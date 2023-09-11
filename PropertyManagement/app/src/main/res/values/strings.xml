@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">PropertyManagement</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_profile">User Profile</string>
+    <string name="title_add_property">Add a New Property</string>
+    <string name="placeholder_text"><u>Click to set</u></string>
+
+</resources>
