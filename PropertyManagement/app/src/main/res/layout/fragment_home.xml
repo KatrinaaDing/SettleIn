@@ -32,20 +32,6 @@
             android:layout_height="match_parent"
             android:paddingHorizontal="20dp"
             >
-
-            <Button
-                android:id="@+id/loginBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="login" />
-
-            <Button
-                android:id="@+id/registerBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="register" />
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>

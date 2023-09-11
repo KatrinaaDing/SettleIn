@@ -42,8 +42,6 @@ public class MainActivity extends AppCompatActivity {
         // floating activity button (plus button)
         FloatingActionButton fab = findViewById(R.id.addProperty);
         BottomAppBar bottomAppBar = findViewById(R.id.bottomAppBar);
-        Button loginBtn = findViewById(R.id.loginBtn);
-        Button registerBtn = findViewById(R.id.registerBtn);
 
         // =================================== Listeners =======================================
         fab.setOnClickListener(new View.OnClickListener() {
@@ -68,16 +66,6 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 return false;
             }
-        });
-
-        loginBtn.setOnClickListener(view -> {
-            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-            startActivity(intent);
-        });
-
-        registerBtn.setOnClickListener(view -> {
-            Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
-            startActivity(intent);
         });
     }
 
