@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.example.property_management.R;
+import com.example.property_management.api.FirebaseAuthHelper;
 import com.google.android.material.bottomappbar.BottomAppBar;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -78,5 +79,16 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
             startActivity(intent);
         });
+    }
+
+    @Override
+        protected void onStart() {
+        super.onStart();
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(this);
+        if (!firebaseAuthHelper.isUserSignedIn()) {
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
+        }
     }
 }

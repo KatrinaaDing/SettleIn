@@ -7,6 +7,7 @@ import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.property_management.R;
+import com.example.property_management.api.FirebaseAuthHelper;
 import com.example.property_management.databinding.ActivityLoginBinding;
 
 public class LoginActivity extends AppCompatActivity {
@@ -33,8 +34,16 @@ public class LoginActivity extends AppCompatActivity {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             startActivity(intent);
         });
+    }
 
-
-
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // if user logged in, go to home screen
+        FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(this);
+        if (firebaseAuthHelper.isUserSignedIn()) {
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
+        }
     }
 }

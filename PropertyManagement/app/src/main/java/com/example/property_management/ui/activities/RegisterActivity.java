@@ -9,6 +9,7 @@ import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.property_management.R;
+import com.example.property_management.api.FirebaseAuthHelper;
 import com.example.property_management.databinding.ActivityRegisterBinding;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -86,8 +87,18 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // if user logged in, go to home screen
+        FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(this);
+        if (firebaseAuthHelper.isUserSignedIn()) {
+            Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+            startActivity(intent);
+        }
+    }
+
     // ========================== Helper Methods ==========================
-    // error checking
     private boolean validateEmail() {
         TextInputLayout emailLayout = findViewById(R.id.editTextRegisterEmail);
         String email = emailLayout.getEditText().getText().toString();
