@@ -13,8 +13,3 @@
 .externalNativeBuild
 .cxx
 local.properties
-# secret
-/PropertyManagement/app/google-services.json
-
-# vscode
-.history/
