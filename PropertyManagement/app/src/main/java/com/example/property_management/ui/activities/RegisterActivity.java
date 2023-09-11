@@ -5,16 +5,23 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseAuthHelper;
+import com.example.property_management.api.callbacks.AuthCallback;
 import com.example.property_management.databinding.ActivityRegisterBinding;
+import com.example.property_management.utils.EmailValidator;
+import com.example.property_management.utils.PasswordValidator;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -36,9 +43,12 @@ public class RegisterActivity extends AppCompatActivity {
 
         // ========================== Listeners ==========================
         submitRegisterBtn.setOnClickListener(view -> {
-            if (validatePassword() && validateEmail()) {
-                Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
-                startActivity(intent);
+            if (validateEmail() && validatePassword()) {
+//                Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+//                startActivity(intent);
+                String email = emailLayout.getEditText().getText().toString();
+                String password = passwordLayout.getEditText().getText().toString();
+                registerUser(email, password);
             }
         });
         goToLoginBtn.setOnClickListener(view -> {
@@ -106,8 +116,8 @@ public class RegisterActivity extends AppCompatActivity {
             emailLayout.setError("Email cannot be empty");
             return false;
         }
-        if (email.length() < 6) {
-            emailLayout.setError("Email must be at least 6 characters");
+        if (!EmailValidator.isValidEmail(email)) {
+            emailLayout.setError("Please enter a valid email.");
             return false;
         }
         return true;
@@ -117,9 +127,14 @@ public class RegisterActivity extends AppCompatActivity {
         TextInputLayout confirmPasswordLayout = findViewById(R.id.editTextConfirmPassword);
         String password = passwordLayout.getEditText().getText().toString();
         String confirmPassword = confirmPasswordLayout.getEditText().getText().toString();
+
         boolean isValid = true;
         if (password.isEmpty()) {
             passwordLayout.setError("Password cannot be empty");
+            isValid = false;
+        }
+        if (!PasswordValidator.isValidPassword(password)) {
+            passwordLayout.setError("Password must be at least 8 characters long, no whitespaces, at least one for each: lowercase letter and digit");
             isValid = false;
         }
         if (confirmPassword.isEmpty()) {
@@ -134,17 +149,28 @@ public class RegisterActivity extends AppCompatActivity {
     }
     private void clearEmailError() {
         TextInputLayout emailLayout = findViewById(R.id.editTextRegisterEmail);
-        String email = emailLayout.getEditText().getText().toString();
         emailLayout.setError(null);
     }
     private void clearPasswordError() {
         TextInputLayout passwordLayout = findViewById(R.id.editTextRegisterPassword);
-        String password = passwordLayout.getEditText().getText().toString();
         passwordLayout.setError(null);
     }
     private void clearConfirmPasswordError() {
         TextInputLayout confirmPasswordLayout = findViewById(R.id.editTextConfirmPassword);
         String confirmPassword = confirmPasswordLayout.getEditText().getText().toString();
         confirmPasswordLayout.setError(null);
+    }
+    private void registerUser(String email, String password) {
+        FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(this);
+        firebaseAuthHelper.createUser(email, password, new AuthCallback() {
+            @Override
+            public void onSuccess(FirebaseUser user) {
+                Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                startActivity(intent);
+            }
+            @Override
+            public void onFailure(Exception e) {}
+        });
+
     }
 }
