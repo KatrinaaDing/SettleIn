@@ -1,2 +1,4 @@
-package com.example.property_management.mappers;public class PropertyMapper {
+package com.example.property_management.mappers;
+
+public class PropertyMapper {
 }

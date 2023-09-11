@@ -1,4 +1,4 @@
-package com.example.property_management.ui.dashboard;
+package com.example.property_management.ui.fragments.dashboard;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;

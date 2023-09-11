@@ -1,2 +1,4 @@
-package com.example.property_management.adapters;public class PropertyAdapter {
+package com.example.property_management.adapters;
+
+public class PropertyAdapter {
 }

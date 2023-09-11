@@ -1,4 +1,4 @@
-package com.example.property_management;
+package com.example.property_management.ui.activities;
 
 import android.os.Bundle;
 import android.view.MenuItem;

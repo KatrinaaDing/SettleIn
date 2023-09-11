@@ -1,2 +1,4 @@
-package com.example.property_management.api;public class PropertyRepository {
+package com.example.property_management.api;
+
+public class FirebasePropertyRepository {
 }

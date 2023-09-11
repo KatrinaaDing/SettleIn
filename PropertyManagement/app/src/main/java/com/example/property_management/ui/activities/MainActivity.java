@@ -1,4 +1,4 @@
-package com.example.property_management;
+package com.example.property_management.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;

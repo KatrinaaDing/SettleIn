@@ -1,4 +1,4 @@
-package com.example.property_management.ui.dashboard;
+package com.example.property_management.ui.fragments.dashboard;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

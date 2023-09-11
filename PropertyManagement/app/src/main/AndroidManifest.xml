@@ -13,7 +13,7 @@
         android:theme="@style/Theme.Javanavbar"
         tools:targetApi="31">
         <activity
-            android:name="com.example.property_management.MainActivity"
+            android:name="com.example.property_management.ui.activities.MainActivity"
             android:exported="true"
             android:label="@string/app_name">
             <intent-filter>
@@ -21,7 +21,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.example.property_management.AddPropertyActivity"/>
+        <activity android:name="com.example.property_management.ui.activities.AddPropertyActivity"/>
 
     </application>
 

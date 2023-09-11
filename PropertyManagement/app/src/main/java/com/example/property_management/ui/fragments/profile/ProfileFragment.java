@@ -1,4 +1,4 @@
-package com.example.property_management.ui.profile;
+package com.example.property_management.ui.fragments.profile;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

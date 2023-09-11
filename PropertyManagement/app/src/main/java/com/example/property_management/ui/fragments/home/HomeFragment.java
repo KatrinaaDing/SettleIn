@@ -1,4 +1,4 @@
-package com.example.property_management.ui.home;
+package com.example.property_management.ui.fragments.home;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
