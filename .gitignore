@@ -1,2 +1,8 @@
 # macos
 .DS_Store
+
+# vscode
+.history
+
+# secret
+/PropertyManagement/app/google-services.json

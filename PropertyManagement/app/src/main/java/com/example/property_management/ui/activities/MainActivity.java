@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.example.property_management.R;
+import com.example.property_management.api.FirebaseAuthHelper;
 import com.google.android.material.bottomappbar.BottomAppBar;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,8 +42,6 @@ public class MainActivity extends AppCompatActivity {
         // floating activity button (plus button)
         FloatingActionButton fab = findViewById(R.id.addProperty);
         BottomAppBar bottomAppBar = findViewById(R.id.bottomAppBar);
-        Button loginBtn = findViewById(R.id.loginBtn);
-        Button registerBtn = findViewById(R.id.registerBtn);
 
         // =================================== Listeners =======================================
         fab.setOnClickListener(new View.OnClickListener() {
@@ -68,15 +67,16 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+    }
 
-        loginBtn.setOnClickListener(view -> {
+    @Override
+        protected void onStart() {
+        super.onStart();
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(this);
+        if (!firebaseAuthHelper.isUserSignedIn()) {
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(intent);
-        });
-
-        registerBtn.setOnClickListener(view -> {
-            Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
-            startActivity(intent);
-        });
+        }
     }
 }
