@@ -22,6 +22,8 @@
             </intent-filter>
         </activity>
         <activity android:name="com.example.property_management.ui.activities.AddPropertyActivity"/>
+        <activity android:name="com.example.property_management.ui.activities.LoginActivity"/>
+        <activity android:name="com.example.property_management.ui.activities.RegisterActivity"/>
 
     </application>
 

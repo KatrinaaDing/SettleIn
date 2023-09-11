@@ -30,15 +30,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/mobile_navigation" />
 
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingBottom="100dp">
-
-        <!-- Scrollable content -->
-
-    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/bottomAppBar"
@@ -51,7 +42,6 @@
         app:menu="@menu/bottom_nav_menu"
         app:navigationIcon="@drawable/baseline_home_white_24"
         app:navigationIconTint="@color/white"
-
         />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -60,6 +50,7 @@
         android:layout_height="wrap_content"
         app:srcCompat="@drawable/baseline_add_24"
         app:layout_anchor="@id/bottomAppBar"
+        style="@style/Widget.MaterialComponents.FloatingActionButton"
         />
 
 

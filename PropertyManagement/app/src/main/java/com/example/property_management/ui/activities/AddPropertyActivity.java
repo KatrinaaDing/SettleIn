@@ -1,5 +1,6 @@
 package com.example.property_management.ui.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.DatePicker;
@@ -68,8 +69,12 @@ public class AddPropertyActivity extends AppCompatActivity {
             // on select time
             timePicker.show(getSupportFragmentManager(), "time_picker");
         });
-
-
+        findViewById(R.id.submitBtn).setOnClickListener(v -> {
+            // on submit new property
+            // TODO: post data here
+            Intent intent = new Intent(AddPropertyActivity.this, MainActivity.class);
+            startActivity(intent);
+        });
 
 
     }

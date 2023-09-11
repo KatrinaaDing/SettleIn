@@ -70,14 +70,14 @@
     </ScrollView>
 
     <Button
-        android:id="@+id/enterDataModeBtn"
+        android:id="@+id/submitBtn"
         style="@style/Widget.Material3.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="10dp"
         android:layout_marginBottom="20dp"
         android:paddingVertical="10dp"
-        android:text="Enter Data Collection mode"
+        android:text="Submit"
 
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

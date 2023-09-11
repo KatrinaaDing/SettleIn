@@ -3,6 +3,7 @@ package com.example.property_management.ui.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 
 import com.example.property_management.R;
 import com.google.android.material.bottomappbar.BottomAppBar;
@@ -27,9 +28,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         getSupportActionBar().hide();
 
+        // =================================== Components ======================================
+        // Bottom navigation bar
         BottomAppBar navView = findViewById(R.id.bottomAppBar);
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.navigation_home, R.id.navigation_profile, R.id.navigation_profile)
                 .build();
@@ -37,7 +38,13 @@ public class MainActivity extends AppCompatActivity {
 //        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 //        NavigationUI.setupWithNavController(navView, navController);
 
+        // floating activity button (plus button)
         FloatingActionButton fab = findViewById(R.id.addProperty);
+        BottomAppBar bottomAppBar = findViewById(R.id.bottomAppBar);
+        Button loginBtn = findViewById(R.id.loginBtn);
+        Button registerBtn = findViewById(R.id.registerBtn);
+
+        // =================================== Listeners =======================================
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -45,9 +52,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
-        BottomAppBar bottomAppBar = findViewById(R.id.bottomAppBar);
-
         bottomAppBar.setNavigationOnClickListener(view -> {
             navController.navigate(R.id.navigation_home);
         });
@@ -63,6 +67,16 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 return false;
             }
+        });
+
+        loginBtn.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
+        });
+
+        registerBtn.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
+            startActivity(intent);
         });
     }
 }
