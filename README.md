@@ -23,42 +23,17 @@ PropertyManagement/app/src/main
 │       └── example
 │           └── property_management
 │               ├── adapters
-│               │   ├── PropertyAdapter.java
-│               │   └── UserAdapter.java
 │               ├── api (Firebase related classes)
-│               │   ├── FirebasePropertyRepository.java
-│               │   └── FirebaseUserRepository.java
 │               ├── data (Entity classes)
-│               │   ├── Property.java
-│               │   └── User.java
 │               ├── mappers (Map entity to model and vice versa)
-│               │   └── PropertyMapper.java
 │               ├── ui 
 │               │   ├── activities
-│               │   │   ├── AddPropertyActivity.java
-│               │   │   └── MainActivity.java
 │               │   └── fragments
-│               │       ├── dashboard
-│               │       │   ├── DashboardFragment.java
-│               │       │   └── DashboardViewModel.java
-│               │       ├── home
-│               │       │   ├── HomeFragment.java
-│               │       │   └── HomeViewModel.java
-│               │       ├── profile
-│               │       │   ├── ProfileFragment.java
-│               │       │   └── ProfileViewModel.java
-│               │       └── property
-│               └── utils
+│               └── utils (helper class)
 └── res
     ├── drawable (Icons and images)
     ├── layout
-    │   ├── activity_add_property.xml
-    │   ├── activity_main.xml
-    │   ├── fragment_dashboard.xml
-    │   ├── fragment_home.xml
-    │   └── fragment_profile.xml
     ├── menu
-    │   └── bottom_nav_menu.xml
     ├── mipmap-anydpi-v26
     ├── mipmap-hdpi
     ├── mipmap-mdpi
@@ -67,12 +42,7 @@ PropertyManagement/app/src/main
     ├── mipmap-xxxhdpi
     ├── navigation
     ├── values (constant values and styles)
-    │   ├── colors.xml
-    │   ├── dimens.xml
-    │   ├── strings.xml
-    │   └── themes.xml
     ├── values-night
-    │   └── themes.xml
     └── xml
 
 ```
