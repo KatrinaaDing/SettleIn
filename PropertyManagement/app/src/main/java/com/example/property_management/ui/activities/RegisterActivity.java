@@ -5,23 +5,17 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseAuthHelper;
-import com.example.property_management.api.callbacks.AuthCallback;
+import com.example.property_management.callbacks.AuthCallback;
 import com.example.property_management.databinding.ActivityRegisterBinding;
 import com.example.property_management.utils.EmailValidator;
 import com.example.property_management.utils.PasswordValidator;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseUser;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class RegisterActivity extends AppCompatActivity {
 

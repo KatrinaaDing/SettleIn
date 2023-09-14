@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseAuthHelper;
-import com.example.property_management.api.callbacks.AuthCallback;
+import com.example.property_management.callbacks.AuthCallback;
 import com.example.property_management.databinding.ActivityLoginBinding;
 import com.example.property_management.utils.EmailValidator;
 import com.example.property_management.utils.PasswordValidator;
