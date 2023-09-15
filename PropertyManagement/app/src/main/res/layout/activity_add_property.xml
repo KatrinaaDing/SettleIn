@@ -92,19 +92,18 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/scrapeUrlBtn"
-                    style="@style/Widget.Material3.Button.IconButton.Filled"
+                    style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:checkable="true"
+                    android:layout_marginHorizontal="10dp"
+                    android:checkable="false"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
                     android:padding="12dp"
-                    android:layout_marginHorizontal="10dp"
                     app:icon="@drawable/baseline_search_white_24"
                     app:iconGravity="textStart"
                     app:iconPadding="0dp"
-                    app:iconSize="24dp"
-                    />
+                    app:iconSize="24dp" />
             </LinearLayout>
 
 
@@ -114,30 +113,11 @@
                 android:layout_height="wrap_content"
                 android:text="TextView" />
 
-            <!--            <LinearLayout-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:orientation="vertical">-->
-
-<!--                <com.google.android.material.button.MaterialButton-->
-<!--                    android:id="@+id/buttonUp"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="Up"/>-->
-
-<!--                <TextView-->
-<!--                    android:id="@+id/textViewNumber"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="0"-->
-<!--                    android:padding="16dp"/>-->
-
-<!--                <com.google.android.material.button.MaterialButton-->
-<!--                    android:id="@+id/buttonDown"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="Down"/>-->
-<!--            </LinearLayout>-->
+            <com.example.property_management.ui.fragments.base.ArrowNumberPicker
+                android:id="@+id/bedroomNumberPicker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:direction="horizontal" />
         </LinearLayout>
     </ScrollView>
 

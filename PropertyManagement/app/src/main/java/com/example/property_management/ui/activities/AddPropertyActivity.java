@@ -14,7 +14,9 @@ import androidx.core.app.NavUtils;
 
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseFunctionsHelper;
+import com.example.property_management.callbacks.onIntegerChangeCallback;
 import com.example.property_management.databinding.ActivityAddPropertyBinding;
+import com.example.property_management.ui.fragments.base.ArrowNumberPicker;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
@@ -25,6 +27,11 @@ import com.google.android.material.timepicker.TimeFormat;
 
 public class AddPropertyActivity extends AppCompatActivity {
     private ActivityAddPropertyBinding binding;
+
+    private String url = "";
+    private int bedroomNumber = 0;
+    private int bathroomNumber = 0;
+    private int carparkNumber = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +69,8 @@ public class AddPropertyActivity extends AppCompatActivity {
         MaterialButton scrapeUrlBtn = findViewById(R.id.scrapeUrlBtn);
         // property info
         TextView propertyInfoText = findViewById(R.id.propertyInfoText);
+        // bedroom number input
+        ArrowNumberPicker bedroomNumberPicker = findViewById(R.id.bedroomNumberPicker);
 
         // ================================== listeners =======================================
         datePicker.addOnPositiveButtonClickListener(selection -> {
@@ -83,8 +92,9 @@ public class AddPropertyActivity extends AppCompatActivity {
         findViewById(R.id.submitBtn).setOnClickListener(v -> {
             // on submit new property
             // TODO: post data here
-            Intent intent = new Intent(AddPropertyActivity.this, MainActivity.class);
-            startActivity(intent);
+            System.out.println(bedroomNumber);
+//            Intent intent = new Intent(AddPropertyActivity.this, MainActivity.class);
+//            startActivity(intent);
         });
         scrapeUrlBtn.setOnClickListener(v -> {
             // on scrape url
@@ -101,7 +111,19 @@ public class AddPropertyActivity extends AppCompatActivity {
                     propertyInfoText.setText(e.getMessage());
                 });
          });
+        bedroomNumberPicker.setOnValueChangeListener(new onIntegerChangeCallback() {
+            @Override
+            public void onIncrease(int newValue) {
+                // Handle the increase
+                bedroomNumber = newValue;
+            }
 
+            @Override
+            public void onDecrease(int newValue) {
+                // Handle the decrease
+                bedroomNumber = newValue;
+            }
+        });
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
