@@ -12,6 +12,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        android:paddingVertical="50dp"
+        android:paddingHorizontal="20dp"
         >
         <LinearLayout
             android:layout_width="match_parent"
@@ -66,6 +68,127 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="a valid url (can copy): https://www.example.com"
+                android:textIsSelectable="true"
+                android:paddingTop="20dp"
+                android:textColor="@color/material_dynamic_primary50"
+                />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+            >
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/urlInputLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Enter url here"
+                    android:paddingVertical="20dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:singleLine="true"
+                        android:inputType="text"
+                        />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/scrapeUrlBtn"
+                    style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="10dp"
+                    android:checkable="false"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:padding="12dp"
+                    app:icon="@drawable/baseline_search_white_24"
+                    app:iconGravity="textStart"
+                    app:iconPadding="0dp"
+                    app:iconSize="24dp" />
+            </LinearLayout>
+
+
+            <TextView
+                android:id="@+id/propertyAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="" />
+
+            <!--  property amenities settings  -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingVertical="10dp">
+                <!--  bedroom  -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingVertical="10dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Bedroom"
+                        android:textSize="10pt"
+                        android:layout_weight="1"
+                        android:paddingVertical="10dp"/>
+                    <com.example.property_management.ui.fragments.base.ArrowNumberPicker
+                        android:id="@+id/bedroomNumberPicker"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:direction="horizontal"
+                        />
+                </LinearLayout>
+                <!--  bathroom  -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingVertical="10dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Bathroom"
+                        android:textSize="10pt"
+                        android:layout_weight="1"
+                        android:paddingVertical="10dp"/>
+                    <com.example.property_management.ui.fragments.base.ArrowNumberPicker
+                        android:id="@+id/bathroomNumberPicker"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:direction="horizontal"
+                        />
+                </LinearLayout>
+                <!--  parking  -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingVertical="10dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Parking"
+                        android:textSize="10pt"
+                        android:layout_weight="1"
+                        android:paddingVertical="10dp"/>
+                    <com.example.property_management.ui.fragments.base.ArrowNumberPicker
+                        android:id="@+id/parkingNumberPicker"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:direction="horizontal"
+                        />
+                </LinearLayout>
+
+            </LinearLayout>
+                
         </LinearLayout>
     </ScrollView>
 
