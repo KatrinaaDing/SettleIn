@@ -118,12 +118,15 @@ public class AddPropertyActivity extends AppCompatActivity {
             if (!validateUrl()) {
                 return;
             }
+            urlInputLayout.setHelperText("Getting information...");
             FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
             firebaseFunctionsHelper.scrapeProperty(urlInputLayout.getEditText().getText().toString())
                 .addOnSuccessListener(result -> {
                     // set property info
                     NewProperty resultProperty = (NewProperty) result;
                     setPropertyInfo(resultProperty);
+                    // set url input helper text
+                    urlInputLayout.setHelperText("");
                 })
                 .addOnFailureListener(e -> {
                     // pop error at input box
