@@ -18,7 +18,7 @@ public class PropertyDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityPropertyDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        setTitle(R.string.title_add_property);
+        setTitle("Property Detail");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // ================================== Components =======================================

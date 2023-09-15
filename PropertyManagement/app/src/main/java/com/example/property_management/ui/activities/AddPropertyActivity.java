@@ -1,20 +1,14 @@
 package com.example.property_management.ui.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.MenuItem;
-import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NavUtils;
 
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseFunctionsHelper;
-import com.example.property_management.callbacks.onIntegerChangeCallback;
+import com.example.property_management.callbacks.onValueChangeCallback;
 import com.example.property_management.databinding.ActivityAddPropertyBinding;
 import com.example.property_management.ui.fragments.base.ArrowNumberPicker;
 import com.google.android.material.button.MaterialButton;
@@ -31,7 +25,7 @@ public class AddPropertyActivity extends AppCompatActivity {
     private String url = "";
     private int bedroomNumber = 0;
     private int bathroomNumber = 0;
-    private int carparkNumber = 0;
+    private int parkingNumber = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +65,10 @@ public class AddPropertyActivity extends AppCompatActivity {
         TextView propertyInfoText = findViewById(R.id.propertyInfoText);
         // bedroom number input
         ArrowNumberPicker bedroomNumberPicker = findViewById(R.id.bedroomNumberPicker);
+        // bathroom number input
+        ArrowNumberPicker bathroomNumberPicker = findViewById(R.id.bathroomNumberPicker);
+        // parking number input
+        ArrowNumberPicker parkingNumberPicker = findViewById(R.id.parkingNumberPicker);
 
         // ================================== listeners =======================================
         datePicker.addOnPositiveButtonClickListener(selection -> {
@@ -92,7 +90,7 @@ public class AddPropertyActivity extends AppCompatActivity {
         findViewById(R.id.submitBtn).setOnClickListener(v -> {
             // on submit new property
             // TODO: post data here
-            System.out.println(bedroomNumber);
+            System.out.println("bedroom: " + bedroomNumber + ", bathroom: " + bathroomNumber + ", parking: " + parkingNumber);
 //            Intent intent = new Intent(AddPropertyActivity.this, MainActivity.class);
 //            startActivity(intent);
         });
@@ -111,19 +109,10 @@ public class AddPropertyActivity extends AppCompatActivity {
                     propertyInfoText.setText(e.getMessage());
                 });
          });
-        bedroomNumberPicker.setOnValueChangeListener(new onIntegerChangeCallback() {
-            @Override
-            public void onIncrease(int newValue) {
-                // Handle the increase
-                bedroomNumber = newValue;
-            }
-
-            @Override
-            public void onDecrease(int newValue) {
-                // Handle the decrease
-                bedroomNumber = newValue;
-            }
-        });
+        // handle number picker value change
+        bedroomNumberPicker.setOnValueChangeListener(newValue -> bedroomNumber = newValue);
+        bathroomNumberPicker.setOnValueChangeListener(newValue -> bathroomNumber = newValue);
+        parkingNumberPicker.setOnValueChangeListener(newValue -> parkingNumber = newValue);
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

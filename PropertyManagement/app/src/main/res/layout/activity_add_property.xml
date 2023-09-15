@@ -111,13 +111,77 @@
                 android:id="@+id/propertyInfoText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="TextView" />
+                android:text="[temporary Property info goes here]" />
 
-            <com.example.property_management.ui.fragments.base.ArrowNumberPicker
-                android:id="@+id/bedroomNumberPicker"
-                android:layout_width="wrap_content"
+            <!--  property amenities settings  -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:direction="horizontal" />
+                android:orientation="vertical"
+                android:paddingVertical="10dp">
+                <!--  bedroom  -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingVertical="10dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Bedroom"
+                        android:textSize="10pt"
+                        android:layout_weight="1"
+                        android:paddingVertical="10dp"/>
+                    <com.example.property_management.ui.fragments.base.ArrowNumberPicker
+                        android:id="@+id/bedroomNumberPicker"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:direction="horizontal"
+                        />
+                </LinearLayout>
+                <!--  bathroom  -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingVertical="10dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Bathroom"
+                        android:textSize="10pt"
+                        android:layout_weight="1"
+                        android:paddingVertical="10dp"/>
+                    <com.example.property_management.ui.fragments.base.ArrowNumberPicker
+                        android:id="@+id/bathroomNumberPicker"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:direction="horizontal"
+                        />
+                </LinearLayout>
+                <!--  parking  -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingVertical="10dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Parking"
+                        android:textSize="10pt"
+                        android:layout_weight="1"
+                        android:paddingVertical="10dp"/>
+                    <com.example.property_management.ui.fragments.base.ArrowNumberPicker
+                        android:id="@+id/parkingNumberPicker"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:direction="horizontal"
+                        />
+                </LinearLayout>
+
+            </LinearLayout>
+                
         </LinearLayout>
     </ScrollView>
 

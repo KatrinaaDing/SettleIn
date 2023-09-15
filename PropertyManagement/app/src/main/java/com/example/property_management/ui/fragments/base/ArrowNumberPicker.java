@@ -8,13 +8,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.property_management.R;
-import com.example.property_management.callbacks.onIntegerChangeCallback;
+import com.example.property_management.callbacks.onValueChangeCallback;
 import com.google.android.material.button.MaterialButton;
 
 public class ArrowNumberPicker extends LinearLayout {
     private int value;
     private int direction;
-    private onIntegerChangeCallback callback;
+    private onValueChangeCallback callback;
 
     public ArrowNumberPicker(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -40,17 +40,18 @@ public class ArrowNumberPicker extends LinearLayout {
 
         // ======================================== Listeners =====================================
         buttonUp.setOnClickListener(view -> {
-            if (this.callback != null && value < 10) {
+            // max value is 9
+            if (this.callback != null && value < 9) {
                 value++;
                 textViewNumber.setText(String.valueOf(value));
-                this.callback.onIncrease(value);
+                this.callback.onChange(value);
             }
         });
         buttonDown.setOnClickListener(view -> {
             if (this.callback != null && value > 0) {
                 value--;
                 textViewNumber.setText(String.valueOf(value));
-                this.callback.onIncrease(value);
+                this.callback.onChange(value);
             }
         });
     }
@@ -65,7 +66,7 @@ public class ArrowNumberPicker extends LinearLayout {
             throw new IllegalArgumentException("Invalid 'direction' attribute value. It must be either 'horizontal' or 'vertical'.");
         }
     }
-    public void setOnValueChangeListener(onIntegerChangeCallback callback) {
+    public void setOnValueChangeListener(onValueChangeCallback callback) {
         this.callback = callback;
     }
 }
