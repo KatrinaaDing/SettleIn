@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="ArrowNumberPicker">
+        <attr name="value" format="integer" />
         <attr name="direction" format="enum" >
             <enum name="horizontal" value="0" />
             <enum name="vertical" value="1" />

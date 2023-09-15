@@ -23,8 +23,9 @@ public class ArrowNumberPicker extends LinearLayout {
         // receive attributes
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ArrowNumberPicker);
         try {
+            value = a.getInteger(R.styleable.ArrowNumberPicker_value, 0);
             direction = a.getInteger(R.styleable.ArrowNumberPicker_direction, 0);
-            handleAttribute(direction);
+            handleAttribute(value, direction);
         } finally {
             a.recycle();
         }
@@ -41,22 +42,27 @@ public class ArrowNumberPicker extends LinearLayout {
         // ======================================== Listeners =====================================
         buttonUp.setOnClickListener(view -> {
             // max value is 9
-            if (this.callback != null && value < 9) {
-                value++;
-                textViewNumber.setText(String.valueOf(value));
-                this.callback.onChange(value);
+            if (this.callback != null && this.value < 9) {
+                this.value++;
+                textViewNumber.setText(String.valueOf(this.value));
+                this.callback.onChange(this.value);
             }
         });
         buttonDown.setOnClickListener(view -> {
-            if (this.callback != null && value > 0) {
-                value--;
-                textViewNumber.setText(String.valueOf(value));
-                this.callback.onChange(value);
+            if (this.callback != null && this.value > 0) {
+                this.value--;
+                textViewNumber.setText(String.valueOf(this.value));
+                this.callback.onChange(this.value);
             }
         });
     }
 
-    public void handleAttribute(int direction) {
+    public void handleAttribute(int value, int direction) {
+        // set initial value
+        TextView textViewNumber = findViewById(R.id.textViewNumber);
+        textViewNumber.setText(String.valueOf(value));
+
+        // set direction
         LinearLayout layout = findViewById(R.id.layout);
         if (direction == 0) {
             layout.setOrientation(LinearLayout.HORIZONTAL);
@@ -68,5 +74,10 @@ public class ArrowNumberPicker extends LinearLayout {
     }
     public void setOnValueChangeListener(onValueChangeCallback callback) {
         this.callback = callback;
+    }
+    public void setValue(int value) {
+        this.value = value;
+        TextView textViewNumber = findViewById(R.id.textViewNumber);
+        textViewNumber.setText(String.valueOf(this.value));
     }
 }
