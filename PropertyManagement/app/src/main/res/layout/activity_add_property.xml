@@ -69,7 +69,14 @@
                     app:layout_constraintEnd_toEndOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="a valid url (can copy): https://www.example.com"
+                android:textIsSelectable="true"
+                android:paddingTop="20dp"
+                android:textColor="@color/material_dynamic_primary50"
+                />
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -108,10 +115,10 @@
 
 
             <TextView
-                android:id="@+id/propertyInfoText"
+                android:id="@+id/propertyAddress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="[temporary Property info goes here]" />
+                android:text="" />
 
             <!--  property amenities settings  -->
             <LinearLayout

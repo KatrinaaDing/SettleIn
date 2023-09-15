@@ -1,6 +1,8 @@
 package com.example.property_management.ui.activities;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.widget.TextView;
 
@@ -9,8 +11,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseFunctionsHelper;
 import com.example.property_management.callbacks.onValueChangeCallback;
+import com.example.property_management.data.NewProperty;
 import com.example.property_management.databinding.ActivityAddPropertyBinding;
 import com.example.property_management.ui.fragments.base.ArrowNumberPicker;
+import com.example.property_management.utils.Helpers;
+import com.example.property_management.utils.UrlValidator;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
@@ -23,6 +28,7 @@ public class AddPropertyActivity extends AppCompatActivity {
     private ActivityAddPropertyBinding binding;
 
     private String url = "";
+    private String address = "";
     private int bedroomNumber = 0;
     private int bathroomNumber = 0;
     private int parkingNumber = 0;
@@ -62,12 +68,10 @@ public class AddPropertyActivity extends AppCompatActivity {
         // scrape url button
         MaterialButton scrapeUrlBtn = findViewById(R.id.scrapeUrlBtn);
         // property info
-        TextView propertyInfoText = findViewById(R.id.propertyInfoText);
-        // bedroom number input
+        TextView propertyAddress = findViewById(R.id.propertyAddress);
+        // number pickers
         ArrowNumberPicker bedroomNumberPicker = findViewById(R.id.bedroomNumberPicker);
-        // bathroom number input
         ArrowNumberPicker bathroomNumberPicker = findViewById(R.id.bathroomNumberPicker);
-        // parking number input
         ArrowNumberPicker parkingNumberPicker = findViewById(R.id.parkingNumberPicker);
 
         // ================================== listeners =======================================
@@ -87,6 +91,20 @@ public class AddPropertyActivity extends AppCompatActivity {
             // on select time
             timePicker.show(getSupportFragmentManager(), "time_picker");
         });
+        // on change url text
+        urlInputLayout.addOnEditTextAttachedListener(textInputLayout ->
+                textInputLayout.getEditText().addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                        urlInputLayout.setError(null);
+                    }
+                    @Override
+                    public void afterTextChanged(Editable editable) {}
+                })
+        );
+
         findViewById(R.id.submitBtn).setOnClickListener(v -> {
             // on submit new property
             // TODO: post data here
@@ -95,6 +113,7 @@ public class AddPropertyActivity extends AppCompatActivity {
 //            startActivity(intent);
         });
         scrapeUrlBtn.setOnClickListener(v -> {
+            Helpers.closeKeyboard(this, urlInputLayout);
             // on scrape url
             if (!validateUrl()) {
                 return;
@@ -102,11 +121,14 @@ public class AddPropertyActivity extends AppCompatActivity {
             FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
             firebaseFunctionsHelper.scrapeProperty(urlInputLayout.getEditText().getText().toString())
                 .addOnSuccessListener(result -> {
-                    propertyInfoText.setText(result.toString());
+                    // set property info
+                    NewProperty resultProperty = (NewProperty) result;
+                    setPropertyInfo(resultProperty);
                 })
                 .addOnFailureListener(e -> {
+                    // pop error at input box
                     System.out.println(e.getMessage());
-                    propertyInfoText.setText(e.getMessage());
+                    urlInputLayout.setError("Error: " + e.getMessage());
                 });
          });
         // handle number picker value change
@@ -130,10 +152,31 @@ public class AddPropertyActivity extends AppCompatActivity {
         if (urlInput.isEmpty()) {
             binding.urlInputLayout.setError("Field can't be empty");
             return false;
+        } else if (!UrlValidator.isValidUrl(urlInput)) {
+            binding.urlInputLayout.setError("Invalid URL. Please check again.");
+            return false;
         } else {
             binding.urlInputLayout.setError(null);
             return true;
         }
+    }
+
+    private void setPropertyInfo(NewProperty property) {
+        // set properties
+        this.bedroomNumber = property.getBedroomNum();
+        this.bathroomNumber = property.getBathroomNum();
+        this.parkingNumber = property.getParkingNum();
+        this.address = property.getAddress();
+
+        // set UI
+        ArrowNumberPicker bedroomNumberPicker = findViewById(R.id.bedroomNumberPicker);
+        ArrowNumberPicker bathroomNumberPicker = findViewById(R.id.bathroomNumberPicker);
+        ArrowNumberPicker parkingNumberPicker = findViewById(R.id.parkingNumberPicker);
+        TextView propertyAddress = findViewById(R.id.propertyAddress);
+        bedroomNumberPicker.setValue(this.bedroomNumber);
+        bathroomNumberPicker.setValue(this.bathroomNumber);
+        parkingNumberPicker.setValue(this.parkingNumber);
+        propertyAddress.setText(this.address);
     }
 
 }
