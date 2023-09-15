@@ -42,32 +42,28 @@ public class LoginActivity extends AppCompatActivity {
                 login(email, password);
             }
         });
-        emailLayout.addOnEditTextAttachedListener(textInputLayout -> {
-            textInputLayout.getEditText().addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    clearEmailError();
-                }
-                @Override
-                public void afterTextChanged(Editable editable) {}
+        emailLayout.addOnEditTextAttachedListener(textInputLayout -> textInputLayout.getEditText().addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                clearEmailError();
+            }
+            @Override
+            public void afterTextChanged(Editable editable) {}
 
-            });
-        });
-        passwordLayout.addOnEditTextAttachedListener(textInputLayout -> {
-            textInputLayout.getEditText().addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    clearPasswordError();
-                }
-                @Override
-                public void afterTextChanged(Editable editable) {}
+        }));
+        passwordLayout.addOnEditTextAttachedListener(textInputLayout -> textInputLayout.getEditText().addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                clearPasswordError();
+            }
+            @Override
+            public void afterTextChanged(Editable editable) {}
 
-            });
-        });
+        }));
         goToRegisterBtn.setOnClickListener(view -> {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             startActivity(intent);
