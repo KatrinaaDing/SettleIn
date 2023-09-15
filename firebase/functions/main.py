@@ -37,7 +37,7 @@ def scrape_property(req: https_fn.CallableRequest) -> Any:
         "url": url,
         "bedroom_num": random.randrange(1, 5),
         "bathroom_num": random.randrange(1,3),
-        "car_num": random.randrange(1,2),
+        "parking_num": random.randrange(1,2),
         "address": '16 Charming Street Hampton East VIC 3188',
         "lat": -37.840935,
         "lng": 144.946457
