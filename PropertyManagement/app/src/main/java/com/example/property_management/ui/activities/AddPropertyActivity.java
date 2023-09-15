@@ -2,6 +2,8 @@ package com.example.property_management.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -11,10 +13,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NavUtils;
 
 import com.example.property_management.R;
+import com.example.property_management.api.FirebaseFunctionsHelper;
 import com.example.property_management.databinding.ActivityAddPropertyBinding;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 
@@ -51,6 +56,12 @@ public class AddPropertyActivity extends AppCompatActivity {
                 .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
                 .setTitleText("Select Inspection Time")
                 .build();
+        // url input
+        TextInputLayout urlInputLayout = findViewById(R.id.urlInputLayout);
+        // scrape url button
+        MaterialButton scrapeUrlBtn = findViewById(R.id.scrapeUrlBtn);
+        // property info
+        TextView propertyInfoText = findViewById(R.id.propertyInfoText);
 
         // ================================== listeners =======================================
         datePicker.addOnPositiveButtonClickListener(selection -> {
@@ -75,7 +86,21 @@ public class AddPropertyActivity extends AppCompatActivity {
             Intent intent = new Intent(AddPropertyActivity.this, MainActivity.class);
             startActivity(intent);
         });
-
+        scrapeUrlBtn.setOnClickListener(v -> {
+            // on scrape url
+            if (!validateUrl()) {
+                return;
+            }
+            FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+            firebaseFunctionsHelper.scrapeProperty(urlInputLayout.getEditText().getText().toString())
+                .addOnSuccessListener(result -> {
+                    propertyInfoText.setText(result.toString());
+                })
+                .addOnFailureListener(e -> {
+                    System.out.println(e.getMessage());
+                    propertyInfoText.setText(e.getMessage());
+                });
+         });
 
     }
     @Override
@@ -86,6 +111,17 @@ public class AddPropertyActivity extends AppCompatActivity {
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private boolean validateUrl() {
+        String urlInput = binding.urlInputLayout.getEditText().getText().toString().trim();
+        if (urlInput.isEmpty()) {
+            binding.urlInputLayout.setError("Field can't be empty");
+            return false;
+        } else {
+            binding.urlInputLayout.setError(null);
+            return true;
         }
     }
 
