@@ -6,3 +6,6 @@
 
 # secret
 /PropertyManagement/app/google-services.json
+
+# idea
+.idea/
