@@ -7,6 +7,8 @@ import android.widget.Button;
 
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseAuthHelper;
+import com.example.property_management.api.FirebasePropertyRepository;
+import com.example.property_management.data.Property;
 import com.google.android.material.bottomappbar.BottomAppBar;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -67,6 +69,13 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+        // TESTING CODE
+        /*
+        FirebasePropertyRepository fpr = new FirebasePropertyRepository();
+        Property data = new Property();
+        data.setAddress("TEST-ADD-PROPERTY");
+        fpr.addProperty(data);
+        */
     }
 
     @Override
