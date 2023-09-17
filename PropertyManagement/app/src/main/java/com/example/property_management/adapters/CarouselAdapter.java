@@ -39,28 +39,26 @@ public class CarouselAdapter extends RecyclerView.Adapter<CarouselAdapter.ViewHo
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_carousel_item, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.custom_carousel_item, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        String imageUrl = imageUrls.get(position);
-        Log.i("url", imageUrl);
-        Glide.with(holder.imageView.getContext())
-                .load(imageUrl)
+        Glide.with(context)
+                .load(imageUrls.get(position))
                 .into(holder.imageView);
 //        holder.itemView.setOnClickListener(view -> onItemClickListener.onClick(holder.imageView, imageUrls.get(position)));
         // Set an OnClickListener on the item view
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (onItemClickListener != null) {
-                    // Pass the clicked ImageView and image URL to the listener
-                    onItemClickListener.onItemClick(holder.imageView, imageUrl);
-                }
-            }
-        });
+//        holder.itemView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if (onItemClickListener != null) {
+//                    // Pass the clicked ImageView and image URL to the listener
+//                    onItemClickListener.onItemClick(holder.imageView, imageUrl);
+//                }
+//            }
+//        });
     }
 
     @Override
