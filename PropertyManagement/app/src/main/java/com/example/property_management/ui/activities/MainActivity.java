@@ -2,12 +2,15 @@ package com.example.property_management.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseAuthHelper;
 import com.example.property_management.api.FirebasePropertyRepository;
+import com.example.property_management.callbacks.GetAllPropertiesCallback;
+import com.example.property_management.callbacks.GetPropertyByIdCallback;
 import com.example.property_management.data.Property;
 import com.google.android.material.bottomappbar.BottomAppBar;
 
@@ -18,6 +21,8 @@ import androidx.navigation.ui.AppBarConfiguration;
 
 import com.example.property_management.databinding.ActivityMainBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -69,13 +74,6 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-        // TESTING CODE
-        /*
-        FirebasePropertyRepository fpr = new FirebasePropertyRepository();
-        Property data = new Property();
-        data.setAddress("TEST-ADD-PROPERTY");
-        fpr.addProperty(data);
-        */
     }
 
     @Override
