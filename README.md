@@ -49,6 +49,7 @@ PropertyManagement/app/src/main
 
 ## Cloud Firestore
 
+Access Property Collection:
 - Get Instance
 
   ```java
@@ -103,5 +104,59 @@ PropertyManagement/app/src/main
   ```
 
   
+Access User Collection:
 
+- Get Instance:
+
+  ```java
+  FirebaseUserRepository db = new FirebaseUserRepository();
+  ```
+
+- Add a User
+
+  ```java
+  User user = new User();
+  user.setUserEmail("myemail@email.com");
+  db.addUser(user);
+  ```
+
+- Get a User Object by DocumentId
+
+  ```java
+  db.getUserInfoById("co9z891lbRxIIDV7zP8L", new GetUserInfoByIdCallback() {
+      @Override
+      public void onSuccess(User user) {
+          Log.d("get-userinfo-by-id-onSuccess", "onSuccess: " + user.getUserEmail());
+      }
+  
+      @Override
+      public void onError(Exception e) {
+  
+      }
+  });
+  ```
+
+- Get all Users
+
+  ```java
+  db.getAllUsers(new GetAllUsersCallback() {
+      @Override
+      public void onSuccess(ArrayList<User> users) {
+          Log.d("get-all-users-onSuccess", "onSuccess: " + users.size());
+      }
+  
+      @Override
+      public void onError(Exception e) {
+  
+      }
+  });
+  ```
+
+- Delete a User by DocumentId
+
+  ```java
+  db.deleteUserById("zTw6n5H9qkn6MhAqdeL8");
+  ```
+
+  
 ​	
