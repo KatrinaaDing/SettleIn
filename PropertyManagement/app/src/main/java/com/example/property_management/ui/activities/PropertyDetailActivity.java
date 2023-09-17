@@ -60,13 +60,12 @@ public class PropertyDetailActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         // linkButton
-        // Find the TextView by its ID
         Button linkButton = findViewById(R.id.linkButton);
         linkButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Define the URL you want to open
-                String url = "https://www.domain.com.au/410-673-latrobe-street-docklands-vic-3008-16651885"; // Replace with your desired URL
+                String url = "https://www.domain.com.au/410-673-latrobe-street-docklands-vic-3008-16651885"; // TODO fetch site url from firebase
 
                 // Create an Intent to open a web browser with the specified URL
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
