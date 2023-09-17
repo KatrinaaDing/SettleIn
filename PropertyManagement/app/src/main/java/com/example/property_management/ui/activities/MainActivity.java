@@ -8,10 +8,6 @@ import android.widget.Button;
 
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseAuthHelper;
-import com.example.property_management.api.FirebasePropertyRepository;
-import com.example.property_management.callbacks.GetAllPropertiesCallback;
-import com.example.property_management.callbacks.GetPropertyByIdCallback;
-import com.example.property_management.data.Property;
 import com.google.android.material.bottomappbar.BottomAppBar;
 
 import androidx.appcompat.app.AppCompatActivity;
