@@ -1,14 +1,20 @@
 package com.example.property_management.ui.activities;
 
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.property_management.R;
+import com.example.property_management.adapters.CarouselAdapter;
 import com.example.property_management.databinding.ActivityPropertyDetailBinding;
+import com.example.property_management.ui.fragments.base.Carousel;
+import java.util.ArrayList;
 
 public class PropertyDetailActivity extends AppCompatActivity {
     private ActivityPropertyDetailBinding binding;
@@ -27,6 +33,19 @@ public class PropertyDetailActivity extends AppCompatActivity {
             Intent intent = new Intent(this, DataCollectionActivity.class);
             startActivity(intent);
         });
+
+        // TODO insert carousel imageUrls data
+        Carousel carousel = findViewById(R.id.propertyCarousel);
+
+        // Create an ArrayList of image URLs (you can replace these with your actual URLs)
+        ArrayList<String> imageUrls = new ArrayList<>();
+
+        imageUrls.add("https://images.unsplash.com/photo-1668889716746-fd2ca90373f7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwzfHx8ZW58MHx8fHx8&auto=format&fit=crop&w=900&q=60");
+        imageUrls.add("https://images.unsplash.com/photo-1614174124242-4b3656523295?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw1fHx8ZW58MHx8fHx8&auto=format&fit=crop&w=900&q=60");
+        imageUrls.add("https://images.unsplash.com/photo-1694449263303-a90c4ce18112?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw4fHx8ZW58MHx8fHx8&auto=format&fit=crop&w=900&q=60");
+
+        // Pass the ArrayList of image URLs to the adapter
+        carousel.setImageUrls(PropertyDetailActivity.this, imageUrls);
     }
 
     @Override
