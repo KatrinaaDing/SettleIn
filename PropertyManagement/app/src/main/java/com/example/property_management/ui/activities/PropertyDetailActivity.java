@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.property_management.R;
 import com.example.property_management.adapters.CarouselAdapter;
 import com.example.property_management.databinding.ActivityPropertyDetailBinding;
-import com.example.property_management.ui.fragments.base.Carousel;
+
 import java.util.ArrayList;
 
 public class PropertyDetailActivity extends AppCompatActivity {
@@ -34,8 +34,8 @@ public class PropertyDetailActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // TODO insert carousel imageUrls data
-        Carousel carousel = findViewById(R.id.propertyCarousel);
+        // Insert carousel imageUrls data
+        RecyclerView recyclerView = findViewById(R.id.recycler);
 
         // Create an ArrayList of image URLs (you can replace these with your actual URLs)
         ArrayList<String> imageUrls = new ArrayList<>();
@@ -44,8 +44,17 @@ public class PropertyDetailActivity extends AppCompatActivity {
         imageUrls.add("https://images.unsplash.com/photo-1614174124242-4b3656523295?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw1fHx8ZW58MHx8fHx8&auto=format&fit=crop&w=900&q=60");
         imageUrls.add("https://images.unsplash.com/photo-1694449263303-a90c4ce18112?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw4fHx8ZW58MHx8fHx8&auto=format&fit=crop&w=900&q=60");
 
-        // Pass the ArrayList of image URLs to the adapter
-        carousel.setImageUrls(PropertyDetailActivity.this, imageUrls);
+        CarouselAdapter adapter = new CarouselAdapter(PropertyDetailActivity.this, imageUrls);
+
+        adapter.setOnItemClickListener(new CarouselAdapter.OnItemClickListener() {
+            @Override
+            public void onClick(ImageView imageView, String imageUrl) {
+                startActivity(new Intent(PropertyDetailActivity.this,
+                                ImageViewActivity.class).putExtra("image", imageUrl),
+                        ActivityOptions.makeSceneTransitionAnimation(PropertyDetailActivity.this, imageView, "image").toBundle());
+            }
+        });
+        recyclerView.setAdapter(adapter);
     }
 
     @Override

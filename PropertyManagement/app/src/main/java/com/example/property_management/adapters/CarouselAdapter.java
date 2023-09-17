@@ -1,8 +1,6 @@
 package com.example.property_management.adapters;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,14 +25,6 @@ public class CarouselAdapter extends RecyclerView.Adapter<CarouselAdapter.ViewHo
 
     }
 
-    public interface OnItemClickListener {
-        void onItemClick(ImageView imageView, String imageUrl);
-    }
-
-    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
-        this.onItemClickListener = onItemClickListener;
-    }
-
 
     @NonNull
     @Override
@@ -45,20 +35,8 @@ public class CarouselAdapter extends RecyclerView.Adapter<CarouselAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Glide.with(context)
-                .load(imageUrls.get(position))
-                .into(holder.imageView);
-//        holder.itemView.setOnClickListener(view -> onItemClickListener.onClick(holder.imageView, imageUrls.get(position)));
-        // Set an OnClickListener on the item view
-//        holder.itemView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                if (onItemClickListener != null) {
-//                    // Pass the clicked ImageView and image URL to the listener
-//                    onItemClickListener.onItemClick(holder.imageView, imageUrl);
-//                }
-//            }
-//        });
+        Glide.with(context).load(imageUrls.get(position)).into(holder.imageView);
+        holder.itemView.setOnClickListener(view -> onItemClickListener.onClick(holder.imageView, imageUrls.get(position)));
     }
 
     @Override
@@ -72,6 +50,14 @@ public class CarouselAdapter extends RecyclerView.Adapter<CarouselAdapter.ViewHo
             super(itemView);
             imageView = itemView.findViewById(R.id.list_item_image);
         }
+    }
+
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
+    }
+
+    public interface OnItemClickListener {
+        void onClick(ImageView imageView, String path);
     }
 
 }
