@@ -12,7 +12,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:paddingVertical="50dp"
         android:paddingHorizontal="20dp"
         >
 
@@ -27,6 +26,58 @@
                 android:layout_marginTop="10sp"
                 android:id="@+id/recycler"
                 app:layoutManager="com.google.android.material.carousel.CarouselLayoutManager"/>
+
+            <TextView
+                android:id="@+id/detailAddressTxt"
+                style="?textAppearanceTitleLarge"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="Property Address"
+                android:textStyle="bold"
+                />
+
+            <TextView
+                android:id="@+id/detailPriceTxt"
+                style="?textAppearanceBodyLarge"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:text="$000 per week"
+                />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <Button
+                    android:id="@+id/linkButton"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="77dp"
+                    android:layout_height="36dp"
+                    android:padding="0dp"
+                    android:text="View Site"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/detailInspectionDateTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="Inspected on date"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_alignParentRight="true"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+
 
             <Button
                 android:id="@+id/dataCollectionBtn"
