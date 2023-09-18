@@ -2,6 +2,7 @@ package com.example.property_management.data;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class UserProperty {
@@ -13,9 +14,11 @@ public class UserProperty {
     private HashMap<String, DistanceInfo> distances;
     private HashMap<String, RoomData> inspectedData;
 
+    private ArrayList<String> images;
+
     public UserProperty() {}
 
-    public UserProperty(String propertyId, boolean inspected, LocalDate inspectionDate, LocalTime inspectionTime, String notes, HashMap<String, DistanceInfo> distances, HashMap<String, RoomData> inspectedData) {
+    public UserProperty(String propertyId, boolean inspected, LocalDate inspectionDate, LocalTime inspectionTime, String notes, HashMap<String, DistanceInfo> distances, HashMap<String, RoomData> inspectedData, ArrayList<String> images) {
         this.propertyId = propertyId;
         this.inspected = inspected;
         this.inspectionDate = inspectionDate;
@@ -23,6 +26,7 @@ public class UserProperty {
         this.notes = notes;
         this.distances = distances;
         this.inspectedData = inspectedData;
+        this.images = images;
     }
 
     public String getPropertyId() { return propertyId; }
@@ -52,4 +56,8 @@ public class UserProperty {
     public HashMap<String, RoomData> getInspectedData() { return inspectedData; }
 
     public void setInspectedData(HashMap<String, RoomData> inspectedData) { this.inspectedData = inspectedData; }
+
+    public ArrayList<String> getImages() { return images; }
+
+    public void setImages(ArrayList<String> images) { this.images = images; }
 }

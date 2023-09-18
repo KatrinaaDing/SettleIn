@@ -2,6 +2,7 @@ package com.example.property_management.api;
 
 import android.util.Log;
 
+import com.example.property_management.callbacks.AddPropertyCallback;
 import com.example.property_management.callbacks.GetAllPropertiesCallback;
 import com.example.property_management.callbacks.GetPropertyByIdCallback;
 import com.example.property_management.data.Property;
@@ -25,19 +26,21 @@ public class FirebasePropertyRepository {
         db = FirebaseFirestore.getInstance();
     }
 
-    public void addProperty(Property property) {
+    public void addProperty(Property property, AddPropertyCallback callback) {
         db.collection("properties")
             .add(property)
             .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                 @Override
                 public void onSuccess(DocumentReference documentReference) {
                     Log.d("add-property-success", "DocumentSnapshot written with ID: " + documentReference.getId());
+                    callback.onSuccess(documentReference.getId());
                 }
             })
             .addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     Log.w("add-property-failure", "Error adding document", e);
+                    callback.onError(e);
                 }
             });
     }
