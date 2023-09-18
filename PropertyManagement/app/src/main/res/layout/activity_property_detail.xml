@@ -79,6 +79,7 @@
                 android:layout_height="wrap_content" />
 
             <TextView
+                android:id="@+id/detailDistanceTitleTxt"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
@@ -87,6 +88,29 @@
                 android:textStyle="bold"
                 android:textSize="@dimen/medium_title"
                 />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/facilities_distance_recycler"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"/>
+
+            <TextView
+                android:id="@+id/detailConditionTitleTxt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:text="Property Conditions"
+                android:textStyle="bold"
+                android:textSize="@dimen/medium_title"
+                />
+
+
 
             <Button
                 android:id="@+id/dataCollectionBtn"
