@@ -2,11 +2,15 @@ package com.example.property_management.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseAuthHelper;
+import com.example.property_management.api.FirebasePropertyRepository;
+import com.example.property_management.callbacks.AddPropertyCallback;
+import com.example.property_management.data.Property;
 import com.google.android.material.bottomappbar.BottomAppBar;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,6 +20,8 @@ import androidx.navigation.ui.AppBarConfiguration;
 
 import com.example.property_management.databinding.ActivityMainBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
