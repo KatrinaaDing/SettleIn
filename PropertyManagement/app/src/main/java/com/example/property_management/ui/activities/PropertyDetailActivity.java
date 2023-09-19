@@ -12,7 +12,7 @@ import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
+import com.example.property_management.data.DistanceInfo;
 import com.example.property_management.R;
 import com.example.property_management.adapters.CarouselAdapter;
 import com.example.property_management.adapters.DistanceAdapter;
@@ -83,7 +83,10 @@ public class PropertyDetailActivity extends AppCompatActivity {
 
         // ================================== Distance =======================================
         ArrayList<DistanceInfo> distanceInfoList = new ArrayList<>();
-        distanceInfoList.add(new DistanceInfo("Southern Cross Station", "0.5km")); // TODO fetch distance from firebase
+        distanceInfoList.add(new DistanceInfo("Coles Spencer St", 0.5F, 1, 5, 6)); // TODO fetch distance from firebase
+        distanceInfoList.add(new DistanceInfo("Melbourne Central Station", 0.8F, 2, 6, 13));
+        distanceInfoList.add(new DistanceInfo("Southern Cross Station", 0.8F, 2, 6, 13));
+        distanceInfoList.add(new DistanceInfo("The university of melbourne", 0.8F, 2, 6, 13));
         setDistanceRecycler(distanceInfoList);
 
     }

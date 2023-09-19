@@ -8,6 +8,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.property_management.R;
+import com.example.property_management.data.DistanceInfo;
+
+import java.util.ArrayList;
 
 public class DistanceAdapter extends RecyclerView.Adapter<DistanceAdapter.DistanceViewHolder> {
 
@@ -33,10 +36,10 @@ public class DistanceAdapter extends RecyclerView.Adapter<DistanceAdapter.Distan
     public void onBindViewHolder(@NonNull DistanceViewHolder holder, int position) {
 
         holder.businessName.setText(distanceInfoList.get(position).getBusinessName());
-        holder.distance.setText(distanceInfoList.get(position).getDistance());
-        holder.driving.setText(distanceInfoList.get(position).getDriving());
-        holder.publicTransport.setText(distanceInfoList.get(position).getPublicTransport());
-        holder.walking.setText(distanceInfoList.get(position).getwalking());
+        holder.distance.setText(String.valueOf(distanceInfoList.get(position).getDistance()) +" km");
+        holder.driving.setText(distanceInfoList.get(position).getDriving() + " min");
+        holder.publicTransport.setText(distanceInfoList.get(position).getPublicTransport() + " min");
+        holder.walking.setText(distanceInfoList.get(position).getWalking() + " min");
     }
 
     @Override
