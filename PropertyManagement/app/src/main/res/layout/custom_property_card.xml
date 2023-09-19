@@ -2,15 +2,16 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginVertical="10dp"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <com.google.android.material.card.MaterialCardView
+        android:id="@+id/propertyCard"
+        style="?attr/materialCardViewElevatedStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/propertyCard"
         android:clickable="true"
         android:focusable="true"
-        android:checkable="true"
         android:layout_marginHorizontal="10dp"
         app:layout_constraintHeight="120dp"
         tools:ignore="MissingConstraints">
@@ -26,7 +27,6 @@
                 android:src="@drawable/property_image_placeholder"
                 android:scaleType="centerCrop"
                 android:adjustViewBounds="true"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large"
                 />
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -40,14 +40,15 @@
                     android:id="@+id/addressTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
                     android:layout_weight="1"
+                    android:textStyle="bold"
                     android:text="No Address Available"/>
                 <TextView
                     android:id="@+id/priceTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textAppearance="?attr/textAppearanceTitleSmall"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
                     android:text="No Price Available"/>
                 <com.example.property_management.ui.fragments.property.AmenitiesGroup
                     android:id="@+id/amenitiesGroup"

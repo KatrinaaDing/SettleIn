@@ -19,7 +19,7 @@
             android:textAlignment="center"
             android:paddingVertical="5dp"
             android:paddingLeft="5dp"
-            android:paddingRight="20dp"
+            android:paddingRight="10dp"
             android:text="0"/>
         <ImageView
             android:layout_width="wrap_content"
@@ -32,7 +32,7 @@
             android:textAlignment="center"
             android:paddingLeft="5dp"
             android:paddingVertical="5dp"
-            android:paddingRight="20dp"
+            android:paddingRight="10dp"
             android:text="0"/>
         <ImageView
             android:layout_width="wrap_content"
@@ -45,7 +45,7 @@
             android:textAlignment="center"
             android:paddingVertical="5dp"
             android:paddingLeft="5dp"
-            android:paddingRight="20dp"
+            android:paddingRight="10dp"
             android:text="0"/>
 
 

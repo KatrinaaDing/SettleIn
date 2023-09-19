@@ -1,6 +1,7 @@
 package com.example.property_management.ui.fragments.base;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -9,6 +10,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.property_management.R;
+import com.example.property_management.ui.activities.PropertyDetailActivity;
 import com.example.property_management.ui.fragments.property.AmenitiesGroup;
 import com.google.android.material.card.MaterialCardView;
 
@@ -41,8 +43,8 @@ public class PropertyCard extends MaterialCardView {
         } finally {
             a.recycle();
         }
-    }
 
+    }
     private void setValue() {
         TextView addressView = findViewById(R.id.addressTextView);
         TextView priceView = findViewById(R.id.priceTextView);
@@ -53,6 +55,6 @@ public class PropertyCard extends MaterialCardView {
             priceView.setText("Price not available");
         else
             priceView.setText("$" + String.valueOf(this.price));
-
     }
+
 }

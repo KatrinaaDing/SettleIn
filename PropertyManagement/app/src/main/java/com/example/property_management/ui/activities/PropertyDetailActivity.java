@@ -12,6 +12,7 @@ import com.example.property_management.databinding.ActivityPropertyDetailBinding
 
 public class PropertyDetailActivity extends AppCompatActivity {
     private ActivityPropertyDetailBinding binding;
+    private String propertyId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,11 +22,17 @@ public class PropertyDetailActivity extends AppCompatActivity {
         setTitle("Property Detail");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        // get property id
+        Intent intent = getIntent();
+        this.propertyId = intent.getStringExtra("property_id"); // -1 is default value
+        setTitle("Property Detail (" + this.propertyId + ")");
+
+
         // ================================== Components =======================================
         Button dataCollectionBtn = findViewById(R.id.dataCollectionBtn);
         dataCollectionBtn.setOnClickListener(view -> {
-            Intent intent = new Intent(this, DataCollectionActivity.class);
-            startActivity(intent);
+            Intent newIntent = new Intent(this, DataCollectionActivity.class);
+            startActivity(newIntent);
         });
     }
 
