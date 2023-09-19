@@ -26,6 +26,7 @@
         <activity android:name="com.example.property_management.ui.activities.RegisterActivity"/>
         <activity android:name="com.example.property_management.ui.activities.PropertyDetailActivity"/>
         <activity android:name="com.example.property_management.ui.activities.DataCollectionActivity"/>
+        <activity android:name=".ui.activities.TestActivity" />
 
     </application>
 
