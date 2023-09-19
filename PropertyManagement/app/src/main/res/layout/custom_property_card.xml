@@ -61,7 +61,7 @@
                 android:minWidth="20dp"
                 android:orientation="vertical">
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/actionBtn"
+                    android:id="@+id/menuBtn"
                     style="@style/Widget.Material3.Button.IconButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

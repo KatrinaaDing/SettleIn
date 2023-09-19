@@ -3,9 +3,11 @@ package com.example.property_management.adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -17,6 +19,7 @@ import com.example.property_management.data.Property;
 import com.example.property_management.ui.activities.PropertyDetailActivity;
 import com.example.property_management.ui.fragments.base.PropertyCard;
 import com.example.property_management.ui.fragments.property.AmenitiesGroup;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 
 import org.w3c.dom.Text;
@@ -59,6 +62,30 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
             intent.putExtra ("property_id", properties.get (position).getPropertyId());
             context.startActivity(intent);
         });
+
+        // set on click listener for menu button
+        holder.menuBtn.setOnClickListener(v -> {
+            PopupMenu popup = new PopupMenu(v.getContext(), holder.menuBtn);
+            popup.inflate(R.menu.property_card_menu);
+            popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    int id = item.getItemId();
+                    if (id == R.id.property_option_get_direction) {
+                        // TODO: Handle get direction
+                        System.out.println("get direction");
+                        return true;
+                    } else if (id == R.id.property_option_delete) {
+                        // TODO: Handle delete
+                        System.out.println("delete property: " + property.getPropertyId());
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            });
+            popup.show();
+        });
     }
 
     @Override
@@ -72,6 +99,7 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
         TextView addressView;
         TextView priceView;
         ImageView thumbnailView;
+        MaterialButton menuBtn;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -80,6 +108,7 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
             addressView = itemView.findViewById(R.id.addressTextView);
             priceView = itemView.findViewById(R.id.priceTextView);
             thumbnailView = itemView.findViewById(R.id.thumbnailImageView);
+            menuBtn = itemView.findViewById(R.id.menuBtn);
         }
     }
 }
