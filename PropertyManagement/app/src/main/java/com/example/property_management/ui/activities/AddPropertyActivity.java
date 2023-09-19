@@ -43,7 +43,7 @@ public class AddPropertyActivity extends AppCompatActivity {
 
         // ================================== Components =======================================
         // inspection date label
-        TextView inspectionDate = findViewById(R.id.inspectionDate);
+        TextView inspectionDate = binding.inspectionDate;
         // date picker
         CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints.Builder().setValidator(DateValidatorPointForward.now());
         MaterialDatePicker<Long> datePicker =
