@@ -6,5 +6,5 @@ import java.util.ArrayList;
 
 public interface GetAllPropertiesCallback {
     void onSuccess(ArrayList<Property> properties);
-    void onError(Exception e);
+    void onError(String msg);
 }

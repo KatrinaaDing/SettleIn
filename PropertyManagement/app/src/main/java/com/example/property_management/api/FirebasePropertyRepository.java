@@ -3,6 +3,7 @@ package com.example.property_management.api;
 import android.util.Log;
 
 import com.example.property_management.callbacks.AddPropertyCallback;
+import com.example.property_management.callbacks.DeletePropertyByIdCallback;
 import com.example.property_management.callbacks.GetAllPropertiesCallback;
 import com.example.property_management.callbacks.GetPropertyByIdCallback;
 import com.example.property_management.data.Property;
@@ -13,6 +14,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -39,13 +41,32 @@ public class FirebasePropertyRepository {
             .addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    Log.w("add-property-failure", "Error adding document", e);
-                    callback.onError(e);
+                    if (e instanceof FirebaseFirestoreException) {
+                        FirebaseFirestoreException firestoreException = (FirebaseFirestoreException) e;
+                        FirebaseFirestoreException.Code errorCode = firestoreException.getCode();
+
+                        switch (errorCode) {
+                            case PERMISSION_DENIED:
+                                Log.w("add-property-failure", "Error permission denied", e);
+                                callback.onError("Error permission denied");
+                                break;
+                            case UNAUTHENTICATED:
+                                Log.w("add-property-failure", "Error unauthenticated", e);
+                                callback.onError("Error unauthenticated");
+                            default:
+                                Log.w("add-property-failure", "Error adding property", e);
+                                callback.onError("Error adding property");
+                                break;
+                        }
+                    } else {
+                        Log.w("add-property-failure", "Non-Firebase Error adding property", e);
+                        callback.onError("Non-Firebase Error adding property");
+                    }
                 }
             });
     }
 
-    public void deletePropertyById(String documentId) {
+    public void deletePropertyById(String documentId, DeletePropertyByIdCallback callback) {
         db.collection("properties").document(documentId)
             .delete()
             .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -57,7 +78,28 @@ public class FirebasePropertyRepository {
             .addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    Log.w("delete-property-failure", "Error deleting document", e);
+                    if (e instanceof FirebaseFirestoreException) {
+                        FirebaseFirestoreException firestoreException = (FirebaseFirestoreException) e;
+                        FirebaseFirestoreException.Code errorCode = firestoreException.getCode();
+
+                        switch (errorCode) {
+                            case PERMISSION_DENIED:
+                                Log.w("delete-property-failure", "Error permission denied", e);
+                                callback.onError("Error permission denied");
+                                break;
+                            case NOT_FOUND:
+                                Log.w("delete-property-failure", "Error property not found", e);
+                                callback.onError("Error property not found");
+                                break;
+                            default:
+                                Log.w("delete-property-failure", "Error deleting property", e);
+                                callback.onError("Error deleting property");
+                                break;
+                        }
+                    } else {
+                        Log.w("delete-property-failure", "Non-Firebase Error deleting property", e);
+                        callback.onError("Non-Firebase Error deleting property");
+                    }
                 }
             });
     }
@@ -73,12 +115,12 @@ public class FirebasePropertyRepository {
                         Log.d("get-property-by-id-success", "DocumentSnapshot data: " + document.getData());
                         callback.onSuccess(document.toObject(Property.class));
                     } else {
-                        Log.d("get-property-by-id-failure", "No such document");
-                        callback.onError(new Exception("No such document"));
+                        Log.d("get-property-by-id-failure", "No such property");
+                        callback.onError("No such property");
                     }
                 } else {
                     Log.d("get-property-by-id-failure", "get failed with ", task.getException());
-                    callback.onError(task.getException());
+                    callback.onError("Error getting property");
                 }
             }
         });
@@ -99,8 +141,8 @@ public class FirebasePropertyRepository {
                         }
                         callback.onSuccess(properties);
                     } else {
-                        Log.d("get-all-properties-failure", "Error getting documents: ", task.getException());
-                        callback.onError(task.getException());
+                        Log.d("get-all-properties-failure", "Error getting all properties: ", task.getException());
+                        callback.onError("Error getting all properties");
                     }
                 }
             });

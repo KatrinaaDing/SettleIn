@@ -53,6 +53,7 @@ public class Property {
     public int getNumBedrooms() { return numBedrooms; }
 
     public void setNumBedrooms(int numBedrooms) { this.numBedrooms = numBedrooms; }
+
     public int getNumBathrooms() { return numBathrooms; }
 
     public void setNumBathrooms(int numBathrooms) { this.numBathrooms = numBathrooms; }

@@ -2,6 +2,8 @@ package com.example.property_management.api;
 
 import android.util.Log;
 
+import com.example.property_management.callbacks.AddUserCallback;
+import com.example.property_management.callbacks.DeleteUserByIdCallback;
 import com.example.property_management.callbacks.GetAllPropertiesCallback;
 import com.example.property_management.callbacks.GetAllUsersCallback;
 import com.example.property_management.callbacks.GetPropertyByIdCallback;
@@ -15,6 +17,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -27,19 +30,37 @@ public class FirebaseUserRepository {
     public FirebaseUserRepository() {
         db = FirebaseFirestore.getInstance();
     }
-    public void addUser(User user) {
+    public void addUser(User user, AddUserCallback callback) {
         db.collection("users")
                 .add(user)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
                         Log.d("add-user-success", "DocumentSnapshot written with ID: " + documentReference.getId());
+                        callback.onSuccess(documentReference.getId());
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.w("add-user-failure", "Error adding document", e);
+                        if (e instanceof FirebaseFirestoreException) {
+                            FirebaseFirestoreException firestoreException = (FirebaseFirestoreException) e;
+                            FirebaseFirestoreException.Code errorCode = firestoreException.getCode();
+
+                            switch (errorCode) {
+                                case PERMISSION_DENIED:
+                                    Log.w("add-user-failure", "Error permission denied", e);
+                                    callback.onError("Error permission denied");
+                                    break;
+                                default:
+                                    Log.w("add-user-failure", "Error adding user", e);
+                                    callback.onError("Error adding user");
+                                    break;
+                            }
+                        } else {
+                            Log.w("add-user-failure", "Non-Firebase Error adding user", e);
+                            callback.onError("Non-Firebase Error adding property");
+                        }
                     }
                 });
     }
@@ -54,12 +75,12 @@ public class FirebaseUserRepository {
                         Log.d("get-userinfo-by-id-success", "DocumentSnapshot data: " + document.getData());
                         callback.onSuccess(document.toObject(User.class));
                     } else {
-                        Log.d("get-userinfo-by-id-failure", "No such document");
-                        callback.onError(new Exception("No such document"));
+                        Log.d("get-userinfo-by-id-failure", "No such user");
+                        callback.onError("No such user");
                     }
                 } else {
                     Log.d("get-userinfo-by-id-failure", "get failed with ", task.getException());
-                    callback.onError(task.getException());
+                    callback.onError("Get userinfo by id failed");
                 }
             }
         });
@@ -80,26 +101,48 @@ public class FirebaseUserRepository {
                             }
                             callback.onSuccess(users);
                         } else {
-                            Log.d("get-all-users-failure", "Error getting documents: ", task.getException());
-                            callback.onError(task.getException());
+                            Log.d("get-all-users-failure", "Error getting all users: ", task.getException());
+                            callback.onError("Error getting all users");
                         }
                     }
                 });
     }
 
-    public void deleteUserById(String documentId) {
+    public void deleteUserById(String documentId, DeleteUserByIdCallback callback) {
         db.collection("users").document(documentId)
             .delete()
             .addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
                     Log.d("delete-user-success", "DocumentSnapshot successfully deleted!");
+                    callback.onSuccess("Successfully delete the user");
                 }
             })
             .addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    Log.w("delete-user-failure", "Error deleting document", e);
+                    if (e instanceof FirebaseFirestoreException) {
+                        FirebaseFirestoreException firestoreException = (FirebaseFirestoreException) e;
+                        FirebaseFirestoreException.Code errorCode = firestoreException.getCode();
+
+                        switch (errorCode) {
+                            case PERMISSION_DENIED:
+                                Log.w("delete-user-failure", "Error permission denied", e);
+                                callback.onError("Error permission denied");
+                                break;
+                            case NOT_FOUND:
+                                Log.w("delete-user-failure", "Error user not found", e);
+                                callback.onError("Error user not found");
+                                break;
+                            default:
+                                Log.w("delete-user-failure", "Error deleting user", e);
+                                callback.onError("Error deleting user");
+                                break;
+                        }
+                    } else {
+                        Log.w("delete-user-failure", "Non-Firebase Error deleting user", e);
+                        callback.onError("Non-Firebase Error deleting user");
+                    }
                 }
             });
     }

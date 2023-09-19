@@ -7,5 +7,5 @@ import java.util.ArrayList;
 
 public interface GetAllUsersCallback {
     void onSuccess(ArrayList<User> users);
-    void onError(Exception e);
+    void onError(String msg);
 }

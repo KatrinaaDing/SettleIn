@@ -6,15 +6,15 @@ public class RoomData {
     private float brightness;
     private float noise;
     private String windowOrientation;
-    private ArrayList<String> image;
+    private ArrayList<String> images;
 
     public RoomData() {};
 
-    public RoomData(float brightness, float noise, String windowOrientation, ArrayList<String> image) {
+    public RoomData(float brightness, float noise, String windowOrientation, ArrayList<String> images) {
         this.brightness = brightness;
         this.noise = noise;
         this.windowOrientation = windowOrientation;
-        this.image = image;
+        this.images = images;
     }
 
     public float getBrightness() { return brightness; }
@@ -29,7 +29,7 @@ public class RoomData {
 
     public void setWindowOrientation(String windowOrientation) { this.windowOrientation = windowOrientation; }
 
-    public ArrayList<String> getImage() { return image; }
+    public ArrayList<String> getImages() { return images; }
 
-    public void setImage(ArrayList<String> image) { this.image = image; }
+    public void setImage(ArrayList<String> images) { this.images = images; }
 }
