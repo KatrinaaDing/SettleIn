@@ -135,7 +135,11 @@ public class AddPropertyActivity extends AppCompatActivity {
                 });
          });
         // handle number picker value change
-        bedroomNumberPicker.setOnValueChangeListener(newValue -> bedroomNumber = newValue);
+        bedroomNumberPicker.setOnValueChangeListener(new onValueChangeCallback() {
+            @Override
+            public void onChange(int newValue) {
+                bedroomNumber = newValue;
+            }});
         bathroomNumberPicker.setOnValueChangeListener(newValue -> bathroomNumber = newValue);
         parkingNumberPicker.setOnValueChangeListener(newValue -> parkingNumber = newValue);
     }
