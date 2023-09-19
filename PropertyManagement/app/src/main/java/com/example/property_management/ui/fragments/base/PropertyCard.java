@@ -4,8 +4,10 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.property_management.R;
 import com.example.property_management.ui.fragments.property.AmenitiesGroup;
 import com.google.android.material.card.MaterialCardView;
@@ -13,7 +15,7 @@ import com.google.android.material.card.MaterialCardView;
 public class PropertyCard extends MaterialCardView {
     private String address = "No Address Available";
     private int price;
-    private String thumbnail = "https://th.bing.com/th/id/OIP.ou4JatDxkOZ1P9sZKyjxjAHaFj?pid=ImgDet&rs=1";
+    private int thumbnail = R.drawable.property_image_placeholder;
     private boolean isInspected;
 
     public PropertyCard(Context context, AttributeSet attrs) {
@@ -32,7 +34,6 @@ public class PropertyCard extends MaterialCardView {
             int parkings = a.getInteger(R.styleable.PropertyCard_parkings, 0);
             amenitiesGroup.setValues(bedrooms, bathrooms, parkings);
             this.isInspected = a.getBoolean(R.styleable.PropertyCard_isInspected, false);
-            this.thumbnail = a.getString(R.styleable.PropertyCard_thumbnail);
             if (a.hasValue(R.styleable.PropertyCard_address)){
                 this.address = a.getString(R.styleable.PropertyCard_address);
             }
@@ -45,6 +46,8 @@ public class PropertyCard extends MaterialCardView {
     private void setValue() {
         TextView addressView = findViewById(R.id.addressTextView);
         TextView priceView = findViewById(R.id.priceTextView);
+        ImageView thumbnailView = findViewById(R.id.thumbnailImageView);
+        thumbnailView.setImageResource(this.thumbnail);
         addressView.setText(this.address);
         if (this.price == -1)
             priceView.setText("Price not available");
