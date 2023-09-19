@@ -10,16 +10,22 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.property_management.R;
 import com.example.property_management.adapters.CarouselAdapter;
+import com.example.property_management.adapters.DistanceAdapter;
 import com.example.property_management.databinding.ActivityPropertyDetailBinding;
 
 import java.util.ArrayList;
 
 public class PropertyDetailActivity extends AppCompatActivity {
     private ActivityPropertyDetailBinding binding;
+
+    DistanceAdapter distanceAdapter;
+
+    RecyclerView distanceRecycler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +80,20 @@ public class PropertyDetailActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        // ================================== Distance =======================================
+        ArrayList<DistanceInfo> distanceInfoList = new ArrayList<>();
+        distanceInfoList.add(new DistanceInfo("Southern Cross Station", "0.5km")); // TODO fetch distance from firebase
+        setDistanceRecycler(distanceInfoList);
+
+    }
+
+    private void setDistanceRecycler(ArrayList<DistanceInfo> distanceInfoList){
+        distanceRecycler = binding.distanceRecycler;
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
+        distanceRecycler.setLayoutManager(layoutManager);
+        distanceAdapter = new DistanceAdapter(this, distanceInfoList);
+        distanceRecycler.setAdapter(distanceAdapter);
     }
 
     @Override

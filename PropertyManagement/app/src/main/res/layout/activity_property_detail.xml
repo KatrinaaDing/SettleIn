@@ -90,7 +90,7 @@
                 />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/facilities_distance_recycler"
+                android:id="@+id/distance_recycler"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
