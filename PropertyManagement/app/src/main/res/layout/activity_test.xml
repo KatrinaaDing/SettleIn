@@ -3,12 +3,24 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
-    <Button
-        android:id="@+id/openDialogBtn"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Open Dialog"
-        tools:layout_editor_absoluteX="10dp"
-        tools:layout_editor_absoluteY="8dp" />
+        android:orientation="vertical"
+        tools:ignore="MissingConstraints">
+        <Button
+            android:id="@+id/openDialogBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Open a basic dialog that has 1 button"
+            tools:layout_editor_absoluteX="10dp"
+            tools:layout_editor_absoluteY="8dp" />
+        <Button
+            android:id="@+id/openDialogBtn2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Open a basic dialog that has 2 button and cannot be closed from outside"
+            tools:layout_editor_absoluteX="10dp"
+            tools:layout_editor_absoluteY="8dp" />
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

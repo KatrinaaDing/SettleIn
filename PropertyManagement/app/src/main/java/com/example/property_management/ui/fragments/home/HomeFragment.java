@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.property_management.databinding.FragmentHomeBinding;
 import com.example.property_management.ui.activities.PropertyDetailActivity;
+import com.example.property_management.ui.activities.TestActivity;
 
 public class HomeFragment extends Fragment {
 
@@ -36,7 +37,11 @@ public class HomeFragment extends Fragment {
             startActivity(intent);
         });
 
-
+        Button testBtn = binding.testBtn;
+        testBtn.setOnClickListener(view -> {
+            Intent intent = new Intent(getActivity(), TestActivity.class);
+            startActivity(intent);
+        });
 
         return root;
     }
