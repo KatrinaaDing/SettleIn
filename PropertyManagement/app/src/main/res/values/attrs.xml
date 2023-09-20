@@ -7,4 +7,13 @@
             <enum name="vertical" value="1" />
         </attr>
     </declare-styleable>
+    <declare-styleable name="PropertyCard">
+        <attr name="address" format="string" />
+        <attr name="price" format="integer" />
+        <attr name="thumbnail" format="string" />
+        <attr name="bedrooms" format="integer" />
+        <attr name="bathrooms" format="integer" />
+        <attr name="parkings" format="integer" />
+        <attr name="isInspected" format="boolean" />
+    </declare-styleable>
 </resources>

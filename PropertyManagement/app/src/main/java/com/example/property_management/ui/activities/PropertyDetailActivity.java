@@ -22,6 +22,7 @@ import java.util.ArrayList;
 
 public class PropertyDetailActivity extends AppCompatActivity {
     private ActivityPropertyDetailBinding binding;
+    private String propertyId;
 
     DistanceAdapter distanceAdapter;
 
@@ -35,11 +36,17 @@ public class PropertyDetailActivity extends AppCompatActivity {
         setTitle("Property Detail");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        // get property id
+        Intent intent = getIntent();
+        this.propertyId = intent.getStringExtra("property_id"); // -1 is default value
+        setTitle("Property Detail (" + this.propertyId + ")");
+
+
         // ================================== Components =======================================
         Button dataCollectionBtn = findViewById(R.id.dataCollectionBtn);
         dataCollectionBtn.setOnClickListener(view -> {
-            Intent intent = new Intent(this, DataCollectionActivity.class);
-            startActivity(intent);
+            Intent newIntent = new Intent(this, DataCollectionActivity.class);
+            startActivity(newIntent);
         });
 
         // Insert carousel imageUrls data
