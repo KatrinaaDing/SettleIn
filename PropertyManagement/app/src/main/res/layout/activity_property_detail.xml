@@ -37,91 +37,126 @@
                 android:textStyle="bold"
                 />
 
-            <TextView
-                android:id="@+id/detailPriceTxt"
-                style="?textAppearanceBodyLarge"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:text="$000 per week"
-                />
-
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                >
+
+                <TextView
+                    android:id="@+id/detailPriceTxt"
+                    style="?textAppearanceBodyLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp"
+                    android:text="$000 per week"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <Button
                     android:id="@+id/linkButton"
                     style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingVertical="10dp"
+                    android:layout_height="24dp"
                     android:paddingHorizontal="0dp"
+                    android:paddingVertical="0dp"
                     android:text="View Site"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/detailInspectionDateTxt"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="Inspected on date"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    android:layout_alignParentRight="true"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <com.google.android.material.divider.MaterialDivider
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:id="@+id/detailDistanceTitleTxt"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:text="Distance from your interested facilities"
-                android:textStyle="bold"
-                android:textSize="@dimen/medium_title"
-                />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/distance_recycler"
+            <LinearLayout
+                android:id="@+id/inspectionTimeLayout"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <com.google.android.material.divider.MaterialDivider
-                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"/>
-
-            <TextView
-                android:id="@+id/detailConditionTitleTxt"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:text="Property Conditions"
-                android:textStyle="bold"
-                android:textSize="@dimen/medium_title"
-                />
-
-
-
-            <Button
-                android:id="@+id/dataCollectionBtn"
+                android:orientation="horizontal"
+                android:layout_alignParentRight="true"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:layout_width="match_parent"
-                android:layout_marginBottom="20dp"
-                android:layout_marginHorizontal="20dp"
-                android:layout_height="wrap_content"
-                android:text="Enter Data Collection Mode"
+                app:layout_constraintTop_toTopOf="parent">
+                <TextView
+                    style="?textAppearanceBodyLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Inspection Time:"/>
+                <TextView
+                    style="?textAppearanceBodyLarge"
+                    android:id="@+id/detailInspectionTimeTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="14:00 Sep 27, 2023" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/editInspectionTimeBtn"
+                    style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="false"
+                    android:insetTop="10dp"
+                    android:insetBottom="10dp"
+                    app:icon="@drawable/baseline_edit_24"
+                    app:iconGravity="textStart"
+                    app:iconSize="16dp" />
+            </LinearLayout>
+            <Button
+                style="@style/Widget.Material3.Button.ElevatedButton"
+                android:id="@+id/addInspectionTimeBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Add Inspection Time"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_alignParentRight="true"
                 />
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/detailDistanceTitleTxt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:text="Distance from your interested facilities"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/medium_title"
+                    />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/distance_recycler"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"/>
+
+                <TextView
+                    android:id="@+id/detailConditionTitleTxt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp"
+                    android:text="Property Conditions"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/medium_title"
+                    />
+
+
+
+                <Button
+                    android:id="@+id/dataCollectionBtn"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_width="match_parent"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginHorizontal="20dp"
+                    android:layout_height="wrap_content"
+                    android:text="Enter Data Collection Mode"
+                    />
         </LinearLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
