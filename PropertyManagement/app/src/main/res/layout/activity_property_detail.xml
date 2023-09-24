@@ -58,46 +58,54 @@
                     android:id="@+id/linkButton"
                     style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="24dp"
+                    android:layout_height="30dp"
                     android:paddingHorizontal="0dp"
                     android:paddingVertical="0dp"
                     android:text="View Site"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/inspectionTimeLayout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_alignParentRight="true"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-                <TextView
-                    style="?textAppearanceBodyLarge"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Inspection Time:"/>
-                <TextView
-                    style="?textAppearanceBodyLarge"
-                    android:id="@+id/detailInspectionTimeTxt"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="14:00 Sep 27, 2023" />
+                    android:orientation="vertical"
+                    android:layout_alignParentLeft="true"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+                    <TextView
+                        style="?textAppearanceBodyLarge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Inspection Time:"/>
+                    <TextView
+                        style="?textAppearanceBodyLarge"
+                        android:id="@+id/detailInspectionTimeTxt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="14:00 Sep 27, 2023" />
+                </LinearLayout>
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/editInspectionTimeBtn"
                     style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     android:checkable="false"
-                    android:insetTop="10dp"
-                    android:insetBottom="10dp"
+                    android:insetTop="12dp"
+                    android:insetBottom="12dp"
                     app:icon="@drawable/baseline_edit_24"
                     app:iconGravity="textStart"
-                    app:iconSize="16dp" />
-            </LinearLayout>
+                    android:padding="10dp"
+                    app:iconSize="20dp" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
             <Button
                 style="@style/Widget.Material3.Button.ElevatedButton"
                 android:id="@+id/addInspectionTimeBtn"

@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -64,7 +65,7 @@ public class PropertyDetailActivity extends AppCompatActivity {
         // ================================== Components =======================================
         // ===== inspection time =====
         Button addInspectionTimeBtn = binding.addInspectionTimeBtn;
-        LinearLayout inspectionTimeLayout = binding.inspectionTimeLayout;
+        ConstraintLayout inspectionTimeLayout = binding.inspectionTimeLayout;
         TextView inspectionTimeTxt = binding.detailInspectionTimeTxt;
         Button editInspectionTimeBtn = binding.editInspectionTimeBtn;
 
@@ -82,6 +83,7 @@ public class PropertyDetailActivity extends AppCompatActivity {
             inspectionTimeTxt.setText(inspectionDate);
             addInspectionTimeBtn.setVisibility(View.VISIBLE);
             date = inspectionDate;
+            addInspectionTimeBtn.setVisibility(View.GONE);
         } else {
             inspectionTimeLayout.setVisibility(View.GONE);
         }
@@ -183,27 +185,40 @@ public class PropertyDetailActivity extends AppCompatActivity {
 
         Button addDateBtn = dialogView.findViewById(R.id.addDateBtn);
         Button addTimeBtn = dialogView.findViewById(R.id.addTimeBtn);
+        Button resetBtn = dialogView.findViewById(R.id.resetBtn);
         TextView dateTxt = dialogView.findViewById(R.id.dateTxt);
         TextView timeTxt = dialogView.findViewById(R.id.timeTxt);
 
-        dateTxt.setText(date);
-        timeTxt.setText(time);
+        // display date and time
+        if (date != "")
+            dateTxt.setText(date);
+        else
+            dateTxt.setText("Not Set");
+        if (time != "")
+            timeTxt.setText(time);
+        else
+            timeTxt.setText("Not Set");
 
+        // ===== dialog =====
         AlertDialog alertDialog = new MaterialAlertDialogBuilder(PropertyDetailActivity.this)
-                .setTitle("Set Inspection Date and Time")
+                .setTitle("Schedule Inspection")
                 .setView(dialogView)
                 .setPositiveButton("Save", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         Button addInspectionTimeBtn = binding.addInspectionTimeBtn;
-                        LinearLayout inspectionTimeLayout = binding.inspectionTimeLayout;
+                        ConstraintLayout inspectionTimeLayout = binding.inspectionTimeLayout;
                         TextView inspectionTimeTxt = binding.detailInspectionTimeTxt;
                         // on click set date
-                        inspectionTimeTxt.setText(timeTxt.getText() + " " + dateTxt.getText());
-                        date = dateTxt.getText().toString();
-                        time = timeTxt.getText().toString();
-                        inspectionTimeLayout.setVisibility(View.VISIBLE);
-                        addInspectionTimeBtn.setVisibility(View.GONE);
+                        if (date != "" || time != "") {
+                            inspectionTimeTxt.setText(time + " " + date);
+                            addInspectionTimeBtn.setVisibility(View.GONE);
+                            inspectionTimeLayout.setVisibility(View.VISIBLE);
+                        } else {
+                            addInspectionTimeBtn.setVisibility(View.VISIBLE);
+                            inspectionTimeLayout.setVisibility(View.GONE);
+                        }
+
                         dialogInterface.dismiss();
                         // TODO put date and time to firebase
                     }
@@ -227,6 +242,7 @@ public class PropertyDetailActivity extends AppCompatActivity {
         // on click set date
         datePicker.addOnPositiveButtonClickListener(selection -> {
             dateTxt.setText(datePicker.getHeaderText());
+            date = datePicker.getHeaderText();
         });
         // on click show date picker
         addDateBtn.setOnClickListener(v -> {
@@ -243,10 +259,18 @@ public class PropertyDetailActivity extends AppCompatActivity {
         timePicker.addOnPositiveButtonClickListener(selection -> {
             // on click set time
             timeTxt.setText(timePicker.getHour() + ":" + timePicker.getMinute());
+            time = timePicker.getHour() + ":" + timePicker.getMinute();
         });
         addTimeBtn.setOnClickListener(v -> {
             // on select time
             timePicker.show(getSupportFragmentManager(), "time_picker");
+        });
+        resetBtn.setOnClickListener(v -> {
+            // on click reset date and time
+            dateTxt.setText("Not Set");
+            timeTxt.setText("Not Set");
+            date = "";
+            time = "";
         });
 
     }
