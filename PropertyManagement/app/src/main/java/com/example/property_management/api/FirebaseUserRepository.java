@@ -8,6 +8,7 @@ import com.example.property_management.callbacks.GetAllPropertiesCallback;
 import com.example.property_management.callbacks.GetAllUsersCallback;
 import com.example.property_management.callbacks.GetPropertyByIdCallback;
 import com.example.property_management.callbacks.GetUserInfoByIdCallback;
+import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.Property;
 import com.example.property_management.data.User;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -24,6 +25,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class FirebaseUserRepository {
     private FirebaseFirestore db;
@@ -142,6 +144,58 @@ public class FirebaseUserRepository {
                     } else {
                         Log.w("delete-user-failure", "Non-Firebase Error deleting user", e);
                         callback.onError("Non-Firebase Error deleting user");
+                    }
+                }
+            });
+    }
+
+    /**
+     * update one or more User fields by the document id
+     *
+     * Example usage:
+     *  HashMap<String, Object> updates = new HashMap<>();
+     *  updates.put("userEmail", "test@email.com");
+     *  update.put("userName", "Bob");
+     *  updateUserFields(documentId, updates, new UpdateUserCallback() {...});
+     *
+     * @param documentId
+     * @param updates
+     * @param callback
+     */
+    public void updateUserFields(String documentId, HashMap<String, Object> updates, UpdateUserCallback callback) {
+        db.collection("users").document(documentId)
+            .update(updates)
+            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void unused) {
+                    Log.d("update-user-fields", "onSuccess: " + "Document " + documentId + " successfully updated.");
+                    callback.onSuccess("Document " + documentId + " successfully updated.");
+                }
+            })
+            .addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    if (e instanceof FirebaseFirestoreException) {
+                        FirebaseFirestoreException firestoreException = (FirebaseFirestoreException) e;
+                        FirebaseFirestoreException.Code errorCode = firestoreException.getCode();
+
+                        switch (errorCode) {
+                            case PERMISSION_DENIED:
+                                Log.w("update-user-fields", "Error permission denied", e);
+                                callback.onError("Error permission denied");
+                                break;
+                            case NOT_FOUND:
+                                Log.w("update-user-fields", "Error user not found", e);
+                                callback.onError("Error user not found");
+                                break;
+                            default:
+                                Log.w("update-user-fields", "Error updating user", e);
+                                callback.onError("Error updating user");
+                                break;
+                        }
+                    } else {
+                        Log.w("update-user-fields", "Non-Firebase Error updating user", e);
+                        callback.onError("Non-Firebase Error updating user");
                     }
                 }
             });
