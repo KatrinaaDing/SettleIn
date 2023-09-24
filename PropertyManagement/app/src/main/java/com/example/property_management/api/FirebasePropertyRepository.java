@@ -102,7 +102,8 @@ public class FirebasePropertyRepository {
             .addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
-                    Log.d("delete-property-success", "DocumentSnapshot successfully deleted!");
+                    Log.d("delete-property-success", "Property successfully deleted!");
+                    callback.onSuccess("Property successfully deleted!");
                 }
             })
             .addOnFailureListener(new OnFailureListener() {

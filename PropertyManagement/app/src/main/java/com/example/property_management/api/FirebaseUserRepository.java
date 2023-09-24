@@ -155,8 +155,8 @@ public class FirebaseUserRepository {
      * Example usage:
      *  HashMap<String, Object> updates = new HashMap<>();
      *  updates.put("userEmail", "test@email.com");
-     *  update.put("userName", "Bob");
-     *  updateUserFields(documentId, updates, new UpdateUserCallback() {...});
+     *  updates.put("userName", "Bob");
+     *  db.updateUserFields(documentId, updates, new UpdateUserCallback() {...});
      *
      * @param documentId
      * @param updates
