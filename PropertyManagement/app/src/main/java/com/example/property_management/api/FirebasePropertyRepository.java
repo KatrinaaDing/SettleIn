@@ -36,11 +36,13 @@ public class FirebasePropertyRepository {
      * @param callback
      */
     public void addProperty(Property property, AddPropertyCallback callback) {
-        Query query = db.collection("Properties")
+        Query query = db.collection("properties")
                 .whereEqualTo("address", property.getAddress())
                 .whereEqualTo("href", property.getHref());
         query.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
+//                Log.d("test", "addProperty: " + task.toString());
+                Log.d("test", "addProperty: " + task.getResult().getDocuments());
                 if (task.getResult().isEmpty()) { // property does not exist
                     db.collection("properties")
                             .add(property)
@@ -88,6 +90,12 @@ public class FirebasePropertyRepository {
 
     }
 
+    /**
+     * delte a property by id
+     *
+     * @param documentId
+     * @param callback
+     */
     public void deletePropertyById(String documentId, DeletePropertyByIdCallback callback) {
         db.collection("properties").document(documentId)
             .delete()
@@ -126,6 +134,11 @@ public class FirebasePropertyRepository {
             });
     }
 
+    /**
+     * get a property by id
+     * @param documentId
+     * @param callback
+     */
     public void getPropertyById(String documentId, GetPropertyByIdCallback callback) {
         DocumentReference docRef = db.collection("properties").document(documentId);
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -148,6 +161,10 @@ public class FirebasePropertyRepository {
         });
     }
 
+    /**
+     * get all the properties
+     * @param callback
+     */
     public void getAllProperties(GetAllPropertiesCallback callback) {
         db.collection("properties")
             .get()

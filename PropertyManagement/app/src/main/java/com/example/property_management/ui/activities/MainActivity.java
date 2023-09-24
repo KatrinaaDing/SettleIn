@@ -73,6 +73,9 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+//        FirebasePropertyRepository db = new FirebasePropertyRepository();
+
     }
 
     @Override
