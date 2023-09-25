@@ -1,12 +1,15 @@
 package com.example.property_management.ui.activities;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,15 +23,16 @@ import com.example.property_management.callbacks.AddPropertyCallback;
 import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.callbacks.onValueChangeCallback;
 import com.example.property_management.data.NewProperty;
-import com.example.property_management.data.Property;
 import com.example.property_management.databinding.ActivityAddPropertyBinding;
 import com.example.property_management.ui.fragments.base.ArrowNumberPicker;
+import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.example.property_management.utils.Helpers;
 import com.example.property_management.utils.UrlValidator;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
@@ -36,6 +40,7 @@ import com.google.android.material.timepicker.TimeFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class AddPropertyActivity extends AppCompatActivity {
     private ActivityAddPropertyBinding binding;
@@ -122,7 +127,7 @@ public class AddPropertyActivity extends AppCompatActivity {
         findViewById(R.id.submitBtn).setOnClickListener(v -> submitProperty(this));
         scrapeUrlBtn.setOnClickListener(v -> {
             // close keyboard
-            Helpers.closeKeyboard(this, urlInputLayout);
+            Helpers.closeKeyboard(this);
             // scrape advertisement from url
             if (!validateUrl()) return;
             urlInputLayout.setHelperText("Getting information...");
@@ -162,7 +167,8 @@ public class AddPropertyActivity extends AppCompatActivity {
             }
             @Override
             public void onError(String msg) {
-                // TODO: show toast
+                String errorMsg = "Error: " + msg;
+                new BasicSnackbar(findViewById(android.R.id.content), errorMsg, "error");
                 Log.e("add-property-failure", msg);
             }
         });
@@ -237,12 +243,19 @@ public class AddPropertyActivity extends AppCompatActivity {
             @Override
             public void onSuccess(String msg) {
                 // redirect to main activity on success
-                Intent intent = new Intent(AddPropertyActivity.this, MainActivity.class);
-                startActivity(intent);
+                new BasicSnackbar(findViewById(android.R.id.content),
+                        "Property added successfully",
+                        "success");
+                // redirect to main activity for showing snackbar
+                new Handler().postDelayed(() -> {
+                    Intent intent = new Intent(AddPropertyActivity.this, MainActivity.class);
+                    startActivity(intent);
+                }, 1000);
             }
             @Override
             public void onError(String msg) {
-                // TODO: show toast
+                String errorMsg = "Error: " + msg;
+                new BasicSnackbar(findViewById(android.R.id.content), errorMsg, "error");
                 Log.e("add-property-failure", msg);
             }
         });

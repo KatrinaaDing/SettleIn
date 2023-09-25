@@ -3,14 +3,12 @@ package com.example.property_management.api;
 import static android.content.ContentValues.TAG;
 
 import android.util.Log;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.property_management.callbacks.AuthCallback;
-import com.google.android.gms.tasks.OnCompleteListener;
+import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -106,12 +104,13 @@ public class FirebaseAuthHelper {
                 errorMessage = "Something went wrong. Please try again later.";
                 break;
         }
-        Toast.makeText(activity, errorMessage,
-                Toast.LENGTH_LONG).show();
+        new BasicSnackbar(activity.findViewById(android.R.id.content),
+                errorMessage,
+                "error",
+                Snackbar.LENGTH_LONG);
     }
 
     private void showSuccess(String msg) {
-       Toast.makeText(activity, msg,
-                Toast.LENGTH_LONG).show();
+        new BasicSnackbar(activity.findViewById(android.R.id.content), msg, "success");
     }
 }
