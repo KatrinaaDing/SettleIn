@@ -2,6 +2,7 @@ package com.example.property_management.data;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class NewProperty {
     private String href;
@@ -28,6 +29,13 @@ public class NewProperty {
         this.price = price;
     }
 
+    public HashMap<String, Object> toUpdateUserObject(String id) {
+        HashMap<String, Object> propertyPayload = new HashMap<>();
+        propertyPayload.put("href", href);
+        propertyPayload.put("price", price);
+        propertyPayload.put("propertyId", id);
+        return propertyPayload;
+    }
     public String getHref() { return href; }
 
     public void setHref(String href) { this.href = href; }

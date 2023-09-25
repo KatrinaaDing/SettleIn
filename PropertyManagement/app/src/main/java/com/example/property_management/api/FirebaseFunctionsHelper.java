@@ -43,7 +43,8 @@ public class FirebaseFunctionsHelper {
                         (int) result.get("parking_num"),
                         (String) result.get("address"),
                         ((Double) result.get("lat")).floatValue(),
-                        ((Double) result.get("lng")).floatValue()
+                        ((Double) result.get("lng")).floatValue(),
+                        0
                     );
                 }
             });

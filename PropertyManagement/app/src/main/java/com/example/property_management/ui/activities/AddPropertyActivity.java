@@ -1,18 +1,23 @@
 package com.example.property_management.ui.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.property_management.R;
+import com.example.property_management.api.FirebaseAuthHelper;
 import com.example.property_management.api.FirebaseFunctionsHelper;
 import com.example.property_management.api.FirebasePropertyRepository;
+import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.AddPropertyCallback;
+import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.callbacks.onValueChangeCallback;
 import com.example.property_management.data.NewProperty;
 import com.example.property_management.data.Property;
@@ -28,16 +33,19 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 public class AddPropertyActivity extends AppCompatActivity {
     private ActivityAddPropertyBinding binding;
-
     private String url = "";
     private String address = "";
     private int bedroomNumber = 0;
     private int bathroomNumber = 0;
     private int parkingNumber = 0;
-    private float lat;
-    private float lng;
+    private float lat = 0;
+    private float lng = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,18 +118,12 @@ public class AddPropertyActivity extends AppCompatActivity {
                     public void afterTextChanged(Editable editable) {}
                 })
         );
-
-        findViewById(R.id.submitBtn).setOnClickListener(v -> {
-            // on submit new property
-            // TODO: post data here
-            System.out.println("bedroom: " + bedroomNumber + ", bathroom: " + bathroomNumber +
-                    ", parking: " + parkingNumber);
-            System.out.println("address: " + address + ", url: " + url);
-            submitProperty();
-        });
+        // on submit new property
+        findViewById(R.id.submitBtn).setOnClickListener(v -> submitProperty(this));
         scrapeUrlBtn.setOnClickListener(v -> {
+            // close keyboard
             Helpers.closeKeyboard(this, urlInputLayout);
-            // on scrape url
+            // scrape advertisement from url
             if (!validateUrl()) return;
             urlInputLayout.setHelperText("Getting information...");
             fetchPropertyInfo(urlInputLayout);
@@ -147,26 +149,26 @@ public class AddPropertyActivity extends AppCompatActivity {
         }
     }
 
-    private void submitProperty() {
+    private void submitProperty(AppCompatActivity activity) {
         // create new property object
-        Property newProperty = new NewProperty(url, bedroomNumber, bathroomNumber, parkingNumber,
-                address, (float) 0.0, (float) 0.0).castToProperty();
+        NewProperty newProperty = new NewProperty(url, bedroomNumber, bathroomNumber, parkingNumber,
+                address, lat, lng, 0);
         // post to firebase
         FirebasePropertyRepository db = new FirebasePropertyRepository();
         db.addProperty(newProperty, new AddPropertyCallback() {
             @Override
             public void onSuccess(String documentId) {
-                Intent intent = new Intent(AddPropertyActivity.this, MainActivity.class);
-                startActivity(intent);
+                updateUserProperty(activity, newProperty, documentId);
             }
-
             @Override
             public void onError(String msg) {
-                System.out.println("error");
+                // TODO: show toast
+                Log.e("add-property-failure", msg);
             }
         });
     }
     private void fetchCoordinates() {
+        // TODO: fetch coordinates
         this.lat = 0;
         this.lng = 0;
     }
@@ -183,7 +185,7 @@ public class AddPropertyActivity extends AppCompatActivity {
             })
             .addOnFailureListener(e -> {
                 // pop error at input box
-                System.out.println(e.getMessage());
+                Log.e("scrape-url-error", e.getMessage());
                 urlInputLayout.setError("Error: " + e.getMessage());
             });
     }
@@ -207,7 +209,7 @@ public class AddPropertyActivity extends AppCompatActivity {
         this.bathroomNumber = property.getNumBathrooms();
         this.parkingNumber = property.getNumParking();
         this.address = property.getAddress();
-        this.url = property.getUrl();
+        this.url = property.getHref();
 
         // set UI
         ArrowNumberPicker bedroomNumberPicker = findViewById(R.id.bedroomNumberPicker);
@@ -220,4 +222,29 @@ public class AddPropertyActivity extends AppCompatActivity {
         propertyAddress.setText(this.address);
     }
 
+    private void updateUserProperty(AppCompatActivity activity, NewProperty newProperty, String propertyId) {
+        // create object to update user document
+        ArrayList<HashMap> propertyList = new ArrayList<>();
+        HashMap<String, Object> propertyPayload = newProperty.toUpdateUserObject(propertyId);
+        propertyList.add(propertyPayload);
+        HashMap<String, Object> userUpdatePayload = new HashMap<>();
+        userUpdatePayload.put("properties", propertyList);
+        // get user id
+        String userId = new FirebaseAuthHelper(activity).getCurrentUser().getUid();
+        // update user document
+        FirebaseUserRepository userRepository = new FirebaseUserRepository();
+        userRepository.updateUserFields(userId, userUpdatePayload, new UpdateUserCallback() {
+            @Override
+            public void onSuccess(String msg) {
+                // redirect to main activity on success
+                Intent intent = new Intent(AddPropertyActivity.this, MainActivity.class);
+                startActivity(intent);
+            }
+            @Override
+            public void onError(String msg) {
+                // TODO: show toast
+                Log.e("add-property-failure", msg);
+            }
+        });
+    }
 }
