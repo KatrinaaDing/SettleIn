@@ -79,10 +79,12 @@ public class FirebaseAuthHelper {
             });
     }
 
+    // sign out user
     public void signout() {
         FirebaseAuth.getInstance().signOut();
     }
 
+    // show error snackbar based on error code
     private void showError(Task<AuthResult> task) {
         FirebaseAuthException e = (FirebaseAuthException) task.getException();
         String errorCode = e.getErrorCode();

@@ -164,10 +164,12 @@ public class RegisterActivity extends AppCompatActivity {
         confirmPasswordLayout.setError(null);
     }
     private void registerUser(String email, String password) {
+        // create user in firebase auth
         FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(this);
         firebaseAuthHelper.createUser(email, password, new AuthCallback() {
             @Override
             public void onSuccess(FirebaseUser user) {
+                // add created user to firestore
                 User newUserObj = new User(user.getUid(), "New User", email, new ArrayList<>(), new ArrayList<>());
                 FirebaseUserRepository firebaseUserRepository = new FirebaseUserRepository();
                 firebaseUserRepository.addUser(newUserObj, new AddUserCallback() {

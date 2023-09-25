@@ -133,7 +133,7 @@ public class AddPropertyActivity extends AppCompatActivity {
             urlInputLayout.setHelperText("Getting information...");
             fetchPropertyInfo(urlInputLayout);
             fetchCoordinates();
-         });
+        });
         // handle number picker value change
         bedroomNumberPicker.setOnValueChangeListener(new onValueChangeCallback() {
             @Override
