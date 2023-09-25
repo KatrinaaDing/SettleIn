@@ -9,6 +9,7 @@ import com.example.property_management.callbacks.AuthCallback;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.FirebaseNetworkException;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -67,12 +68,10 @@ public class FirebaseAuthHelper {
                     Log.d(TAG, "signInWithEmail:success");
                     FirebaseUser user = mAuth.getCurrentUser();
                     showSuccess("Login successfully.");
-                    System.out.println(user);
                     callback.onSuccess(user);
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w(TAG, "signInWithEmail:failure", task.getException());
-                    System.out.println("Login fail");
                     showError(task);
                     callback.onFailure(task.getException());
                 }
@@ -86,6 +85,15 @@ public class FirebaseAuthHelper {
 
     // show error snackbar based on error code
     private void showError(Task<AuthResult> task) {
+        // handle network error
+        if (task.getException() instanceof FirebaseNetworkException) {
+            new BasicSnackbar(activity.findViewById(android.R.id.content),
+                    "Network error. Please check your connection and try again later.",
+                    "error",
+                    Snackbar.LENGTH_LONG);
+            return;
+        }
+        // handle other errors
         FirebaseAuthException e = (FirebaseAuthException) task.getException();
         String errorCode = e.getErrorCode();
         String errorMessage;

@@ -22,6 +22,8 @@ import com.example.property_management.data.Property;
 import com.example.property_management.databinding.FragmentHomeBinding;
 import com.example.property_management.ui.activities.PropertyDetailActivity;
 import com.example.property_management.ui.activities.TestActivity;
+import com.example.property_management.ui.fragments.base.BasicSnackbar;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 
@@ -80,7 +82,7 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onError(String msg) {
-                
+                new BasicSnackbar(getView(), msg, "error", Snackbar.LENGTH_LONG);
             }
         });
     }
