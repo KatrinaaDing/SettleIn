@@ -2,6 +2,7 @@ package com.example.property_management.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.Button;
@@ -17,6 +18,7 @@ import com.example.property_management.data.User;
 import com.example.property_management.data.UserProperty;
 import com.example.property_management.databinding.ActivityRegisterBinding;
 import com.example.property_management.utils.EmailValidator;
+import com.example.property_management.utils.Helpers;
 import com.example.property_management.utils.PasswordValidator;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseUser;
@@ -43,6 +45,8 @@ public class RegisterActivity extends AppCompatActivity {
 
         // ========================== Listeners ==========================
         submitRegisterBtn.setOnClickListener(view -> {
+            // close keyboard
+            Helpers.closeKeyboard(this);
             if (validateEmail() && validatePassword()) {
 //                Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
 //                startActivity(intent);
@@ -169,8 +173,11 @@ public class RegisterActivity extends AppCompatActivity {
                 firebaseUserRepository.addUser(newUserObj, new AddUserCallback() {
                     @Override
                     public void onSuccess(String documentId) {
-                        Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
-                        startActivity(intent);
+                        // go to home screen after snackbar displayed
+                        new Handler().postDelayed(() -> {
+                            Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                            startActivity(intent);
+                        }, 1000);
                     }
                     @Override
                     public void onError(String msg) {
