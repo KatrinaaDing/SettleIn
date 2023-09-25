@@ -1,78 +1,66 @@
 package com.example.property_management.data;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public class NewProperty {
-    private String url;
-    private int bedroomNum;
-    private int bathroomNum;
-    private int parkingNum;
+    private String href;
     private String address;
     private float lat;
     private float lng;
+    private int numBedrooms;
+    private int numBathrooms;
+    private int numParking;
+    private int price;
+    private ArrayList<String> images;
 
-    public NewProperty(String url, int bedroomNum, int bathroomNum, int parkingNum, String address, float lat, float lng) {
-        this.url = url;
-        this.bedroomNum = bedroomNum;
-        this.bathroomNum = bathroomNum;
-        this.parkingNum = parkingNum;
+    public NewProperty() {};
+
+    public NewProperty(String href, int numBedrooms, int numBathrooms, int numParking, String address, float lat, float lng, int price) {
+        this.href = href;
         this.address = address;
         this.lat = lat;
         this.lng = lng;
+        this.numBedrooms = numBedrooms;
+        this.numBathrooms = numBathrooms;
+        this.numParking = numParking;
+        this.images = images;
+        this.price = price;
     }
 
-    public Property castToProperty() {
-        Property newPropertyObj = new Property();
-        newPropertyObj.setHref(this.getUrl());
-        newPropertyObj.setNumBedrooms(this.getBedroomNum());
-        newPropertyObj.setNumBathrooms(this.getBathroomNum());
-        newPropertyObj.setNumParking(this.getParkingNum());
-        newPropertyObj.setAddress(this.getAddress());
-        newPropertyObj.setLat(this.getLat());
-        newPropertyObj.setLng(this.getLng());
-        return newPropertyObj;
-    }
-    // getters
-    public String getUrl() {
-        return url;
-    }
-    public int getBedroomNum() {
-        return bedroomNum;
-    }
-    public int getBathroomNum() {
-        return bathroomNum;
-    }
-    public int getParkingNum() {
-        return parkingNum;
-    }
-    public String getAddress() {
-        return address;
-    }
-    public float getLat() {
-        return lat;
-    }
-    public float getLng() {
-        return lng;
-    }
-    // setters
-    public void setUrl(String url) {
-        this.url = url;
-    }
-    public void setBedroomNum(int bedroomNum) {
-        this.bedroomNum = bedroomNum;
-    }
-    public void setBathroomNum(int bathroomNum) {
-        this.bathroomNum = bathroomNum;
-    }
-    public void setParkingNum(int parkingNum) {
-        this.parkingNum = parkingNum;
-    }
-    public void setAddress(String address) {
-        this.address = address;
-    }
-    public void setLat(float lat) {
-        this.lat = lat;
-    }
-    public void setLng(float lng) {
-        this.lng = lng;
-    }
+    public String getHref() { return href; }
 
+    public void setHref(String href) { this.href = href; }
+
+    public String getAddress() { return address; }
+
+    public void setAddress(String address) { this.address = address; }
+
+    public float getLat() { return lat; }
+
+    public void setLat(float lat) { this.lat = lat; }
+
+    public float getLng() { return lng; }
+
+    public void setLng(float lng) { this.lng = lng; }
+
+    public int getNumBedrooms() { return numBedrooms; }
+
+    public void setNumBedrooms(int numBedrooms) { this.numBedrooms = numBedrooms; }
+
+    public int getNumBathrooms() { return numBathrooms; }
+
+    public void setNumBathrooms(int numBathrooms) { this.numBathrooms = numBathrooms; }
+
+    public int getNumParking() { return numParking; }
+
+    public void setNumParking(int numParking) { this.numParking = numParking; }
+
+    public ArrayList<String> getImages() { return images; }
+
+    public void setImages(ArrayList<String> images) { this.images = images; }
+
+    public int getPrice() { return price; }
+
+    public void setPrice(int price) { this.price = price; }
 }

@@ -6,6 +6,7 @@ import com.example.property_management.callbacks.AddPropertyCallback;
 import com.example.property_management.callbacks.DeletePropertyByIdCallback;
 import com.example.property_management.callbacks.GetAllPropertiesCallback;
 import com.example.property_management.callbacks.GetPropertyByIdCallback;
+import com.example.property_management.data.NewProperty;
 import com.example.property_management.data.Property;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -32,20 +33,20 @@ public class FirebasePropertyRepository {
     /**
      * Check if the property exists in the db, if not exists, then add the property
      * To be added successfully, <address + href> must be unique
-     * @param property
+     * @param newProperty
      * @param callback
      */
-    public void addProperty(Property property, AddPropertyCallback callback) {
+    public void addProperty(NewProperty newProperty, AddPropertyCallback callback) {
         Query query = db.collection("properties")
-                .whereEqualTo("address", property.getAddress())
-                .whereEqualTo("href", property.getHref());
+                .whereEqualTo("address", newProperty.getAddress())
+                .whereEqualTo("href", newProperty.getHref());
         query.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
 //                Log.d("test", "addProperty: " + task.toString());
                 Log.d("test", "addProperty: " + task.getResult().getDocuments());
                 if (task.getResult().isEmpty()) { // property does not exist
                     db.collection("properties")
-                            .add(property)
+                            .add(newProperty)
                             .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                 @Override
                                 public void onSuccess(DocumentReference documentReference) {
@@ -177,6 +178,7 @@ public class FirebasePropertyRepository {
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             Log.d("get-all-properties-success", document.getId() + " => " + document.getData());
                             Property property = document.toObject(Property.class);
+                            property.setPropertyId(document.getId());
                             properties.add(property);
                         }
                         callback.onSuccess(properties);
