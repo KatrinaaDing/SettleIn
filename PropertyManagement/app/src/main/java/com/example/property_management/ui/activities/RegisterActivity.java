@@ -10,12 +10,18 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseAuthHelper;
+import com.example.property_management.api.FirebaseUserRepository;
+import com.example.property_management.callbacks.AddUserCallback;
 import com.example.property_management.callbacks.AuthCallback;
+import com.example.property_management.data.User;
+import com.example.property_management.data.UserProperty;
 import com.example.property_management.databinding.ActivityRegisterBinding;
 import com.example.property_management.utils.EmailValidator;
 import com.example.property_management.utils.PasswordValidator;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseUser;
+
+import java.util.ArrayList;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -151,7 +157,6 @@ public class RegisterActivity extends AppCompatActivity {
     }
     private void clearConfirmPasswordError() {
         TextInputLayout confirmPasswordLayout = findViewById(R.id.editTextConfirmPassword);
-        String confirmPassword = confirmPasswordLayout.getEditText().getText().toString();
         confirmPasswordLayout.setError(null);
     }
     private void registerUser(String email, String password) {
@@ -159,8 +164,19 @@ public class RegisterActivity extends AppCompatActivity {
         firebaseAuthHelper.createUser(email, password, new AuthCallback() {
             @Override
             public void onSuccess(FirebaseUser user) {
-                Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
-                startActivity(intent);
+                User newUserObj = new User(user.getUid(), "New User", email, new ArrayList<>(), new ArrayList<>());
+                FirebaseUserRepository firebaseUserRepository = new FirebaseUserRepository();
+                firebaseUserRepository.addUser(newUserObj, new AddUserCallback() {
+                    @Override
+                    public void onSuccess(String documentId) {
+                        Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                        startActivity(intent);
+                    }
+                    @Override
+                    public void onError(String msg) {
+                        System.out.println("Error: " + msg);
+                    }
+                });
             }
             @Override
             public void onFailure(Exception e) {}
