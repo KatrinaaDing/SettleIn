@@ -12,6 +12,7 @@ import com.example.property_management.api.FirebasePropertyRepository;
 import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.AddPropertyCallback;
 import com.example.property_management.callbacks.DeletePropertyByIdCallback;
+import com.example.property_management.callbacks.GetAllPropertiesCallback;
 import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.Property;
 import com.google.android.material.bottomappbar.BottomAppBar;

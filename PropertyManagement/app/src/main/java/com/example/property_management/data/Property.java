@@ -13,11 +13,11 @@ public class Property {
     private int numBathrooms;
     private int numParking;
     private HashMap<String, RoomData> propertyData;
-
+    private int price;
     private ArrayList<String> images;
 
     public Property() {};
-    public Property(String propertyId, String href, String address, float lat, float lng, int numBedrooms, int numBathrooms, int numParking, HashMap<String, RoomData> propertyData, ArrayList<String> images) {
+    public Property(String propertyId, String href, String address, float lat, float lng, int numBedrooms, int numBathrooms, int numParking, HashMap<String, RoomData> propertyData, ArrayList<String> images, int price) {
         this.propertyId = propertyId;
         this.href = href;
         this.address = address;
@@ -28,6 +28,7 @@ public class Property {
         this.numParking = numParking;
         this.propertyData = propertyData;
         this.images = images;
+        this.price = price;
     }
 
     public String getPropertyId() { return propertyId; }
@@ -69,4 +70,8 @@ public class Property {
     public ArrayList<String> getImages() { return images; }
 
     public void setImages(ArrayList<String> images) { this.images = images; }
+
+    public int getPrice() { return price; }
+
+    public void setPrice(int price) { this.price = price; }
 }

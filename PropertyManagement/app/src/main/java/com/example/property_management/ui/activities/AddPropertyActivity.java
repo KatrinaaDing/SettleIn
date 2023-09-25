@@ -170,9 +170,9 @@ public class AddPropertyActivity extends AppCompatActivity {
 
     private void setPropertyInfo(NewProperty property) {
         // set properties
-        this.bedroomNumber = property.getBedroomNum();
-        this.bathroomNumber = property.getBathroomNum();
-        this.parkingNumber = property.getParkingNum();
+        this.bedroomNumber = property.getNumBedrooms();
+        this.bathroomNumber = property.getNumBathrooms();
+        this.parkingNumber = property.getNumParking();
         this.address = property.getAddress();
 
         // set UI
