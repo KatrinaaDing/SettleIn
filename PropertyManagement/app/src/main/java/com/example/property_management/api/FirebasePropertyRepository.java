@@ -39,7 +39,7 @@ public class FirebasePropertyRepository {
     public void addProperty(NewProperty newProperty, AddPropertyCallback callback) {
         Query query = db.collection("properties")
                 .whereEqualTo("address", newProperty.getAddress())
-                .whereEqualTo("url", newProperty.getUrl());
+                .whereEqualTo("href", newProperty.getHref());
         query.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
 //                Log.d("test", "addProperty: " + task.toString());
