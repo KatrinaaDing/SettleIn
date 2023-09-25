@@ -24,8 +24,9 @@ PropertyManagement/app/src/main
 │           └── property_management
 │               ├── adapters
 │               ├── api (Firebase related classes)
+│               ├── callbacks (Callback interfaces)
 │               ├── data (Entity classes)
-│               ├── mappers (Map entity to model and vice versa)
+│               ├── sensors (Sensor classes)
 │               ├── ui 
 │               │   ├── activities
 │               │   └── fragments
@@ -34,15 +35,9 @@ PropertyManagement/app/src/main
     ├── drawable (Icons and images)
     ├── layout
     ├── menu
-    ├── mipmap-anydpi-v26
-    ├── mipmap-hdpi
-    ├── mipmap-mdpi
-    ├── mipmap-xhdpi
-    ├── mipmap-xxhdpi
-    ├── mipmap-xxxhdpi
+    ├── mipmap
     ├── navigation
     ├── values (constant values and styles)
-    ├── values-night
     └── xml
 
 ```
