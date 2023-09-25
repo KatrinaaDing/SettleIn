@@ -42,8 +42,8 @@ public class FirebaseFunctionsHelper {
                         (int) result.get("bathroom_num"),
                         (int) result.get("parking_num"),
                         (String) result.get("address"),
-                        (Double) result.get("lat"),
-                        (Double) result.get("lng")
+                        ((Double) result.get("lat")).floatValue(),
+                        ((Double) result.get("lng")).floatValue()
                     );
                 }
             });

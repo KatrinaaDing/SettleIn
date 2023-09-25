@@ -6,10 +6,10 @@ public class NewProperty {
     private int bathroomNum;
     private int parkingNum;
     private String address;
-    private double lat;
-    private double lng;
+    private float lat;
+    private float lng;
 
-    public NewProperty(String url, int bedroomNum, int bathroomNum, int parkingNum, String address, double lat, double lng) {
+    public NewProperty(String url, int bedroomNum, int bathroomNum, int parkingNum, String address, float lat, float lng) {
         this.url = url;
         this.bedroomNum = bedroomNum;
         this.bathroomNum = bathroomNum;
@@ -19,6 +19,17 @@ public class NewProperty {
         this.lng = lng;
     }
 
+    public Property castToProperty() {
+        Property newPropertyObj = new Property();
+        newPropertyObj.setHref(this.getUrl());
+        newPropertyObj.setNumBedrooms(this.getBedroomNum());
+        newPropertyObj.setNumBathrooms(this.getBathroomNum());
+        newPropertyObj.setNumParking(this.getParkingNum());
+        newPropertyObj.setAddress(this.getAddress());
+        newPropertyObj.setLat(this.getLat());
+        newPropertyObj.setLng(this.getLng());
+        return newPropertyObj;
+    }
     // getters
     public String getUrl() {
         return url;
@@ -35,10 +46,10 @@ public class NewProperty {
     public String getAddress() {
         return address;
     }
-    public double getLat() {
+    public float getLat() {
         return lat;
     }
-    public double getLng() {
+    public float getLng() {
         return lng;
     }
     // setters
@@ -57,10 +68,11 @@ public class NewProperty {
     public void setAddress(String address) {
         this.address = address;
     }
-    public void setLat(double lat) {
+    public void setLat(float lat) {
         this.lat = lat;
     }
-    public void setLng(double lng) {
+    public void setLng(float lng) {
         this.lng = lng;
     }
+
 }

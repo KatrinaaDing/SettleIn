@@ -1,5 +1,6 @@
 package com.example.property_management.ui.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -10,8 +11,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseFunctionsHelper;
+import com.example.property_management.api.FirebasePropertyRepository;
+import com.example.property_management.callbacks.AddPropertyCallback;
 import com.example.property_management.callbacks.onValueChangeCallback;
 import com.example.property_management.data.NewProperty;
+import com.example.property_management.data.Property;
 import com.example.property_management.databinding.ActivityAddPropertyBinding;
 import com.example.property_management.ui.fragments.base.ArrowNumberPicker;
 import com.example.property_management.utils.Helpers;
@@ -32,6 +36,8 @@ public class AddPropertyActivity extends AppCompatActivity {
     private int bedroomNumber = 0;
     private int bathroomNumber = 0;
     private int parkingNumber = 0;
+    private float lat;
+    private float lng;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,31 +114,18 @@ public class AddPropertyActivity extends AppCompatActivity {
         findViewById(R.id.submitBtn).setOnClickListener(v -> {
             // on submit new property
             // TODO: post data here
-            System.out.println("bedroom: " + bedroomNumber + ", bathroom: " + bathroomNumber + ", parking: " + parkingNumber);
-//            Intent intent = new Intent(AddPropertyActivity.this, MainActivity.class);
-//            startActivity(intent);
+            System.out.println("bedroom: " + bedroomNumber + ", bathroom: " + bathroomNumber +
+                    ", parking: " + parkingNumber);
+            System.out.println("address: " + address + ", url: " + url);
+            submitProperty();
         });
         scrapeUrlBtn.setOnClickListener(v -> {
             Helpers.closeKeyboard(this, urlInputLayout);
             // on scrape url
-            if (!validateUrl()) {
-                return;
-            }
+            if (!validateUrl()) return;
             urlInputLayout.setHelperText("Getting information...");
-            FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
-            firebaseFunctionsHelper.scrapeProperty(urlInputLayout.getEditText().getText().toString())
-                .addOnSuccessListener(result -> {
-                    // set property info
-                    NewProperty resultProperty = (NewProperty) result;
-                    setPropertyInfo(resultProperty);
-                    // set url input helper text
-                    urlInputLayout.setHelperText("");
-                })
-                .addOnFailureListener(e -> {
-                    // pop error at input box
-                    System.out.println(e.getMessage());
-                    urlInputLayout.setError("Error: " + e.getMessage());
-                });
+            fetchPropertyInfo(urlInputLayout);
+            fetchCoordinates();
          });
         // handle number picker value change
         bedroomNumberPicker.setOnValueChangeListener(new onValueChangeCallback() {
@@ -154,6 +147,46 @@ public class AddPropertyActivity extends AppCompatActivity {
         }
     }
 
+    private void submitProperty() {
+        // create new property object
+        Property newProperty = new NewProperty(url, bedroomNumber, bathroomNumber, parkingNumber,
+                address, (float) 0.0, (float) 0.0).castToProperty();
+        // post to firebase
+        FirebasePropertyRepository db = new FirebasePropertyRepository();
+        db.addProperty(newProperty, new AddPropertyCallback() {
+            @Override
+            public void onSuccess(String documentId) {
+                Intent intent = new Intent(AddPropertyActivity.this, MainActivity.class);
+                startActivity(intent);
+            }
+
+            @Override
+            public void onError(String msg) {
+                System.out.println("error");
+            }
+        });
+    }
+    private void fetchCoordinates() {
+        this.lat = 0;
+        this.lng = 0;
+    }
+
+    private void fetchPropertyInfo(TextInputLayout urlInputLayout) {
+        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+        firebaseFunctionsHelper.scrapeProperty(urlInputLayout.getEditText().getText().toString())
+            .addOnSuccessListener(result -> {
+                // set property info
+                NewProperty resultProperty = (NewProperty) result;
+                setPropertyInfo(resultProperty);
+                // set url input helper text
+                urlInputLayout.setHelperText("");
+            })
+            .addOnFailureListener(e -> {
+                // pop error at input box
+                System.out.println(e.getMessage());
+                urlInputLayout.setError("Error: " + e.getMessage());
+            });
+    }
     private boolean validateUrl() {
         String urlInput = binding.urlInputLayout.getEditText().getText().toString().trim();
         if (urlInput.isEmpty()) {
@@ -174,6 +207,7 @@ public class AddPropertyActivity extends AppCompatActivity {
         this.bathroomNumber = property.getBathroomNum();
         this.parkingNumber = property.getParkingNum();
         this.address = property.getAddress();
+        this.url = property.getUrl();
 
         // set UI
         ArrowNumberPicker bedroomNumberPicker = findViewById(R.id.bedroomNumberPicker);
