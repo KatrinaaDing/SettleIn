@@ -11,17 +11,19 @@ public class UserProperty {
     private LocalDate inspectionDate;
     private LocalTime inspectionTime;
     private String notes;
+    private int price;
     private HashMap<String, DistanceInfo> distances;
     private HashMap<String, RoomData> inspectedData;
 
     public UserProperty() {}
 
-    public UserProperty(String propertyId, boolean inspected, LocalDate inspectionDate, LocalTime inspectionTime, String notes, HashMap<String, DistanceInfo> distances, HashMap<String, RoomData> inspectedData) {
+    public UserProperty(String propertyId, boolean inspected, LocalDate inspectionDate, LocalTime inspectionTime, String notes, HashMap<String, DistanceInfo> distances, HashMap<String, RoomData> inspectedData, int price) {
         this.propertyId = propertyId;
         this.inspected = inspected;
         this.inspectionDate = inspectionDate;
         this.inspectionTime = inspectionTime;
         this.notes = notes;
+        this.price = price;
         this.distances = distances;
         this.inspectedData = inspectedData;
     }
@@ -45,6 +47,10 @@ public class UserProperty {
     public String getNotes() { return notes; }
 
     public void setNotes(String notes) { this.notes = notes; }
+
+    public int getPrice() { return price; }
+
+    public void setPrice(int price) { this.price = price; }
 
     public HashMap<String, DistanceInfo> getDistances() { return distances; }
 
