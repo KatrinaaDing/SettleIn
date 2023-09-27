@@ -44,8 +44,6 @@ def scrape_domain(url):
         # code reference: https://stackoverflow.com/questions/11339210/how-to-get-integer-values-from-a-string-in-python
         price = re.search(r'(\d+,?)+', price_str).group()
         price = 0 if price == None else int(price.replace(',', ''))
-        # price_match = price_patterns.search(price_str)
-        # price = int(price_match.group(1)) if price_match else 0
 
         beds_baths_parkings_str = html_soup.find('div',{'class':'css-1dtnjt5'}).text
         patterns = {
@@ -76,14 +74,13 @@ def scrape_domain(url):
 #Input: URL(str)
 #Output: URL (str), price (int), bed_num (int), parking_num (int), address (str),imgs_url (list of str)
 def scrape_raywhite(url):
-    
     try:
         html_soup = getHtml(url)
         address = html_soup.find('h1',{'class': 'banner-basic__title'}).text.replace("\n", ", ").strip(", ").strip()
 
         price_str = html_soup.find('div',{'class': 'property-detail__banner__side__price'}).text.strip()
-        match = re.search(r'\$(\d+)/week', price_str)
-        price = int(match.group(1)) if match else 0
+        price = re.search(r'(\d+,?)+', price_str).group()
+        price = 0 if price == None else int(price.replace(',', ''))
 
         beds_baths_parkings_str = html_soup.find('div',{'class':'property-meta'}).text
         beds_baths_parkings_num = re.findall(r'\d+', beds_baths_parkings_str)
