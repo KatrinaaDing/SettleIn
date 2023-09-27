@@ -52,7 +52,7 @@ def scrape_domain(url):
     price_str = html_soup.find('div',{'data-testid': 'listing-details__summary-title'}).text
     price_patterns = re.compile(r'\$(\d{2,4}) per week')
     price_match = price_patterns.search(price_str)
-    price = int(price_match.group(1)) if price_match else None
+    price = int(price_match.group(1)) if price_match else 0
 
     beds_baths_parkings_str = html_soup.find('div',{'class':'css-1dtnjt5'}).text
     patterns = {
@@ -87,7 +87,7 @@ def scrape_raywhite(url):
 
     price_str = html_soup.find('div',{'class': 'property-detail__banner__side__price'}).text.strip()
     match = re.search(r'\$(\d+)/week', price_str)
-    price = int(match.group(1)) if match else None
+    price = int(match.group(1)) if match else 0
 
     beds_baths_parkings_str = html_soup.find('div',{'class':'property-meta'}).text
     beds_baths_parkings_num = re.findall(r'\d+', beds_baths_parkings_str)
