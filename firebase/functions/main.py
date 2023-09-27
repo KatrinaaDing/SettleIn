@@ -1,5 +1,5 @@
 # The Cloud Functions for Firebase SDK to create Cloud Functions and set up triggers.
-from firebase-functions import firestore_fn, https_fn
+from firebase_functions import firestore_fn, https_fn
 # The Firebase Admin SDK to access Cloud Firestore.
 from firebase_admin import initialize_app, firestore
 from typing import Any
@@ -9,7 +9,6 @@ import google.cloud.firestore
 import re
 from bs4 import BeautifulSoup
 import requests
-import os
 
 initialize_app()
 
@@ -137,7 +136,7 @@ def scrape_property(req: https_fn.CallableRequest) -> Any:
     # [START v2returnAddData]
     property = {
         "url": url,                              #str
-        "price": price                           #int
+        "price": price,                          #int
         "bedroom_num": bedroom_num,              #int
         "bathroom_num": bathroom_num,            #int
         "parking_num": parking_num,              #int
@@ -145,4 +144,4 @@ def scrape_property(req: https_fn.CallableRequest) -> Any:
         "images": images,                        #a list of str
     }
     return property
-  
+
