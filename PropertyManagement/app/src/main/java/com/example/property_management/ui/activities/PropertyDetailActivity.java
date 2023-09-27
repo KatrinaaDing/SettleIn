@@ -18,21 +18,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.property_management.ui.fragments.property.AmenitiesGroup;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.example.property_management.callbacks.BasicDialogCallback;
 import com.example.property_management.data.DistanceInfo;
 import com.example.property_management.R;
 import com.example.property_management.adapters.CarouselAdapter;
 import com.example.property_management.adapters.DistanceAdapter;
 import com.example.property_management.databinding.ActivityPropertyDetailBinding;
-import com.example.property_management.ui.fragments.base.BasicDialog;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 

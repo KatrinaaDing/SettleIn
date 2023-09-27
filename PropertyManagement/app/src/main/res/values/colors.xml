@@ -11,4 +11,5 @@
     <color name="error">#FFB00020</color>
     <color name="success">#238C23</color>
     <color name="warning">#FFEB3B</color>
+    <color name="grey">#767676</color>
 </resources>

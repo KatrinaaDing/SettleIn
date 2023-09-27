@@ -117,6 +117,7 @@
                 android:id="@+id/addInspectionTimeBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_marginBottom="3dp"
                 android:text="Add Inspection Time"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

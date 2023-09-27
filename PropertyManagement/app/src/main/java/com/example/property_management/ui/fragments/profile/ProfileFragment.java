@@ -1,27 +1,57 @@
 package com.example.property_management.ui.fragments.profile;
 
+import static android.content.ContentValues.TAG;
+
+import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.property_management.R;
 import com.example.property_management.api.FirebaseAuthHelper;
 import com.example.property_management.databinding.FragmentProfileBinding;
 import com.example.property_management.ui.activities.LoginActivity;
+import com.example.property_management.ui.activities.PropertyDetailActivity;
+import com.example.property_management.ui.fragments.base.AutocompleteFragment;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.android.libraries.places.api.net.PlacesClient;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ProfileFragment extends Fragment {
 
     private FragmentProfileBinding binding;
     private AppCompatActivity activity;
+
+    PlacesClient placesClient;
+
+    String selectedPlaceName = "";
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -41,12 +71,66 @@ public class ProfileFragment extends Fragment {
         TextView userEmail = binding.userEmail;
         TextView userId = binding.userId;
 
+        // ===== Add Location Dialog =====
+        Button addLocationBtn = binding.addLocationBtn;
+        addLocationBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    showCustomDialog();
+                } catch (PackageManager.NameNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
         // ========================= Listeners ==========================
         logoutBtn.setOnClickListener(v -> {
             logout();
         });
 
         return root;
+    }
+
+    // ========================= Functions ==========================
+    private void showCustomDialog() throws PackageManager.NameNotFoundException {
+
+        View dialogView = getLayoutInflater().inflate(R.layout.custom_interested_location_dialog, null);
+
+        // ===== dialog =====
+        AlertDialog alertDialog = new MaterialAlertDialogBuilder(getContext())
+                .setTitle("Add Interested Location")
+                .setView(dialogView)
+                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        View autocompleteView = dialogView.findViewById(R.id.auto_fragment);
+                        AutocompleteFragment autocompleteFragment = (AutocompleteFragment) getChildFragmentManager().findFragmentById(autocompleteView.getId());
+                        Log.i("isnull", "autocompleteFragment: " + (autocompleteFragment == null ? "null" : "not null"));
+
+                        if (autocompleteFragment == null) {
+                            Log.e("isnull", "autocompleteFragment is null");
+                            return;
+                        }
+                        selectedPlaceName = autocompleteFragment.getSelectedPlaceName();
+                        System.out.println("Add Location: " + selectedPlaceName);
+                        if (selectedPlaceName.equals("")) {
+                            Toast.makeText(getContext(), "Please select a location", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        // TODO POST new location to firebase
+                        dialogInterface.dismiss();
+                    }
+                }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // clear selected place name
+                        selectedPlaceName = "";
+                        dialogInterface.dismiss();
+                    }
+                }).create();
+        alertDialog.show();
+
     }
 
     @Override
