@@ -6,15 +6,17 @@ import com.example.property_management.callbacks.AddUserCallback;
 import com.example.property_management.callbacks.DeleteUserByIdCallback;
 import com.example.property_management.callbacks.GetAllPropertiesCallback;
 import com.example.property_management.callbacks.GetAllUsersCallback;
-import com.example.property_management.callbacks.GetPropertyByIdCallback;
 import com.example.property_management.callbacks.GetUserInfoByIdCallback;
 import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.Property;
 import com.example.property_management.data.User;
+import com.example.property_management.data.UserProperty;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -204,5 +206,30 @@ public class FirebaseUserRepository {
                     }
                 }
             });
+    }
+
+    public void getAllUserProperties(GetAllPropertiesCallback callback) {
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        DocumentReference docRef = db.collection("users").document(currentUser.getUid());
+//        Log.d("test-get-user-properties", "getAllUserProperties: " + currentUser.getUid());
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    ArrayList<UserProperty> userProperties = new ArrayList<>();
+                    for (UserProperty userProperty : task.getResult().toObject(User.class).getProperties()) {
+//                        Log.d("get-all-properties-success", document.getId() + " => " + document.getData());
+//                        Property property = document.toObject(Property.class);
+//                        property.setPropertyId(document.getId());
+//                        properties.add(property);
+                    }
+//                    callback.onSuccess(properties);
+                } else {
+                    Log.d("get-all-properties-failure", "Error getting all properties: ", task.getException());
+                    callback.onError("Error getting all properties");
+                }
+            }
+        });
     }
 }

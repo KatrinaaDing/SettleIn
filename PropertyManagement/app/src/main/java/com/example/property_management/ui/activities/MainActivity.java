@@ -81,6 +81,19 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+        FirebaseUserRepository db = new FirebaseUserRepository();
+        db.getAllUserProperties(new GetAllPropertiesCallback() {
+            @Override
+            public void onSuccess(ArrayList<Property> properties) {
+
+            }
+
+            @Override
+            public void onError(String msg) {
+
+            }
+        });
     }
 
     @Override
