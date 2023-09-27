@@ -42,9 +42,9 @@ public class FirebaseFunctionsHelper {
                         (int) result.get("bathroom_num"),
                         (int) result.get("parking_num"),
                         (String) result.get("address"),
-                        (float) result.get("lat"),
-                        (float) result.get("lng"),
-                            0
+                        ((Double) result.get("lat")).floatValue(),
+                        ((Double) result.get("lng")).floatValue(),
+                        0
                     );
                 }
             });

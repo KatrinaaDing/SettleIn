@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         bottomAppBar.setNavigationOnClickListener(view -> {
             navController.navigate(R.id.navigation_home);
         });
-
+        // navigate to home page when click on home icon or profile page for profile icon
         bottomAppBar.setOnMenuItemClickListener(menuItem -> {
             int id = menuItem.getItemId();
             if (id == R.id.navigation_home) {

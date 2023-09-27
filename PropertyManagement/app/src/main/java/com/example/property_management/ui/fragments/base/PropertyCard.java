@@ -43,7 +43,6 @@ public class PropertyCard extends MaterialCardView {
         } finally {
             a.recycle();
         }
-
     }
     private void setValue() {
         TextView addressView = findViewById(R.id.addressTextView);

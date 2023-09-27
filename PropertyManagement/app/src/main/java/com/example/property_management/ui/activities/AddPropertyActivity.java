@@ -1,37 +1,56 @@
 package com.example.property_management.ui.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.property_management.R;
+import com.example.property_management.api.FirebaseAuthHelper;
 import com.example.property_management.api.FirebaseFunctionsHelper;
+import com.example.property_management.api.FirebasePropertyRepository;
+import com.example.property_management.api.FirebaseUserRepository;
+import com.example.property_management.callbacks.AddPropertyCallback;
+import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.callbacks.onValueChangeCallback;
 import com.example.property_management.data.NewProperty;
 import com.example.property_management.databinding.ActivityAddPropertyBinding;
 import com.example.property_management.ui.fragments.base.ArrowNumberPicker;
+import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.example.property_management.utils.Helpers;
 import com.example.property_management.utils.UrlValidator;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 public class AddPropertyActivity extends AppCompatActivity {
     private ActivityAddPropertyBinding binding;
-
     private String url = "";
     private String address = "";
     private int bedroomNumber = 0;
     private int bathroomNumber = 0;
     private int parkingNumber = 0;
+    private float lat = 0;
+    private float lng = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,36 +123,17 @@ public class AddPropertyActivity extends AppCompatActivity {
                     public void afterTextChanged(Editable editable) {}
                 })
         );
-
-        findViewById(R.id.submitBtn).setOnClickListener(v -> {
-            // on submit new property
-            // TODO: post data here
-            System.out.println("bedroom: " + bedroomNumber + ", bathroom: " + bathroomNumber + ", parking: " + parkingNumber);
-//            Intent intent = new Intent(AddPropertyActivity.this, MainActivity.class);
-//            startActivity(intent);
-        });
+        // on submit new property
+        findViewById(R.id.submitBtn).setOnClickListener(v -> submitProperty(this));
         scrapeUrlBtn.setOnClickListener(v -> {
-            Helpers.closeKeyboard(this, urlInputLayout);
-            // on scrape url
-            if (!validateUrl()) {
-                return;
-            }
+            // close keyboard
+            Helpers.closeKeyboard(this);
+            // scrape advertisement from url
+            if (!validateUrl()) return;
             urlInputLayout.setHelperText("Getting information...");
-            FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
-            firebaseFunctionsHelper.scrapeProperty(urlInputLayout.getEditText().getText().toString())
-                .addOnSuccessListener(result -> {
-                    // set property info
-                    NewProperty resultProperty = (NewProperty) result;
-                    setPropertyInfo(resultProperty);
-                    // set url input helper text
-                    urlInputLayout.setHelperText("");
-                })
-                .addOnFailureListener(e -> {
-                    // pop error at input box
-                    System.out.println(e.getMessage());
-                    urlInputLayout.setError("Error: " + e.getMessage());
-                });
-         });
+            fetchPropertyInfo(urlInputLayout);
+            fetchCoordinates();
+        });
         // handle number picker value change
         bedroomNumberPicker.setOnValueChangeListener(new onValueChangeCallback() {
             @Override
@@ -154,6 +154,47 @@ public class AddPropertyActivity extends AppCompatActivity {
         }
     }
 
+    private void submitProperty(AppCompatActivity activity) {
+        // create new property object
+        NewProperty newProperty = new NewProperty(url, bedroomNumber, bathroomNumber, parkingNumber,
+                address, lat, lng, 0);
+        // post to firebase
+        FirebasePropertyRepository db = new FirebasePropertyRepository();
+        db.addProperty(newProperty, new AddPropertyCallback() {
+            @Override
+            public void onSuccess(String documentId) {
+                updateUserProperty(activity, newProperty, documentId);
+            }
+            @Override
+            public void onError(String msg) {
+                String errorMsg = "Error: " + msg;
+                new BasicSnackbar(findViewById(android.R.id.content), errorMsg, "error");
+                Log.e("add-property-failure", msg);
+            }
+        });
+    }
+    private void fetchCoordinates() {
+        // TODO: fetch coordinates
+        this.lat = 0;
+        this.lng = 0;
+    }
+
+    private void fetchPropertyInfo(TextInputLayout urlInputLayout) {
+        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+        firebaseFunctionsHelper.scrapeProperty(urlInputLayout.getEditText().getText().toString())
+            .addOnSuccessListener(result -> {
+                // set property info
+                NewProperty resultProperty = (NewProperty) result;
+                setPropertyInfo(resultProperty);
+                // set url input helper text
+                urlInputLayout.setHelperText("");
+            })
+            .addOnFailureListener(e -> {
+                // pop error at input box
+                Log.e("scrape-url-error", e.getMessage());
+                urlInputLayout.setError("Error: " + e.getMessage());
+            });
+    }
     private boolean validateUrl() {
         String urlInput = binding.urlInputLayout.getEditText().getText().toString().trim();
         if (urlInput.isEmpty()) {
@@ -174,6 +215,7 @@ public class AddPropertyActivity extends AppCompatActivity {
         this.bathroomNumber = property.getNumBathrooms();
         this.parkingNumber = property.getNumParking();
         this.address = property.getAddress();
+        this.url = property.getHref();
 
         // set UI
         ArrowNumberPicker bedroomNumberPicker = findViewById(R.id.bedroomNumberPicker);
@@ -186,4 +228,36 @@ public class AddPropertyActivity extends AppCompatActivity {
         propertyAddress.setText(this.address);
     }
 
+    private void updateUserProperty(AppCompatActivity activity, NewProperty newProperty, String propertyId) {
+        // create object to update user document
+        ArrayList<HashMap> propertyList = new ArrayList<>();
+        HashMap<String, Object> propertyPayload = newProperty.toUpdateUserObject(propertyId);
+        propertyList.add(propertyPayload);
+        HashMap<String, Object> userUpdatePayload = new HashMap<>();
+        userUpdatePayload.put("properties", propertyList);
+        // get user id
+        String userId = new FirebaseAuthHelper(activity).getCurrentUser().getUid();
+        // update user document
+        FirebaseUserRepository userRepository = new FirebaseUserRepository();
+        userRepository.updateUserFields(userId, userUpdatePayload, new UpdateUserCallback() {
+            @Override
+            public void onSuccess(String msg) {
+                // redirect to main activity on success
+                new BasicSnackbar(findViewById(android.R.id.content),
+                        "Property added successfully",
+                        "success");
+                // redirect to main activity for showing snackbar
+                new Handler().postDelayed(() -> {
+                    Intent intent = new Intent(AddPropertyActivity.this, MainActivity.class);
+                    startActivity(intent);
+                }, 1000);
+            }
+            @Override
+            public void onError(String msg) {
+                String errorMsg = "Error: " + msg;
+                new BasicSnackbar(findViewById(android.R.id.content), errorMsg, "error");
+                Log.e("add-property-failure", msg);
+            }
+        });
+    }
 }
