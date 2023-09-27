@@ -50,6 +50,7 @@ public class AddPropertyActivity extends AppCompatActivity {
     private int parkingNumber = 0;
     private float lat = 0;
     private float lng = 0;
+    private int price = 0;
 
     AutocompleteFragment autocompleteFragment;
 
@@ -156,7 +157,7 @@ public class AddPropertyActivity extends AppCompatActivity {
     private void submitProperty(AppCompatActivity activity) {
         // create new property object
         NewProperty newProperty = new NewProperty(url, bedroomNumber, bathroomNumber, parkingNumber,
-                autocompleteFragment.getSelectedPlaceName(), lat, lng, 0);
+                autocompleteFragment.getSelectedPlaceName(), lat, lng, price);
         // post to firebase
         FirebasePropertyRepository db = new FirebasePropertyRepository();
         db.addProperty(newProperty, new AddPropertyCallback() {
@@ -181,9 +182,8 @@ public class AddPropertyActivity extends AppCompatActivity {
     private void fetchPropertyInfo(TextInputLayout urlInputLayout) {
         FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
         firebaseFunctionsHelper.scrapeProperty(urlInputLayout.getEditText().getText().toString())
-            .addOnSuccessListener(result -> {
+            .addOnSuccessListener(resultProperty -> {
                 // set property info
-                NewProperty resultProperty = (NewProperty) result;
                 setPropertyInfo(resultProperty);
                 // set url input helper text
                 urlInputLayout.setHelperText("");
@@ -214,6 +214,7 @@ public class AddPropertyActivity extends AppCompatActivity {
         this.bathroomNumber = property.getNumBathrooms();
         this.parkingNumber = property.getNumParking();
         this.url = property.getHref();
+        this.price = property.getPrice();
 
         // set UI
         ArrowNumberPicker bedroomNumberPicker = findViewById(R.id.bedroomNumberPicker);
