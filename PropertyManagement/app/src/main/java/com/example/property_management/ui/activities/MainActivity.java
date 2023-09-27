@@ -81,21 +81,6 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-        FirebasePropertyRepository db = new FirebasePropertyRepository();
-        NewProperty p = new NewProperty();
-        p.setAddress("address");
-        p.setHref("href");
-        db.addProperty(p, new AddPropertyCallback() {
-            @Override
-            public void onSuccess(String documentId) {
-
-            }
-
-            @Override
-            public void onError(String msg) {
-
-            }
-        });
     }
 
     @Override
