@@ -26,8 +26,8 @@ import java.util.Arrays;
 
 public class AutocompleteFragment extends Fragment {
     private FragmentAutocompleteBinding binding;
+    AutocompleteSupportFragment autocompleteFragment;
     private PlacesClient placesClient;
-
     String selectedPlaceName = "";
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -52,7 +52,7 @@ public class AutocompleteFragment extends Fragment {
 
         // Initialize the AutocompleteSupportFragment.
         try {
-            AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
+            autocompleteFragment = (AutocompleteSupportFragment)
                 getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
             // Specify the types of place data to return.
@@ -104,6 +104,11 @@ public class AutocompleteFragment extends Fragment {
 
     public String getSelectedPlaceName() {
         return selectedPlaceName;
+    }
+
+    public void setPlaceNameText(String placeNameText) {
+        this.autocompleteFragment.setText(placeNameText);
+        this.selectedPlaceName = placeNameText;
     }
 
 }

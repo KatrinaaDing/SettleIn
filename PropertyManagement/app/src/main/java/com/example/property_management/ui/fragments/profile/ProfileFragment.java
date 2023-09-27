@@ -15,34 +15,19 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
-
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseAuthHelper;
 import com.example.property_management.databinding.FragmentProfileBinding;
 import com.example.property_management.ui.activities.LoginActivity;
-import com.example.property_management.ui.activities.PropertyDetailActivity;
 import com.example.property_management.ui.fragments.base.AutocompleteFragment;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
-import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.android.libraries.places.api.net.PlacesClient;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class ProfileFragment extends Fragment {
 
@@ -105,7 +90,8 @@ public class ProfileFragment extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         View autocompleteView = dialogView.findViewById(R.id.auto_fragment);
-                        AutocompleteFragment autocompleteFragment = (AutocompleteFragment) getChildFragmentManager().findFragmentById(autocompleteView.getId());
+                        AutocompleteFragment autocompleteFragment = (AutocompleteFragment)
+                                getChildFragmentManager().findFragmentById(autocompleteView.getId());
                         Log.i("isnull", "autocompleteFragment: " + (autocompleteFragment == null ? "null" : "not null"));
 
                         if (autocompleteFragment == null) {
