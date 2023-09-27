@@ -113,6 +113,23 @@
                     app:iconSize="24dp" />
             </LinearLayout>
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Address"
+                android:textStyle="bold"
+                android:textSize="@dimen/medium_title"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                />
+            <fragment
+                android:id="@+id/auto_fragment"
+                android:name="com.example.property_management.ui.fragments.base.AutocompleteFragment"
+                tools:layout="@layout/fragment_autocomplete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
+
 
             <TextView
                 android:id="@+id/propertyAddress"
