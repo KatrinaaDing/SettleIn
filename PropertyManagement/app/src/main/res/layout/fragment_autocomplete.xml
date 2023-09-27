@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/border"
     tools:context="com.example.property_management.ui.fragments.base.AutocompleteFragment">
 
     <fragment android:id="@+id/autocomplete_fragment"
