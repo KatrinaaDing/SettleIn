@@ -26,6 +26,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class FirebaseUserRepository {
     private FirebaseFirestore db;
@@ -33,13 +34,17 @@ public class FirebaseUserRepository {
         db = FirebaseFirestore.getInstance();
     }
     public void addUser(User user, AddUserCallback callback) {
+        Map<String, Object> userPayload = new HashMap<>();
+        userPayload.put("userName", user.getUserName());
+        userPayload.put("userEmail", user.getUserEmail());
         db.collection("users")
-                .add(user)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                .document(user.getUserId())
+                .set(userPayload)
+                .addOnSuccessListener(new OnSuccessListener() {
                     @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d("add-user-success", "DocumentSnapshot written with ID: " + documentReference.getId());
-                        callback.onSuccess(documentReference.getId());
+                    public void onSuccess(Object o) {
+                        Log.d("add-user-success", "DocumentSnapshot written with ID: " + user.getUserId());
+                        callback.onSuccess(user.getUserId());
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {

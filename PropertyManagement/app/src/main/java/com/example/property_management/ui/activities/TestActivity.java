@@ -17,7 +17,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
 
-public class TestActivity  extends AppCompatActivity {
+public class TestActivity extends AppCompatActivity {
     private ActivityTestBinding binding;
 
     @Override
