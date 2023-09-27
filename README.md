@@ -54,7 +54,7 @@ Access Property Collection:
 - Add a Property
 
   ```java
-  Property p1 = new Property();
+  NewProperty p1 = new NewProperty();
   p1.setAddress("address");
   p1.setHref("href");
   db.addProperty(p1, new AddPropertyCallback() {
@@ -105,7 +105,7 @@ Access Property Collection:
 
 - Get all Properties
 
-  ```
+  ```java
   db.getAllProperties(new GetAllPropertiesCallback() {
       @Override
       public void onSuccess(ArrayList<Property> properties) {
