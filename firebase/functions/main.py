@@ -9,6 +9,7 @@ import google.cloud.firestore
 import re
 from bs4 import BeautifulSoup
 import requests
+import json
 
 initialize_app()
 
@@ -31,13 +32,12 @@ def getHtml(url):
 
     try:
         res = requests.get(url, headers = headers)
-        print (res.status_code)
         res.encoding='UTF-8'
         soup=BeautifulSoup(res.text,'lxml')
         return soup
 
     except Exception as e:
-        print(e)
+        raise Exception("Failed to scrape url: ", str(e))
 
 
 #Scrape the property information on the domain website based on the URL.
@@ -81,7 +81,7 @@ def scrape_domain(url):
 #Output: URL (str), price (int), bed_num (int), parking_num (int), address (str),imgs_url (list of str)
 def scrape_raywhite(url):
     html_soup = getHtml(url)
-
+    
     address = html_soup.find('h1',{'class': 'banner-basic__title'}).text.replace("\n", ", ").strip(", ").strip()
 
     price_str = html_soup.find('div',{'class': 'property-detail__banner__side__price'}).text.strip()
@@ -90,7 +90,7 @@ def scrape_raywhite(url):
 
     beds_baths_parkings_str = html_soup.find('div',{'class':'property-meta'}).text
     beds_baths_parkings_num = re.findall(r'\d+', beds_baths_parkings_str)
-    beds_baths_parkings_count= {'bed_num': 0, 'bath_num': 0, 'car_num': 0}
+    beds_baths_parkings_count= {'bed_num': -1, 'bath_num': -1, 'car_num': -1}
     classes_to_find = [
         ('icon icon-solid-bed', 'bed_num'),
         ('icon icon-solid-bath', 'bath_num'),
@@ -106,36 +106,68 @@ def scrape_raywhite(url):
     return url, price, beds_baths_parkings_count['bed_num'], beds_baths_parkings_count['bath_num'], beds_baths_parkings_count['car_num'], imgs_url
 
 
+def create_error_response(error_code:int, message: str) -> https_fn.Response:
+    """Create an error response with the given error code and message."""
+    return https_fn.Response(
+        json.dumps({"error": {"code": error_code, "message": message}}),
+        status=error_code,
+        headers={"Content-Type": "application/json"},
+    )
 
 #Determine the website to scrape based on the URL format.
 #If the website does not come from domain or raywhite, temporarily return a default value.
-@https_fn.on_call()
-def scrape_property(req: https_fn.CallableRequest) -> Any:
+@https_fn.on_request()
+def scrape_property_restful(req: https_fn.Request) -> https_fn.Response:
     """Scrape a rental advertisement and return the data"""
     try:
         # parameters passed from the client.
-        url = req.data["url"]
-
-        if "domain" in url:
-            url, price, bedroom_num, bathroom_num, parking_num, address, images = scrape_domain(url)
-        elif "raywhite" in url:
-            url, price, bedroom_num, bathroom_num, parking_num, address, images = scrape_raywhite(url)
-        else:
-            url, price, bedroom_num, bathroom_num, parking_num, address, images = "N/A", "-1", "-1", "-1", "-1", "N/A", ["N/A"]
-
+        # url = req.data["url"]
+        url = req.args.get("url")
+        
     except (ValueError, KeyError):
-        # Throwing an HttpsError so that the client gets the error details.
-        raise https_fn.HttpsError(
-            code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-            message=(
-                'The function must be called with an arguments`, "url", which must be string.'
-            ),
+        # # Throwing an HttpsError so that the client gets the error details.
+        # raise https_fn.HttpsError(
+        #     code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+        #     message=(
+        #         'The function must be called with an parameter, "url", which must be string.'
+        #     ),
+        # )
+        return create_error_response(
+            400,
+            "The function must be called with an parameter, 'url', which must be string.",
+        )
+        
+    try: 
+        if "domain" in url:
+            href, price, bedroom_num, bathroom_num, parking_num, address, images = scrape_domain(url)
+        elif "raywhite" in url:
+            href, price, bedroom_num, bathroom_num, parking_num, address, images = scrape_raywhite(url)
+        else:
+            # raise https_fn.HttpsError(
+            #     code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+            #     message=(
+            #         'Your URL is not from domain or raywhite.'
+            #     ),
+            # )
+            return create_error_response(
+                404,
+                "We only support URL from from Domain or Raywhite.",
+            )
+    except Exception as e:
+        # return error when address not found
+        # raise https_fn.HttpsError
+        #     code=https_fn.FunctionsErrorCode.INTERNAL,
+        #     message=(str(e)),
+        # )
+        return create_error_response(
+            500,
+            str(e),
         )
     # [END v2addHttpsError]
 
     # [START v2returnAddData]
     property = {
-        "url": url,                              #str
+        "url": href,                              #str
         "price": price,                          #int
         "bedroom_num": bedroom_num,              #int
         "bathroom_num": bathroom_num,            #int
@@ -143,5 +175,6 @@ def scrape_property(req: https_fn.CallableRequest) -> Any:
         "address": address,                      #str
         "images": images,                        #a list of str
     }
-    return property
-
+    return_data = json.dumps({ "property": property}) 
+    return https_fn.Response(return_data, status=200, headers={"Content-Type": "application/json"})
+    
