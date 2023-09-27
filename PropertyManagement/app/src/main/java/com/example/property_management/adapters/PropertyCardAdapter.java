@@ -2,6 +2,7 @@ package com.example.property_management.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -45,7 +46,6 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        System.out.println(position);
         Property property = properties.get(position);
         holder.addressView.setText(property.getAddress());
 //        holder.priceView.setText("$" + String.valueOf(property.getPrice()));
@@ -56,7 +56,7 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
         }
         holder.amenitiesGroup.setValues(property.getNumBedrooms(), property.getNumBathrooms(), property.getNumParking());
 
-        // set on click listener
+        // set on click a property card
         holder.propertyCard.setOnClickListener (v-> {
             Intent intent = new Intent (context, PropertyDetailActivity.class);
             intent.putExtra ("property_id", properties.get (position).getPropertyId());

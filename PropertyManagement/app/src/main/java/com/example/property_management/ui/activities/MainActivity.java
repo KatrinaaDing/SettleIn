@@ -9,7 +9,11 @@ import android.widget.Button;
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseAuthHelper;
 import com.example.property_management.api.FirebasePropertyRepository;
+import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.AddPropertyCallback;
+import com.example.property_management.callbacks.DeletePropertyByIdCallback;
+import com.example.property_management.callbacks.GetAllPropertiesCallback;
+import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.Property;
 import com.google.android.material.bottomappbar.BottomAppBar;
 
@@ -22,6 +26,7 @@ import com.example.property_management.databinding.ActivityMainBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -60,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         bottomAppBar.setNavigationOnClickListener(view -> {
             navController.navigate(R.id.navigation_home);
         });
-
+        // navigate to home page when click on home icon or profile page for profile icon
         bottomAppBar.setOnMenuItemClickListener(menuItem -> {
             int id = menuItem.getItemId();
             if (id == R.id.navigation_home) {
