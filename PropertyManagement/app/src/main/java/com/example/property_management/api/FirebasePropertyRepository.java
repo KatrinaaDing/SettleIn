@@ -23,6 +23,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FirebasePropertyRepository {
     private FirebaseFirestore db;
@@ -82,7 +83,14 @@ public class FirebasePropertyRepository {
                             });
 
                 } else {
-                    callback.onError("Property with the same address and href already exists.");
+                    QuerySnapshot querySnapshot = task.getResult();
+                    if (querySnapshot != null) {
+                        List<DocumentSnapshot> documents = querySnapshot.getDocuments();
+                        if (!documents.isEmpty()) {
+                            String documentId = documents.get(0).getId();
+                            Log.d("add-property", "property exists with document id " + documentId);
+                        }
+                    }
                 }
             } else {
                 callback.onError("Error querying Firestore: " + task.getException());

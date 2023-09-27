@@ -14,6 +14,7 @@ import com.example.property_management.callbacks.AddPropertyCallback;
 import com.example.property_management.callbacks.DeletePropertyByIdCallback;
 import com.example.property_management.callbacks.GetAllPropertiesCallback;
 import com.example.property_management.callbacks.UpdateUserCallback;
+import com.example.property_management.data.NewProperty;
 import com.example.property_management.data.Property;
 import com.google.android.material.bottomappbar.BottomAppBar;
 
@@ -24,6 +25,8 @@ import androidx.navigation.ui.AppBarConfiguration;
 
 import com.example.property_management.databinding.ActivityMainBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -76,6 +79,21 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             } else {
                 return false;
+            }
+        });
+        FirebasePropertyRepository db = new FirebasePropertyRepository();
+        NewProperty p = new NewProperty();
+        p.setAddress("address");
+        p.setHref("href");
+        db.addProperty(p, new AddPropertyCallback() {
+            @Override
+            public void onSuccess(String documentId) {
+
+            }
+
+            @Override
+            public void onError(String msg) {
+
             }
         });
     }
