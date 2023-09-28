@@ -225,10 +225,10 @@ public class FirebaseUserRepository {
             @Override
             public void onComplete(Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                    ArrayList<UserProperty> userProperties = new ArrayList<>();
+
                     List<String> docIds = new ArrayList<>();
-                    for (UserProperty userProperty : task.getResult().toObject(User.class).getProperties()) {
-                        docIds.add(userProperty.getPropertyId());
+                    for (String docId : task.getResult().toObject(User.class).getProperties().keySet()) {
+                        docIds.add(docId);
                     }
                     Log.d("get-all-user-properties-success", docIds.toString());
                     collecRef.whereIn(FieldPath.documentId(), docIds)

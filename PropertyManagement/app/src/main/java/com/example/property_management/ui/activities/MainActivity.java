@@ -8,6 +8,7 @@ import com.example.property_management.R;
 import com.example.property_management.api.FirebaseAuthHelper;
 import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.GetAllUserPropertiesCallback;
+import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.Property;
 import com.google.android.material.bottomappbar.BottomAppBar;
 
@@ -20,6 +21,7 @@ import com.example.property_management.databinding.ActivityMainBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -69,6 +71,31 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             } else {
                 return false;
+            }
+        });
+        FirebaseUserRepository db = new FirebaseUserRepository();
+//        HashMap<String, Object> updates = new HashMap<>();
+//        updates.put("properties.newProperty.price", 1);
+//        db.updateUserFields("t0d69WGyhUMoc1RkckCRfg3Cb7d2", updates, new UpdateUserCallback() {
+//                @Override
+//            public void onSuccess(String msg) {
+//
+//            }
+//
+//            @Override
+//            public void onError(String msg) {
+//
+//            }
+//        });
+        db.getAllUserProperties(new GetAllUserPropertiesCallback() {
+            @Override
+            public void onSuccess(ArrayList<Property> properties) {
+
+            }
+
+            @Override
+            public void onError(String msg) {
+
             }
         });
     }

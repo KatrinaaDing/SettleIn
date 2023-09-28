@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.property_management.adapters.PropertyCardAdapter;
 import com.example.property_management.api.FirebasePropertyRepository;
+import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.GetAllUserPropertiesCallback;
 import com.example.property_management.data.Property;
 import com.example.property_management.databinding.FragmentHomeBinding;
@@ -68,8 +69,8 @@ public class HomeFragment extends Fragment {
     }
 
     private void getAllProperties(Context context) {
-        FirebasePropertyRepository db = new FirebasePropertyRepository();
-        db.getAllProperties(new GetAllUserPropertiesCallback() {
+        FirebaseUserRepository db = new FirebaseUserRepository();
+        db.getAllUserProperties(new GetAllUserPropertiesCallback() {
             @Override
             public void onSuccess(ArrayList<Property> properties) {
                 RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
