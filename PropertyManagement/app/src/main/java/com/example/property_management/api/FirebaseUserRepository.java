@@ -225,32 +225,37 @@ public class FirebaseUserRepository {
             @Override
             public void onComplete(Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-
                     List<String> docIds = new ArrayList<>();
-                    for (String docId : task.getResult().toObject(User.class).getProperties().keySet()) {
-                        docIds.add(docId);
+                    HashMap<String, UserProperty> properties = task.getResult().toObject(User.class).getProperties();
+                    if (properties != null && !properties.isEmpty()) {
+                        for (String docId : properties.keySet()) {
+                            docIds.add(docId);
+                        }
                     }
+
                     Log.d("get-all-user-properties-success", docIds.toString());
-                    collecRef.whereIn(FieldPath.documentId(), docIds)
-                            .get()
-                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                @Override
-                                public void onComplete(@androidx.annotation.NonNull Task<QuerySnapshot> task) {
-                                    if (task.isSuccessful()) {
-                                        ArrayList<Property> properties = new ArrayList<>();
-                                        for (QueryDocumentSnapshot document : task.getResult()) {
-                                            Log.d("get-all-user-properties-success", document.getId() + " => " + document.getData());
-                                            Property property = document.toObject(Property.class);
-                                            property.setPropertyId(document.getId());
-                                            properties.add(property);
+                    if (docIds != null && !docIds.isEmpty()) {
+                        collecRef.whereIn(FieldPath.documentId(), docIds)
+                                .get()
+                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onComplete(@androidx.annotation.NonNull Task<QuerySnapshot> task) {
+                                        if (task.isSuccessful()) {
+                                            ArrayList<Property> properties = new ArrayList<>();
+                                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                                Log.d("get-all-user-properties-success", document.getId() + " => " + document.getData());
+                                                Property property = document.toObject(Property.class);
+                                                property.setPropertyId(document.getId());
+                                                properties.add(property);
+                                            }
+                                            callback.onSuccess(properties);
+                                        } else {
+                                            Log.d("get-all-user-properties-failure", "Error getting all user properties: ", task.getException());
+                                            callback.onError("Error getting all user properties");
                                         }
-                                        callback.onSuccess(properties);
-                                    } else {
-                                        Log.d("get-all-user-properties-failure", "Error getting all user properties: ", task.getException());
-                                        callback.onError("Error getting all user properties");
                                     }
-                                }
-                            });
+                                });
+                    }
                 } else {
                     Log.d("get-all-user-properties-failure", "Error getting all properties of the user: ", task.getException());
                     callback.onError("Error getting all properties of the user");

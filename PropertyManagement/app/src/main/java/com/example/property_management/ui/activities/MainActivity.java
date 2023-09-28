@@ -73,31 +73,6 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-        FirebaseUserRepository db = new FirebaseUserRepository();
-//        HashMap<String, Object> updates = new HashMap<>();
-//        updates.put("properties.newProperty.price", 1);
-//        db.updateUserFields("t0d69WGyhUMoc1RkckCRfg3Cb7d2", updates, new UpdateUserCallback() {
-//                @Override
-//            public void onSuccess(String msg) {
-//
-//            }
-//
-//            @Override
-//            public void onError(String msg) {
-//
-//            }
-//        });
-        db.getAllUserProperties(new GetAllUserPropertiesCallback() {
-            @Override
-            public void onSuccess(ArrayList<Property> properties) {
-
-            }
-
-            @Override
-            public void onError(String msg) {
-
-            }
-        });
     }
 
     @Override
