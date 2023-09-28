@@ -156,7 +156,7 @@ public class AddPropertyActivity extends AppCompatActivity {
     private void submitProperty(AppCompatActivity activity) {
         // create new property object
         NewProperty newProperty = new NewProperty(url, bedroomNumber, bathroomNumber, parkingNumber,
-                autocompleteFragment.getSelectedPlaceName(), lat, lng, 0);
+                autocompleteFragment.getSelectedAddress(), lat, lng, 0);
         // post to firebase
         FirebasePropertyRepository db = new FirebasePropertyRepository();
         db.addProperty(newProperty, new AddPropertyCallback() {
@@ -231,7 +231,7 @@ public class AddPropertyActivity extends AppCompatActivity {
             return;
         }
         // set address text to UI
-        autocompleteFragment.setPlaceNameText(property.getAddress());
+        autocompleteFragment.setAddressText(property.getAddress());
     }
 
     private void updateUserProperty(AppCompatActivity activity, NewProperty newProperty, String propertyId) {

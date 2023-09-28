@@ -26,9 +26,9 @@ import java.util.Arrays;
 
 public class AutocompleteFragment extends Fragment {
     private FragmentAutocompleteBinding binding;
-    AutocompleteSupportFragment autocompleteFragment;
+    CustomPlaceAutoCompleteFragment autocompleteFragment;
     private PlacesClient placesClient;
-    String selectedPlaceName = "";
+    String selectedAddress = "";
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -50,9 +50,9 @@ public class AutocompleteFragment extends Fragment {
         }
         this.placesClient = Places.createClient(getContext());
 
-        // Initialize the AutocompleteSupportFragment.
+        // Initialize the CustomPlaceAutocompleteFragment.
         try {
-            autocompleteFragment = (AutocompleteSupportFragment)
+            autocompleteFragment = (CustomPlaceAutoCompleteFragment)
                 getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
             // Specify the types of place data to return.
@@ -63,15 +63,16 @@ public class AutocompleteFragment extends Fragment {
                 @Override
                 public void onPlaceSelected(@NonNull Place place) {
                     System.out.println("name: " + place.getName() + ", Address: " + place.getAddress());
-//                    selectedPlaceName = place.getName();
-                    selectedPlaceName = place.getAddress();
+                    autocompleteFragment.setPlace(place);
+                    selectedAddress = place.getAddress();
                 }
 
                 @Override
                 public void onError(@NonNull Status status) {
-                    selectedPlaceName = "";
+                    selectedAddress = "";
                     Log.i(TAG, "An error occurred: " + status);
                 }
+
             });
         } catch (Exception e) {
             System.out.println("error: " + e.getMessage());
@@ -103,13 +104,14 @@ public class AutocompleteFragment extends Fragment {
         return null;
     }
 
-    public String getSelectedPlaceName() {
-        return selectedPlaceName;
+    public String getSelectedAddress() {
+        return selectedAddress;
     }
 
-    public void setPlaceNameText(String placeNameText) {
+    public void setAddressText(String placeNameText) {
+        // set address text to search bar
         this.autocompleteFragment.setText(placeNameText);
-        this.selectedPlaceName = placeNameText;
+        this.selectedAddress = placeNameText;
     }
 
 }

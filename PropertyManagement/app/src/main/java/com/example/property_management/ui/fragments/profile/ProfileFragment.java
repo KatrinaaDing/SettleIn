@@ -36,7 +36,7 @@ public class ProfileFragment extends Fragment {
 
     PlacesClient placesClient;
 
-    String selectedPlaceName = "";
+    String selectedAddress = "";
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -62,6 +62,7 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 try {
+                    // launch dialog
                     showCustomDialog();
                 } catch (PackageManager.NameNotFoundException e) {
                     throw new RuntimeException(e);
@@ -82,6 +83,16 @@ public class ProfileFragment extends Fragment {
 
         View dialogView = getLayoutInflater().inflate(R.layout.custom_interested_location_dialog, null);
 
+        View autocompleteView = dialogView.findViewById(R.id.auto_fragment);
+        AutocompleteFragment autocompleteFragment = (AutocompleteFragment)
+                getChildFragmentManager().findFragmentById(autocompleteView.getId());
+        Log.i("isnull", "autocompleteFragment: " + (autocompleteFragment == null ? "null" : "not null"));
+
+        if (autocompleteFragment == null) {
+            Log.e("isnull", "autocompleteFragment is null");
+            return;
+        }
+
         // ===== dialog =====
         AlertDialog alertDialog = new MaterialAlertDialogBuilder(getContext())
                 .setTitle("Add Interested Location")
@@ -89,18 +100,9 @@ public class ProfileFragment extends Fragment {
                 .setPositiveButton("Add", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        View autocompleteView = dialogView.findViewById(R.id.auto_fragment);
-                        AutocompleteFragment autocompleteFragment = (AutocompleteFragment)
-                                getChildFragmentManager().findFragmentById(autocompleteView.getId());
-                        Log.i("isnull", "autocompleteFragment: " + (autocompleteFragment == null ? "null" : "not null"));
-
-                        if (autocompleteFragment == null) {
-                            Log.e("isnull", "autocompleteFragment is null");
-                            return;
-                        }
-                        selectedPlaceName = autocompleteFragment.getSelectedPlaceName();
-                        System.out.println("Add Location: " + selectedPlaceName);
-                        if (selectedPlaceName.equals("")) {
+                        selectedAddress = autocompleteFragment.getSelectedAddress();
+                        System.out.println("Add Location: " + selectedAddress);
+                        if (selectedAddress.equals("")) {
                             Toast.makeText(getContext(), "Please select a location", Toast.LENGTH_SHORT).show();
                             return;
                         }
@@ -110,8 +112,8 @@ public class ProfileFragment extends Fragment {
                 }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        // clear selected place name
-                        selectedPlaceName = "";
+                        // clear selected address
+                        selectedAddress = "";
                         dialogInterface.dismiss();
                     }
                 }).create();
