@@ -27,6 +27,10 @@ def getHtml(url):
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36'
     }
     res = requests.get(url, headers = headers)
+
+    if res.status_code != 200:
+        return None
+
     res.encoding='UTF-8'
     soup=BeautifulSoup(res.text,'lxml')
     return soup
@@ -39,21 +43,30 @@ def getHtml(url):
 def scrape_domain(url):
     try:
         html_soup = getHtml(url)
-        address = html_soup.find('h1',{'class': 'css-164r41r'}).text
-        price_str = html_soup.find('div',{'data-testid': 'listing-details__summary-title'}).text
-        # code reference: https://stackoverflow.com/questions/11339210/how-to-get-integer-values-from-a-string-in-python
-        price = re.search(r'(\d+,?)+', price_str).group()
-        price = 0 if price == None else int(price.replace(',', ''))
 
-        beds_baths_parkings_str = html_soup.find('div',{'class':'css-1dtnjt5'}).text
+        #if failed to scrape, return the default value
+        if html_soup is None:
+            return "N/A", "-1", "-1", "-1", "-1", "N/A", ["N/A"]
+
+        address = html_soup.find('h1',{'class': 'css-164r41r'}).text
+        price_str = html_soup.find('div',{'data-testid': 'listing-details__summary-title'})
+        if price_str is None:
+            price_str = html_soup.find('span',{'data-testid': 'listing-details__listing-summary-title-name'})
+        # code reference: https://stackoverflow.com/questions/11339210/how-to-get-integer-values-from-a-string-in-python
+        price = re.search(r'(\d+,?)+', price_str.text).group()
+        price = -1 if price == None else int(price.replace(',', ''))
+
+        beds_baths_parkings_str = html_soup.find('div',{'class':'css-1dtnjt5'})
+        if beds_baths_parkings_str is None:
+            beds_baths_parkings_str = html_soup.find('div',{'class':'css-18biwo'})
         patterns = {
             'bed': re.compile(r'(\d|−) Bed'),
             'bath': re.compile(r'(\d|−) Bath'),
             'parking': re.compile(r'(\d|−) Parking')
         }
-        bed_count, bath_count, parking_count = None, None, None
+        bed_count, bath_count, parking_count = -1, -1, -1
         for feature, pattern in patterns.items():
-            match = pattern.search(beds_baths_parkings_str)
+            match = pattern.search(beds_baths_parkings_str.text)
             if match:
                 value = match.group(1)
                 if feature == 'bed':
@@ -76,11 +89,16 @@ def scrape_domain(url):
 def scrape_raywhite(url):
     try:
         html_soup = getHtml(url)
+
+        #if failed to scrape, return the default value
+        if html_soup is None:
+            return "N/A", "-1", "-1", "-1", "-1", "N/A", ["N/A"]
+
         address = html_soup.find('h1',{'class': 'banner-basic__title'}).text.replace("\n", ", ").strip(", ").strip()
 
         price_str = html_soup.find('div',{'class': 'property-detail__banner__side__price'}).text.strip()
         price = re.search(r'(\d+,?)+', price_str).group()
-        price = 0 if price == None else int(price.replace(',', ''))
+        price = -1 if price == None else int(price.replace(',', ''))
 
         beds_baths_parkings_str = html_soup.find('div',{'class':'property-meta'}).text
         beds_baths_parkings_num = re.findall(r'\d+', beds_baths_parkings_str)
@@ -99,9 +117,9 @@ def scrape_raywhite(url):
         imgs_url = [img['src'] for img in imgs if 'src' in img.attrs]
     except:
         raise Exception("Failed to scrape url. Please insert data manually.")
-        
 
-    return url, price, beds_baths_parkings_count['bed_num'], beds_baths_parkings_count['bath_num'], beds_baths_parkings_count['car_num'], imgs_url
+
+    return url, price, beds_baths_parkings_count['bed_num'], beds_baths_parkings_count['bath_num'], beds_baths_parkings_count['car_num'],address,imgs_url
 
 
 def create_error_response(error_code:int, message: str) -> https_fn.Response:
