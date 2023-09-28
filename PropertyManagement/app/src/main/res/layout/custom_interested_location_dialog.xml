@@ -22,6 +22,6 @@
         android:name="com.example.property_management.ui.fragments.base.AutocompleteFragment"
         tools:layout="@layout/fragment_autocomplete"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         />
 </LinearLayout>

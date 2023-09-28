@@ -56,14 +56,15 @@ public class AutocompleteFragment extends Fragment {
                 getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
             // Specify the types of place data to return.
-            autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.LAT_LNG,Place.Field.NAME));
+            autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.LAT_LNG,Place.Field.NAME, Place.Field.ADDRESS));
 
             // Set up a PlaceSelectionListener to handle the response.
             autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
                 @Override
                 public void onPlaceSelected(@NonNull Place place) {
                     System.out.println("name: " + place.getName() + ", Address: " + place.getAddress());
-                    selectedPlaceName = place.getName();
+//                    selectedPlaceName = place.getName();
+                    selectedPlaceName = place.getAddress();
                 }
 
                 @Override
