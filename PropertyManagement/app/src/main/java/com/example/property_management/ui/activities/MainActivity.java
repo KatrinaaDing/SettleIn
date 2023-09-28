@@ -2,19 +2,12 @@ package com.example.property_management.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseAuthHelper;
-import com.example.property_management.api.FirebasePropertyRepository;
 import com.example.property_management.api.FirebaseUserRepository;
-import com.example.property_management.callbacks.AddPropertyCallback;
-import com.example.property_management.callbacks.DeletePropertyByIdCallback;
-import com.example.property_management.callbacks.GetAllPropertiesCallback;
-import com.example.property_management.callbacks.UpdateUserCallback;
-import com.example.property_management.data.NewProperty;
+import com.example.property_management.callbacks.GetAllUserPropertiesCallback;
 import com.example.property_management.data.Property;
 import com.google.android.material.bottomappbar.BottomAppBar;
 
@@ -26,10 +19,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import com.example.property_management.databinding.ActivityMainBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import org.checkerframework.checker.units.qual.A;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -79,19 +69,6 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             } else {
                 return false;
-            }
-        });
-
-        FirebaseUserRepository db = new FirebaseUserRepository();
-        db.getAllUserProperties(new GetAllPropertiesCallback() {
-            @Override
-            public void onSuccess(ArrayList<Property> properties) {
-
-            }
-
-            @Override
-            public void onError(String msg) {
-
             }
         });
     }

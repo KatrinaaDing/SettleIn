@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.example.property_management.callbacks.AddUserCallback;
 import com.example.property_management.callbacks.DeleteUserByIdCallback;
-import com.example.property_management.callbacks.GetAllPropertiesCallback;
+import com.example.property_management.callbacks.GetAllUserPropertiesCallback;
 import com.example.property_management.callbacks.GetAllUsersCallback;
 import com.example.property_management.callbacks.GetUserInfoByIdCallback;
 import com.example.property_management.callbacks.UpdateUserCallback;
@@ -17,8 +17,10 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -28,6 +30,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class FirebaseUserRepository {
@@ -208,26 +211,49 @@ public class FirebaseUserRepository {
             });
     }
 
-    public void getAllUserProperties(GetAllPropertiesCallback callback) {
+    /**
+     * get all user properties
+     * @param callback
+     */
+    public void getAllUserProperties(GetAllUserPropertiesCallback callback) {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         DocumentReference docRef = db.collection("users").document(currentUser.getUid());
-//        Log.d("test-get-user-properties", "getAllUserProperties: " + currentUser.getUid());
+        CollectionReference collecRef = db.collection("properties");
+        //        Log.d("test-get-user-properties", "getAllUserProperties: " + currentUser.getUid());
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
                     ArrayList<UserProperty> userProperties = new ArrayList<>();
+                    List<String> docIds = new ArrayList<>();
                     for (UserProperty userProperty : task.getResult().toObject(User.class).getProperties()) {
-//                        Log.d("get-all-properties-success", document.getId() + " => " + document.getData());
-//                        Property property = document.toObject(Property.class);
-//                        property.setPropertyId(document.getId());
-//                        properties.add(property);
+                        docIds.add(userProperty.getPropertyId());
                     }
-//                    callback.onSuccess(properties);
+                    Log.d("get-all-user-properties-success", docIds.toString());
+                    collecRef.whereIn(FieldPath.documentId(), docIds)
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                @Override
+                                public void onComplete(@androidx.annotation.NonNull Task<QuerySnapshot> task) {
+                                    if (task.isSuccessful()) {
+                                        ArrayList<Property> properties = new ArrayList<>();
+                                        for (QueryDocumentSnapshot document : task.getResult()) {
+                                            Log.d("get-all-user-properties-success", document.getId() + " => " + document.getData());
+                                            Property property = document.toObject(Property.class);
+                                            property.setPropertyId(document.getId());
+                                            properties.add(property);
+                                        }
+                                        callback.onSuccess(properties);
+                                    } else {
+                                        Log.d("get-all-user-properties-failure", "Error getting all user properties: ", task.getException());
+                                        callback.onError("Error getting all user properties");
+                                    }
+                                }
+                            });
                 } else {
-                    Log.d("get-all-properties-failure", "Error getting all properties: ", task.getException());
-                    callback.onError("Error getting all properties");
+                    Log.d("get-all-user-properties-failure", "Error getting all properties of the user: ", task.getException());
+                    callback.onError("Error getting all properties of the user");
                 }
             }
         });
