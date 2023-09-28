@@ -102,23 +102,6 @@ Access Property Collection:
       }
   });
   ```
-
-- Get all Properties
-
-  ```java
-  db.getAllProperties(new GetAllPropertiesCallback() {
-      @Override
-      public void onSuccess(ArrayList<Property> properties) {
-          Log.d("get-all-properties-onSuccess", "onSuccess: " + properties.size());
-      }
-  
-      @Override
-      public void onError(Exception e) {
-  
-      }
-  });
-  ```
-
   
 
 Access User Collection:
@@ -143,6 +126,22 @@ Access User Collection:
   
       @Override
       public void onError(String msg) {
+  
+      }
+  });
+  ```
+
+- Get all User's Properties
+
+  ```java
+  db.getAllUserProperties(new GetAllUserPropertiesCallback() {
+      @Override
+      public void onSuccess(ArrayList<Property> properties) {
+          Log.d("get-all-properties-onSuccess", "onSuccess: " + properties.size());
+      }
+  
+      @Override
+      public void onError(Exception e) {
   
       }
   });
