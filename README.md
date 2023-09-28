@@ -112,16 +112,15 @@ Access User Collection:
   FirebaseUserRepository db = new FirebaseUserRepository();
   ```
 
-- Update User fields
+- Update Nested User fields
 
   ```java
   HashMap<String, Object> updates = new HashMap<>();
-  updates.put("userEmail", "test@email.com");
-  updates.put("userName", "Bob");
-  db.updateUserFields("co9z891lbRxIIDV7zP8L", updates, new UpdateUserCallback() {
-      @Override
+  updates.put("properties.newProperty.price", 100);
+  db.updateUserFields("t0d69WGyhUMoc1RkckCRfg3Cb7d2", updates, new UpdateUserCallback() {
+          @Override
       public void onSuccess(String msg) {
-          Log.d("test", "onSuccess: " + msg);
+  
       }
   
       @Override
