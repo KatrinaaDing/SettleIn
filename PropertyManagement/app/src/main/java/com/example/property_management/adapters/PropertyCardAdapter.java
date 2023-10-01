@@ -48,7 +48,7 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Property property = properties.get(position);
         holder.addressView.setText(property.getAddress());
-//        holder.priceView.setText("$" + String.valueOf(property.getPrice()));
+        holder.priceView.setText("$" + property.getPrice());
         if ((property.getImages() != null) && !property.getImages().isEmpty()) {
             Glide.with(holder.thumbnailView.getContext())
                     .load(property.getImages().get(0))

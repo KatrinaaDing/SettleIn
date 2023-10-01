@@ -72,7 +72,10 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="a valid url (can copy): https://www.example.com"
+                android:text="a valid url (can copy): https://www.example.com,
+                https://www.domain.com.au/3-01-83-bay-street-brighton-vic-3186-2018787564,
+                https://www.domain.com.au/24-gardiner-parade-glen-iris-vic-3146-16674780,
+                https://www.domain.com.au/1207-408-lonsdale-street-melbourne-vic-3000-2018776858"
                 android:textIsSelectable="true"
                 android:paddingTop="20dp"
                 android:textColor="@color/purple_500"
@@ -113,12 +116,22 @@
                     app:iconSize="24dp" />
             </LinearLayout>
 
-
             <TextView
-                android:id="@+id/propertyAddress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="" />
+                android:text="Address"
+                android:textStyle="bold"
+                android:textSize="@dimen/medium_title"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                />
+            <fragment
+                android:id="@+id/auto_property_fragment"
+                android:name="com.example.property_management.ui.fragments.base.AutocompleteFragment"
+                tools:layout="@layout/fragment_autocomplete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
 
             <!--  property amenities settings  -->
             <LinearLayout
