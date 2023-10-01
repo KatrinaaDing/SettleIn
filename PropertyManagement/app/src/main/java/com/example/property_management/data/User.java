@@ -1,6 +1,7 @@
 package com.example.property_management.data;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class User {
     private String userId;
@@ -9,11 +10,11 @@ public class User {
 
     private ArrayList<String> interestedFacilities;
 
-    private ArrayList<UserProperty> properties;
+    private HashMap<String, UserProperty> properties;
 
     public User() {}
 
-    public User(String userId, String userName, String userEmail, ArrayList<String> interestedFacilities, ArrayList<UserProperty> properties) {
+    public User(String userId, String userName, String userEmail, ArrayList<String> interestedFacilities, HashMap<String, UserProperty> properties) {
         this.userId = userId;
         this.userName = userName;
         this.userEmail = userEmail;
@@ -37,7 +38,7 @@ public class User {
 
     public void setInterestedFacilities(ArrayList<String> interestedFacilities) { this.interestedFacilities = interestedFacilities; }
 
-    public ArrayList<UserProperty> getProperties() { return properties; }
+    public HashMap<String, UserProperty> getProperties() { return properties; }
 
-    public void setProperties(ArrayList<UserProperty> properties) { this.properties = properties; }
+    public void setProperties(HashMap<String, UserProperty> properties) { this.properties = properties; }
 }

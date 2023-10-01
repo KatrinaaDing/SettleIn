@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.example.property_management.callbacks.AddPropertyCallback;
 import com.example.property_management.callbacks.DeletePropertyByIdCallback;
-import com.example.property_management.callbacks.GetAllPropertiesCallback;
+import com.example.property_management.callbacks.GetAllUserPropertiesCallback;
 import com.example.property_management.callbacks.GetPropertyByIdCallback;
 import com.example.property_management.data.NewProperty;
 import com.example.property_management.data.Property;
@@ -23,6 +23,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FirebasePropertyRepository {
     private FirebaseFirestore db;
@@ -82,7 +83,14 @@ public class FirebasePropertyRepository {
                             });
 
                 } else {
-                    callback.onError("Property with the same address and href already exists.");
+                    QuerySnapshot querySnapshot = task.getResult();
+                    if (querySnapshot != null) {
+                        List<DocumentSnapshot> documents = querySnapshot.getDocuments();
+                        if (!documents.isEmpty()) {
+                            String documentId = documents.get(0).getId();
+                            Log.d("add-property", "property exists with document id " + documentId);
+                        }
+                    }
                 }
             } else {
                 callback.onError("Error querying Firestore: " + task.getException());
@@ -162,32 +170,4 @@ public class FirebasePropertyRepository {
             }
         });
     }
-
-    /**
-     * get all the properties
-     * @param callback
-     */
-    public void getAllProperties(GetAllPropertiesCallback callback) {
-        db.collection("properties")
-            .get()
-            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    if (task.isSuccessful()) {
-                        ArrayList<Property> properties = new ArrayList<>();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            Log.d("get-all-properties-success", document.getId() + " => " + document.getData());
-                            Property property = document.toObject(Property.class);
-                            property.setPropertyId(document.getId());
-                            properties.add(property);
-                        }
-                        callback.onSuccess(properties);
-                    } else {
-                        Log.d("get-all-properties-failure", "Error getting all properties: ", task.getException());
-                        callback.onError("Error getting all properties");
-                    }
-                }
-            });
-    }
-
 }
