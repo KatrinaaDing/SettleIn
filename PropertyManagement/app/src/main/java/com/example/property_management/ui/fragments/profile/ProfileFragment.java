@@ -80,18 +80,12 @@ public class ProfileFragment extends Fragment {
 
     // ========================= Functions ==========================
     private void showCustomDialog() throws PackageManager.NameNotFoundException {
-
+        Log.i("dialogView", "here");
         View dialogView = getLayoutInflater().inflate(R.layout.custom_interested_location_dialog, null);
+        Log.i("dialogView", "here2");
 
-        View autocompleteView = dialogView.findViewById(R.id.auto_fragment);
-        AutocompleteFragment autocompleteFragment = (AutocompleteFragment)
-                getChildFragmentManager().findFragmentById(autocompleteView.getId());
-        Log.i("isnull", "autocompleteFragment: " + (autocompleteFragment == null ? "null" : "not null"));
+//        View autocompleteView = dialogView.findViewById(R.id.auto_fragment);
 
-        if (autocompleteFragment == null) {
-            Log.e("isnull", "autocompleteFragment is null");
-            return;
-        }
 
         // ===== dialog =====
         AlertDialog alertDialog = new MaterialAlertDialogBuilder(getContext())
@@ -100,6 +94,12 @@ public class ProfileFragment extends Fragment {
                 .setPositiveButton("Add", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
+                        AutocompleteFragment autocompleteFragment = (AutocompleteFragment)
+                                getChildFragmentManager().findFragmentById(R.id.auto_fragment);
+                        if (autocompleteFragment == null) {
+                            Log.e("isnull", "autocompleteFragment is null");
+                            return;
+                        }
                         selectedAddress = autocompleteFragment.getSelectedAddress();
                         System.out.println("Add Location: " + selectedAddress);
                         if (selectedAddress.equals("")) {
@@ -118,7 +118,6 @@ public class ProfileFragment extends Fragment {
                     }
                 }).create();
         alertDialog.show();
-
     }
 
     @Override
