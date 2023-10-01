@@ -4,7 +4,7 @@ import com.example.property_management.data.Property;
 
 import java.util.ArrayList;
 
-public interface GetAllUserPropertiesCallback {
+public interface GetAllPropertiesCallback {
     void onSuccess(ArrayList<Property> properties);
     void onError(String msg);
 }
