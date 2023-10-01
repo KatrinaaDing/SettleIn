@@ -237,9 +237,11 @@ public class AddPropertyActivity extends AppCompatActivity {
 
     private void updateUserProperty(AppCompatActivity activity, NewProperty newProperty, String propertyId) {
         // create object to update user document
+        ArrayList<HashMap> propertyList = new ArrayList<>();
         HashMap<String, Object> propertyPayload = newProperty.toUpdateUserObject(propertyId);
+        propertyList.add(propertyPayload);
         HashMap<String, Object> userUpdatePayload = new HashMap<>();
-        userUpdatePayload.put("properties." + propertyId, propertyPayload);
+        userUpdatePayload.put("properties", propertyList);
         // get user id
         String userId = new FirebaseAuthHelper(activity).getCurrentUser().getUid();
         // update user document

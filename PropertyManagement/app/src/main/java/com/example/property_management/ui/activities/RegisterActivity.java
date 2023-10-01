@@ -24,7 +24,6 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -171,7 +170,7 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onSuccess(FirebaseUser user) {
                 // add created user to firestore
-                User newUserObj = new User(user.getUid(), "New User", email, new ArrayList<>(), new HashMap<>());
+                User newUserObj = new User(user.getUid(), "New User", email, new ArrayList<>(), new ArrayList<>());
                 FirebaseUserRepository firebaseUserRepository = new FirebaseUserRepository();
                 firebaseUserRepository.addUser(newUserObj, new AddUserCallback() {
                     @Override
