@@ -46,7 +46,7 @@ def scrape_domain(url):
 
         #if failed to scrape, return the default value
         if html_soup is None:
-            return "N/A", "-1", "-1", "-1", "-1", "N/A", ["N/A"]
+            raise Exception()
 
         address = html_soup.find('h1',{'class': 'css-164r41r'}).text
         price_str = html_soup.find('div',{'data-testid': 'listing-details__summary-title'})
@@ -64,17 +64,16 @@ def scrape_domain(url):
             'bath': re.compile(r'(\d|−) Bath'),
             'parking': re.compile(r'(\d|−) Parking')
         }
-        bed_count, bath_count, parking_count = -1, -1, -1
         for feature, pattern in patterns.items():
             match = pattern.search(beds_baths_parkings_str.text)
             if match:
                 value = match.group(1)
                 if feature == 'bed':
-                    bed_num = 0 if value == '−' else int(value)
+                    bed_num = -1 if value == '−' else int(value)
                 elif feature == 'bath':
-                    bath_num = 0 if value == '−' else int(value)
+                    bath_num = -1 if value == '−' else int(value)
                 elif feature == 'parking':
-                    parking_num = 0 if value == '−' else int(value)
+                    parking_num = -1 if value == '−' else int(value)
 
         imgs_url = html_soup.find('img',{'class': 'css-bh4wo8'}).get('src')
     except:
@@ -92,7 +91,7 @@ def scrape_raywhite(url):
 
         #if failed to scrape, return the default value
         if html_soup is None:
-            return "N/A", "-1", "-1", "-1", "-1", "N/A", ["N/A"]
+            raise Exception()
 
         address = html_soup.find('h1',{'class': 'banner-basic__title'}).text.replace("\n", ", ").strip(", ").strip()
 
