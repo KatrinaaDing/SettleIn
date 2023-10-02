@@ -1,5 +1,6 @@
 package com.example.property_management.ui.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -42,6 +43,7 @@ import com.google.android.material.timepicker.TimeFormat;
 import androidx.fragment.app.Fragment;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class AddPropertyActivity extends AppCompatActivity {
     private ActivityAddPropertyBinding binding;
@@ -220,10 +222,44 @@ public class AddPropertyActivity extends AppCompatActivity {
      * @param activity current activity
      */
     private void submitProperty(AppCompatActivity activity) {
+        // check if property exists
+        Map<String, String> payLoad = new HashMap<>();
+        payLoad.put("href", url);
+        payLoad.put("address", autocompleteFragment.getSelectedPlaceName());
+        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+        firebaseFunctionsHelper.checkPropertyExists(payLoad)
+            .addOnSuccessListener(result -> {
+                if (result == null) {
+                    // property does not exist
+                    Log.d("add-property-exists", "can add property");
+                    addProperty(activity);
+                } else {
+                    // property exists
+                    Log.d("add-property-exists", "property exists with document id " + result);
+                    new BasicSnackbar(findViewById(android.R.id.content),
+                            "You have already added this property.",
+                            "error");
+                }
+            })
+            .addOnFailureListener(e -> {
+                // pop error at input box
+                Log.e("add-property", e.getMessage());
+                new BasicSnackbar(findViewById(android.R.id.content),
+                        "Error: " + e.getMessage(),
+                        "error");
+            });
+
+    }
+
+    /**
+     * Add new property to firebase
+     * @param activity current activity
+     */
+    private void addProperty(AppCompatActivity activity) {
+        // post to firebase
         // create new property object
         NewProperty newProperty = new NewProperty(url, bedroomNumber, bathroomNumber, parkingNumber,
                 autocompleteFragment.getSelectedPlaceName(), lat, lng, price, images);
-        // post to firebase
         FirebasePropertyRepository db = new FirebasePropertyRepository();
         db.addProperty(newProperty, new AddPropertyCallback() {
             @Override
@@ -238,7 +274,6 @@ public class AddPropertyActivity extends AppCompatActivity {
             }
         });
     }
-
     /**
      * Fetch coordinates from address
      * @param onComplete callback task

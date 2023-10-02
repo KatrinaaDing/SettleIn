@@ -5,6 +5,8 @@ import androidx.annotation.NonNull;
 import com.example.property_management.data.NewProperty;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.FirebaseFunctionsException;
 import com.google.firebase.functions.HttpsCallableResult;
@@ -58,5 +60,36 @@ public class FirebaseFunctionsHelper {
                 }
 
             });
+    }
+
+    public Task<String> checkPropertyExists(Map<String, String> payLoad) {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        payLoad.put("userId", userId);
+
+        return mFunctions
+                .getHttpsCallable("check_property_exist")
+                .call(payLoad)
+                .continueWith(new Continuation<HttpsCallableResult, String>() {
+                    // This continuation runs on either success or failure, but if the task
+                    // has failed then getResult() will throw an Exception which will be
+                    // propagated down.
+                    @Override
+                    public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
+                        Map<String, Object> result;
+                        try{
+                            result = (Map<String, Object>) task.getResult().getData();
+                        } catch (Exception e) {
+                            int msgIdx = e.getMessage().indexOf("n:") + 2;
+                            String msg = e.getMessage().substring(msgIdx);
+                            throw new Exception(msg);
+                        }
+                        // return property id if exist, null if not exist
+                        if ((boolean) result.get("exist")) {
+                            return (String) result.get("propertyId");
+                        } else {
+                            return null;
+                        }
+                    }
+                });
     }
 }
