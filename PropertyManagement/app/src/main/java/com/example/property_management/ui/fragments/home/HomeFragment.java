@@ -45,12 +45,11 @@ public class HomeFragment extends Fragment {
 //        final TextView textView = binding.textHome;
 //        homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
 
-
-        Button testBtn = binding.testBtn;
-        testBtn.setOnClickListener(view -> {
-            Intent intent = new Intent(getActivity(), TestActivity.class);
-            startActivity(intent);
-        });
+//        Button testBtn = binding.testBtn;
+//        testBtn.setOnClickListener(view -> {
+//            Intent intent = new Intent(getActivity(), TestActivity.class);
+//            startActivity(intent);
+//        });
 
         getAllProperties(this.getContext());
 
@@ -68,6 +67,10 @@ public class HomeFragment extends Fragment {
         db.getAllUserProperties(new GetAllUserPropertiesCallback() {
             @Override
             public void onSuccess(ArrayList<Property> properties) {
+                if (properties.isEmpty()) {
+                    binding.textHome.setText("Press the + sign\n to add your first property!\n\n||\nV");
+                    return;
+                }
                 RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
                 propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
                 RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties);

@@ -9,6 +9,7 @@ import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.FirebaseFunctionsException;
 import com.google.firebase.functions.HttpsCallableResult;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,7 +44,6 @@ public class FirebaseFunctionsHelper {
                         String msg = e.getMessage().substring(msgIdx);
                         throw new Exception(msg);
                     }
-
                     return new NewProperty(
                         (String) result.get("url"),
                         (int) result.get("bedroom_num"),
@@ -52,7 +52,8 @@ public class FirebaseFunctionsHelper {
                         (String) result.get("address"),
                         0,
                         0,
-                        (int) result.get("price")
+                        (int) result.get("price"),
+                        (ArrayList<String>) result.get("images")
                     );
                 }
 

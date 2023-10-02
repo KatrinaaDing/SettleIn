@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.Target;
 import com.example.property_management.R;
 import com.example.property_management.data.Property;
 import com.example.property_management.ui.activities.PropertyDetailActivity;
@@ -48,8 +49,10 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Property property = properties.get(position);
         holder.addressView.setText(property.getAddress());
-        holder.priceView.setText("$" + property.getPrice());
+        holder.priceView.setText("$" + property.getPrice() + "pw");
+
         if ((property.getImages() != null) && !property.getImages().isEmpty()) {
+            // set the first image as thumbnail
             Glide.with(holder.thumbnailView.getContext())
                     .load(property.getImages().get(0))
                     .into(holder.thumbnailView);

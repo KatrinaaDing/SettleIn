@@ -52,6 +52,8 @@ public class AddPropertyActivity extends AppCompatActivity {
     private float lat = 0;
     private float lng = 0;
     private int price = 0;
+    private ArrayList<String> images;
+
 
     AutocompleteFragment autocompleteFragment;
 
@@ -220,7 +222,7 @@ public class AddPropertyActivity extends AppCompatActivity {
     private void submitProperty(AppCompatActivity activity) {
         // create new property object
         NewProperty newProperty = new NewProperty(url, bedroomNumber, bathroomNumber, parkingNumber,
-                autocompleteFragment.getSelectedPlaceName(), lat, lng, price);
+                autocompleteFragment.getSelectedPlaceName(), lat, lng, price, images);
         // post to firebase
         FirebasePropertyRepository db = new FirebasePropertyRepository();
         db.addProperty(newProperty, new AddPropertyCallback() {
@@ -245,7 +247,8 @@ public class AddPropertyActivity extends AppCompatActivity {
         // TODO: fetch coordinates
         this.lat = 0;
         this.lng = 0;
-        // run callback task
+        // run callback task (allow submit)
+        // TODO: only allow submit when coordinates are successfully fetched
         onComplete.run();
     }
 
@@ -304,6 +307,7 @@ public class AddPropertyActivity extends AppCompatActivity {
         this.parkingNumber = property.getNumParking();
         this.url = property.getHref();
         this.price = property.getPrice();
+        this.images = property.getImages();
 
         // set UI
         TextInputLayout priceInputLayout = findViewById(R.id.priceInputLayout);
@@ -317,7 +321,6 @@ public class AddPropertyActivity extends AppCompatActivity {
 
         // set address to autocomplete fragment
         autocompleteFragment = (AutocompleteFragment) getSupportFragmentManager().findFragmentById(R.id.auto_property_fragment);
-        Log.i("isnull", "autocompleteFragment: " + (autocompleteFragment == null ? "null" : "not null"));
         if (autocompleteFragment == null) {
             Log.e("isnull", "autocompleteFragment is null");
             return;

@@ -89,6 +89,7 @@ public class FirebasePropertyRepository {
                         if (!documents.isEmpty()) {
                             String documentId = documents.get(0).getId();
                             Log.d("add-property", "property exists with document id " + documentId);
+                            callback.onError("You have already added this property.");
                         }
                     }
                 }
