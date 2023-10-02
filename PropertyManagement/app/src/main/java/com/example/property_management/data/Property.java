@@ -12,6 +12,7 @@ public class Property {
     private int numBedrooms;
     private int numBathrooms;
     private int numParking;
+    // public property sensor data
     private HashMap<String, RoomData> propertyData;
     private int price;
     private ArrayList<String> images;
