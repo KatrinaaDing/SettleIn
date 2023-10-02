@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.property_management.adapters.PropertyCardAdapter;
+import com.example.property_management.api.FirebaseFunctionsHelper;
 import com.example.property_management.api.FirebasePropertyRepository;
 import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.GetAllUserPropertiesCallback;
@@ -68,26 +69,44 @@ public class HomeFragment extends Fragment {
      * @param context the context of the fragment
      */
     private void getAllProperties(Context context) {
-        FirebaseUserRepository db = new FirebaseUserRepository();
-        db.getAllUserProperties(new GetAllUserPropertiesCallback() {
-            @Override
-            public void onSuccess(ArrayList<Property> properties) {
-                if (properties.isEmpty()) {
-                    binding.hint.setVisibility(View.VISIBLE);
-                }
-                RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
-                propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
-                RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties);
-                propertiesRecyclerView.setAdapter(propertyCardAdapter);
+//        FirebaseUserRepository db = new FirebaseUserRepository();
+//        db.getAllUserProperties(new GetAllUserPropertiesCallback() {
+//            @Override
+//            public void onSuccess(ArrayList<Property> properties) {
+//                if (properties.isEmpty()) {
+//                    binding.hint.setVisibility(View.VISIBLE);
+//                }
+//                RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
+//                propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
+//                RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties);
+//                propertiesRecyclerView.setAdapter(propertyCardAdapter);
+//
+//                allProperties = properties;
+//            }
+//
+//            @Override
+//            public void onError(String msg) {
+//                new BasicSnackbar(getView(), msg, "error", Snackbar.LENGTH_LONG);
+//            }
+//        });
+        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+        firebaseFunctionsHelper.getAllProperties()
+                .addOnSuccessListener(result -> {
+                    ArrayList<Property> properties = (ArrayList<Property>) result;
+                    if (properties.isEmpty()) {
+                        binding.hint.setVisibility(View.VISIBLE);
+                    }
+                    RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
+                    propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
+                    RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties);
+                    propertiesRecyclerView.setAdapter(propertyCardAdapter);
 
-                allProperties = properties;
-            }
-
-            @Override
-            public void onError(String msg) {
-                new BasicSnackbar(getView(), msg, "error", Snackbar.LENGTH_LONG);
-            }
-        });
+                    allProperties = properties;
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("get-all-properties", e.getMessage());
+                    new BasicSnackbar(getView(), e.getMessage(), "error", Snackbar.LENGTH_LONG);
+                });
     }
 
     public ArrayList<Property> getAllProperties() {
