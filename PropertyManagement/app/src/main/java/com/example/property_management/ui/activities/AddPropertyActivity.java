@@ -114,7 +114,6 @@ public class AddPropertyActivity extends AppCompatActivity {
 //            // on select time
 //            timePicker.show(getSupportFragmentManager(), "time_picker");
 //        });
-
     }
 
     /**
@@ -156,7 +155,7 @@ public class AddPropertyActivity extends AppCompatActivity {
     }
 
     /**
-     * Enable and disable new property submission
+     * Enable and disable new property submission button
      */
     private void enableSubmit() {
         Button submitBtn = findViewById(R.id.submitBtn);
@@ -164,6 +163,11 @@ public class AddPropertyActivity extends AppCompatActivity {
     }
     private void disableSubmit() {
         Button submitBtn = findViewById(R.id.submitBtn);
+        submitBtn.setEnabled(false);
+    }
+    public void setSubmitLoading() {
+        Button submitBtn = findViewById(R.id.submitBtn);
+        submitBtn.setText("Submitting...");
         submitBtn.setEnabled(false);
     }
 
@@ -181,6 +185,7 @@ public class AddPropertyActivity extends AppCompatActivity {
                 @Override
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                     urlInputLayout.setError(null);
+                    urlInputLayout.setHelperText("");
                 }
                 @Override
                 public void afterTextChanged(Editable editable) {}
@@ -222,6 +227,8 @@ public class AddPropertyActivity extends AppCompatActivity {
      * @param activity current activity
      */
     private void submitProperty(AppCompatActivity activity) {
+        // set submit button to loading state
+        setSubmitLoading();
         // check if property exists
         Map<String, String> payLoad = new HashMap<>();
         payLoad.put("href", url);
@@ -230,12 +237,14 @@ public class AddPropertyActivity extends AppCompatActivity {
         firebaseFunctionsHelper.checkPropertyExists(payLoad)
             .addOnSuccessListener(result -> {
                 if (result == null) {
-                    // property does not exist
+                    // property does not exist, add the property
                     Log.d("add-property-exists", "can add property");
                     addProperty(activity);
                 } else {
-                    // property exists
+                    // property exists, return the document id
+                    // TODO: pop dialog to ask user if redirect to property page
                     Log.d("add-property-exists", "property exists with document id " + result);
+                    enableSubmit();
                     new BasicSnackbar(findViewById(android.R.id.content),
                             "You have already added this property.",
                             "error");
@@ -244,6 +253,7 @@ public class AddPropertyActivity extends AppCompatActivity {
             .addOnFailureListener(e -> {
                 // pop error at input box
                 Log.e("add-property", e.getMessage());
+                enableSubmit();
                 new BasicSnackbar(findViewById(android.R.id.content),
                         "Error: " + e.getMessage(),
                         "error");
@@ -381,11 +391,12 @@ public class AddPropertyActivity extends AppCompatActivity {
         userRepository.updateUserFields(userId, userUpdatePayload, new UpdateUserCallback() {
             @Override
             public void onSuccess(String msg) {
+                enableSubmit();
                 // redirect to main activity on success
                 new BasicSnackbar(findViewById(android.R.id.content),
                         "Property added successfully",
                         "success");
-                // redirect to main activity for showing snackbar
+                // delay redirection to main activity for showing snackbar
                 new Handler().postDelayed(() -> {
                     Intent intent = new Intent(AddPropertyActivity.this, MainActivity.class);
                     startActivity(intent);
@@ -393,6 +404,7 @@ public class AddPropertyActivity extends AppCompatActivity {
             }
             @Override
             public void onError(String msg) {
+                enableSubmit();
                 String errorMsg = "Error: " + msg;
                 new BasicSnackbar(findViewById(android.R.id.content), errorMsg, "error");
                 Log.e("add-property-failure", msg);

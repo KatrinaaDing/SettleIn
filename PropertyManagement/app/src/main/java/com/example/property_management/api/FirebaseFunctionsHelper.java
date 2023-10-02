@@ -1,5 +1,7 @@
 package com.example.property_management.api;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.example.property_management.data.NewProperty;
@@ -123,6 +125,7 @@ public class FirebaseFunctionsHelper {
                         }
                         // iterate each object in the result and convert to Property object
                         ArrayList<Property> properties = new ArrayList<>();
+                        Log.d("get-all-properties", "result: " + result);
                         for (Map<String, Object> propertyObj : result) {
                             Property property = new Property(
                                     (String) propertyObj.get("propertyId"),

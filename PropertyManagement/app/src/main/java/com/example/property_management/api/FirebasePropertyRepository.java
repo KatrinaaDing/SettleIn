@@ -44,8 +44,32 @@ public class FirebasePropertyRepository {
         Query sameHrefQuery = db.collection("properties")
                 .whereEqualTo("href", newProperty.getHref());
         // handle result by a helper function
-        sameAddressQuery.get().addOnCompleteListener(task -> handleExistProperty(task, newProperty, callback));
-        sameHrefQuery.get().addOnCompleteListener(task -> handleExistProperty(task, newProperty, callback));
+        sameAddressQuery.get().addOnCompleteListener(addressTask -> {
+            String documentIdWidthSameAddress = checkExistProperty(addressTask, callback);
+            if (documentIdWidthSameAddress == null) {
+                // if result is null, return error
+                callback.onError("Error querying Firestore: " + addressTask.getException());
+            } else if (documentIdWidthSameAddress.equals("")) {
+                // if the address does not exist, check if the href is unique
+                sameHrefQuery.get().addOnCompleteListener(hrefTask -> {
+                    String documentIdWithSameHref = checkExistProperty(hrefTask, callback);
+                    if (documentIdWithSameHref == null) {
+                        // if result is null, return error
+                        callback.onError("Error querying Firestore: " + hrefTask.getException());
+                    } else if (documentIdWithSameHref.equals("")) {
+                        // if the href is also not exist in the database, add the property
+                        addNewProperty(newProperty, callback);
+                    } else {
+                        // if the href exists, return the document id of the property
+                        callback.onSuccess(documentIdWithSameHref);
+                    }
+                });
+            } else {
+                // if the address exists, return the document id of the property
+                callback.onSuccess(documentIdWidthSameAddress);
+            }
+        });
+
     }
 
     /**
@@ -166,29 +190,28 @@ public class FirebasePropertyRepository {
      * handle the result of checking if the property exists (identical href or address)
      * if the property does not exist, add the property
      * @param task the task to check if the property exists
-     * @param newProperty the new property to be added
      * @param callback callback to handle success and error
      */
-    private void handleExistProperty(Task<QuerySnapshot> task, NewProperty newProperty, AddPropertyCallback callback) {
+    private String checkExistProperty(Task<QuerySnapshot> task, AddPropertyCallback callback) {
         if (task.isSuccessful()) {
             Log.d("test", "addProperty: " + task.getResult().getDocuments());
             QuerySnapshot querySnapshot = task.getResult();
             if (querySnapshot != null) {
                 // property does not exist, add the property
                 if (querySnapshot.isEmpty()) {
-                    addNewProperty(newProperty, callback);
+                    return "";
                 } else {
                     List<DocumentSnapshot> documents = querySnapshot.getDocuments();
                     if (!documents.isEmpty()) {
                         String documentId = documents.get(0).getId();
                         Log.d("add-property", "property exists with document id " + documentId);
-                        // property exists, return the document id
-                        callback.onSuccess(documentId);
+                        return documentId;
+                    } else {
+                        return "";
                     }
                 }
             }
-        } else {
-            callback.onError("Error querying Firestore: " + task.getException());
         }
+        return null;
     }
 }
