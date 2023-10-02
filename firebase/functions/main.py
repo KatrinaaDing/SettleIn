@@ -244,9 +244,13 @@ def scrape_property_restful(req: https_fn.Request) -> https_fn.Response:
 #         if user is None:
 #             return create_error_response(404, "User not found.")
 #         # for each propertyId in user document, get the property document
+#         if 'properties' not in user:
+#             return []
+#         # for each propertyId in user document, get the property document
 #         properties = []
 #         for property_id in user['properties']:
 #             property = firestore.client().collection(u'properties').document(property_id).get().to_dict()
+#             property['propertyId'] = property_id
 #             properties.append(property)
 #         return_data = json.dumps({ "properties": properties })
 #         return https_fn.Response(return_data, status=200, headers={"Content-Type": "application/json"})
@@ -282,6 +286,7 @@ def get_user_properties(req:  https_fn.Request) -> Any:
         properties = []
         for property_id in user['properties']:
             property = firestore.client().collection(u'properties').document(property_id).get().to_dict()
+            property['propertyId'] = property_id
             properties.append(property)
         return properties
     
