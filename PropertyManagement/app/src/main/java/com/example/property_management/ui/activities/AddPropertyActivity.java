@@ -48,8 +48,8 @@ public class AddPropertyActivity extends AppCompatActivity {
     private int bedroomNumber = 0;
     private int bathroomNumber = 0;
     private int parkingNumber = 0;
-    private float lat = 0;
-    private float lng = 0;
+    private double lat = Double.NaN;
+    private double lng = Double.NaN;
     private int price = 0;
 
     AutocompleteFragment autocompleteFragment;
@@ -132,7 +132,7 @@ public class AddPropertyActivity extends AppCompatActivity {
             if (!validateUrl()) return;
             urlInputLayout.setHelperText("Getting information...");
             fetchPropertyInfo(urlInputLayout);
-            fetchCoordinates();
+//            fetchCoordinates();
         });
         // handle number picker value change
         bedroomNumberPicker.setOnValueChangeListener(new onValueChangeCallback() {
@@ -155,6 +155,12 @@ public class AddPropertyActivity extends AppCompatActivity {
     }
 
     private void submitProperty(AppCompatActivity activity) {
+        // invalid address if lat or lng is NaN
+        if (Double.isNaN(lat) || Double.isNaN(lng)) {
+            new BasicSnackbar(findViewById(android.R.id.content), "Invalid address", "error");
+            return;
+        }
+
         // create new property object
         NewProperty newProperty = new NewProperty(url, bedroomNumber, bathroomNumber, parkingNumber,
                 autocompleteFragment.getSelectedAddress(), lat, lng, 0);
@@ -174,9 +180,24 @@ public class AddPropertyActivity extends AppCompatActivity {
         });
     }
     private void fetchCoordinates() {
-        // TODO: fetch coordinates
-        this.lat = 0;
-        this.lng = 0;
+        // check if autocompleteFragment is null
+        if (autocompleteFragment == null) {
+            System.out.println("fetch coordinate, autocompleteFragment is null");
+            return;
+        }
+        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+        // call firebase function to get lat and lng
+        firebaseFunctionsHelper.getLngLatByAddress(autocompleteFragment.getSelectedAddress())
+            .addOnSuccessListener(result -> {
+                // set lat and lng
+                lat = result.get("lat");
+                lng = result.get("lng");
+                System.out.println("lat: " + lat + ", lng: " + lng);
+            })
+            .addOnFailureListener(e -> {
+                // pop error at input box
+                Log.e("get lng lat error", e.getMessage());
+            });
     }
 
     private void fetchPropertyInfo(TextInputLayout urlInputLayout) {
@@ -185,6 +206,7 @@ public class AddPropertyActivity extends AppCompatActivity {
             .addOnSuccessListener(resultProperty -> {
                 // set property info
                 setPropertyInfo(resultProperty);
+                fetchCoordinates();
                 // set url input helper text
                 urlInputLayout.setHelperText("");
             })

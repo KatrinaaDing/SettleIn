@@ -6,7 +6,6 @@ import com.example.property_management.data.NewProperty;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.functions.FirebaseFunctions;
-import com.google.firebase.functions.FirebaseFunctionsException;
 import com.google.firebase.functions.HttpsCallableResult;
 
 import java.util.HashMap;
@@ -57,5 +56,38 @@ public class FirebaseFunctionsHelper {
                 }
 
             });
+    }
+
+    public Task<Map<String, Double>> getLngLatByAddress(String address) {
+        // Create the arguments to the callable function, which is just a single "url" field
+        Map<String, String> data = new HashMap<>();
+        data.put("address", address);
+
+        return mFunctions
+            .getHttpsCallable("get_lnglat_by_address")
+            .call(data)
+            .continueWith(new Continuation<HttpsCallableResult, Map<String, Double>>() {
+                // This continuation runs on either success or failure, but if the task
+                // has failed then getResult() will throw an Exception which will be
+                // propagated down.
+                @Override
+                public Map<String, Double> then(@NonNull Task<HttpsCallableResult> task) throws Exception {
+                    Map<String, Object> result;
+                    try{
+                        result = (Map<String, Object>) task.getResult().getData();
+                    } catch (Exception e) {
+                        int msgIdx = e.getMessage().indexOf("n:") + 2;
+                        String msg = e.getMessage().substring(msgIdx);
+                        throw new Exception(msg);
+                    }
+
+                    Map<String, Double> res = new HashMap<>();
+                    res.put("lng", (Double) result.get("lng"));
+                    res.put("lat", (Double) result.get("lat"));
+                    return res;
+                }
+
+            });
+
     }
 }

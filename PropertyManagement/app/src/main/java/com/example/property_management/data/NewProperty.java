@@ -7,8 +7,8 @@ import java.util.Map;
 public class NewProperty {
     private String href;
     private String address;
-    private float lat;
-    private float lng;
+    private double lat;
+    private double lng;
     private int numBedrooms;
     private int numBathrooms;
     private int numParking;
@@ -17,7 +17,7 @@ public class NewProperty {
 
     public NewProperty() {};
 
-    public NewProperty(String href, int numBedrooms, int numBathrooms, int numParking, String address, float lat, float lng, int price) {
+    public NewProperty(String href, int numBedrooms, int numBathrooms, int numParking, String address, double lat, double lng, int price) {
         this.href = href;
         this.address = address;
         this.lat = lat;
@@ -44,13 +44,13 @@ public class NewProperty {
 
     public void setAddress(String address) { this.address = address; }
 
-    public float getLat() { return lat; }
+    public double getLat() { return lat; }
 
-    public void setLat(float lat) { this.lat = lat; }
+    public void setLat(double lat) { this.lat = lat; }
 
-    public float getLng() { return lng; }
+    public double getLng() { return lng; }
 
-    public void setLng(float lng) { this.lng = lng; }
+    public void setLng(double lng) { this.lng = lng; }
 
     public int getNumBedrooms() { return numBedrooms; }
 
