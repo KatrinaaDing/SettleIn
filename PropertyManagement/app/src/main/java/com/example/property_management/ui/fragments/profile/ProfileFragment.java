@@ -142,7 +142,7 @@ public class ProfileFragment extends Fragment {
         FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(activity);
         FirebaseUser user = firebaseAuthHelper.getCurrentUser();
         assert user != null;
-        binding.userEmail.setText("User Email: " + user.getEmail());
+        binding.userEmail.setText("Email: " + user.getEmail());
         binding.userId.setText("User ID: " + user.getUid());
 
     }
