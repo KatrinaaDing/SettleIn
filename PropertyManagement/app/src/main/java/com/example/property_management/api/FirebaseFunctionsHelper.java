@@ -6,6 +6,7 @@ import com.example.property_management.data.NewProperty;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.functions.FirebaseFunctions;
+import com.google.firebase.functions.FirebaseFunctionsException;
 import com.google.firebase.functions.HttpsCallableResult;
 
 import java.util.HashMap;
@@ -26,7 +27,7 @@ public class FirebaseFunctionsHelper {
         data.put("url", url);
 
         return mFunctions
-            .getHttpsCallable("scrape_property")
+            .getHttpsCallable("scrape_property_v2")
             .call(data)
             .continueWith(new Continuation<HttpsCallableResult, NewProperty>() {
                 // This continuation runs on either success or failure, but if the task
@@ -34,7 +35,14 @@ public class FirebaseFunctionsHelper {
                 // propagated down.
                 @Override
                 public NewProperty then(@NonNull Task<HttpsCallableResult> task) throws Exception {
-                    Map<String, Object> result = (Map<String, Object>) task.getResult().getData();
+                    Map<String, Object> result;
+                    try{
+                        result = (Map<String, Object>) task.getResult().getData();
+                    } catch (Exception e) {
+                        int msgIdx = e.getMessage().indexOf("n:") + 2;
+                        String msg = e.getMessage().substring(msgIdx);
+                        throw new Exception(msg);
+                    }
 
                     return new NewProperty(
                         (String) result.get("url"),
@@ -42,11 +50,12 @@ public class FirebaseFunctionsHelper {
                         (int) result.get("bathroom_num"),
                         (int) result.get("parking_num"),
                         (String) result.get("address"),
-                        ((Double) result.get("lat")).floatValue(),
-                        ((Double) result.get("lng")).floatValue(),
-                        0
+                        0,
+                        0,
+                        (int) result.get("price")
                     );
                 }
+
             });
     }
 }

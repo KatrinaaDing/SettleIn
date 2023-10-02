@@ -72,7 +72,10 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="a valid url (can copy): https://www.example.com"
+                android:text="a valid url (can copy): https://www.example.com,
+                https://www.domain.com.au/3-01-83-bay-street-brighton-vic-3186-2018787564,
+                https://www.domain.com.au/24-gardiner-parade-glen-iris-vic-3146-16674780,
+                https://www.domain.com.au/1207-408-lonsdale-street-melbourne-vic-3000-2018776858"
                 android:textIsSelectable="true"
                 android:paddingTop="20dp"
                 android:textColor="@color/purple_500"
