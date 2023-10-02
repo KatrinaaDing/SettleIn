@@ -44,9 +44,6 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-//        final TextView textView = binding.textHome;
-//        homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
-
 //        Button testBtn = binding.testBtn;
 //        testBtn.setOnClickListener(view -> {
 //            Intent intent = new Intent(getActivity(), TestActivity.class);
@@ -94,17 +91,18 @@ public class HomeFragment extends Fragment {
                 .addOnSuccessListener(result -> {
                     ArrayList<Property> properties = (ArrayList<Property>) result;
                     if (properties.isEmpty()) {
+                        // show hint if no property exists
                         binding.hint.setVisibility(View.VISIBLE);
                     }
                     RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
                     propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
                     RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties);
                     propertiesRecyclerView.setAdapter(propertyCardAdapter);
-
+                    binding.loadingText.setVisibility(View.GONE);
                     allProperties = properties;
                 })
                 .addOnFailureListener(e -> {
-                    Log.e("get-all-properties", e.getMessage());
+                    Log.e("get-all-properties-fail", e.getMessage());
                     new BasicSnackbar(getView(), e.getMessage(), "error", Snackbar.LENGTH_LONG);
                 });
     }
