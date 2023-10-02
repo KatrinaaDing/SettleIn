@@ -86,14 +86,12 @@ public class AddPropertyActivity extends AppCompatActivity {
 //                .setTitleText("Select Inspection Time")
 //                .build();
 
+        // initialise components
         initSubmitButton();
         initUrlInputLayout();
         initScrapeUrlButton();
+        initArrowNumberPickers();
 
-        // number pickers
-        ArrowNumberPicker bedroomNumberPicker = findViewById(R.id.bedroomNumberPicker);
-        ArrowNumberPicker bathroomNumberPicker = findViewById(R.id.bathroomNumberPicker);
-        ArrowNumberPicker parkingNumberPicker = findViewById(R.id.parkingNumberPicker);
 
         // ================================== listeners =======================================
 //        datePicker.addOnPositiveButtonClickListener(selection -> {
@@ -113,16 +111,13 @@ public class AddPropertyActivity extends AppCompatActivity {
 //            timePicker.show(getSupportFragmentManager(), "time_picker");
 //        });
 
-
-        // handle number picker value change
-        bedroomNumberPicker.setOnValueChangeListener(new onValueChangeCallback() {
-            @Override
-            public void onChange(int newValue) {
-                bedroomNumber = newValue;
-            }});
-        bathroomNumberPicker.setOnValueChangeListener(newValue -> bathroomNumber = newValue);
-        parkingNumberPicker.setOnValueChangeListener(newValue -> parkingNumber = newValue);
     }
+
+    /**
+     * Handle back button on action bar
+     * @param item menu item
+     * @return true if handled, false otherwise
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -134,6 +129,20 @@ public class AddPropertyActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Initialise property amenities arrow number pickers
+     */
+    private void initArrowNumberPickers() {
+        ArrowNumberPicker bedroomNumberPicker = findViewById(R.id.bedroomNumberPicker);
+        ArrowNumberPicker bathroomNumberPicker = findViewById(R.id.bathroomNumberPicker);
+        ArrowNumberPicker parkingNumberPicker = findViewById(R.id.parkingNumberPicker);
+        bedroomNumberPicker.setOnValueChangeListener(newValue -> bedroomNumber = newValue);
+        bathroomNumberPicker.setOnValueChangeListener(newValue -> bathroomNumber = newValue);
+        parkingNumberPicker.setOnValueChangeListener(newValue -> parkingNumber = newValue);
+    }
+    /**
+     * Initialise submit property button
+     */
     private void initSubmitButton() {
         // on submit new property
         Button submitBtn = findViewById(R.id.submitBtn);
@@ -153,6 +162,10 @@ public class AddPropertyActivity extends AppCompatActivity {
         Button submitBtn = findViewById(R.id.submitBtn);
         submitBtn.setEnabled(false);
     }
+
+    /**
+     * Initialise url text input layout
+     */
     private void initUrlInputLayout() {
         TextInputLayout urlInputLayout = findViewById(R.id.urlInputLayout);
 
@@ -170,13 +183,17 @@ public class AddPropertyActivity extends AppCompatActivity {
             })
         );
     }
+
+    /**
+     * Initialise scrape url button
+     */
     private void initScrapeUrlButton() {
         // scrape url button
         MaterialButton scrapeUrlBtn = findViewById(R.id.scrapeUrlBtn);
         // url input
         TextInputLayout urlInputLayout = findViewById(R.id.urlInputLayout);
         scrapeUrlBtn.setOnClickListener(v -> {
-            // close keyboard
+            // close keyboard on click
             Helpers.closeKeyboard(this);
             // scrape advertisement from url
             if (!validateUrl()) return;
@@ -188,13 +205,18 @@ public class AddPropertyActivity extends AppCompatActivity {
                 // enable click action on finish scraping
                 scrapeUrlBtn.setEnabled(true);
                 fetchCoordinates(() -> {
-                    // enable submit button
+                    // enable submit button on finish fetching coordinates
                     enableSubmit();
                 });
             });
 
         });
     }
+
+    /**
+     * Submit new property to firebase
+     * @param activity current activity
+     */
     private void submitProperty(AppCompatActivity activity) {
         // create new property object
         NewProperty newProperty = new NewProperty(url, bedroomNumber, bathroomNumber, parkingNumber,
@@ -214,15 +236,25 @@ public class AddPropertyActivity extends AppCompatActivity {
             }
         });
     }
+
+    /**
+     * Fetch coordinates from address
+     * @param onComplete callback task
+     */
     private void fetchCoordinates(Runnable onComplete) {
         // TODO: fetch coordinates
         this.lat = 0;
         this.lng = 0;
+        // run callback task
         onComplete.run();
     }
 
+    /**
+     * Fetch property info from url
+     * @param urlInputLayout the text input layout to enter url
+     * @param onComplete callback task
+     */
     private void fetchPropertyInfo(TextInputLayout urlInputLayout, Runnable onComplete) {
-
         FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
         firebaseFunctionsHelper.scrapeProperty(urlInputLayout.getEditText().getText().toString())
             .addOnSuccessListener(resultProperty -> {
@@ -242,6 +274,11 @@ public class AddPropertyActivity extends AppCompatActivity {
             });
 
     }
+
+    /**
+     * Validate url input
+     * @return true if valid, false otherwise
+     */
     private boolean validateUrl() {
         String urlInput = binding.urlInputLayout.getEditText().getText().toString().trim();
         if (urlInput.isEmpty()) {
@@ -256,6 +293,10 @@ public class AddPropertyActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Set scrapped property info to UI
+     * @param property property object returned from scraping
+     */
     private void setPropertyInfo(NewProperty property) {
         // set properties
         this.bedroomNumber = property.getNumBedrooms();
@@ -265,24 +306,31 @@ public class AddPropertyActivity extends AppCompatActivity {
         this.price = property.getPrice();
 
         // set UI
+        TextInputLayout priceInputLayout = findViewById(R.id.priceInputLayout);
         ArrowNumberPicker bedroomNumberPicker = findViewById(R.id.bedroomNumberPicker);
         ArrowNumberPicker bathroomNumberPicker = findViewById(R.id.bathroomNumberPicker);
         ArrowNumberPicker parkingNumberPicker = findViewById(R.id.parkingNumberPicker);
+        priceInputLayout.getEditText().setText(String.valueOf(this.price));
         bedroomNumberPicker.setValue(this.bedroomNumber);
         bathroomNumberPicker.setValue(this.bathroomNumber);
         parkingNumberPicker.setValue(this.parkingNumber);
 
+        // set address to autocomplete fragment
         autocompleteFragment = (AutocompleteFragment) getSupportFragmentManager().findFragmentById(R.id.auto_property_fragment);
         Log.i("isnull", "autocompleteFragment: " + (autocompleteFragment == null ? "null" : "not null"));
-
         if (autocompleteFragment == null) {
             Log.e("isnull", "autocompleteFragment is null");
             return;
         }
-        // set address text to UI
         autocompleteFragment.setPlaceNameText(property.getAddress());
     }
 
+    /**
+     * Update user document with new property
+     * @param activity current activity
+     * @param newProperty new property object
+     * @param propertyId property id returned from firebase
+     */
     private void updateUserProperty(AppCompatActivity activity, NewProperty newProperty, String propertyId) {
         // create object to update user document
         HashMap<String, Object> propertyPayload = newProperty.toUpdateUserObject(propertyId);
