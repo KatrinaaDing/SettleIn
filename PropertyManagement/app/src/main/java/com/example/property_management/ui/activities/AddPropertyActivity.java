@@ -63,27 +63,27 @@ public class AddPropertyActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // ================================== Components =======================================
-        // inspection date label
-        TextView inspectionDate = binding.inspectionDate;
-        // date picker
-        CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints.Builder().setValidator(DateValidatorPointForward.now());
-        MaterialDatePicker<Long> datePicker =
-                MaterialDatePicker
-                .Builder
-                .datePicker()
-                .setTitleText("Select Inspection date")
-                .setCalendarConstraints(constraintsBuilder.build())
-                .build();
-        // inspection time label
-        TextView inspectionTime = findViewById(R.id.inspectionTime);
-        // inspection time
-        MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
-                .setTimeFormat(TimeFormat.CLOCK_12H)
-                .setHour(12)
-                .setMinute(0)
-                .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
-                .setTitleText("Select Inspection Time")
-                .build();
+//        // inspection date label
+//        TextView inspectionDate = binding.inspectionDate;
+//        // date picker
+//        CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints.Builder().setValidator(DateValidatorPointForward.now());
+//        MaterialDatePicker<Long> datePicker =
+//                MaterialDatePicker
+//                .Builder
+//                .datePicker()
+//                .setTitleText("Select Inspection date")
+//                .setCalendarConstraints(constraintsBuilder.build())
+//                .build();
+//        // inspection time label
+//        TextView inspectionTime = findViewById(R.id.inspectionTime);
+//        // inspection time
+//        MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
+//                .setTimeFormat(TimeFormat.CLOCK_12H)
+//                .setHour(12)
+//                .setMinute(0)
+//                .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
+//                .setTitleText("Select Inspection Time")
+//                .build();
         // url input
         TextInputLayout urlInputLayout = findViewById(R.id.urlInputLayout);
         // scrape url button
@@ -94,22 +94,22 @@ public class AddPropertyActivity extends AppCompatActivity {
         ArrowNumberPicker parkingNumberPicker = findViewById(R.id.parkingNumberPicker);
 
         // ================================== listeners =======================================
-        datePicker.addOnPositiveButtonClickListener(selection -> {
-            // on click set date
-           inspectionDate.setText(datePicker.getHeaderText());
-        });
-        timePicker.addOnPositiveButtonClickListener(selection -> {
-            // on click set time
-            inspectionTime.setText(timePicker.getHour() + ":" + timePicker.getMinute());
-        });
-        inspectionDate.setOnClickListener(v -> {
-            // on select date
-            datePicker.show(getSupportFragmentManager(), "date_picker");
-        });
-        inspectionTime.setOnClickListener(v -> {
-            // on select time
-            timePicker.show(getSupportFragmentManager(), "time_picker");
-        });
+//        datePicker.addOnPositiveButtonClickListener(selection -> {
+//            // on click set date
+//           inspectionDate.setText(datePicker.getHeaderText());
+//        });
+//        timePicker.addOnPositiveButtonClickListener(selection -> {
+//            // on click set time
+//            inspectionTime.setText(timePicker.getHour() + ":" + timePicker.getMinute());
+//        });
+//        inspectionDate.setOnClickListener(v -> {
+//            // on select date
+//            datePicker.show(getSupportFragmentManager(), "date_picker");
+//        });
+//        inspectionTime.setOnClickListener(v -> {
+//            // on select time
+//            timePicker.show(getSupportFragmentManager(), "time_picker");
+//        });
         // on change url text
         urlInputLayout.addOnEditTextAttachedListener(textInputLayout ->
                 textInputLayout.getEditText().addTextChangedListener(new TextWatcher() {

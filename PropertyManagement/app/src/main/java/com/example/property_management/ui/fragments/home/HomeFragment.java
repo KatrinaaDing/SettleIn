@@ -42,14 +42,9 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textHome;
+//        final TextView textView = binding.textHome;
 //        homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
 
-        Button propertyBtn = binding.propertyDetailBtn;
-        propertyBtn.setOnClickListener(view -> {
-            Intent intent = new Intent(getActivity(), PropertyDetailActivity.class);
-            startActivity(intent);
-        });
 
         Button testBtn = binding.testBtn;
         testBtn.setOnClickListener(view -> {

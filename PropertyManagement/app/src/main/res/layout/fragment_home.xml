@@ -33,11 +33,6 @@
             android:paddingHorizontal="20dp"
             android:orientation="vertical">
             <Button
-                android:id="@+id/propertyDetailBtn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Go to property detail screen" />
-            <Button
                 android:id="@+id/testBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

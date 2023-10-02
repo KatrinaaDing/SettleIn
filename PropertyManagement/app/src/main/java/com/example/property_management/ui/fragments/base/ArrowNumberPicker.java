@@ -66,6 +66,7 @@ public class ArrowNumberPicker extends LinearLayout {
         LinearLayout layout = findViewById(R.id.layout);
         if (direction == 0) {
             layout.setOrientation(LinearLayout.HORIZONTAL);
+            layout.setLayoutDirection(LAYOUT_DIRECTION_RTL);
         } else if (direction == 1) {
             layout.setOrientation(LinearLayout.VERTICAL);
         } else {
