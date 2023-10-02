@@ -3,6 +3,7 @@ package com.example.property_management.ui.fragments.home;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,14 +63,17 @@ public class HomeFragment extends Fragment {
         binding = null;
     }
 
+    /**
+     * Get all properties from the db and display them in the recycler view
+     * @param context the context of the fragment
+     */
     private void getAllProperties(Context context) {
         FirebaseUserRepository db = new FirebaseUserRepository();
         db.getAllUserProperties(new GetAllUserPropertiesCallback() {
             @Override
             public void onSuccess(ArrayList<Property> properties) {
                 if (properties.isEmpty()) {
-                    binding.textHome.setText("Press the + sign\n to add your first property!\n\n||\nV");
-                    return;
+                    binding.hint.setVisibility(View.VISIBLE);
                 }
                 RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
                 propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
@@ -84,5 +88,9 @@ public class HomeFragment extends Fragment {
                 new BasicSnackbar(getView(), msg, "error", Snackbar.LENGTH_LONG);
             }
         });
+    }
+
+    public ArrayList<Property> getAllProperties() {
+        return allProperties;
     }
 }
