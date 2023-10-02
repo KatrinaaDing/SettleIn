@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -84,10 +85,11 @@ public class AddPropertyActivity extends AppCompatActivity {
 //                .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
 //                .setTitleText("Select Inspection Time")
 //                .build();
-        // url input
-        TextInputLayout urlInputLayout = findViewById(R.id.urlInputLayout);
-        // scrape url button
-        MaterialButton scrapeUrlBtn = findViewById(R.id.scrapeUrlBtn);
+
+        initSubmitButton();
+        initUrlInputLayout();
+        initScrapeUrlButton();
+
         // number pickers
         ArrowNumberPicker bedroomNumberPicker = findViewById(R.id.bedroomNumberPicker);
         ArrowNumberPicker bathroomNumberPicker = findViewById(R.id.bathroomNumberPicker);
@@ -110,30 +112,8 @@ public class AddPropertyActivity extends AppCompatActivity {
 //            // on select time
 //            timePicker.show(getSupportFragmentManager(), "time_picker");
 //        });
-        // on change url text
-        urlInputLayout.addOnEditTextAttachedListener(textInputLayout ->
-                textInputLayout.getEditText().addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-                    @Override
-                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                        urlInputLayout.setError(null);
-                    }
-                    @Override
-                    public void afterTextChanged(Editable editable) {}
-                })
-        );
-        // on submit new property
-        findViewById(R.id.submitBtn).setOnClickListener(v -> submitProperty(this));
-        scrapeUrlBtn.setOnClickListener(v -> {
-            // close keyboard
-            Helpers.closeKeyboard(this);
-            // scrape advertisement from url
-            if (!validateUrl()) return;
-            urlInputLayout.setHelperText("Getting information...");
-            fetchPropertyInfo(urlInputLayout);
-            fetchCoordinates();
-        });
+
+
         // handle number picker value change
         bedroomNumberPicker.setOnValueChangeListener(new onValueChangeCallback() {
             @Override
@@ -154,6 +134,67 @@ public class AddPropertyActivity extends AppCompatActivity {
         }
     }
 
+    private void initSubmitButton() {
+        // on submit new property
+        Button submitBtn = findViewById(R.id.submitBtn);
+        // disable submit button by default
+        submitBtn.setEnabled(false);
+        submitBtn.setOnClickListener(v -> submitProperty(this));
+    }
+
+    /**
+     * Enable and disable new property submission
+     */
+    private void enableSubmit() {
+        Button submitBtn = findViewById(R.id.submitBtn);
+        submitBtn.setEnabled(true);
+    }
+    private void disableSubmit() {
+        Button submitBtn = findViewById(R.id.submitBtn);
+        submitBtn.setEnabled(false);
+    }
+    private void initUrlInputLayout() {
+        TextInputLayout urlInputLayout = findViewById(R.id.urlInputLayout);
+
+        // on change url text
+        urlInputLayout.addOnEditTextAttachedListener(textInputLayout ->
+            textInputLayout.getEditText().addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                    urlInputLayout.setError(null);
+                }
+                @Override
+                public void afterTextChanged(Editable editable) {}
+            })
+        );
+    }
+    private void initScrapeUrlButton() {
+        // scrape url button
+        MaterialButton scrapeUrlBtn = findViewById(R.id.scrapeUrlBtn);
+        // url input
+        TextInputLayout urlInputLayout = findViewById(R.id.urlInputLayout);
+        scrapeUrlBtn.setOnClickListener(v -> {
+            // close keyboard
+            Helpers.closeKeyboard(this);
+            // scrape advertisement from url
+            if (!validateUrl()) return;
+            // disable search and submit button on start scraping
+            scrapeUrlBtn.setEnabled(false);
+            disableSubmit();
+            urlInputLayout.setHelperText("Getting information...");
+            fetchPropertyInfo(urlInputLayout, () -> {
+                // enable click action on finish scraping
+                scrapeUrlBtn.setEnabled(true);
+                fetchCoordinates(() -> {
+                    // enable submit button
+                    enableSubmit();
+                });
+            });
+
+        });
+    }
     private void submitProperty(AppCompatActivity activity) {
         // create new property object
         NewProperty newProperty = new NewProperty(url, bedroomNumber, bathroomNumber, parkingNumber,
@@ -173,13 +214,15 @@ public class AddPropertyActivity extends AppCompatActivity {
             }
         });
     }
-    private void fetchCoordinates() {
+    private void fetchCoordinates(Runnable onComplete) {
         // TODO: fetch coordinates
         this.lat = 0;
         this.lng = 0;
+        onComplete.run();
     }
 
-    private void fetchPropertyInfo(TextInputLayout urlInputLayout) {
+    private void fetchPropertyInfo(TextInputLayout urlInputLayout, Runnable onComplete) {
+
         FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
         firebaseFunctionsHelper.scrapeProperty(urlInputLayout.getEditText().getText().toString())
             .addOnSuccessListener(resultProperty -> {
@@ -187,12 +230,17 @@ public class AddPropertyActivity extends AppCompatActivity {
                 setPropertyInfo(resultProperty);
                 // set url input helper text
                 urlInputLayout.setHelperText("");
+                // run callback task
+                onComplete.run();
             })
             .addOnFailureListener(e -> {
                 // pop error at input box
                 Log.e("scrape-url-error", e.getMessage());
                 urlInputLayout.setError("Error: " + e.getMessage());
+                // run callback task
+                onComplete.run();
             });
+
     }
     private boolean validateUrl() {
         String urlInput = binding.urlInputLayout.getEditText().getText().toString().trim();

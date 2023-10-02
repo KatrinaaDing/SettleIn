@@ -33,7 +33,8 @@
             android:textSize="10pt"
             android:text="0"
             android:padding="10dp"
-            />
+            android:textDirection="ltr"
+        />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonDown"
