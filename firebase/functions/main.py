@@ -227,3 +227,233 @@ def scrape_property_restful(req: https_fn.Request) -> https_fn.Response:
     }
     return_data = json.dumps({ "property": property }) 
     return https_fn.Response(return_data, status=200, headers={"Content-Type": "application/json"})
+
+# get all properties of a user from firestore
+# @https_fn.on_request()
+# def get_user_properties_rest(req:  https_fn.Request) -> https_fn.Response:
+#     user_id = req.args.get("userId")
+#     if user_id is None:
+#         return create_error_response(
+#             400,
+#             "The function must be called with an parameter, 'userId', which must be string.",
+#         )
+#     try:
+#         # get user document
+#         coll_user = firestore.client().collection(u'users').document(user_id)
+#         user = coll_user.get().to_dict()
+#         if user is None:
+#             return create_error_response(404, "User not found.")
+#         # for each propertyId in user document, get the property document
+#         if 'properties' not in user:
+#             return []
+#         # for each propertyId in user document, get the property document
+#         properties = []
+#         for property_id in user['properties']:
+#             property = firestore.client().collection(u'properties').document(property_id).get().to_dict()
+#             property['propertyId'] = property_id
+#             properties.append(property)
+#         return_data = json.dumps({ "properties": properties })
+#         return https_fn.Response(return_data, status=200, headers={"Content-Type": "application/json"})
+#     except Exception as e:
+#         return create_error_response(
+#             500,
+#             str(e),
+#         )
+        
+# get all properties of a user from firestore
+@https_fn.on_call()
+def get_user_properties(req:  https_fn.Request) -> Any:
+    user_id = req.data["userId"]
+    if user_id is None:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+            message=(
+                "The function must be called with an parameter, 'userId', which must be string."
+            ),
+        )
+    try:
+        # get user document
+        coll_user = firestore.client().collection(u'users').document(user_id)
+        user = coll_user.get().to_dict()
+        if user is None:
+            raise https_fn.HttpsError(
+                code=https_fn.FunctionsErrorCode.NOT_FOUND,
+                message=("User not found."),
+            )
+        # for each propertyId in user document, get the property document
+        if 'properties' not in user:
+            return []
+        properties = []
+        for property_id in user['properties']:
+            property = firestore.client().collection(u'properties').document(property_id).get().to_dict()
+            property['propertyId'] = property_id
+            properties.append(property)
+        return properties
+    
+    except Exception as e:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.INTERNAL,
+            message=(str(e)),
+        )
+
+
+# get a property from firestore combined with user's collected data from that property
+# @https_fn.on_request()
+# def get_property_by_id_rest(req:  https_fn.Request) -> https_fn.Response:
+#     # get property and user id
+#     property_id = req.args.get("propertyId")
+#     user_id = req.args.get("userId")
+#     if property_id is None or user_id is None:
+#         return create_error_response(
+#             400,
+#             "The function must be called with two parameters, 'propertyId' and 'userId, which must be string.",
+#         )
+#     # get property and user document
+#     property = firestore.client().collection(u'properties').document(property_id).get().to_dict()
+#     if property is None:
+#         return create_error_response(404, "Property not found.")
+#     user = firestore.client().collection(u'users').document(user_id).get().to_dict()
+#     if user is None:
+#         return create_error_response(404, "User not found.")
+#     try:
+#         user_property = user['properties'][property_id]
+#     except Exception as e:
+#         return create_error_response(404, "The property does not belong to this user.")
+    
+#     try:
+#         user_property.update(property)
+#         return_data = json.dumps({ "property": user_property })
+#         return https_fn.Response(return_data, status=200, headers={"Content-Type": "application/json"})
+#     except Exception as e:
+#         return create_error_response(
+#             500,
+#             str(e),
+#         )
+        
+# get a property from firestore combined with user's collected data from that property
+@https_fn.on_call()
+def get_property_by_id(req:  https_fn.Request) -> Any:
+    # get property and user id
+    property_id = req.data["propertyId"]
+    user_id = req.data["userId"]
+    if property_id is None or user_id is None:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+            message=(
+                "The function must be called with two parameters, 'propertyId' and 'userId, which must be string."
+            ),
+        )
+    # get property and user document
+    property = firestore.client().collection(u'properties').document(property_id).get().to_dict()
+    if property is None:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.NOT_FOUND,
+            message=( "Property not found."),
+        )
+    user = firestore.client().collection(u'users').document(user_id).get().to_dict()
+    if user is None:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.NOT_FOUND,
+            message=("User not found."),
+        )
+    # get user's collected data from that property
+    try:
+        user_property = user['properties'][property_id]
+    except Exception as e:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.NOT_FOUND,
+            message=("The property does not belong to this user."),
+        )
+    # merge property and user's collected data (user's property data will override property document data)
+    try:
+        property.update(user_property)
+        return_data = json.dumps({ "property": property })
+        return return_data
+    except Exception as e:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.INTERNAL,
+            message=(str(e)),
+        )
+        
+# @https_fn.on_request()
+# def check_property_exist_rest(req:  https_fn.Request) -> https_fn.Response:
+#     user_id = req.args.get("userId")
+#     address = req.args.get("address")
+#     href = req.args.get("href")
+#     if user_id is None:
+#         return create_error_response(
+#             400,
+#             "The function must be called with a parameter, 'userId' , which must be string.",
+#         )
+#     if address is None and href is None:
+#         return create_error_response(
+#             400,
+#             "The function must be called with either 'address' or 'href' , which must be string.",
+#         )
+#     try:
+#         coll_user = firestore.client().collection(u'users').document(user_id)
+#         user = coll_user.get().to_dict()
+#         if user is None:
+#             return create_error_response(404, "User not found.")
+#         for property_id in user['properties']:
+#             # get property document
+#             property = firestore.client().collection(u'properties').document(property_id).get().to_dict()
+#             # check if property exist, return propertyId if exist
+#             if (address is not None and property['address'] == address) or (href is not None and property['href'] == href):
+#                 return_data = json.dumps({"exist": True, "propertyId": property_id})
+#                 return https_fn.Response(return_data, status=200, headers={"Content-Type": "application/json"})
+#         # property not exist, return false
+#         return_data = json.dumps({"exist": False})
+#         return https_fn.Response(return_data, status=200, headers={"Content-Type": "application/json"})
+#     except Exception as e:
+#         return create_error_response(500, str(e))
+    
+# check if a property exist in a user's collection
+@https_fn.on_call()
+def check_property_exist(req: https_fn.Request) -> Any:
+    # get data from request
+    user_id = req.data["userId"]
+    address = req.data["address"]
+    href = req.data["href"]
+    if user_id is None:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+            message=(
+                "The function must be called with a parameter, 'userId' , which must be string."
+            ),
+        )
+    if address is None and href is None:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+            message=(
+                "The function must be called with either 'address' or 'href' , which must be string."
+            ),
+        )
+    # get user document
+    coll_user = firestore.client().collection(u'users').document(user_id)
+    user = coll_user.get().to_dict()
+    if user is None:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.NOT_FOUND,
+            message=("User not found."),
+        )
+    # no property in user document
+    if 'properties' not in user:
+        return_data = { "exist": False }
+        return return_data
+    try:
+        for property_id in user['properties']:
+            # get property document
+            property = firestore.client().collection(u'properties').document(property_id).get().to_dict()
+            # check if property exist, return propertyId if exist
+            if (address is not None and property['address'] == address) or (href is not None and property['href'] == href):
+                return_data = { "exist": True, "propertyId": property_id }
+                return return_data
+        # property not exist, return false
+        return_data = { "exist": False }
+        return return_data
+    except Exception as e:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.INTERNAL,
+            message=(str(e)),
+        )

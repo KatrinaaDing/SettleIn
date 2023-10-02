@@ -12,4 +12,5 @@
     <color name="success">#238C23</color>
     <color name="warning">#FFEB3B</color>
     <color name="grey">#767676</color>
+    <color name="lightGrey">#C5C5C5</color>
 </resources>

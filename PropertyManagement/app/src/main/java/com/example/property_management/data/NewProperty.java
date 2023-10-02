@@ -17,7 +17,7 @@ public class NewProperty {
 
     public NewProperty() {};
 
-    public NewProperty(String href, int numBedrooms, int numBathrooms, int numParking, String address, float lat, float lng, int price) {
+    public NewProperty(String href, int numBedrooms, int numBathrooms, int numParking, String address, float lat, float lng, int price, ArrayList<String> images) {
         this.href = href;
         this.address = address;
         this.lat = lat;

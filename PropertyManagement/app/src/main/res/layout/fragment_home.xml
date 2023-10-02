@@ -7,18 +7,50 @@
     tools:context="com.example.property_management.ui.fragments.home.HomeFragment">
 
     <TextView
-        android:id="@+id/text_home"
+        android:id="@+id/loading_text"
+        android:visibility="visible"
+        android:text="Loading..."
+        android:textSize="25sp"
+        android:textColor="@color/grey"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginBottom="100dp"
         android:textAlignment="center"
-        android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <LinearLayout
+        android:id="@+id/hint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="invisible"
+        android:orientation="vertical">
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:src="@drawable/baseline_add_home_work_24"
+            app:tint="@color/lightGrey" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="Press the + sign\n to add your first property!\n\n||\nV"
+            android:textAlignment="center"
+            android:textSize="25sp"
+            android:textColor="@color/lightGrey"/>
+    </LinearLayout>
+
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -32,18 +64,22 @@
             android:layout_height="match_parent"
             android:paddingHorizontal="20dp"
             android:orientation="vertical">
-            <Button
-                android:id="@+id/propertyDetailBtn"
+            <!-- title -->
+            <TextView
+                android:id="@+id/home_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Go to property detail screen" />
-            <Button
-                android:id="@+id/testBtn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Go to Test Screen"
-                style="@style/Widget.Material3.Button.ElevatedButton"
-                android:layout_marginVertical="20dp"/>
+                android:text="Your Shortlisted Properties"
+                android:paddingBottom="20dp"
+                android:textSize="30sp"
+                />
+<!--            <Button-->
+<!--                android:id="@+id/testBtn"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Go to Test Screen"-->
+<!--                style="@style/Widget.Material3.Button.ElevatedButton"-->
+<!--                android:layout_marginVertical="20dp"/>-->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/propertiesRecyclerView"
                 android:layout_width="match_parent"
