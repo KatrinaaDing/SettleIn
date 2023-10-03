@@ -19,6 +19,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.property_management.R;
@@ -61,7 +62,7 @@ public class ProfileFragment extends Fragment {
         TextView userId = binding.userId;
 
         // ===== Add Location Dialog =====
-        Button addLocationBtn = binding.addLocationBtn;
+        ImageButton addLocationBtn = binding.addLocationBtn;
         addLocationBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -175,5 +176,7 @@ public class ProfileFragment extends Fragment {
 //            }
 //        });
 //        dialog.show(getParentFragmentManager(), "Test dialog");
+        DialogFragment dialog = new EditProfileDialogFragment();
+        dialog.show(getParentFragmentManager(), "EditProfileDialogFragment");
     }
 }
