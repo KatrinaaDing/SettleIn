@@ -44,11 +44,11 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-//        Button testBtn = binding.testBtn;
-//        testBtn.setOnClickListener(view -> {
-//            Intent intent = new Intent(getActivity(), TestActivity.class);
-//            startActivity(intent);
-//        });
+        Button testBtn = binding.testBtn;
+        testBtn.setOnClickListener(view -> {
+            Intent intent = new Intent(getActivity(), TestActivity.class);
+            startActivity(intent);
+        });
 
         getAllProperties(this.getContext());
 

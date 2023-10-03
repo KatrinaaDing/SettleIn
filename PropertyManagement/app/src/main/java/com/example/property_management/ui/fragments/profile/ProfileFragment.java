@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -22,9 +23,11 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseAuthHelper;
+import com.example.property_management.callbacks.BasicDialogCallback;
 import com.example.property_management.databinding.FragmentProfileBinding;
 import com.example.property_management.ui.activities.LoginActivity;
 import com.example.property_management.ui.fragments.base.AutocompleteFragment;
+import com.example.property_management.ui.fragments.base.BasicDialog;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -52,6 +55,7 @@ public class ProfileFragment extends Fragment {
         profileViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
 
         // ========================= Components ==========================
+        ImageButton editBtn = binding.editBtn;
         Button logoutBtn = binding.logoutBtn;
         TextView userEmail = binding.userEmail;
         TextView userId = binding.userId;
@@ -71,6 +75,13 @@ public class ProfileFragment extends Fragment {
         });
 
         // ========================= Listeners ==========================
+        editBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                editProfile();
+            }
+        });
+
         logoutBtn.setOnClickListener(v -> {
             logout();
         });
@@ -144,7 +155,25 @@ public class ProfileFragment extends Fragment {
         FirebaseUser user = firebaseAuthHelper.getCurrentUser();
         assert user != null;
         binding.userEmail.setText("Email: " + user.getEmail());
-        binding.userId.setText("User ID: " + user.getUid());
+//        binding.userId.setText("User ID: " + user.getUid());
+    }
 
+    public void editProfile() {
+//        BasicDialog dialog = new BasicDialog(false,
+//                "Test2 dialog",
+//                "This dialog cannot be closed from outside and has 2 buttons",
+//                "Cancel",
+//                "Save");
+//        dialog.setCallback(new BasicDialogCallback() {
+//            @Override
+//            public void onLeftBtnClick() {
+//                dialog.dismiss();
+//            }
+//            @Override
+//            public void onRightBtnClick() {
+//                dialog.dismiss();
+//            }
+//        });
+//        dialog.show(getParentFragmentManager(), "Test dialog");
     }
 }

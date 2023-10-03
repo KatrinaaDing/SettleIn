@@ -73,13 +73,13 @@
                 android:paddingBottom="20dp"
                 android:textSize="30sp"
                 />
-<!--            <Button-->
-<!--                android:id="@+id/testBtn"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:text="Go to Test Screen"-->
-<!--                style="@style/Widget.Material3.Button.ElevatedButton"-->
-<!--                android:layout_marginVertical="20dp"/>-->
+            <Button
+                android:id="@+id/testBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Go to Test Screen"
+                style="@style/Widget.Material3.Button.ElevatedButton"
+                android:layout_marginVertical="20dp"/>
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/propertiesRecyclerView"
                 android:layout_width="match_parent"
