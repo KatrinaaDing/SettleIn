@@ -3,6 +3,7 @@ from firebase_functions import firestore_fn, https_fn
 # The Firebase Admin SDK to access Cloud Firestore.
 from firebase_admin import initialize_app, firestore
 from typing import Any
+import os
 import google.cloud.firestore
 
 # libraries
@@ -12,6 +13,8 @@ import requests
 import json
 
 initialize_app()
+
+DEFAULT_AMENITIES_NUM = 0
 
 @https_fn.on_request()
 def hello_world(req: https_fn.Request) -> https_fn.Response:
@@ -35,8 +38,6 @@ def getHtml(url):
     soup=BeautifulSoup(res.text,'lxml')
     return soup
 
-
-
 #Scrape the property information on the domain website based on the URL.
 #Input: URL(str)
 #Output: URL (str), price (int), bed_num (int), parking_num (int), address (str),imgs_url (list of str)
@@ -54,7 +55,7 @@ def scrape_domain(url):
             price_str = html_soup.find('span',{'data-testid': 'listing-details__listing-summary-title-name'})
         # code reference: https://stackoverflow.com/questions/11339210/how-to-get-integer-values-from-a-string-in-python
         price = re.search(r'(\d+,?)+', price_str.text).group()
-        price = -1 if price == None else int(price.replace(',', ''))
+        price = DEFAULT_AMENITIES_NUM if price == None else int(price.replace(',', ''))
 
         beds_baths_parkings_str = html_soup.find('div',{'class':'css-1dtnjt5'})
         if beds_baths_parkings_str is None:
@@ -69,11 +70,11 @@ def scrape_domain(url):
             if match:
                 value = match.group(1)
                 if feature == 'bed':
-                    bed_num = -1 if value == '−' else int(value)
+                    bed_num = DEFAULT_AMENITIES_NUM if value == '−' else int(value)
                 elif feature == 'bath':
-                    bath_num = -1 if value == '−' else int(value)
+                    bath_num = DEFAULT_AMENITIES_NUM if value == '−' else int(value)
                 elif feature == 'parking':
-                    parking_num = -1 if value == '−' else int(value)
+                    parking_num = DEFAULT_AMENITIES_NUM if value == '−' else int(value)
 
         imgs_url = html_soup.find('img',{'class': 'css-bh4wo8'}).get('src')
     except:
@@ -97,12 +98,12 @@ def scrape_raywhite(url):
 
         price_str = html_soup.find('div',{'class': 'property-detail__banner__side__price'}).text.strip()
         price = re.search(r'(\d+,?)+', price_str).group()
-        price = -1 if price == None else int(price.replace(',', ''))
+        price = DEFAULT_AMENITIES_NUM if price == None else int(price.replace(',', ''))
 
         beds_baths_parkings_str = html_soup.find('div',{'class':'property-meta'}).text
         beds_baths_parkings_num = re.findall(r'\d+', beds_baths_parkings_str)
         # define default value
-        beds_baths_parkings_count= {'bed_num': -1, 'bath_num': -1, 'car_num': -1}
+        beds_baths_parkings_count= {'bed_num': DEFAULT_AMENITIES_NUM, 'bath_num': DEFAULT_AMENITIES_NUM, 'car_num': DEFAULT_AMENITIES_NUM}
         classes_to_find = [
             ('icon icon-solid-bed', 'bed_num'),
             ('icon icon-solid-bath', 'bath_num'),
@@ -228,6 +229,82 @@ def scrape_property_restful(req: https_fn.Request) -> https_fn.Response:
     return_data = json.dumps({ "property": property }) 
     return https_fn.Response(return_data, status=200, headers={"Content-Type": "application/json"})
 
+
+"""
+    get longtitude and latitude of the input address
+    Input: address (str)
+    Output: {"coordinate": {"lat": LAT, "lng": LNG}}
+"""
+@https_fn.on_call(secrets=["MAPS_API_KEY"])
+def get_lnglat_by_address(req: https_fn.Request) -> Any:
+    # parameters passed from the client.
+    try:
+        address = req.data["address"]
+
+    except (ValueError, KeyError):
+        # Throwing an HttpsError so that the client gets the error details.
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+            message=(
+                'The function must be cadlled with an parameter, "address", which must be string.'
+            ),
+        )
+    
+    # get lng and lat of the input address from google gedocode api
+    r = requests.get('https://maps.googleapis.com/maps/api/geocode/json?address=' + address + '&key=' + os.environ.get("MAPS_API_KEY"))
+    r = r.json()
+    # if the address is valid, return the coordinate
+    status = r["status"]
+    if status == "OK":
+        return r["results"][0]["geometry"]["location"]
+    
+    # if error, return the error message
+    elif status == "ZERO_RESULTS":
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.NOT_FOUND,
+            message=("The address is invalid."),
+        )
+
+    elif status == "OVER_DAILY_LIMIT" or status == "OVER_QUERY_LIMIT" or status == "REQUEST_DENIED":
+
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.PERMISSION_DENIED,
+            message=(r["error_message"]),
+        )
+    
+    else:
+        # status == "UNKNOWN_ERROR"
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.INTERNAL,
+            message=(r["google map server error, please try again later."]),
+        )
+    
+
+# a restful api version of scrape_property_v2
+@https_fn.on_request(secrets=["MAPS_API_KEY"])
+def get_lnglat_by_address_restful(req: https_fn.Request) -> https_fn.Response:
+    # parameters passed from the client.
+    address = req.args.get("address")
+    if address is None:
+        return create_error_response(
+            400,
+            "The function must be called with an parameter, 'address', which must be string.",
+        )
+    
+    # get lng and lat of the input address from google gedocode api
+    r = requests.get('https://maps.googleapis.com/maps/api/geocode/json?address=' + address + '&key=' + os.environ.get("MAPS_API_KEY"))
+    r = r.json()
+    # if the address is valid, return the coordinate
+    if r["status"] == "OK":
+        return r["results"][0]["geometry"]["location"]
+    # if error, return the error message
+    else:
+        re = {
+            "error": r["error_message"]
+        }
+        return re
+    
+    
 # get all properties of a user from firestore
 # @https_fn.on_request()
 # def get_user_properties_rest(req:  https_fn.Request) -> https_fn.Response:

@@ -51,8 +51,8 @@ public class AddPropertyActivity extends AppCompatActivity {
     private int bedroomNumber = 0;
     private int bathroomNumber = 0;
     private int parkingNumber = 0;
-    private float lat = 0;
-    private float lng = 0;
+    private double lat = Double.NaN;
+    private double lng = Double.NaN;
     private int price = 0;
     private ArrayList<String> images;
 
@@ -227,12 +227,18 @@ public class AddPropertyActivity extends AppCompatActivity {
      * @param activity current activity
      */
     private void submitProperty(AppCompatActivity activity) {
+        // invalid address if lat or lng is NaN
+        if (Double.isNaN(lat) || Double.isNaN(lng)) {
+            new BasicSnackbar(findViewById(android.R.id.content), "Invalid address", "error");
+            return;
+        }
+
         // set submit button to loading state
         setSubmitLoading();
         // check if property exists
         Map<String, String> payLoad = new HashMap<>();
         payLoad.put("href", url);
-        payLoad.put("address", autocompleteFragment.getSelectedPlaceName());
+        payLoad.put("address", autocompleteFragment.getSelectedAddress());
         FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
         firebaseFunctionsHelper.checkPropertyExists(payLoad)
             .addOnSuccessListener(result -> {
@@ -266,10 +272,11 @@ public class AddPropertyActivity extends AppCompatActivity {
      * @param activity current activity
      */
     private void addProperty(AppCompatActivity activity) {
+        Log.i("newproperty", lat + ", " + lng);
         // post to firebase
         // create new property object
         NewProperty newProperty = new NewProperty(url, bedroomNumber, bathroomNumber, parkingNumber,
-                autocompleteFragment.getSelectedPlaceName(), lat, lng, price, images);
+                autocompleteFragment.getSelectedAddress(), lat, lng, price, images);
         FirebasePropertyRepository db = new FirebasePropertyRepository();
         db.addProperty(newProperty, new AddPropertyCallback() {
             @Override
@@ -284,17 +291,33 @@ public class AddPropertyActivity extends AppCompatActivity {
             }
         });
     }
+
     /**
      * Fetch coordinates from address
      * @param onComplete callback task
      */
     private void fetchCoordinates(Runnable onComplete) {
-        // TODO: fetch coordinates
-        this.lat = 0;
-        this.lng = 0;
-        // run callback task (allow submit)
-        // TODO: only allow submit when coordinates are successfully fetched
-        onComplete.run();
+        // check if autocompleteFragment is null
+        if (autocompleteFragment == null) {
+            System.out.println("fetch coordinate, autocompleteFragment is null");
+            return;
+        }
+        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+        // call firebase function to get lat and lng
+        firebaseFunctionsHelper.getLngLatByAddress(autocompleteFragment.getSelectedAddress())
+            .addOnSuccessListener(result -> {
+                // set lat and lng
+                lat = result.get("lat");
+                lng = result.get("lng");
+                System.out.println("lat: " + lat + ", lng: " + lng);
+                // run callback task (allow submit)
+                // only allow submit when coordinates are successfully fetched
+                onComplete.run();
+            })
+            .addOnFailureListener(e -> {
+                // pop error at input box
+                Log.e("get lng lat error", e.getMessage());
+            });
     }
 
     /**
@@ -370,7 +393,8 @@ public class AddPropertyActivity extends AppCompatActivity {
             Log.e("isnull", "autocompleteFragment is null");
             return;
         }
-        autocompleteFragment.setPlaceNameText(property.getAddress());
+        // set address text to UI
+        autocompleteFragment.setAddressText(property.getAddress());
     }
 
     /**
