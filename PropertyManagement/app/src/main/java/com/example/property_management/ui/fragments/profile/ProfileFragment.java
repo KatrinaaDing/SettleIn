@@ -52,7 +52,7 @@ public class ProfileFragment extends Fragment {
         activity = (AppCompatActivity) getActivity();
 
         final TextView textView = binding.textProfile;
-        profileViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+//        profileViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
 
         // ========================= Components ==========================
         ImageButton editBtn = binding.editBtn;

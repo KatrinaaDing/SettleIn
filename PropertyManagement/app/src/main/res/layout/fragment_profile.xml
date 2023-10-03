@@ -21,60 +21,94 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:paddingBottom="100dp">
+        android:paddingBottom="100dp"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="66dp">
 
         <!-- Scrollable content -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingHorizontal="20dp"
             android:orientation="vertical"
-            >
+            android:paddingHorizontal="20dp">
 
-            <TextView
-                android:id="@+id/userName"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Username"
-                android:textAlignment="center"
-                android:textSize="30sp"
-                android:textStyle="bold" />
+                android:orientation="horizontal">
 
-            <ImageButton
-                android:id="@+id/editBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/baseline_edit_note_24"
-                android:layout_gravity="end"
-                android:background="@android:color/transparent"/>
+                <TextView
+                    android:id="@+id/userName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Username"
+                    android:textSize="30sp"
+                    android:textStyle="bold"
+                    android:layout_weight="1"/>
+
+                <ImageButton
+                    android:id="@+id/editBtn"
+                    android:layout_width="55dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="end"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/baseline_edit_note_24" />
+            </LinearLayout>
+
 
             <TextView
                 android:id="@+id/userEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                />
+                android:textSize="8pt" />
 
             <TextView
                 android:id="@+id/userId"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                />
-            <Button
-                android:id="@+id/logoutBtn"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/textView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Logout" />
+                android:text="Choose Facilities and Calculate Distance From Property"
+                android:textStyle="bold"
+                android:textSize="8pt"/>
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Interested Locations"
+                android:textSize="8pt"
+                android:layout_marginTop="40px"
+                />
 
             <Button
                 android:id="@+id/addLocationBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Add location"/>
+                android:text="Add location" />
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <Button
+        android:id="@+id/logoutBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="100dp"
+        android:layout_weight="1"
+        android:text="Logout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
