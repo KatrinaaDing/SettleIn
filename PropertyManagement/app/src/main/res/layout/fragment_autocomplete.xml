@@ -6,10 +6,11 @@
     android:background="@drawable/border"
     tools:context="com.example.property_management.ui.fragments.base.AutocompleteFragment">
 
-    <fragment android:id="@+id/autocomplete_fragment"
+    <fragment
+        android:id="@+id/autocomplete_fragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+        android:name="com.example.property_management.ui.fragments.base.CustomPlaceAutoCompleteFragment"
         tools:ignore="MissingConstraints" />
 
 
