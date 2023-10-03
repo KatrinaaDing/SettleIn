@@ -160,23 +160,7 @@ public class ProfileFragment extends Fragment {
     }
 
     public void editProfile() {
-//        BasicDialog dialog = new BasicDialog(false,
-//                "Test2 dialog",
-//                "This dialog cannot be closed from outside and has 2 buttons",
-//                "Cancel",
-//                "Save");
-//        dialog.setCallback(new BasicDialogCallback() {
-//            @Override
-//            public void onLeftBtnClick() {
-//                dialog.dismiss();
-//            }
-//            @Override
-//            public void onRightBtnClick() {
-//                dialog.dismiss();
-//            }
-//        });
-//        dialog.show(getParentFragmentManager(), "Test dialog");
         DialogFragment dialog = new EditProfileDialogFragment();
-        dialog.show(getParentFragmentManager(), "EditProfileDialogFragment");
+        dialog.show(getChildFragmentManager(), "EditProfileDialogFragment");
     }
 }
