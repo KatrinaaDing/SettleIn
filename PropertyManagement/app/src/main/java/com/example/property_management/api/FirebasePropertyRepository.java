@@ -41,6 +41,7 @@ public class FirebasePropertyRepository {
         // check if the property exists by having the same address or href
         Query sameAddressQuery = db.collection("properties")
                 .whereEqualTo("address", newProperty.getAddress());
+        System.out.println("propertyaddress: " + newProperty.getAddress());
         Query sameHrefQuery = db.collection("properties")
                 .whereEqualTo("href", newProperty.getHref());
         // handle result by a helper function
