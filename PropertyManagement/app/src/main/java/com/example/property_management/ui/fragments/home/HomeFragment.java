@@ -3,6 +3,7 @@ package com.example.property_management.ui.fragments.home;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,8 +17,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.property_management.adapters.PropertyCardAdapter;
+import com.example.property_management.api.FirebaseFunctionsHelper;
 import com.example.property_management.api.FirebasePropertyRepository;
-import com.example.property_management.callbacks.GetAllPropertiesCallback;
+import com.example.property_management.api.FirebaseUserRepository;
+import com.example.property_management.callbacks.GetAllUserPropertiesCallback;
 import com.example.property_management.data.Property;
 import com.example.property_management.databinding.FragmentHomeBinding;
 import com.example.property_management.ui.activities.PropertyDetailActivity;
@@ -41,20 +44,11 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textHome;
-//        homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
-
-        Button propertyBtn = binding.propertyDetailBtn;
-        propertyBtn.setOnClickListener(view -> {
-            Intent intent = new Intent(getActivity(), PropertyDetailActivity.class);
-            startActivity(intent);
-        });
-
-        Button testBtn = binding.testBtn;
-        testBtn.setOnClickListener(view -> {
-            Intent intent = new Intent(getActivity(), TestActivity.class);
-            startActivity(intent);
-        });
+//        Button testBtn = binding.testBtn;
+//        testBtn.setOnClickListener(view -> {
+//            Intent intent = new Intent(getActivity(), TestActivity.class);
+//            startActivity(intent);
+//        });
 
         getAllProperties(this.getContext());
 
@@ -67,23 +61,53 @@ public class HomeFragment extends Fragment {
         binding = null;
     }
 
+    /**
+     * Get all properties from the db and display them in the recycler view
+     * @param context the context of the fragment
+     */
     private void getAllProperties(Context context) {
-        FirebasePropertyRepository db = new FirebasePropertyRepository();
-        db.getAllProperties(new GetAllPropertiesCallback() {
-            @Override
-            public void onSuccess(ArrayList<Property> properties) {
-                RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
-                propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
-                RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties);
-                propertiesRecyclerView.setAdapter(propertyCardAdapter);
+//        FirebaseUserRepository db = new FirebaseUserRepository();
+//        db.getAllUserProperties(new GetAllUserPropertiesCallback() {
+//            @Override
+//            public void onSuccess(ArrayList<Property> properties) {
+//                if (properties.isEmpty()) {
+//                    binding.hint.setVisibility(View.VISIBLE);
+//                }
+//                RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
+//                propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
+//                RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties);
+//                propertiesRecyclerView.setAdapter(propertyCardAdapter);
+//
+//                allProperties = properties;
+//            }
+//
+//            @Override
+//            public void onError(String msg) {
+//                new BasicSnackbar(getView(), msg, "error", Snackbar.LENGTH_LONG);
+//            }
+//        });
+        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+        firebaseFunctionsHelper.getAllProperties()
+                .addOnSuccessListener(result -> {
+                    ArrayList<Property> properties = (ArrayList<Property>) result;
+                    if (properties.isEmpty()) {
+                        // show hint if no property exists
+                        binding.hint.setVisibility(View.VISIBLE);
+                    }
+                    RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
+                    propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
+                    RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties);
+                    propertiesRecyclerView.setAdapter(propertyCardAdapter);
+                    binding.loadingText.setVisibility(View.GONE);
+                    allProperties = properties;
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("get-all-properties-fail", e.getMessage());
+                    new BasicSnackbar(getView(), e.getMessage(), "error", Snackbar.LENGTH_LONG);
+                });
+    }
 
-                allProperties = properties;
-            }
-
-            @Override
-            public void onError(String msg) {
-                new BasicSnackbar(getView(), msg, "error", Snackbar.LENGTH_LONG);
-            }
-        });
+    public ArrayList<Property> getAllProperties() {
+        return allProperties;
     }
 }

@@ -27,10 +27,10 @@ public class PropertyCard extends MaterialCardView {
         // get amentities group
         AmenitiesGroup amenitiesGroup = findViewById(R.id.amenitiesGroup);
 
-        // set attributes
+        // set attributes and default values
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PropertyCard);
         try {
-            this.price = a.getInteger(R.styleable.PropertyCard_price, 203);
+            this.price = a.getInteger(R.styleable.PropertyCard_price, 0);
             int bedrooms = a.getInteger(R.styleable.PropertyCard_bedrooms, 0);
             int bathrooms = a.getInteger(R.styleable.PropertyCard_bathrooms, 0);
             int parkings = a.getInteger(R.styleable.PropertyCard_parkings, 0);
@@ -50,7 +50,7 @@ public class PropertyCard extends MaterialCardView {
         ImageView thumbnailView = findViewById(R.id.thumbnailImageView);
         thumbnailView.setImageResource(this.thumbnail);
         addressView.setText(this.address);
-        if (this.price == -1)
+        if (this.price == 0)
             priceView.setText("Price not available");
         else
             priceView.setText("$" + String.valueOf(this.price));

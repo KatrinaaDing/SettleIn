@@ -54,7 +54,7 @@ Access Property Collection:
 - Add a Property
 
   ```java
-  Property p1 = new Property();
+  NewProperty p1 = new NewProperty();
   p1.setAddress("address");
   p1.setHref("href");
   db.addProperty(p1, new AddPropertyCallback() {
@@ -102,23 +102,6 @@ Access Property Collection:
       }
   });
   ```
-
-- Get all Properties
-
-  ```
-  db.getAllProperties(new GetAllPropertiesCallback() {
-      @Override
-      public void onSuccess(ArrayList<Property> properties) {
-          Log.d("get-all-properties-onSuccess", "onSuccess: " + properties.size());
-      }
-  
-      @Override
-      public void onError(Exception e) {
-  
-      }
-  });
-  ```
-
   
 
 Access User Collection:
@@ -129,20 +112,35 @@ Access User Collection:
   FirebaseUserRepository db = new FirebaseUserRepository();
   ```
 
-- Update User fields
+- Update Nested User fields
 
   ```java
   HashMap<String, Object> updates = new HashMap<>();
-  updates.put("userEmail", "test@email.com");
-  updates.put("userName", "Bob");
-  db.updateUserFields("co9z891lbRxIIDV7zP8L", updates, new UpdateUserCallback() {
-      @Override
+  updates.put("properties.newProperty.price", 100);
+  db.updateUserFields("t0d69WGyhUMoc1RkckCRfg3Cb7d2", updates, new UpdateUserCallback() {
+          @Override
       public void onSuccess(String msg) {
-          Log.d("test", "onSuccess: " + msg);
+  
       }
   
       @Override
       public void onError(String msg) {
+  
+      }
+  });
+  ```
+
+- Get all User's Properties
+
+  ```java
+  db.getAllUserProperties(new GetAllUserPropertiesCallback() {
+      @Override
+      public void onSuccess(ArrayList<Property> properties) {
+          Log.d("get-all-properties-onSuccess", "onSuccess: " + properties.size());
+      }
+  
+      @Override
+      public void onError(Exception e) {
   
       }
   });

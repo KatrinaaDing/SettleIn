@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.example.property_management.callbacks.AddPropertyCallback;
 import com.example.property_management.callbacks.DeletePropertyByIdCallback;
-import com.example.property_management.callbacks.GetAllPropertiesCallback;
+import com.example.property_management.callbacks.GetAllUserPropertiesCallback;
 import com.example.property_management.callbacks.GetPropertyByIdCallback;
 import com.example.property_management.data.NewProperty;
 import com.example.property_management.data.Property;
@@ -23,6 +23,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FirebasePropertyRepository {
     private FirebaseFirestore db;
@@ -37,55 +38,35 @@ public class FirebasePropertyRepository {
      * @param callback
      */
     public void addProperty(NewProperty newProperty, AddPropertyCallback callback) {
-        Query query = db.collection("properties")
-                .whereEqualTo("address", newProperty.getAddress())
+        // check if the property exists by having the same address or href
+        Query sameAddressQuery = db.collection("properties")
+                .whereEqualTo("address", newProperty.getAddress());
+        Query sameHrefQuery = db.collection("properties")
                 .whereEqualTo("href", newProperty.getHref());
-        query.get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-//                Log.d("test", "addProperty: " + task.toString());
-                Log.d("test", "addProperty: " + task.getResult().getDocuments());
-                if (task.getResult().isEmpty()) { // property does not exist
-                    db.collection("properties")
-                            .add(newProperty)
-                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                @Override
-                                public void onSuccess(DocumentReference documentReference) {
-                                    Log.d("add-property-success", "DocumentSnapshot written with ID: " + documentReference.getId());
-                                    callback.onSuccess(documentReference.getId());
-                                }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    if (e instanceof FirebaseFirestoreException) {
-                                        FirebaseFirestoreException firestoreException = (FirebaseFirestoreException) e;
-                                        FirebaseFirestoreException.Code errorCode = firestoreException.getCode();
-
-                                        switch (errorCode) {
-                                            case PERMISSION_DENIED:
-                                                Log.w("add-property-failure", "Error permission denied", e);
-                                                callback.onError("Error permission denied");
-                                                break;
-                                            case UNAUTHENTICATED:
-                                                Log.w("add-property-failure", "Error unauthenticated", e);
-                                                callback.onError("Error unauthenticated");
-                                            default:
-                                                Log.w("add-property-failure", "Error adding property", e);
-                                                callback.onError("Error adding property");
-                                                break;
-                                        }
-                                    } else {
-                                        Log.w("add-property-failure", "Non-Firebase Error adding property", e);
-                                        callback.onError("Non-Firebase Error adding property");
-                                    }
-                                }
-                            });
-
-                } else {
-                    callback.onError("Property with the same address and href already exists.");
-                }
+        // handle result by a helper function
+        sameAddressQuery.get().addOnCompleteListener(addressTask -> {
+            String documentIdWidthSameAddress = checkExistProperty(addressTask, callback);
+            if (documentIdWidthSameAddress == null) {
+                // if result is null, return error
+                callback.onError("Error querying Firestore: " + addressTask.getException());
+            } else if (documentIdWidthSameAddress.equals("")) {
+                // if the address does not exist, check if the href is unique
+                sameHrefQuery.get().addOnCompleteListener(hrefTask -> {
+                    String documentIdWithSameHref = checkExistProperty(hrefTask, callback);
+                    if (documentIdWithSameHref == null) {
+                        // if result is null, return error
+                        callback.onError("Error querying Firestore: " + hrefTask.getException());
+                    } else if (documentIdWithSameHref.equals("")) {
+                        // if the href is also not exist in the database, add the property
+                        addNewProperty(newProperty, callback);
+                    } else {
+                        // if the href exists, return the document id of the property
+                        callback.onSuccess(documentIdWithSameHref);
+                    }
+                });
             } else {
-                callback.onError("Error querying Firestore: " + task.getException());
+                // if the address exists, return the document id of the property
+                callback.onSuccess(documentIdWidthSameAddress);
             }
         });
 
@@ -164,30 +145,73 @@ public class FirebasePropertyRepository {
     }
 
     /**
-     * get all the properties
-     * @param callback
+     * add a new property into the database
+     * @param newProperty the new property to be added
+     * @param callback callback to handle success and error
      */
-    public void getAllProperties(GetAllPropertiesCallback callback) {
+    private void addNewProperty(NewProperty newProperty, AddPropertyCallback callback){
         db.collection("properties")
-            .get()
-            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    if (task.isSuccessful()) {
-                        ArrayList<Property> properties = new ArrayList<>();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            Log.d("get-all-properties-success", document.getId() + " => " + document.getData());
-                            Property property = document.toObject(Property.class);
-                            property.setPropertyId(document.getId());
-                            properties.add(property);
-                        }
-                        callback.onSuccess(properties);
-                    } else {
-                        Log.d("get-all-properties-failure", "Error getting all properties: ", task.getException());
-                        callback.onError("Error getting all properties");
+                .add(newProperty)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Log.d("add-property-success", "DocumentSnapshot written with ID: " + documentReference.getId());
+                        callback.onSuccess(documentReference.getId());
                     }
-                }
-            });
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        if (e instanceof FirebaseFirestoreException) {
+                            FirebaseFirestoreException firestoreException = (FirebaseFirestoreException) e;
+                            FirebaseFirestoreException.Code errorCode = firestoreException.getCode();
+                            switch (errorCode) {
+                                case PERMISSION_DENIED:
+                                    Log.w("add-property-failure", "Error permission denied", e);
+                                    callback.onError("Error permission denied");
+                                    break;
+                                case UNAUTHENTICATED:
+                                    Log.w("add-property-failure", "Error unauthenticated", e);
+                                    callback.onError("Error unauthenticated");
+                                default:
+                                    Log.w("add-property-failure", "Error adding property", e);
+                                    callback.onError("Error adding property");
+                                    break;
+                            }
+                        } else {
+                            Log.w("add-property-failure", "Non-Firebase Error adding property", e);
+                            callback.onError("Non-Firebase Error adding property");
+                        }
+                    }
+                });
     }
 
+    /**
+     * handle the result of checking if the property exists (identical href or address)
+     * if the property does not exist, add the property
+     * @param task the task to check if the property exists
+     * @param callback callback to handle success and error
+     */
+    private String checkExistProperty(Task<QuerySnapshot> task, AddPropertyCallback callback) {
+        if (task.isSuccessful()) {
+            Log.d("test", "addProperty: " + task.getResult().getDocuments());
+            QuerySnapshot querySnapshot = task.getResult();
+            if (querySnapshot != null) {
+                // property does not exist, add the property
+                if (querySnapshot.isEmpty()) {
+                    return "";
+                } else {
+                    List<DocumentSnapshot> documents = querySnapshot.getDocuments();
+                    if (!documents.isEmpty()) {
+                        String documentId = documents.get(0).getId();
+                        Log.d("add-property", "property exists with document id " + documentId);
+                        return documentId;
+                    } else {
+                        return "";
+                    }
+                }
+            }
+        }
+        return null;
+    }
 }
