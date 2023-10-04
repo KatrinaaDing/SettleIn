@@ -20,21 +20,18 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.Target;
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.BasicDialogCallback;
 import com.example.property_management.callbacks.DeletePropertyByIdCallback;
 import com.example.property_management.data.Property;
-import com.example.property_management.ui.activities.AddPropertyActivity;
-import com.example.property_management.ui.activities.MainActivity;
 import com.example.property_management.ui.activities.PropertyDetailActivity;
 import com.example.property_management.ui.fragments.base.BasicDialog;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
-import com.example.property_management.ui.fragments.base.PropertyCard;
 import com.example.property_management.ui.fragments.property.AmenitiesGroup;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
@@ -62,9 +59,19 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        // set values to the view
         Property property = properties.get(position);
         holder.addressView.setText(property.getAddress());
-        holder.priceView.setText("$" + property.getPrice() + "pw");
+        if (property.getPrice() == 0) {
+            holder.priceView.setText("Price not available");
+        } else {
+            holder.priceView.setText("$" + property.getPrice() + "pw");
+        }
+        holder.inspectedView.setText(property.getInspected() ? "Inspected" : "Not Inspected");
+        if (property.getInspected()) {
+            holder.inspectedView.setText("Inspected");
+            holder.inspectedView.setTextColor(ContextCompat.getColor(context, R.color.success));
+        }
 
         if ((property.getImages() != null) && !property.getImages().isEmpty()) {
             // set the first image as thumbnail
@@ -137,6 +144,7 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
         TextView addressView;
         TextView priceView;
         ImageView thumbnailView;
+        TextView inspectedView;
         MaterialButton menuBtn;
 
         public ViewHolder(View itemView) {
@@ -147,6 +155,7 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
             priceView = itemView.findViewById(R.id.priceTextView);
             thumbnailView = itemView.findViewById(R.id.thumbnailImageView);
             menuBtn = itemView.findViewById(R.id.menuBtn);
+            inspectedView = itemView.findViewById(R.id.inspectionStatusTextView);
         }
     }
 

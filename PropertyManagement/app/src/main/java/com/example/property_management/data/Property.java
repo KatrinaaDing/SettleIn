@@ -16,6 +16,7 @@ public class Property {
     private HashMap<String, RoomData> propertyData;
     private int price;
     private ArrayList<String> images;
+    private boolean inspected;
 
     public Property() {};
     public Property(String propertyId, String href, String address, double lat, double lng, int numBedrooms, int numBathrooms, int numParking, HashMap<String, RoomData> propertyData, ArrayList<String> images, int price) {
@@ -75,4 +76,6 @@ public class Property {
     public int getPrice() { return price; }
 
     public void setPrice(int price) { this.price = price; }
+    public void setInspected(boolean isInspected) { this.inspected = isInspected; }
+    public boolean getInspected() { return inspected; }
 }
