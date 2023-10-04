@@ -300,6 +300,7 @@ public class AddPropertyActivity extends AppCompatActivity {
         // check if autocompleteFragment is null
         if (autocompleteFragment == null) {
             System.out.println("fetch coordinate, autocompleteFragment is null");
+            new BasicSnackbar(findViewById(android.R.id.content), "Error: Cannot fetch property location. Try again later.", "error");
             return;
         }
         FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
@@ -317,6 +318,7 @@ public class AddPropertyActivity extends AppCompatActivity {
             .addOnFailureListener(e -> {
                 // pop error at input box
                 Log.e("get lng lat error", e.getMessage());
+                new BasicSnackbar(findViewById(android.R.id.content), "Error: Cannot fetch property location. Try again later.", "error");
             });
     }
 
