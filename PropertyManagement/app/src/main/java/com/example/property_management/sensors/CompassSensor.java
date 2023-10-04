@@ -4,15 +4,13 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Handler;
 
 import com.example.property_management.callbacks.SensorCallback;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-public class CompassSensor extends MeasurableSensor implements SensorEventListener {
+public class CompassSensor implements SensorEventListener {
 
+    private SensorCallback callback;
     private SensorManager sensorManager;
     private Sensor accelerometerSensor, magnetometerSensor;
     private float[] lastAccelerometer = new float[3];
@@ -24,12 +22,25 @@ public class CompassSensor extends MeasurableSensor implements SensorEventListen
     long lastUpdatedTime = 0;
 
     public CompassSensor(Context context, SensorCallback callback) {
-        super(callback);
+        //super(callback);
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        this.callback = callback;
     }
 
+
+    //处理3秒延迟启动的线程
+    private Handler handler = new Handler();
+    private Runnable stopRunnable = new Runnable() {
+        @Override
+        public void run() {
+            stopTest();
+        }
+    };
+
+
+    //传感器值变动时获取并计算方位
     @Override
     public void onSensorChanged(SensorEvent sensorEvent){
         if(sensorEvent.sensor == accelerometerSensor){
@@ -60,47 +71,19 @@ public class CompassSensor extends MeasurableSensor implements SensorEventListen
         }
     }
 
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int i){
-        // Handle sensor accuracy changes if needed
-    }
 
-    @Override
-    public List<Float> onSensorValuesChanged() {
-        // Convert the float array to a List<Float>
-        List<Float> orientationList = new ArrayList<>();
-        for (float value : orientation) {
-            orientationList.add(value);
-        }
-        return orientationList;
-    }
-
-    @Override
-    public void onSensorAccuracyChanged(int accuracy) {
-        // Handle sensor accuracy changes if needed
-    }
-
-    @Override
-    public boolean hasSensor() {
-        return accelerometerSensor != null && magnetometerSensor != null;
-    }
-
-    @Override
-    public SensorManager requiresPermissions() {
-        // Optionally, check and request necessary permissions
-        return sensorManager;
-    }
-
-    @Override
-    public void start() {
+    //开始测试并在3秒后停止
+    public void startTest() {
         sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_GAME);
         sensorManager.registerListener(this, magnetometerSensor, SensorManager.SENSOR_DELAY_GAME);
+        handler.postDelayed(stopRunnable, 3000);  // 在3秒后停止测试
     }
 
-    @Override
-    public void stop() {
+
+    public void stopTest() {
         sensorManager.unregisterListener(this, accelerometerSensor);
         sensorManager.unregisterListener(this, magnetometerSensor);
+        handler.removeCallbacks(stopRunnable);  // 取消所有挂起的Runnable任务
     }
 
     private String getDirection(float degree) {
@@ -136,5 +119,45 @@ public class CompassSensor extends MeasurableSensor implements SensorEventListen
             default: return 0f;
         }
     }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i){
+        // Handle sensor accuracy changes if needed
+    }
+
+
+
+    /**
+    @Override
+    public List<Float> onSensorValuesChanged() {
+        // Convert the float array to a List<Float>
+        List<Float> orientationList = new ArrayList<>();
+        for (float value : orientation) {
+            orientationList.add(value);
+        }
+        return orientationList;
+    }
+    **/
+
+    /**
+    @Override
+    public void onSensorAccuracyChanged(int accuracy) {
+        // Handle sensor accuracy changes if needed
+    }
+
+    @Override
+    public boolean hasSensor() {
+        return accelerometerSensor != null && magnetometerSensor != null;
+    }
+
+    @Override
+    public SensorManager requiresPermissions() {
+        // Optionally, check and request necessary permissions
+        return sensorManager;
+    }
+    **/
+
+
+
 
 }
