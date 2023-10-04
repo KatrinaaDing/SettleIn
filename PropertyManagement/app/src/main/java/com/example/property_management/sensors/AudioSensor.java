@@ -1,14 +1,13 @@
 package com.example.property_management.sensors;
-
 import android.annotation.SuppressLint;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.util.Log;
 
 import com.example.property_management.callbacks.SensorCallback;
 
 public class AudioSensor {
-
     private final int audioSource = MediaRecorder.AudioSource.VOICE_RECOGNITION;
     private final int sampleRateInHz = 44100;
     private final int channelConfig = AudioFormat.CHANNEL_IN_MONO;
@@ -16,7 +15,7 @@ public class AudioSensor {
     private final int bufferSizeInBytes;
     private final int bufferSizeInShorts;
     private final AudioRecord audioRecord;
-    private final SensorCallback callback;
+    private SensorCallback callback;
     private boolean isRecording = false;
 
     @SuppressLint("MissingPermission")
@@ -29,6 +28,7 @@ public class AudioSensor {
     }
 
     public void startTest() {
+        Log.d("AudioSensor", "startTest() called");
         isRecording = true;
         new Thread(new Runnable() {
             @Override
@@ -68,6 +68,10 @@ public class AudioSensor {
     public void stopTest() {
         isRecording = false;
         audioRecord.stop();
+    }
+
+    public void setCallback(SensorCallback callback) {
+        this.callback = callback;
     }
 
 }

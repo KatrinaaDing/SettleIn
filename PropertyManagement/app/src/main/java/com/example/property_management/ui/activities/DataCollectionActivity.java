@@ -1,40 +1,27 @@
 package com.example.property_management.ui.activities;
-import com.example.property_management.callbacks.SensorCallback;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.property_management.R;
+import com.example.property_management.adapters.RoomAdapter;
 import com.example.property_management.databinding.ActivityDataCollectionBinding;
 import com.example.property_management.sensors.AudioSensor;
 import com.example.property_management.sensors.CompassSensor;
@@ -42,9 +29,8 @@ import com.example.property_management.sensors.LightSensor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
-public class DataCollectionActivity extends AppCompatActivity implements SensorCallback{
+public class DataCollectionActivity extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_CAMERA = 1;
     private @NonNull ActivityDataCollectionBinding binding;
 
@@ -57,30 +43,28 @@ public class DataCollectionActivity extends AppCompatActivity implements SensorC
 
     // NEW: Camera and Image variables
     private RecyclerView recyclerView;
-    private ImageAdapter imageAdapter;
+    //private ImageAdapter imageAdapter;
     private final List<Bitmap> images = new ArrayList<>();
     private TextView photoCountTextView;
 
     private RecyclerView roomsRecyclerView;
-    //private RoomAdapter roomAdapter;
+    private RoomAdapter roomAdapter;
+    private List<String> roomNames = new ArrayList<>();
 
     private Dialog noteDialog;
     private SharedPreferences sharedPreferences;
 
 
 
-    private final ActivityResultLauncher<Intent> mGetContent = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == Activity.RESULT_OK) {
-                    Intent data = result.getData();
-                    Bitmap photo = (Bitmap) data.getExtras().get("data");
-                    images.add(photo);
-                    imageAdapter.notifyDataSetChanged();
-                    updatePhotoCount();
-                }
-            }
-    );
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == Activity.RESULT_OK) {
+            Bitmap photo = (Bitmap) data.getExtras().get("data");
+            roomAdapter.addImageToRoom(requestCode, photo);
+        }
+    }
 
 
 
@@ -91,24 +75,24 @@ public class DataCollectionActivity extends AppCompatActivity implements SensorC
         setContentView(binding.getRoot());
         setTitle("Collect data mode");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        /**
-         //recycle room
-         int roomCount = 3;
 
-         // Initialize rooms RecyclerView
-         roomsRecyclerView = findViewById(R.id.recycler_view);
+        //recycle room
+        //int roomCount = 3;
 
-         // Define the list of room names
-         List<String> roomNames = new ArrayList<>();
-         for (int i = 1; i <= 3; i++) { // assuming you want 3 rooms
-         roomNames.add("Room " + i);
-         }
+        // Initialize rooms RecyclerView
+        roomsRecyclerView = findViewById(R.id.recycler_view);
 
-         // Setup the adapter for rooms
-         roomAdapter = new RoomAdapter(roomNames, this);
-         roomsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-         roomsRecyclerView.setAdapter(roomAdapter);
-         */
+        // Define the list of room names
+        List<String> roomNames = new ArrayList<>();
+        for (int i = 1; i <= 4; i++) { // assuming  3 rooms
+            roomNames.add("Room " + i);
+        }
+
+        // Setup the adapter for rooms
+        roomAdapter = new RoomAdapter(this, roomNames);
+        roomsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        roomsRecyclerView.setAdapter(roomAdapter);
+
 
 
 
@@ -123,10 +107,11 @@ public class DataCollectionActivity extends AppCompatActivity implements SensorC
                     MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
 
         }
+        /**
         audioSensor = new AudioSensor(this);
 
         binding.noiseTest1.setOnClickListener(v -> {
-                    audioSensor.startTest();
+            audioSensor.startTest();
                 }
         );
 
@@ -141,23 +126,23 @@ public class DataCollectionActivity extends AppCompatActivity implements SensorC
         binding.windowTest1.setOnClickListener(v -> {
             compassSensor.startTest();
         });
-
+*/
 
         /**
-         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-         != PackageManager.PERMISSION_GRANTED) {
-         ActivityCompat.requestPermissions(this,
-         new String[]{Manifest.permission.CAMERA},
-         MY_PERMISSIONS_REQUEST_CAMERA);
-         }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CAMERA},
+                    MY_PERMISSIONS_REQUEST_CAMERA);
+        }
          */
 
 
-
+/**
         recyclerView = findViewById(R.id.recyclerView);
         imageAdapter = new ImageAdapter(images, recyclerView);
-        //recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        //recyclerView.setAdapter(imageAdapter);
+            //recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            //recyclerView.setAdapter(imageAdapter);
         photoCountTextView = findViewById(R.id.photoCount);
 
         binding.openCamera.setOnClickListener(new View.OnClickListener() {
@@ -171,6 +156,7 @@ public class DataCollectionActivity extends AppCompatActivity implements SensorC
                 }
             }
         });
+  */
 
 
 
@@ -226,23 +212,24 @@ public class DataCollectionActivity extends AppCompatActivity implements SensorC
     }
 
     /**
-     @Override
-     protected void onResume() {
-     super.onResume();
-     // Start all sensors
-     sensorManagerClass.startAllSensors();
-     }
-
-     @Override
-     protected void onPause() {
-     super.onPause();
-     // Stop all sensors
-     sensorManagerClass.stopAllSensors();
-     }
-     **/
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Start all sensors
+        sensorManagerClass.startAllSensors();
+    }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        // Stop all sensors
+        sensorManagerClass.stopAllSensors();
+    }
+    **/
+/**
+    @Override
     public void onSensorDataChanged(String sensorType, float value) {
+
         switch (sensorType) {
             case "Light":
                 updateLightData(value);
@@ -251,7 +238,10 @@ public class DataCollectionActivity extends AppCompatActivity implements SensorC
                 updateCompassData(value);
                 break;
         }
+
     }
+*/
+    /**
 
     @Override
     public void onCurrentDbCalculated(double currentDb) {
@@ -284,6 +274,7 @@ public class DataCollectionActivity extends AppCompatActivity implements SensorC
             }
         });
     }
+    */
 
 
     private String getDirectionFromDecimal(float directionDecimal) {
@@ -306,6 +297,7 @@ public class DataCollectionActivity extends AppCompatActivity implements SensorC
         photoCountTextView.setText(text);
     }
 
+    /**
     public void showPhotos(View view) {
         Log.d("DEBUG", "Number of images: " + images.size());
         Dialog dialog = new Dialog(this);
@@ -318,6 +310,7 @@ public class DataCollectionActivity extends AppCompatActivity implements SensorC
 
         dialog.show();
     }
+     */
 
     //note
     private void showNoteDialog() {
@@ -349,6 +342,7 @@ public class DataCollectionActivity extends AppCompatActivity implements SensorC
         sharedPreferences.edit().putString("note", note).apply();
     }
 
+    /**
     public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> {
 
         private final List<Bitmap> images;
@@ -413,5 +407,6 @@ public class DataCollectionActivity extends AppCompatActivity implements SensorC
             }
         }
     }
+        */
 
 }

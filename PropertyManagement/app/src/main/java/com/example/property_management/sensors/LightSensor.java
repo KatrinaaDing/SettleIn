@@ -22,6 +22,7 @@ public class LightSensor implements SensorEventListener{
     private float totalValue = 0;
     private int readingCount = 0;
 
+
     public LightSensor(Context context, SensorCallback callback) {
         //super(callback);
         this.callback = callback;  // 初始化 callback
@@ -72,6 +73,10 @@ public class LightSensor implements SensorEventListener{
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         // Handle sensor accuracy changes if needed
+    }
+
+    public void setCallback(SensorCallback callback) {
+        this.callback = callback;
     }
 
 

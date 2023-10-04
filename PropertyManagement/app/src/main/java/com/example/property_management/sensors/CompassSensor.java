@@ -125,6 +125,9 @@ public class CompassSensor implements SensorEventListener {
         // Handle sensor accuracy changes if needed
     }
 
+    public void setCallback(SensorCallback callback) {
+        this.callback = callback;
+    }
 
 
     /**
