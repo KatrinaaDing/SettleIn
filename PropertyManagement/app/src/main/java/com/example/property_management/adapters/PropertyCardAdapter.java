@@ -111,7 +111,7 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
                             context.startActivity(webIntent);
                         }
                         return true;
-                        
+
                     } else if (id == R.id.property_option_delete) {
                         // handle delete property
                         confirmDeleteProperty(property);
@@ -121,6 +121,7 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
                     }
                 }
             });
+
             popup.show();
         });
     }
