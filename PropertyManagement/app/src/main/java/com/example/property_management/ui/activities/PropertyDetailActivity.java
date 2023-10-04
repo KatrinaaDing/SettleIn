@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
@@ -18,6 +19,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.property_management.api.FirebasePropertyRepository;
+import com.example.property_management.callbacks.GetPropertyByIdCallback;
+import com.example.property_management.data.Property;
 import com.example.property_management.ui.fragments.property.AmenitiesGroup;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.example.property_management.data.DistanceInfo;
@@ -36,6 +41,8 @@ import java.util.ArrayList;
 public class PropertyDetailActivity extends AppCompatActivity {
     private ActivityPropertyDetailBinding binding;
     private String propertyId;
+
+    private Property property;
 
     DistanceAdapter distanceAdapter;
 
@@ -58,15 +65,11 @@ public class PropertyDetailActivity extends AppCompatActivity {
         this.propertyId = intent.getStringExtra("property_id"); // -1 is default value
         setTitle("Property Detail (" + this.propertyId + ")");
 
+        // fetch property data from firebase
+        getPropertyById(this.propertyId);
+
 
         // ================================== Components =======================================
-        // ===== amenities group =====
-        // TODO fetch bedrooms, bathrooms, parkings from firebase
-        Integer bathrooms = 2;
-        Integer bedrooms = 3;
-        Integer parkings = 1;
-        AmenitiesGroup amenitiesGroup = findViewById(R.id.amenitiesGroup);
-        amenitiesGroup.setValues(bedrooms, bathrooms, parkings);
         // ===== inspection time =====
         Button addInspectionTimeBtn = binding.addInspectionTimeBtn;
         ConstraintLayout inspectionTimeLayout = binding.inspectionTimeLayout;
@@ -105,30 +108,6 @@ public class PropertyDetailActivity extends AppCompatActivity {
                 showCustomDialog();
             }
         });
-
-        // ===== carousel =====
-        // Insert carousel imageUrls data
-        RecyclerView recyclerView = findViewById(R.id.recycler);
-
-        // Create an ArrayList of image URLs (you can replace these with your actual URLs)
-        ArrayList<String> imageUrls = new ArrayList<>();
-        // TODO fetch imageUrls from firebase
-        imageUrls.add("https://images.unsplash.com/photo-1668889716746-fd2ca90373f7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwzfHx8ZW58MHx8fHx8&auto=format&fit=crop&w=900&q=60");
-        imageUrls.add("https://images.unsplash.com/photo-1614174124242-4b3656523295?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw1fHx8ZW58MHx8fHx8&auto=format&fit=crop&w=900&q=60");
-        imageUrls.add("https://images.unsplash.com/photo-1694449263303-a90c4ce18112?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw4fHx8ZW58MHx8fHx8&auto=format&fit=crop&w=900&q=60");
-
-        CarouselAdapter adapter = new CarouselAdapter(PropertyDetailActivity.this, imageUrls);
-
-        // on click open image
-        adapter.setOnItemClickListener(new CarouselAdapter.OnItemClickListener() {
-            @Override
-            public void onClick(ImageView imageView, String imageUrl) {
-                startActivity(new Intent(PropertyDetailActivity.this,
-                                ImageViewActivity.class).putExtra("image", imageUrl),
-                        ActivityOptions.makeSceneTransitionAnimation(PropertyDetailActivity.this, imageView, "image").toBundle());
-            }
-        });
-        recyclerView.setAdapter(adapter);
 
         // linkButton
         Button linkButton = findViewById(R.id.linkButton);
@@ -277,5 +256,52 @@ public class PropertyDetailActivity extends AppCompatActivity {
             time = "";
         });
 
+    }
+
+    private void getPropertyById(String propertyId) {
+        FirebasePropertyRepository firebasePropertyRepository = new FirebasePropertyRepository();
+        firebasePropertyRepository.getPropertyById(propertyId, new GetPropertyByIdCallback() {
+            @Override
+            public void onSuccess(Property property) {
+                PropertyDetailActivity.this.property = property;
+                // ===== address and AmenitiesGroup =====
+                binding.detailAddressTxt.setText(property.getAddress());
+                binding.detailPriceTxt.setText("$" + property.getPrice() + " per week");
+                binding.amenitiesGroup.setValues(property.getNumBedrooms(), property.getNumBathrooms(), property.getNumParking());
+
+                // ===== carousel =====
+                // Insert carousel imageUrls data
+                RecyclerView recyclerView = findViewById(R.id.recycler);
+
+                // Create an ArrayList of image URLs (you can replace these with your actual URLs)
+//                ArrayList<String> imageUrls = new ArrayList<>();
+//                // TODO fetch imageUrls from firebase
+//                imageUrls.add("https://images.unsplash.com/photo-1668889716746-fd2ca90373f7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwzfHx8ZW58MHx8fHx8&auto=format&fit=crop&w=900&q=60");
+//                imageUrls.add("https://images.unsplash.com/photo-1614174124242-4b3656523295?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw1fHx8ZW58MHx8fHx8&auto=format&fit=crop&w=900&q=60");
+//                imageUrls.add("https://images.unsplash.com/photo-1694449263303-a90c4ce18112?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw4fHx8ZW58MHx8fHx8&auto=format&fit=crop&w=900&q=60");
+
+                CarouselAdapter adapter = new CarouselAdapter(PropertyDetailActivity.this, property.getImages());
+
+                // on click open image
+                adapter.setOnItemClickListener(new CarouselAdapter.OnItemClickListener() {
+                    @Override
+                    public void onClick(ImageView imageView, String imageUrl) {
+                        startActivity(new Intent(PropertyDetailActivity.this,
+                                        ImageViewActivity.class).putExtra("image", imageUrl),
+                                ActivityOptions.makeSceneTransitionAnimation(PropertyDetailActivity.this, imageView, "image").toBundle());
+                    }
+                });
+                recyclerView.setAdapter(adapter);
+            }
+
+            @Override
+            public void onError(String msg) {
+                // if error happens, show error message and hide detail content
+                ScrollView detailContent = binding.detailContent;
+                TextView errorMessage = binding.errorMessage;
+                detailContent.setVisibility(View.GONE);
+                errorMessage.setVisibility(View.VISIBLE);
+            }
+        });
     }
 }

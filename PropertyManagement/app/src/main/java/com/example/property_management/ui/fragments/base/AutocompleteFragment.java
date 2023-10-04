@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.property_management.R;
 import com.example.property_management.databinding.FragmentAutocompleteBinding;
+import com.example.property_management.ui.activities.AddPropertyActivity;
 import com.google.android.gms.common.api.Status;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
@@ -29,6 +30,10 @@ public class AutocompleteFragment extends Fragment {
     CustomPlaceAutoCompleteFragment autocompleteFragment;
     private PlacesClient placesClient;
     String selectedAddress = "";
+
+    double lng = Double.NaN;
+
+    double lat = Double.NaN;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -65,6 +70,17 @@ public class AutocompleteFragment extends Fragment {
                     System.out.println("name: " + place.getName() + ", Address: " + place.getAddress());
                     autocompleteFragment.setPlace(place);
                     selectedAddress = place.getAddress();
+                    lat = place.getLatLng().latitude;
+                    lng = place.getLatLng().longitude;
+
+                    // Access the parent activity
+                    AddPropertyActivity parentActivity = (AddPropertyActivity) getActivity();
+
+                    if (parentActivity != null) {
+                        // Call the method in the parent activity
+                        View submitBtn = parentActivity.binding.submitBtn;
+                        submitBtn.setEnabled(true);
+                    }
                 }
 
                 @Override
@@ -112,6 +128,22 @@ public class AutocompleteFragment extends Fragment {
         // set address text to search bar
         this.autocompleteFragment.setText(placeNameText);
         this.selectedAddress = placeNameText;
+    }
+
+    public double getLng() {
+        return lng;
+    }
+
+    public double getLat() {
+        return lat;
+    }
+
+    public void setLng(double lng) {
+        this.lng = lng;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
     }
 
 }
