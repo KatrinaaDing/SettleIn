@@ -524,7 +524,7 @@ def check_property_exist(req: https_fn.Request) -> Any:
             # get property document
             property = firestore.client().collection(u'properties').document(property_id).get().to_dict()
             # check if property exist, return propertyId if exist
-            if (address is not None and property['address'] == address) or (href is not None and property['href'] == href):
+            if (address is not None and address != '' and property['address'] == address) or (href is not None and href != '' and property['href'] == href):
                 return_data = { "exist": True, "propertyId": property_id }
                 return return_data
         # property not exist, return false
