@@ -130,7 +130,7 @@ public class HomeFragment extends Fragment {
                 })
                 .addOnFailureListener(e -> {
                     Log.e("get-all-properties-fail", e.getMessage());
-                    new BasicSnackbar(getView(), e.getMessage(), "error", Snackbar.LENGTH_LONG);
+                    binding.loadingText.setText("Failed to load properties. Please try again later.");
                 });
     }
 
