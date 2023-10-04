@@ -109,30 +109,6 @@ public class PropertyDetailActivity extends AppCompatActivity {
             }
         });
 
-        // ===== carousel =====
-        // Insert carousel imageUrls data
-        RecyclerView recyclerView = findViewById(R.id.recycler);
-
-        // Create an ArrayList of image URLs (you can replace these with your actual URLs)
-        ArrayList<String> imageUrls = new ArrayList<>();
-        // TODO fetch imageUrls from firebase
-        imageUrls.add("https://images.unsplash.com/photo-1668889716746-fd2ca90373f7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwzfHx8ZW58MHx8fHx8&auto=format&fit=crop&w=900&q=60");
-        imageUrls.add("https://images.unsplash.com/photo-1614174124242-4b3656523295?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw1fHx8ZW58MHx8fHx8&auto=format&fit=crop&w=900&q=60");
-        imageUrls.add("https://images.unsplash.com/photo-1694449263303-a90c4ce18112?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw4fHx8ZW58MHx8fHx8&auto=format&fit=crop&w=900&q=60");
-
-        CarouselAdapter adapter = new CarouselAdapter(PropertyDetailActivity.this, imageUrls);
-
-        // on click open image
-        adapter.setOnItemClickListener(new CarouselAdapter.OnItemClickListener() {
-            @Override
-            public void onClick(ImageView imageView, String imageUrl) {
-                startActivity(new Intent(PropertyDetailActivity.this,
-                                ImageViewActivity.class).putExtra("image", imageUrl),
-                        ActivityOptions.makeSceneTransitionAnimation(PropertyDetailActivity.this, imageView, "image").toBundle());
-            }
-        });
-        recyclerView.setAdapter(adapter);
-
         // linkButton
         Button linkButton = findViewById(R.id.linkButton);
 
@@ -288,9 +264,34 @@ public class PropertyDetailActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Property property) {
                 PropertyDetailActivity.this.property = property;
+                // ===== address and AmenitiesGroup =====
                 binding.detailAddressTxt.setText(property.getAddress());
                 binding.detailPriceTxt.setText("$" + property.getPrice() + " per week");
                 binding.amenitiesGroup.setValues(property.getNumBedrooms(), property.getNumBathrooms(), property.getNumParking());
+
+                // ===== carousel =====
+                // Insert carousel imageUrls data
+                RecyclerView recyclerView = findViewById(R.id.recycler);
+
+                // Create an ArrayList of image URLs (you can replace these with your actual URLs)
+//                ArrayList<String> imageUrls = new ArrayList<>();
+//                // TODO fetch imageUrls from firebase
+//                imageUrls.add("https://images.unsplash.com/photo-1668889716746-fd2ca90373f7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwzfHx8ZW58MHx8fHx8&auto=format&fit=crop&w=900&q=60");
+//                imageUrls.add("https://images.unsplash.com/photo-1614174124242-4b3656523295?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw1fHx8ZW58MHx8fHx8&auto=format&fit=crop&w=900&q=60");
+//                imageUrls.add("https://images.unsplash.com/photo-1694449263303-a90c4ce18112?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw4fHx8ZW58MHx8fHx8&auto=format&fit=crop&w=900&q=60");
+
+                CarouselAdapter adapter = new CarouselAdapter(PropertyDetailActivity.this, property.getImages());
+
+                // on click open image
+                adapter.setOnItemClickListener(new CarouselAdapter.OnItemClickListener() {
+                    @Override
+                    public void onClick(ImageView imageView, String imageUrl) {
+                        startActivity(new Intent(PropertyDetailActivity.this,
+                                        ImageViewActivity.class).putExtra("image", imageUrl),
+                                ActivityOptions.makeSceneTransitionAnimation(PropertyDetailActivity.this, imageView, "image").toBundle());
+                    }
+                });
+                recyclerView.setAdapter(adapter);
             }
 
             @Override
