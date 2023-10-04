@@ -46,13 +46,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AddPropertyActivity extends AppCompatActivity {
-    private ActivityAddPropertyBinding binding;
+    public ActivityAddPropertyBinding binding;
     private String url = "";
     private int bedroomNumber = 0;
     private int bathroomNumber = 0;
     private int parkingNumber = 0;
-    private double lat = Double.NaN;
-    private double lng = Double.NaN;
     private int price = 0;
     private ArrayList<String> images;
 
@@ -165,10 +163,16 @@ public class AddPropertyActivity extends AppCompatActivity {
         Button submitBtn = findViewById(R.id.submitBtn);
         submitBtn.setEnabled(false);
     }
-    public void setSubmitLoading() {
+    public void setSubmitLoading(boolean isLoading) {
         Button submitBtn = findViewById(R.id.submitBtn);
-        submitBtn.setText("Submitting...");
-        submitBtn.setEnabled(false);
+        if (isLoading) {
+            submitBtn.setText("Submitting...");
+            submitBtn.setEnabled(false);
+        } else {
+            submitBtn.setText("Submit");
+            submitBtn.setEnabled(true);
+        }
+
     }
 
     /**
@@ -227,14 +231,15 @@ public class AddPropertyActivity extends AppCompatActivity {
      * @param activity current activity
      */
     private void submitProperty(AppCompatActivity activity) {
+        autocompleteFragment = (AutocompleteFragment) getSupportFragmentManager().findFragmentById(R.id.auto_property_fragment);
         // invalid address if lat or lng is NaN
-        if (Double.isNaN(lat) || Double.isNaN(lng)) {
+        if (Double.isNaN(autocompleteFragment.getLat()) || Double.isNaN(autocompleteFragment.getLng())) {
             new BasicSnackbar(findViewById(android.R.id.content), "Invalid address", "error");
             return;
         }
 
         // set submit button to loading state
-        setSubmitLoading();
+        setSubmitLoading(true);
         // check if property exists
         Map<String, String> payLoad = new HashMap<>();
         payLoad.put("href", url);
@@ -250,7 +255,7 @@ public class AddPropertyActivity extends AppCompatActivity {
                     // property exists, return the document id
                     // TODO: pop dialog to ask user if redirect to property page
                     Log.d("add-property-exists", "property exists with document id " + result);
-                    enableSubmit();
+                    setSubmitLoading(false);
                     new BasicSnackbar(findViewById(android.R.id.content),
                             "You have already added this property.",
                             "error");
@@ -272,11 +277,10 @@ public class AddPropertyActivity extends AppCompatActivity {
      * @param activity current activity
      */
     private void addProperty(AppCompatActivity activity) {
-        Log.i("newproperty", lat + ", " + lng);
         // post to firebase
         // create new property object
         NewProperty newProperty = new NewProperty(url, bedroomNumber, bathroomNumber, parkingNumber,
-                autocompleteFragment.getSelectedAddress(), lat, lng, price, images);
+                autocompleteFragment.getSelectedAddress(), autocompleteFragment.getLat(), autocompleteFragment.getLng(), price, images);
         FirebasePropertyRepository db = new FirebasePropertyRepository();
         db.addProperty(newProperty, new AddPropertyCallback() {
             @Override
@@ -308,9 +312,12 @@ public class AddPropertyActivity extends AppCompatActivity {
         firebaseFunctionsHelper.getLngLatByAddress(autocompleteFragment.getSelectedAddress())
             .addOnSuccessListener(result -> {
                 // set lat and lng
-                lat = result.get("lat");
-                lng = result.get("lng");
+                double lat = result.get("lat");
+                double lng = result.get("lng");
                 System.out.println("lat: " + lat + ", lng: " + lng);
+                // set lat and lng to autocompleteFragment
+                autocompleteFragment.setLat(lat);
+                autocompleteFragment.setLng(lng);
                 // run callback task (allow submit)
                 // only allow submit when coordinates are successfully fetched
                 onComplete.run();
