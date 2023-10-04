@@ -70,6 +70,7 @@ public class PropertyDetailActivity extends AppCompatActivity {
 
 
         // ================================== Components =======================================
+        // TODO move to different functions
         // ===== inspection time =====
         Button addInspectionTimeBtn = binding.addInspectionTimeBtn;
         ConstraintLayout inspectionTimeLayout = binding.inspectionTimeLayout;
@@ -245,54 +246,12 @@ public class PropertyDetailActivity extends AppCompatActivity {
         firebasePropertyRepository.getPropertyById(propertyId, new GetPropertyByIdCallback() {
             @Override
             public void onSuccess(Property property) {
+                // if success, set property data to UI
                 PropertyDetailActivity.this.property = property;
-                // ===== address and AmenitiesGroup =====
                 binding.detailAddressTxt.setText(property.getAddress());
-                binding.detailPriceTxt.setText("$" + property.getPrice() + " per week");
-                binding.amenitiesGroup.setValues(property.getNumBedrooms(), property.getNumBathrooms(), property.getNumParking());
-
-                // ===== carousel =====
-                ArrayList<String> images = property.getImages();
-                RecyclerView recyclerView = findViewById(R.id.recycler);
-                if (images == null || images.isEmpty()) {
-                    // if no image, hide carousel
-                    recyclerView.setVisibility(View.GONE);
-                } else {
-                    // set adapter
-                    CarouselAdapter adapter = new CarouselAdapter(PropertyDetailActivity.this, images);
-
-                    // on click open image
-                    adapter.setOnItemClickListener(new CarouselAdapter.OnItemClickListener() {
-                        @Override
-                        public void onClick(ImageView imageView, String imageUrl) {
-                            startActivity(new Intent(PropertyDetailActivity.this,
-                                            ImageViewActivity.class).putExtra("image", imageUrl),
-                                    ActivityOptions.makeSceneTransitionAnimation(PropertyDetailActivity.this, imageView, "image").toBundle());
-                        }
-                    });
-                    recyclerView.setAdapter(adapter);
-                }
-
-                // linkButton
-                Button linkButton = findViewById(R.id.linkButton);
-                String href = property.getHref();
-                if (href == null || href == "") {
-                    // if no href, hide linkButton
-                    linkButton.setVisibility(View.GONE);
-                } else {
-
-                    // on click redirect to property ad site
-                    linkButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            // Create an Intent to open a web browser with the specified URL
-                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(href));
-
-                            // Start the web browser activity
-                            startActivity(intent);
-                        }
-                    });
-                }
+                setAmenitiesGroup(property);
+                setCarousel(property);
+                setLinkButton(property);
             }
 
             @Override
@@ -304,5 +263,58 @@ public class PropertyDetailActivity extends AppCompatActivity {
                 errorMessage.setVisibility(View.VISIBLE);
             }
         });
+    }
+
+    // set amenities group data to UI
+    private void setAmenitiesGroup(Property property) {
+        binding.detailPriceTxt.setText("$" + property.getPrice() + " per week");
+        binding.amenitiesGroup.setValues(property.getNumBedrooms(), property.getNumBathrooms(), property.getNumParking());
+    }
+
+    // set images to carousel
+    private void setCarousel(Property property) {
+        ArrayList<String> images = property.getImages();
+        RecyclerView recyclerView = findViewById(R.id.recycler);
+        if (images == null || images.isEmpty()) {
+            // if no image, hide carousel
+            recyclerView.setVisibility(View.GONE);
+        } else {
+            // set adapter
+            CarouselAdapter adapter = new CarouselAdapter(PropertyDetailActivity.this, images);
+
+            // on click open image
+            adapter.setOnItemClickListener(new CarouselAdapter.OnItemClickListener() {
+                @Override
+                public void onClick(ImageView imageView, String imageUrl) {
+                    startActivity(new Intent(PropertyDetailActivity.this,
+                                    ImageViewActivity.class).putExtra("image", imageUrl),
+                            ActivityOptions.makeSceneTransitionAnimation(PropertyDetailActivity.this, imageView, "image").toBundle());
+                }
+            });
+            recyclerView.setAdapter(adapter);
+        }
+    }
+
+    // set link button href
+    private void setLinkButton(Property property) {
+        Button linkButton = findViewById(R.id.linkButton);
+        String href = property.getHref();
+        if (href == null || href == "") {
+            // if no href, hide linkButton
+            linkButton.setVisibility(View.GONE);
+        } else {
+
+            // on click redirect to property ad site
+            linkButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Create an Intent to open a web browser with the specified URL
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(href));
+
+                    // Start the web browser activity
+                    startActivity(intent);
+                }
+            });
+        }
     }
 }
