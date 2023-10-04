@@ -1,7 +1,9 @@
 package com.example.property_management.adapters;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -17,8 +19,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.Target;
 import com.example.property_management.R;
+import com.example.property_management.api.FirebaseUserRepository;
+import com.example.property_management.callbacks.DeletePropertyByIdCallback;
 import com.example.property_management.data.Property;
+import com.example.property_management.ui.activities.AddPropertyActivity;
+import com.example.property_management.ui.activities.MainActivity;
 import com.example.property_management.ui.activities.PropertyDetailActivity;
+import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.example.property_management.ui.fragments.base.PropertyCard;
 import com.example.property_management.ui.fragments.property.AmenitiesGroup;
 import com.google.android.material.button.MaterialButton;
@@ -81,6 +88,29 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
                     } else if (id == R.id.property_option_delete) {
                         // TODO: Handle delete
                         System.out.println("delete property: " + property.getPropertyId());
+                        FirebaseUserRepository firebaseUserRepository = new FirebaseUserRepository();
+                        firebaseUserRepository.deleteUserProperty(property.getPropertyId(), new DeletePropertyByIdCallback() {
+                            @Override
+                            public void onSuccess(String msg) {
+                                Activity activity = (Activity) context;
+                                new BasicSnackbar(activity.findViewById(android.R.id.content), msg, "success");
+                                Log.d("property-card-adapter", "delete property success");
+                                // refresh the activity after showing the snackbar
+                                new Handler().postDelayed(() -> {
+                                    activity.recreate();
+                                }, 1000);
+                            }
+
+                            @Override
+                            public void onError(String msg) {
+                                Activity activity = (Activity) context;
+                                new BasicSnackbar(activity.findViewById(android.R.id.content),
+                                        msg + ". Please try again later.", "error");
+                                Log.e("property-card-adapter", "delete property failure: " + msg);
+
+                            }
+
+                        });
                         return true;
                     } else {
                         return false;
