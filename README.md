@@ -116,7 +116,8 @@ Access User Collection:
 
   ```java
   HashMap<String, Object> updates = new HashMap<>();
-  updates.put("properties.newProperty.price", 100);
+  String newPropertyId = "abcde";
+  updates.put("properties." + newPropertyId + ".price", 100);
   db.updateUserFields("t0d69WGyhUMoc1RkckCRfg3Cb7d2", updates, new UpdateUserCallback() {
           @Override
       public void onSuccess(String msg) {
