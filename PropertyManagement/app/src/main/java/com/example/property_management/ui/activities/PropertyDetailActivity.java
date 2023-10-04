@@ -70,6 +70,7 @@ public class PropertyDetailActivity extends AppCompatActivity {
 
 
         // ================================== Components =======================================
+        // TODO move to different functions
         // ===== inspection time =====
         Button addInspectionTimeBtn = binding.addInspectionTimeBtn;
         ConstraintLayout inspectionTimeLayout = binding.inspectionTimeLayout;
@@ -106,24 +107,6 @@ public class PropertyDetailActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 showCustomDialog();
-            }
-        });
-
-        // linkButton
-        Button linkButton = findViewById(R.id.linkButton);
-
-        // on click redirect to property ad site
-        linkButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Define the URL you want to open
-                String url = "https://www.domain.com.au/410-673-latrobe-street-docklands-vic-3008-16651885"; // TODO fetch site url from firebase
-
-                // Create an Intent to open a web browser with the specified URL
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-
-                // Start the web browser activity
-                startActivity(intent);
             }
         });
 
@@ -263,35 +246,12 @@ public class PropertyDetailActivity extends AppCompatActivity {
         firebasePropertyRepository.getPropertyById(propertyId, new GetPropertyByIdCallback() {
             @Override
             public void onSuccess(Property property) {
+                // if success, set property data to UI
                 PropertyDetailActivity.this.property = property;
-                // ===== address and AmenitiesGroup =====
                 binding.detailAddressTxt.setText(property.getAddress());
-                binding.detailPriceTxt.setText("$" + property.getPrice() + " per week");
-                binding.amenitiesGroup.setValues(property.getNumBedrooms(), property.getNumBathrooms(), property.getNumParking());
-
-                // ===== carousel =====
-                // Insert carousel imageUrls data
-                RecyclerView recyclerView = findViewById(R.id.recycler);
-
-                // Create an ArrayList of image URLs (you can replace these with your actual URLs)
-//                ArrayList<String> imageUrls = new ArrayList<>();
-//                // TODO fetch imageUrls from firebase
-//                imageUrls.add("https://images.unsplash.com/photo-1668889716746-fd2ca90373f7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwzfHx8ZW58MHx8fHx8&auto=format&fit=crop&w=900&q=60");
-//                imageUrls.add("https://images.unsplash.com/photo-1614174124242-4b3656523295?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw1fHx8ZW58MHx8fHx8&auto=format&fit=crop&w=900&q=60");
-//                imageUrls.add("https://images.unsplash.com/photo-1694449263303-a90c4ce18112?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw4fHx8ZW58MHx8fHx8&auto=format&fit=crop&w=900&q=60");
-
-                CarouselAdapter adapter = new CarouselAdapter(PropertyDetailActivity.this, property.getImages());
-
-                // on click open image
-                adapter.setOnItemClickListener(new CarouselAdapter.OnItemClickListener() {
-                    @Override
-                    public void onClick(ImageView imageView, String imageUrl) {
-                        startActivity(new Intent(PropertyDetailActivity.this,
-                                        ImageViewActivity.class).putExtra("image", imageUrl),
-                                ActivityOptions.makeSceneTransitionAnimation(PropertyDetailActivity.this, imageView, "image").toBundle());
-                    }
-                });
-                recyclerView.setAdapter(adapter);
+                setAmenitiesGroup(property);
+                setCarousel(property);
+                setLinkButton(property);
             }
 
             @Override
@@ -303,5 +263,58 @@ public class PropertyDetailActivity extends AppCompatActivity {
                 errorMessage.setVisibility(View.VISIBLE);
             }
         });
+    }
+
+    // set amenities group data to UI
+    private void setAmenitiesGroup(Property property) {
+        binding.detailPriceTxt.setText("$" + property.getPrice() + " per week");
+        binding.amenitiesGroup.setValues(property.getNumBedrooms(), property.getNumBathrooms(), property.getNumParking());
+    }
+
+    // set images to carousel
+    private void setCarousel(Property property) {
+        ArrayList<String> images = property.getImages();
+        RecyclerView recyclerView = findViewById(R.id.recycler);
+        if (images == null || images.isEmpty()) {
+            // if no image, hide carousel
+            recyclerView.setVisibility(View.GONE);
+        } else {
+            // set adapter
+            CarouselAdapter adapter = new CarouselAdapter(PropertyDetailActivity.this, images);
+
+            // on click open image
+            adapter.setOnItemClickListener(new CarouselAdapter.OnItemClickListener() {
+                @Override
+                public void onClick(ImageView imageView, String imageUrl) {
+                    startActivity(new Intent(PropertyDetailActivity.this,
+                                    ImageViewActivity.class).putExtra("image", imageUrl),
+                            ActivityOptions.makeSceneTransitionAnimation(PropertyDetailActivity.this, imageView, "image").toBundle());
+                }
+            });
+            recyclerView.setAdapter(adapter);
+        }
+    }
+
+    // set link button href
+    private void setLinkButton(Property property) {
+        Button linkButton = findViewById(R.id.linkButton);
+        String href = property.getHref();
+        if (href == null || href == "") {
+            // if no href, hide linkButton
+            linkButton.setVisibility(View.GONE);
+        } else {
+
+            // on click redirect to property ad site
+            linkButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Create an Intent to open a web browser with the specified URL
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(href));
+
+                    // Start the web browser activity
+                    startActivity(intent);
+                }
+            });
+        }
     }
 }
