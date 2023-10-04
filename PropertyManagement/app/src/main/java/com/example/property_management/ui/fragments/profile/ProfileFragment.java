@@ -57,6 +57,7 @@ public class ProfileFragment extends Fragment {
 
         // ========================= Components ==========================
         ImageButton editBtn = binding.editBtn;
+        ImageButton addFacilityBtn = binding.addFacilityBtn;
         Button logoutBtn = binding.logoutBtn;
         TextView userEmail = binding.userEmail;
         TextView userId = binding.userId;
@@ -80,6 +81,13 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 editProfile();
+            }
+        });
+
+        addFacilityBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addFacility();
             }
         });
 
@@ -162,5 +170,10 @@ public class ProfileFragment extends Fragment {
     public void editProfile() {
         DialogFragment dialog = new EditProfileDialogFragment();
         dialog.show(getChildFragmentManager(), "EditProfileDialogFragment");
+    }
+
+    public void addFacility() {
+        DialogFragment dialog = new AddNewFacilityDialogFragment();
+        dialog.show(getChildFragmentManager(), "AddNewFacilityDialogFragment");
     }
 }
