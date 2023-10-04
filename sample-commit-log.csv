@@ -1,0 +1,154 @@
+b441cbc,KatrinaaDing,6 minutes ago,Merge pull request #17 from KatrinaaDing/google_map
+0835a23,Lan Lin,49 minutes ago,merge from master, solved many merge conflicts
+62e2690,Lan Lin,2 hours ago,modify function
+9ea5f77,Qiao Chen,12 hours ago,Merge pull request #16 from KatrinaaDing/add-property-flow-finalise
+46ad799,Lan Lin,13 hours ago,add get_lnglat_by_address function
+7772326,KatrinaaDing,13 hours ago,fix duplicate add property bug
+5ca0fb2,KatrinaaDing,13 hours ago,add a loading state of home screen
+1d95296,KatrinaaDing,14 hours ago,use function to get all  properties
+f082901,KatrinaaDing,14 hours ago,add property id in return data
+8c77d20,KatrinaaDing,14 hours ago,check if a property exists in database. if yes, use the existing property id and add into user document. if not, create a new property
+201815f,KatrinaaDing,14 hours ago,implement new functions: get_user_properties, get_property_by_id, check_property_exist
+33c28de,KatrinaaDing,16 hours ago,display hint message on home page with empty property list
+64fbf30,KatrinaaDing,19 hours ago,refactor code and restyle home page
+404f0cc,KatrinaaDing,20 hours ago,refactor and add comments
+fc3164c,KatrinaaDing,20 hours ago,allow clear text in url input
+7170b88,KatrinaaDing,20 hours ago,handle search and submit new property state
+83a4c68,KatrinaaDing,21 hours ago,clean useless components
+ae4d0aa,KatrinaaDing,22 hours ago,Revert "Revert "Get User's Properties""
+47423ef,KatrinaaDing,22 hours ago,Merge branch 'get-user-properties' into develop
+6e9c97a,Lan Lin,23 hours ago,fix merge conflict
+7224376,KatrinaaDing,35 hours ago,add comment
+2642a2b,Lan Lin,2 days ago,debugging
+3eabb17,KatrinaaDing,2 days ago,Merge pull request #15 from KatrinaaDing/revert-13-get-user-properties
+8002964,KatrinaaDing,2 days ago,Revert "Get User's Properties"
+f5022b9,KatrinaaDing,2 days ago,Merge pull request #13 from KatrinaaDing/get-user-properties
+1a9a47a,KatrinaaDing,2 days ago,Merge branch 'develop' into get-user-properties
+2d3e095,KatrinaaDing,2 days ago,Merge pull request #14 from KatrinaaDing/Yuanlin-Scraper-Update
+4b98f5a,KatrinaaDing,2 days ago,udpate default value
+0869c2a,Qiao Chen,5 days ago,Update README.md
+12c9105,songshu,5 days ago,finish tests
+e38c57c,songshu,5 days ago,backup for debug, currently User/properties are Map not List
+2952784,Lan Lin,5 days ago,add full address to autocomplete search box
+3f9bb8e,LAPTOP-L9AN6BJO\ASUS,5 days ago,Scraper Update for error handling and special case handling
+b56fc60,Qiao Chen,5 days ago,Update README.md
+c8d7f4a,songshu,5 days ago,working getAllUserProperties()
+ca2911c,Lan Lin,5 days ago,fix autocomplete ui
+8b1cbe0,KatrinaaDing,5 days ago,Merge pull request #12 from KatrinaaDing/google_map
+da85e4a,KatrinaaDing,5 days ago,add price property to NewProperty class
+f0a2fdf,KatrinaaDing,5 days ago,fix price bug
+2bb4a58,KatrinaaDing,5 days ago,Merge branch 'develop' into google_map
+92e3a22,KatrinaaDing,5 days ago,Merge pull request #11 from KatrinaaDing/merge-main-py-to-develop
+b405ddb,KatrinaaDing,5 days ago,udpate firebase function helper to handle error
+a5731a1,KatrinaaDing,5 days ago,fix bug and add more error handling. also deploy a restful api version
+933cdf2,Lan Lin,5 days ago,add autocomplete search in add property page
+045932d,songshu,5 days ago,getAllUserProperties() backup
+8d49acf,KatrinaaDing,6 days ago,create endpoint to scrape url
+44c99ed,Lan Lin,6 days ago,add border to autocomplete box
+ccdffec,Lan Lin,6 days ago,add autocomplete search in add property page, unfinish
+a59cda6,Lan Lin,6 days ago,add autocomplete search in profile page
+ee3aee1,KatrinaaDing,6 days ago,add dependencies and fix typo
+afc9df5,Qiao Chen,6 days ago,Update README.md
+7416aa5,songshu,6 days ago,remove testing code
+71780ae,songshu,6 days ago,retunred document id when <address+href> already exists
+b45b16a,LAPTOP-L9AN6BJO\ASUS,6 days ago,change return types of price when failed to scrape
+8cf15c4,LAPTOP-L9AN6BJO\ASUS,6 days ago,Merge branch 'develop' of https://github.com/KatrinaaDing/COMP90018-Property-Management into develop
+60130b7,Lan Lin,6 days ago,Merge branch 'develop' into google_map
+c7bd1a3,Lan LIN,6 days ago,Merge pull request #9 from KatrinaaDing/home-activity
+2f81d4a,LAPTOP-L9AN6BJO\ASUS,6 days ago,Merge branch 'develop' of https://github.com/KatrinaaDing/COMP90018-Property-Management into develop
+7330207,LAPTOP-L9AN6BJO\ASUS,6 days ago,Merge main.py from Yuanlin-Scraper-Sensor branch
+0fe2f51,KatrinaaDing,7 days ago,add more error handling
+240906a,KatrinaaDing,7 days ago,add comments and restyle
+e3fc063,KatrinaaDing,7 days ago,close keyboard to avoid overlapping with snackbar
+7a3f351,KatrinaaDing,7 days ago,create and display snackbar for user
+581d8b2,KatrinaaDing,8 days ago,update user document on adding new property
+4f424e3,KatrinaaDing,8 days ago,set white color to icons in dark mode
+76160cf,KatrinaaDing,8 days ago,Merge branch 'develop' into home-activity
+80a965e,KatrinaaDing,8 days ago,Merge pull request #8 from KatrinaaDing/properties
+9fb4c6d,KatrinaaDing,8 days ago,add new user to firestore on register
+ad4f6d9,songshu,8 days ago,modified NewProperty class
+faa92c9,KatrinaaDing,8 days ago,fetch all properties
+c89645b,KatrinaaDing,8 days ago,change coordinates type from double to float
+adc392d,songshu,8 days ago,addProperty(Property)->addProperty(NewProperty) and set propertyId when getting all properties
+f71f3b0,KatrinaaDing,8 days ago,update readme
+fddd3c8,KatrinaaDing,9 days ago,Merge pull request #7 from KatrinaaDing/db-update
+b885c2c,Lan Lin,9 days ago,add amenities group to property detail activity
+56c6d4e,Lan Lin,9 days ago,finish schedule and edit inspection time feature
+fb475ce,Qiao Chen,9 days ago,Update README.md
+ca5f9c9,songshu,9 days ago,done tests
+0ffca99,songshu,9 days ago,fix bug in addProperty
+8b65222,songshu,9 days ago,update user fields
+94991bf,songshu,9 days ago,duplicate check when adding a property
+10d3b50,songshu,9 days ago,added price to User Property
+20009b1,Lan Lin,10 days ago,enable add and edit inspection time in detail page
+5270b52,Lan LIN,13 days ago,Merge pull request #6 from KatrinaaDing/ui-dialogs
+e142bef,KatrinaaDing,13 days ago,solve coflict
+c1471c1,KatrinaaDing,13 days ago,Merge pull request #5 from KatrinaaDing/interested_facilities
+eb06e76,KatrinaaDing,13 days ago,add menu to property card
+065d2ba,KatrinaaDing,13 days ago,implement properties adapter in test screen
+9856135,Lan Lin,2 weeks ago,Merge branch 'develop' into interested_facilities
+84b521e,Lan Lin,2 weeks ago,finish interested facilities distance design,adapter and connect with DistanceInfo
+bef272a,KatrinaaDing,2 weeks ago,Merge branch 'develop' into ui-dialogs
+be16005,KatrinaaDing,2 weeks ago,create property card adapter
+8ba7e48,KatrinaaDing,2 weeks ago,update binding ref
+69e9c68,KatrinaaDing,2 weeks ago,refine property card
+8471997,KatrinaaDing,2 weeks ago,Merge pull request #4 from KatrinaaDing/db
+18bbac2,Lan Lin,2 weeks ago,Merge branch 'db' into interested_facilities
+97fbc38,songshu,2 weeks ago,modified callbasks onError()
+c85ee88,KatrinaaDing,2 weeks ago,create a property card and amenities Group
+60100b8,Lan Lin,2 weeks ago,delete useless custom carousel xml
+4d264cb,Lan Lin,2 weeks ago,not finish DistanceAdapter, still need to check DistanceInfo
+71156db,KatrinaaDing,2 weeks ago,add sample dialog to test screen
+69f8bca,KatrinaaDing,2 weeks ago,create a basic dialog
+5085022,KatrinaaDing,2 weeks ago,create test screen
+53bb111,songshu,2 weeks ago,Merge branch 'db' of github.com:KatrinaaDing/COMP90018-Property-Management into db
+3ecd3b5,songshu,2 weeks ago,added AddPropertyCallback
+7656010,Lan Lin,2 weeks ago,design facilities_distance_item
+7436081,Lan Lin,2 weeks ago,add info to property details
+99f6392,Lan Lin,2 weeks ago,add info to property details
+d9acad8,Qiao Chen,2 weeks ago,Update README.md
+6623ed8,songshu,2 weeks ago,Merge branch 'db' of github.com:KatrinaaDing/COMP90018-Property-Management into db
+51207a0,songshu,2 weeks ago,implemented FirebaseUserRepository.java
+fcbad86,Qiao Chen,2 weeks ago,Update README.md
+13be739,songshu,2 weeks ago,implemented FirebasePropertyRepository
+fc64f12,Lan Lin,2 weeks ago,carousel finished
+a840f33,Lan Lin,2 weeks ago,carousel not finish
+fafc72d,Lan Lin,2 weeks ago,carousel not finish
+7868f86,songshu,2 weeks ago,Working addProperty() in FirebasePropertyPrepository.java
+27f210c,songshu,2 weeks ago,add object classes
+1f1ada6,KatrinaaDing,2 weeks ago,fix ui bug on emulator
+1e3eec2,KatrinaaDing,2 weeks ago,Merge pull request #3 from KatrinaaDing/firebase-functions
+33101ad,KatrinaaDing,2 weeks ago,add loading status
+6715860,KatrinaaDing,2 weeks ago,rename attibutes
+4d7768a,KatrinaaDing,2 weeks ago,handle enter url
+611fc00,KatrinaaDing,2 weeks ago,refactor
+acf5890,KatrinaaDing,2 weeks ago,handle add a new property by entering url
+8560151,KatrinaaDing,2 weeks ago,implement room and parking number setting when add new property
+78ec7aa,KatrinaaDing,3 weeks ago,create a custom arrow number picker
+4560478,KatrinaaDing,3 weeks ago,Merge branch 'develop' into firebase-functions
+c01c66e,KatrinaaDing,3 weeks ago,implement firebase functions helper
+4f655d0,KatrinaaDing,3 weeks ago,create firebase functions
+2290e86,Lan Lin,3 weeks ago,git ignore idea
+7b3e74c,KatrinaaDing,3 weeks ago,Merge remote-tracking branch 'origin/develop' into develop
+7b67107,KatrinaaDing,3 weeks ago,delete unused code and restructure project
+9d3816c,KatrinaaDing,3 weeks ago,Update README.md
+85ed3c1,KatrinaaDing,3 weeks ago,Merge pull request #2 from KatrinaaDing/init-sensors-screen
+52c732d,KatrinaaDing,3 weeks ago,create new screens
+8a6bdb2,KatrinaaDing,3 weeks ago,Merge pull request #1 from KatrinaaDing/firebase-authentication
+57f9fd2,KatrinaaDing,3 weeks ago,create basic profile view
+77e8bc2,KatrinaaDing,3 weeks ago,refactor code
+85e55a8,KatrinaaDing,3 weeks ago,create input validator
+f946010,KatrinaaDing,3 weeks ago,remove temporary login/logout buttons
+9f2edb8,KatrinaaDing,3 weeks ago,implement firebase authentication
+48c8f8c,KatrinaaDing,3 weeks ago,update gitignore
+d70380c,KatrinaaDing,3 weeks ago,hide secrets
+0fb26f9,KatrinaaDing,3 weeks ago,update gitignore
+ecdb9c4,KatrinaaDing,3 weeks ago,update
+8094b94,KatrinaaDing,3 weeks ago,add key
+ce8c7e6,KatrinaaDing,3 weeks ago,create firebase authentication helpers
+75e6133,KatrinaaDing,3 weeks ago,create login and register activity
+3dbdafd,KatrinaaDing,3 weeks ago,init project structure
+917053c,KatrinaaDing,3 weeks ago,add project structure
+8b7cfda,KatrinaaDing,3 weeks ago,create app framework
+e825a0c,KatrinaaDing,4 weeks ago,Update README.md
+faa1095,KatrinaaDing,4 weeks ago,Initial commit

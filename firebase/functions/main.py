@@ -188,46 +188,46 @@ def scrape_property_v2(req: https_fn.Request) -> Any:
     return property
 
 # a restful api version of scrape_property_v2
-@https_fn.on_request()
-def scrape_property_restful(req: https_fn.Request) -> https_fn.Response:
-    """Scrape a rental advertisement and return the data"""
-    url = req.args.get("url")
-    if url is None:
-        return create_error_response(
-            400,
-            "The function must be called with an parameter, 'url', which must be string.",
-        )
+# @https_fn.on_request()
+# def scrape_property_restful(req: https_fn.Request) -> https_fn.Response:
+#     """Scrape a rental advertisement and return the data"""
+#     url = req.args.get("url")
+#     if url is None:
+#         return create_error_response(
+#             400,
+#             "The function must be called with an parameter, 'url', which must be string.",
+#         )
         
-    try: 
-        if "domain" in url:
-            href, price, bedroom_num, bathroom_num, parking_num, address, images = scrape_domain(url)
-        elif "raywhite" in url:
-            href, price, bedroom_num, bathroom_num, parking_num, address, images = scrape_raywhite(url)
-        else:
-            return create_error_response(
-                404,
-                "We only support URL from from Domain or Raywhite.",
-            )
-    except Exception as e:
-        # return error when address not found
-        return create_error_response(
-            500,
-            str(e),
-        )
-    # [END v2addHttpsError]
+#     try: 
+#         if "domain" in url:
+#             href, price, bedroom_num, bathroom_num, parking_num, address, images = scrape_domain(url)
+#         elif "raywhite" in url:
+#             href, price, bedroom_num, bathroom_num, parking_num, address, images = scrape_raywhite(url)
+#         else:
+#             return create_error_response(
+#                 404,
+#                 "We only support URL from from Domain or Raywhite.",
+#             )
+#     except Exception as e:
+#         # return error when address not found
+#         return create_error_response(
+#             500,
+#             str(e),
+#         )
+#     # [END v2addHttpsError]
 
-    # [START v2returnAddData]
-    property = {
-        "url": href,                             #str
-        "price": price,                          #int
-        "bedroom_num": bedroom_num,              #int
-        "bathroom_num": bathroom_num,            #int
-        "parking_num": parking_num,              #int
-        "address": address,                      #str
-        "images": images,                        #a list of str
-    }
-    return_data = json.dumps({ "property": property }) 
-    return https_fn.Response(return_data, status=200, headers={"Content-Type": "application/json"})
+#     # [START v2returnAddData]
+#     property = {
+#         "url": href,                             #str
+#         "price": price,                          #int
+#         "bedroom_num": bedroom_num,              #int
+#         "bathroom_num": bathroom_num,            #int
+#         "parking_num": parking_num,              #int
+#         "address": address,                      #str
+#         "images": images,                        #a list of str
+#     }
+#     return_data = json.dumps({ "property": property }) 
+#     return https_fn.Response(return_data, status=200, headers={"Content-Type": "application/json"})
 
 
 """
@@ -281,31 +281,31 @@ def get_lnglat_by_address(req: https_fn.Request) -> Any:
     
 
 # a restful api version of scrape_property_v2
-@https_fn.on_request(secrets=["MAPS_API_KEY"])
-def get_lnglat_by_address_restful(req: https_fn.Request) -> https_fn.Response:
-    # parameters passed from the client.
-    address = req.args.get("address")
-    if address is None:
-        return create_error_response(
-            400,
-            "The function must be called with an parameter, 'address', which must be string.",
-        )
+# @https_fn.on_request(secrets=["MAPS_API_KEY"])
+# def get_lnglat_by_address_restful(req: https_fn.Request) -> https_fn.Response:
+#     # parameters passed from the client.
+#     address = req.args.get("address")
+#     if address is None:
+#         return create_error_response(
+#             400,
+#             "The function must be called with an parameter, 'address', which must be string.",
+#         )
     
-    # get lng and lat of the input address from google gedocode api
-    r = requests.get('https://maps.googleapis.com/maps/api/geocode/json?address=' + address + '&key=' + os.environ.get("MAPS_API_KEY"))
-    r = r.json()
-    # if the address is valid, return the coordinate
-    if r["status"] == "OK":
-        return r["results"][0]["geometry"]["location"]
-    # if error, return the error message
-    else:
-        re = {
-            "error": r["error_message"]
-        }
-        return re
+#     # get lng and lat of the input address from google gedocode api
+#     r = requests.get('https://maps.googleapis.com/maps/api/geocode/json?address=' + address + '&key=' + os.environ.get("MAPS_API_KEY"))
+#     r = r.json()
+#     # if the address is valid, return the coordinate
+#     if r["status"] == "OK":
+#         return r["results"][0]["geometry"]["location"]
+#     # if error, return the error message
+#     else:
+#         re = {
+#             "error": r["error_message"]
+#         }
+#         return re
     
     
-# get all properties of a user from firestore
+# # get all properties of a user from firestore
 # @https_fn.on_request()
 # def get_user_properties_rest(req:  https_fn.Request) -> https_fn.Response:
 #     user_id = req.args.get("userId")
@@ -322,7 +322,7 @@ def get_lnglat_by_address_restful(req: https_fn.Request) -> https_fn.Response:
 #             return create_error_response(404, "User not found.")
 #         # for each propertyId in user document, get the property document
 #         if 'properties' not in user:
-#             return []
+#             return json.dumps({ "properties": [] })
 #         # for each propertyId in user document, get the property document
 #         properties = []
 #         for property_id in user['properties']:
@@ -359,12 +359,14 @@ def get_user_properties(req:  https_fn.Request) -> Any:
             )
         # for each propertyId in user document, get the property document
         if 'properties' not in user:
+            print("[get-all-properties]", " user ", user_id, " has no properties")
             return []
         properties = []
         for property_id in user['properties']:
             property = firestore.client().collection(u'properties').document(property_id).get().to_dict()
             property['propertyId'] = property_id
             properties.append(property)
+        print("[get-all-properties]", " user ", user_id, " has properties")
         return properties
     
     except Exception as e:
@@ -373,8 +375,7 @@ def get_user_properties(req:  https_fn.Request) -> Any:
             message=(str(e)),
         )
 
-
-# get a property from firestore combined with user's collected data from that property
+# # get a property from firestore combined with user's collected data from that property
 # @https_fn.on_request()
 # def get_property_by_id_rest(req:  https_fn.Request) -> https_fn.Response:
 #     # get property and user id

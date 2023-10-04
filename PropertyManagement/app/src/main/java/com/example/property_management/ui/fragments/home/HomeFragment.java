@@ -27,6 +27,8 @@ import com.example.property_management.ui.activities.PropertyDetailActivity;
 import com.example.property_management.ui.activities.TestActivity;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 
@@ -50,7 +52,9 @@ public class HomeFragment extends Fragment {
 //            startActivity(intent);
 //        });
 
-        getAllProperties(this.getContext());
+        if (waitForAuth()) {
+            getAllProperties(this.getContext());
+        }
 
         return root;
     }
@@ -59,6 +63,28 @@ public class HomeFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    private boolean waitForAuth() {
+        // wait until firebase authentication is done
+        binding.loadingText.setText("Signing you in...");
+        // try 5 seconds
+        int tryCount = 0;
+        while (FirebaseAuth.getInstance().getCurrentUser() == null && tryCount < 10) {
+            try {
+                Thread.sleep(500);
+                tryCount++;
+                // set text to text view 'hint'
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            binding.loadingText.setText("Sign in failed. Please try again.");
+            return false;
+        }
+        binding.loadingText.setText("Loading properties...");
+        return true;
     }
 
     /**
@@ -76,6 +102,7 @@ public class HomeFragment extends Fragment {
 //                RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
 //                propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
 //                RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties);
+//                binding.loadingText.setVisibility(View.GONE);
 //                propertiesRecyclerView.setAdapter(propertyCardAdapter);
 //
 //                allProperties = properties;
