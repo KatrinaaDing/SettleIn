@@ -9,12 +9,13 @@ public class User {
     private String userEmail;
 
     private ArrayList<String> interestedFacilities;
+    private ArrayList<String> interestedLocations;
 
     private HashMap<String, UserProperty> properties;
 
     public User() {}
 
-    public User(String userId, String userName, String userEmail, ArrayList<String> interestedFacilities, HashMap<String, UserProperty> properties) {
+    public User(String userId, String userName, String userEmail, ArrayList<String> interestedFacilities, ArrayList<String> interestedLocations, HashMap<String, UserProperty> properties) {
         this.userId = userId;
         this.userName = userName;
         this.userEmail = userEmail;
@@ -41,4 +42,8 @@ public class User {
     public HashMap<String, UserProperty> getProperties() { return properties; }
 
     public void setProperties(HashMap<String, UserProperty> properties) { this.properties = properties; }
+
+    public ArrayList<String> getInterestedLocations() { return interestedLocations; }
+
+    public void setInterestedLocations(ArrayList<String> interestedLocations) { this.interestedLocations = interestedLocations; }
 }
