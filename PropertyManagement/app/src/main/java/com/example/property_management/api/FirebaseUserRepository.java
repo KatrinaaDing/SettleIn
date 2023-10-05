@@ -3,6 +3,7 @@ package com.example.property_management.api;
 import android.util.Log;
 
 import com.example.property_management.callbacks.AddUserCallback;
+import com.example.property_management.callbacks.DeletePropertyByIdCallback;
 import com.example.property_management.callbacks.DeleteUserByIdCallback;
 import com.example.property_management.callbacks.GetAllUserPropertiesCallback;
 import com.example.property_management.callbacks.GetAllUsersCallback;
@@ -21,6 +22,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldPath;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -266,5 +268,36 @@ public class FirebaseUserRepository {
                 }
             }
         });
+    }
+
+    /**
+     * delete a property from the user's properties
+     * @param documentId property id
+     * @param callback callback
+     */
+    public void deleteUserProperty(String documentId, DeletePropertyByIdCallback callback) {
+        // retrieve current user id
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        String userId = mAuth.getCurrentUser().getUid();
+        // create key
+        String key = "properties." + documentId;
+        // create payload
+        HashMap<String, Object> payload = new HashMap<>();
+        payload.put(key, FieldValue.delete());
+        // update user
+        updateUserFields(userId, payload, new UpdateUserCallback() {
+            @Override
+            public void onSuccess(String message) {
+                Log.d("delete-user-property", "onSuccess: " + message);
+                callback.onSuccess("Property deleted successfully");
+            }
+
+            @Override
+            public void onError(String message) {
+                Log.d("delete-user-property", "onError: " + message);
+                callback.onError("Cannot delete property:" + message);
+            }
+        });
+
     }
 }

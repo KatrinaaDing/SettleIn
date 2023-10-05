@@ -46,13 +46,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AddPropertyActivity extends AppCompatActivity {
-    private ActivityAddPropertyBinding binding;
+    public ActivityAddPropertyBinding binding;
     private String url = "";
     private int bedroomNumber = 0;
     private int bathroomNumber = 0;
     private int parkingNumber = 0;
-    private double lat = Double.NaN;
-    private double lng = Double.NaN;
     private int price = 0;
     private ArrayList<String> images;
 
@@ -159,6 +157,7 @@ public class AddPropertyActivity extends AppCompatActivity {
      */
     private void enableSubmit() {
         Button submitBtn = findViewById(R.id.submitBtn);
+        submitBtn.setText("Submit");
         submitBtn.setEnabled(true);
     }
     private void disableSubmit() {
@@ -170,13 +169,18 @@ public class AddPropertyActivity extends AppCompatActivity {
         submitBtn.setText("Submitting...");
         submitBtn.setEnabled(false);
     }
+    public void setSubmitFetchingCoordinates() {
+        Button submitBtn = findViewById(R.id.submitBtn);
+        submitBtn.setText("Validating address...");
+        submitBtn.setEnabled(false);
+    }
 
     /**
      * Initialise url text input layout
      */
     private void initUrlInputLayout() {
         TextInputLayout urlInputLayout = findViewById(R.id.urlInputLayout);
-
+        MaterialButton scrapeUrlBtn = findViewById(R.id.scrapeUrlBtn);
         // on change url text
         urlInputLayout.addOnEditTextAttachedListener(textInputLayout ->
             textInputLayout.getEditText().addTextChangedListener(new TextWatcher() {
@@ -186,6 +190,7 @@ public class AddPropertyActivity extends AppCompatActivity {
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                     urlInputLayout.setError(null);
                     urlInputLayout.setHelperText("");
+                    scrapeUrlBtn.setEnabled(true);
                 }
                 @Override
                 public void afterTextChanged(Editable editable) {}
@@ -227,8 +232,9 @@ public class AddPropertyActivity extends AppCompatActivity {
      * @param activity current activity
      */
     private void submitProperty(AppCompatActivity activity) {
+        autocompleteFragment = (AutocompleteFragment) getSupportFragmentManager().findFragmentById(R.id.auto_property_fragment);
         // invalid address if lat or lng is NaN
-        if (Double.isNaN(lat) || Double.isNaN(lng)) {
+        if (Double.isNaN(autocompleteFragment.getLat()) || Double.isNaN(autocompleteFragment.getLng())) {
             new BasicSnackbar(findViewById(android.R.id.content), "Invalid address", "error");
             return;
         }
@@ -272,15 +278,18 @@ public class AddPropertyActivity extends AppCompatActivity {
      * @param activity current activity
      */
     private void addProperty(AppCompatActivity activity) {
-        Log.i("newproperty", lat + ", " + lng);
         // post to firebase
         // create new property object
+        if (url == "") {
+            url = null;
+        }
         NewProperty newProperty = new NewProperty(url, bedroomNumber, bathroomNumber, parkingNumber,
-                autocompleteFragment.getSelectedAddress(), lat, lng, price, images);
+                autocompleteFragment.getSelectedAddress(), autocompleteFragment.getLat(), autocompleteFragment.getLng(), price, images);
         FirebasePropertyRepository db = new FirebasePropertyRepository();
         db.addProperty(newProperty, new AddPropertyCallback() {
             @Override
             public void onSuccess(String documentId) {
+                Log.i("add-property-success", "property added with id " + documentId);
                 updateUserProperty(activity, newProperty, documentId);
             }
             @Override
@@ -294,38 +303,46 @@ public class AddPropertyActivity extends AppCompatActivity {
 
     /**
      * Fetch coordinates from address
-     * @param onComplete callback task
+     * @param onSuccess callback task that runs on success
      */
-    private void fetchCoordinates(Runnable onComplete) {
+    private void fetchCoordinates(Runnable onSuccess) {
         // check if autocompleteFragment is null
         if (autocompleteFragment == null) {
             System.out.println("fetch coordinate, autocompleteFragment is null");
+            new BasicSnackbar(findViewById(android.R.id.content), "Error: Cannot fetch property location. Try again later.", "error");
             return;
         }
         FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+        Log.i("fetch-coordinates", "fetching coordinates of " + autocompleteFragment.getSelectedAddress());
+        setSubmitFetchingCoordinates();
         // call firebase function to get lat and lng
         firebaseFunctionsHelper.getLngLatByAddress(autocompleteFragment.getSelectedAddress())
             .addOnSuccessListener(result -> {
                 // set lat and lng
-                lat = result.get("lat");
-                lng = result.get("lng");
-                System.out.println("lat: " + lat + ", lng: " + lng);
+                double lat = result.get("lat");
+                double lng = result.get("lng");
+                Log.i("fetch-coordinates", "lat: " + lat + ", lng: " + lng);
+
+                // set lat and lng to autocompleteFragment
+                autocompleteFragment.setLat(lat);
+                autocompleteFragment.setLng(lng);
                 // run callback task (allow submit)
                 // only allow submit when coordinates are successfully fetched
-                onComplete.run();
+                onSuccess.run();
             })
             .addOnFailureListener(e -> {
                 // pop error at input box
                 Log.e("get lng lat error", e.getMessage());
+                new BasicSnackbar(findViewById(android.R.id.content), "Error: Cannot fetch property location. Try again later.", "error");
             });
     }
 
     /**
      * Fetch property info from url
      * @param urlInputLayout the text input layout to enter url
-     * @param onComplete callback task
+     * @param onSuccess callback task that run on success
      */
-    private void fetchPropertyInfo(TextInputLayout urlInputLayout, Runnable onComplete) {
+    private void fetchPropertyInfo(TextInputLayout urlInputLayout, Runnable onSuccess) {
         FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
         firebaseFunctionsHelper.scrapeProperty(urlInputLayout.getEditText().getText().toString())
             .addOnSuccessListener(resultProperty -> {
@@ -334,14 +351,12 @@ public class AddPropertyActivity extends AppCompatActivity {
                 // set url input helper text
                 urlInputLayout.setHelperText("");
                 // run callback task
-                onComplete.run();
+                onSuccess.run();
             })
             .addOnFailureListener(e -> {
                 // pop error at input box
                 Log.e("scrape-url-error", e.getMessage());
                 urlInputLayout.setError("Error: " + e.getMessage());
-                // run callback task
-                onComplete.run();
             });
 
     }
@@ -404,6 +419,7 @@ public class AddPropertyActivity extends AppCompatActivity {
      * @param propertyId property id returned from firebase
      */
     private void updateUserProperty(AppCompatActivity activity, NewProperty newProperty, String propertyId) {
+        Log.i("add-user-property", "updating user document" + propertyId);
         // create object to update user document
         HashMap<String, Object> propertyPayload = newProperty.toUpdateUserObject(propertyId);
         HashMap<String, Object> userUpdatePayload = new HashMap<>();

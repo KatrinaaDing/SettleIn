@@ -130,8 +130,8 @@ public class FirebaseFunctionsHelper {
                                     (String) propertyObj.get("propertyId"),
                                     (String) propertyObj.get("href"),
                                     (String) propertyObj.get("address"),
-                                    (float) ((Double) propertyObj.get("lat")).doubleValue(),
-                                    (float) ((Double) propertyObj.get("lng")).doubleValue(),
+                                    (Double) propertyObj.get("lat"),
+                                    (Double) propertyObj.get("lng"),
                                     (int) propertyObj.get("numBedrooms"),
                                     (int) propertyObj.get("numBathrooms"),
                                     (int) propertyObj.get("numParking"),
@@ -139,6 +139,7 @@ public class FirebaseFunctionsHelper {
                                     (ArrayList<String>) propertyObj.get("images"),
                                     (int) propertyObj.get("price")
                             );
+                            property.setInspected((boolean) propertyObj.get("inspected"));
                             properties.add(property);
                         }
                         return properties;
