@@ -328,6 +328,11 @@ def get_lnglat_by_address(req: https_fn.Request) -> Any:
 #         for property_id in user['properties']:
 #             property = firestore.client().collection(u'properties').document(property_id).get().to_dict()
 #             property['propertyId'] = property_id
+#             property['price'] = user['properties'][property_id]['price']
+#             if ('inspected' in user['properties'][property_id]):
+#                 property['inspected'] = user['properties'][property_id]['inspected'] 
+#             else:
+#                 property['inspected'] = False
 #             properties.append(property)
 #         return_data = json.dumps({ "properties": properties })
 #         return https_fn.Response(return_data, status=200, headers={"Content-Type": "application/json"})
@@ -364,8 +369,15 @@ def get_user_properties(req:  https_fn.Request) -> Any:
         properties = []
         for property_id in user['properties']:
             property = firestore.client().collection(u'properties').document(property_id).get().to_dict()
+            # add user-side data to property document
             property['propertyId'] = property_id
+            property['price'] = user['properties'][property_id]['price']
+            if ('inspected' in user['properties'][property_id]):
+                property['inspected'] = user['properties'][property_id]['inspected'] 
+            else:
+                property['inspected'] = False
             properties.append(property)
+        print("[get-all-properties]", properties)
         print("[get-all-properties]", " user ", user_id, " has properties")
         return properties
     

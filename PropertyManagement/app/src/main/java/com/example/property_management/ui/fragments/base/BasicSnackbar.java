@@ -37,22 +37,27 @@ public class BasicSnackbar {
     }
 
     private void showSnackbar() {
-        Snackbar snackbar = Snackbar.make(view, message, duration);
-        View snackbarView = snackbar.getView();
-        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) snackbarView.getLayoutParams();
-        // appears at the bottom by default
-        params.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
-        // set margin
-        params.setMargins(20, 0, 20, 200); // Last parameter is the distance from the bottom edge
-        // set color
-        if (type.equals("success")) {
-            snackbar.setBackgroundTint(ContextCompat.getColor(view.getContext(), R.color.success));
-        } else if (type.equals("error")) {
-            snackbar.setBackgroundTint(ContextCompat.getColor(view.getContext(), R.color.error));
-        } else if (type.equals("warning")) {
-            snackbar.setBackgroundTint(ContextCompat.getColor(view.getContext(), R.color.warning));
+        try {
+            Snackbar snackbar = Snackbar.make(view, message, duration);
+            View snackbarView = snackbar.getView();
+            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) snackbarView.getLayoutParams();
+            // appears at the bottom by default
+            params.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+            // set margin
+            params.setMargins(20, 0, 20, 200); // Last parameter is the distance from the bottom edge
+            // set color
+            if (type.equals("success")) {
+                snackbar.setBackgroundTint(ContextCompat.getColor(view.getContext(), R.color.success));
+            } else if (type.equals("error")) {
+                snackbar.setBackgroundTint(ContextCompat.getColor(view.getContext(), R.color.error));
+            } else if (type.equals("warning")) {
+                snackbar.setBackgroundTint(ContextCompat.getColor(view.getContext(), R.color.warning));
+            }
+            snackbarView.setLayoutParams(params);
+            snackbar.show();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        snackbarView.setLayoutParams(params);
-        snackbar.show();
+
     }
 }

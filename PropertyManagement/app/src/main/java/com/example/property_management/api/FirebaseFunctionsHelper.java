@@ -139,6 +139,7 @@ public class FirebaseFunctionsHelper {
                                     (ArrayList<String>) propertyObj.get("images"),
                                     (int) propertyObj.get("price")
                             );
+                            property.setInspected((boolean) propertyObj.get("inspected"));
                             properties.add(property);
                         }
                         return properties;
