@@ -71,12 +71,11 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position, @NonNull List<Object> payloads) {
         if (!payloads.isEmpty() && payloads.get(0).equals("UPDATE_PHOTO_COUNT")) {
-            // 只更新照片数量的显示
+
             int updatedPhotoCount = roomImages.get(position).size();
             Log.d("RoomAdapter", "Updated photo count: " + updatedPhotoCount);
             holder.photoCount.setText(updatedPhotoCount + " added");
         } else {
-            // 全部重新绑定
             onBindViewHolder(holder, position);
         }
     }
@@ -90,7 +89,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         LightSensor currentLightSensor = lightSensors.get(position);
         CompassSensor currentCompassSensor = compassSensors.get(position);
 
-        // Create a callback for this room
         SensorCallback roomCallback = new SensorCallback() {
             @Override
             public void onSensorDataChanged(String sensorType, float value) {
@@ -122,7 +120,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             }
         };
 
-
         currentAudioSensor.setCallback(roomCallback);
         currentLightSensor.setCallback(roomCallback);
         currentCompassSensor.setCallback(roomCallback);
@@ -146,19 +143,16 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             audioSensor = new AudioSensor(roomCallback);
             lightSensor = new LightSensor(context, roomCallback);
             compassSensor = new CompassSensor(context, roomCallback);
-
-            // 存储这个房间的传感器已经被初始化
             initializedRooms.add(position);
         }
 
         // camera function
 
-
         holder.openCameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int currentPosition = holder.getAdapterPosition();
-                if (currentPosition != RecyclerView.NO_POSITION) {  // 检查位置是否有效
+                if (currentPosition != RecyclerView.NO_POSITION) {
                     Intent open_camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                     ((Activity) context).startActivityForResult(open_camera, currentPosition); // 使用currentPosition作为requestCode
                 }
@@ -252,8 +246,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         notifyItemChanged(roomPosition, "UPDATE_PHOTO_COUNT");
     }
 
-
-
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView roomName;
         ImageView cameraIcon, noiseIcon, lightIcon, compassIcon;
@@ -287,19 +279,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             compassTestButton = itemView.findViewById(R.id.window_test1);
         }
     }
-    /**
-    private void updatePhotoCount() {
-        String text = images.size() + " added";
-        photoCountTextView.setText(text);
-    }
-
-    public void addImageToRoom(int roomPosition, Bitmap image) {
-        roomImages.get(roomPosition).add(image);
-        notifyItemChanged(roomPosition);
-    }
-     */
-
-
 
     public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> {
 
@@ -323,28 +302,23 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             Bitmap bitmap = images.get(position);
             float ratio = (float) bitmap.getWidth() / (float) bitmap.getHeight();
 
-            // 获取 RecyclerView 的宽度
             int width = recyclerView.getWidth();
 
-            // 根据图片的宽高比来计算 ImageView 的高度
             int height = Math.round(width / ratio);
 
-            // 动态设置 ImageView 的高度
             ViewGroup.LayoutParams params = holder.imageView.getLayoutParams();
             params.width = bitmap.getWidth();
             params.height = bitmap.getHeight();
             holder.imageView.setLayoutParams(params);
-            // 设置图片
+
             holder.imageView.setImageBitmap(bitmap);
 
-            // Set click listener for the delete button
             holder.deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     images.remove(position);
                     notifyItemRemoved(position);
                     notifyItemRangeChanged(position, images.size());
-                    //updatePhotoCount();  // 更新照片数量显示
                 }
             });
         }

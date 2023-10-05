@@ -60,7 +60,7 @@ public class AudioSensor {
                     }
                 }
                 double averageDb = sumDb / count;
-                callback.onAverageDbCalculated(averageDb);  // 更新平均分贝值
+                callback.onAverageDbCalculated(averageDb);
             }
         }).start();
     }
