@@ -5,7 +5,10 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+
+
     <ScrollView
+        android:id="@+id/detailContent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -13,6 +16,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:paddingHorizontal="20dp"
+        android:visibility="visible"
         >
 
         <LinearLayout
@@ -174,4 +178,11 @@
                     />
         </LinearLayout>
     </ScrollView>
+    <TextView
+        android:id="@+id/errorMessage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:text="An error occurred."
+        android:visibility="gone" /> <!-- Initially hidden -->
 </androidx.constraintlayout.widget.ConstraintLayout>
