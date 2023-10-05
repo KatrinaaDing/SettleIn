@@ -12,25 +12,19 @@ import java.util.Locale;
 
 public class LightSensor implements SensorEventListener{
 
-
     private SensorManager sensorManager;
     private Sensor lightSensor;
     private SensorCallback callback;
     private float changedValue;
-
-    //trace the light value got in 3 seconds
     private float totalValue = 0;
     private int readingCount = 0;
-
 
     public LightSensor(Context context, SensorCallback callback) {
         //super(callback);
         this.callback = callback;
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-
     }
-
 
     public void startTest() {
         totalValue = 0;
@@ -66,10 +60,8 @@ public class LightSensor implements SensorEventListener{
         }
     }
 
-
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // Handle sensor accuracy changes if needed
     }
 
     public void setCallback(SensorCallback callback) {

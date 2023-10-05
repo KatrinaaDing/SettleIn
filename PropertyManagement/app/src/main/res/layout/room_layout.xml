@@ -18,9 +18,9 @@
             android:layout_height="wrap_content"
             android:text="Lounge room" />
 
-
     </LinearLayout>
 
+    <!-- Row: camera -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -43,7 +43,6 @@
             android:paddingVertical="10dp"
             android:text="Photos" />
 
-
         <TextView
             android:id="@+id/photoCount"
             android:layout_width="48dp"
@@ -60,7 +59,6 @@
             android:layout_height="wrap_content"
             android:text="Add" />
     </LinearLayout>
-
 
     <!-- Row 1: Noise -->
     <LinearLayout

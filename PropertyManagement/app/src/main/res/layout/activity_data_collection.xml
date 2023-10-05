@@ -23,7 +23,6 @@
             android:orientation="vertical">
 
             <!-- note -->
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -55,6 +54,7 @@
 
             </LinearLayout>
 
+            <!-- each room -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_view"
                 android:layout_width="match_parent"
@@ -62,7 +62,6 @@
                 android:paddingHorizontal="20dp" />
 
         </LinearLayout>
-
 
     </ScrollView>
 

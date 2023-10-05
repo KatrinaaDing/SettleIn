@@ -73,7 +73,6 @@ public class CompassSensor implements SensorEventListener {
         handler.postDelayed(stopRunnable, 3000);  // 在3秒后停止测试
     }
 
-
     public void stopTest() {
         sensorManager.unregisterListener(this, accelerometerSensor);
         sensorManager.unregisterListener(this, magnetometerSensor);
@@ -116,7 +115,6 @@ public class CompassSensor implements SensorEventListener {
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i){
-        // Handle sensor accuracy changes if needed
     }
 
     public void setCallback(SensorCallback callback) {

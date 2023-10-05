@@ -34,17 +34,12 @@ import java.util.Set;
 
 public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     private final List<String> roomNames;
-    private int roomCount;
     private Context context;
     private Set<Integer> initializedRooms = new HashSet<>();
-
-    public TextView photoCount;
-
     private LightSensor lightSensor;
     private CompassSensor compassSensor;
     private AudioSensor audioSensor;
     private List<List<Bitmap>> roomImages = new ArrayList<>();
-
     private List<LightSensor> lightSensors = new ArrayList<>();
     private List<CompassSensor> compassSensors = new ArrayList<>();
     private List<AudioSensor> audioSensors = new ArrayList<>();
@@ -54,7 +49,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         this.roomNames = roomNames;
         for (int i = 0; i < roomNames.size(); i++) {
             roomImages.add(new ArrayList<>());
-
             audioSensors.add(new AudioSensor(null));
             lightSensors.add(new LightSensor(context, null));
             compassSensors.add(new CompassSensor(context, null));
@@ -71,11 +65,12 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position, @NonNull List<Object> payloads) {
         if (!payloads.isEmpty() && payloads.get(0).equals("UPDATE_PHOTO_COUNT")) {
-
+            // update the photo count only
             int updatedPhotoCount = roomImages.get(position).size();
             Log.d("RoomAdapter", "Updated photo count: " + updatedPhotoCount);
             holder.photoCount.setText(updatedPhotoCount + " added");
         } else {
+            // rebind
             onBindViewHolder(holder, position);
         }
     }
@@ -89,6 +84,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         LightSensor currentLightSensor = lightSensors.get(position);
         CompassSensor currentCompassSensor = compassSensors.get(position);
 
+        // create a callback for this room
         SensorCallback roomCallback = new SensorCallback() {
             @Override
             public void onSensorDataChanged(String sensorType, float value) {
@@ -107,7 +103,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             @Override
             public void onCurrentDbCalculated(double currentDb) {
                 ((Activity) context).runOnUiThread(() -> {
-
                     holder.noiseValueTextView.setText(String.format("%.2f dB", currentDb));
                 });
             }
@@ -139,31 +134,30 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         });
 
         if (!initializedRooms.contains(position)) {
-            // 初始化传感器
+            // initialize the sensors
             audioSensor = new AudioSensor(roomCallback);
             lightSensor = new LightSensor(context, roomCallback);
             compassSensor = new CompassSensor(context, roomCallback);
             initializedRooms.add(position);
         }
 
-        // camera function
-
+        /**
+         * camera sensor for each room
+         */
         holder.openCameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int currentPosition = holder.getAdapterPosition();
                 if (currentPosition != RecyclerView.NO_POSITION) {
                     Intent open_camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    ((Activity) context).startActivityForResult(open_camera, currentPosition); // 使用currentPosition作为requestCode
+                    ((Activity) context).startActivityForResult(open_camera, currentPosition);
                 }
             }
         });
 
-
         int currentPosition = holder.getAdapterPosition();
-        if (currentPosition != RecyclerView.NO_POSITION) {  // 检查位置是否有效
+        if (currentPosition != RecyclerView.NO_POSITION) {
             holder.photoCount.setText(roomImages.get(currentPosition).size() + " added");
-
         }
 
         holder.photoCount.setOnClickListener(new View.OnClickListener() {
@@ -187,7 +181,8 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     @Override
                     public void onClick(View v) {
                         roomImages.get(roomPosition).remove(position);
-                        updatePhotoCountForRoom(roomPosition);  // 调用此函数来更新照片数量
+                        //update photo count
+                        updatePhotoCountForRoom(roomPosition);
                         dialog.dismiss();
                     }
                 });
@@ -195,15 +190,12 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         };
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setAdapter(imageAdapter);
-
         dialog.show();
     }
-
 
     private void updatePhotoCountForRoom(int roomPosition) {
         notifyItemChanged(roomPosition, "UPDATE_PHOTO_COUNT");
     }
-
 
     private void updateLightData(ViewHolder holder, float lightValue) {
         ((Activity) context).runOnUiThread(() -> {
@@ -220,8 +212,10 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         });
     }
 
+    // Calculate direction of compass
     private String getDirectionFromDecimal(float directionDecimal) {
-        int directionCode = (int)(directionDecimal * 100);  // Convert the decimal part to an integer
+        // Convert the decimal part to an integer
+        int directionCode = (int)(directionDecimal * 100);
         switch (directionCode) {
             case 1: return "N";
             case 2: return "NE";
@@ -231,10 +225,10 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             case 6: return "SW";
             case 7: return "W";
             case 8: return "NW";
-            default: return "";  // Return an empty string if the direction code is invalid
+            // Return an empty string if the direction code is invalid
+            default: return "";
         }
     }
-
 
     @Override
     public int getItemCount() {
@@ -252,7 +246,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         TextView imageView, noiseView, lightView, compassView;
         TextView photoCount, noiseValueTextView, lightValueTextView, compassValueTextView;
         Button openCameraButton, noiseTestButton, lightTestButton, compassTestButton;
-
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -301,9 +294,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
             Bitmap bitmap = images.get(position);
             float ratio = (float) bitmap.getWidth() / (float) bitmap.getHeight();
-
             int width = recyclerView.getWidth();
-
             int height = Math.round(width / ratio);
 
             ViewGroup.LayoutParams params = holder.imageView.getLayoutParams();

@@ -47,21 +47,14 @@ public class DataCollectionActivity extends AppCompatActivity {
     private CompassSensor compassSensor;
     private AudioSensor audioSensor;
     private static final int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
-
-    // NEW: Camera and Image variables
     private RecyclerView recyclerView;
-    //private ImageAdapter imageAdapter;
     private final List<Bitmap> images = new ArrayList<>();
     private TextView photoCountTextView;
-
     private RecyclerView roomsRecyclerView;
     private RoomAdapter roomAdapter;
     private List<String> roomNames = new ArrayList<>();
-
     private Dialog noteDialog;
     private SharedPreferences sharedPreferences;
-
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -81,38 +74,35 @@ public class DataCollectionActivity extends AppCompatActivity {
         setTitle("Collect data mode");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        //recycle room
-        //int roomCount = 3;
-
-        // Initialize rooms RecyclerView
         roomsRecyclerView = findViewById(R.id.recycler_view);
 
-        // Define the list of room names
         List<String> roomNames = new ArrayList<>();
-        for (int i = 1; i <= 2; i++) { // assuming  3 rooms
+        // assuming  2 rooms
+        for (int i = 1; i <= 2; i++) {
             roomNames.add("Room " + i);
         }
 
-        // Setup the adapter for rooms
+        //Setup the adapter for rooms
         roomAdapter = new RoomAdapter(this, roomNames);
         roomsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         roomsRecyclerView.setAdapter(roomAdapter);
 
-
-        //=============================== Sensor work and click event--------------------------------
-        //Audio Sensor section
-        //get microphone permission for audio
+        /**
+         *  Sensor work and click event
+         *  Audio Sensor section
+         *  get microphone permission for audio
+         */
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
 
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.RECORD_AUDIO},
                     MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
-
         }
 
-        // Initialize SharedPreferences
+        /**
+         * note function
+         */
         sharedPreferences = getSharedPreferences("notes", MODE_PRIVATE);
-
         Button buttonNote = findViewById(R.id.buttonNote);
 
         buttonNote.setOnClickListener(new View.OnClickListener() {
@@ -122,15 +112,20 @@ public class DataCollectionActivity extends AppCompatActivity {
             }
         });
 
-        //==========================Click Finish Button to return property detail page ====================================
+        /**
+         * Click Finish Button to return property detail page
+         */
         binding.finishButton.setOnClickListener(view -> {
             //Need to define the logic of return tested data
             finish();
         });
     }
 
-    //==============================Helpers to be transport===============================
-
+    /**
+     * Helpers to be transport
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -142,28 +137,10 @@ public class DataCollectionActivity extends AppCompatActivity {
         }
     }
 
-
-    private String getDirectionFromDecimal(float directionDecimal) {
-        int directionCode = (int)(directionDecimal * 100);
-        switch (directionCode) {
-            case 1: return "N";
-            case 2: return "NE";
-            case 3: return "E";
-            case 4: return "SE";
-            case 5: return "S";
-            case 6: return "SW";
-            case 7: return "W";
-            case 8: return "NW";
-            default: return "";
-        }
-    }
-
-    private void updatePhotoCount() {
-        String text = images.size() + " added";
-        photoCountTextView.setText(text);
-    }
-
-    //note
+    /**
+     * collect note
+     * Show note
+     */
     private void showNoteDialog() {
         noteDialog = new Dialog(this);
         noteDialog.setContentView(R.layout.dialog_note);
@@ -171,7 +148,7 @@ public class DataCollectionActivity extends AppCompatActivity {
         final EditText editTextNote = noteDialog.findViewById(R.id.editTextNote);
         Button buttonSave = noteDialog.findViewById(R.id.buttonSave);
 
-        // Load existing note, if any
+        // load existing note
         String existingNote = sharedPreferences.getString("note", "");
         editTextNote.setText(existingNote);
 
@@ -181,7 +158,7 @@ public class DataCollectionActivity extends AppCompatActivity {
                 String note;
                 note = editTextNote.getText().toString();
                 saveNote(note);
-                noteDialog.dismiss();  // Dismiss the dialog
+                noteDialog.dismiss();
             }
         });
 
@@ -193,4 +170,23 @@ public class DataCollectionActivity extends AppCompatActivity {
         sharedPreferences.edit().putString("note", note).apply();
     }
 
+    private String getDirectionFromDecimal(float directionDecimal) {
+        int directionCode = (int)(directionDecimal * 100);  // Convert the decimal part to an integer
+        switch (directionCode) {
+            case 1: return "N";
+            case 2: return "NE";
+            case 3: return "E";
+            case 4: return "SE";
+            case 5: return "S";
+            case 6: return "SW";
+            case 7: return "W";
+            case 8: return "NW";
+            default: return "";  // Return an empty string if the direction code is invalid
+        }
+    }
+
+    private void updatePhotoCount() {
+        String text = images.size() + " added";
+        photoCountTextView.setText(text);
+    }
 }
