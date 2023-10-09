@@ -38,7 +38,10 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 
 public class PropertyDetailActivity extends AppCompatActivity {
@@ -211,8 +214,10 @@ public class PropertyDetailActivity extends AppCompatActivity {
                         .build();
         // on click set date
         datePicker.addOnPositiveButtonClickListener(selection -> {
-            dateTxt.setText(datePicker.getHeaderText());
-            date = datePicker.getHeaderText();
+            // display more sensible date format
+            String formattedDate = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(new Date(selection));
+            dateTxt.setText(formattedDate);
+            date = formattedDate;
         });
         // on click show date picker
         addDateBtn.setOnClickListener(v -> {
@@ -228,8 +233,10 @@ public class PropertyDetailActivity extends AppCompatActivity {
                 .build();
         timePicker.addOnPositiveButtonClickListener(selection -> {
             // on click set time
-            timeTxt.setText(timePicker.getHour() + ":" + timePicker.getMinute());
-            time = timePicker.getHour() + ":" + timePicker.getMinute();
+            // store date in format for easily parsing by LocalTime
+            String formattedTime = String.format(Locale.getDefault(), "%02d:%02d", timePicker.getHour(), timePicker.getMinute());
+            timeTxt.setText(formattedTime);
+            time = formattedTime;
         });
         addTimeBtn.setOnClickListener(v -> {
             // on select time

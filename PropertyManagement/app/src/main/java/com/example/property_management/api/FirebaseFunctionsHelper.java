@@ -18,8 +18,10 @@ import com.google.firebase.functions.HttpsCallableResult;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class FirebaseFunctionsHelper {
@@ -232,9 +234,14 @@ public class FirebaseFunctionsHelper {
                     boolean inspected = result.get("inspected") == null
                             ? false
                             : (boolean) result.get("inspected");
+                    // parse date in certain format
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
+                            "dd MMM yyyy",
+                            Locale.ENGLISH);
                     LocalDate inspectionDate = result.get("inspectionDate") == null
                             ? null
-                            : LocalDate.parse((String) result.get("inspectionDate"));
+                            : LocalDate.parse((String) result.get("inspectionDate"), formatter);
+                    // parse time
                     LocalTime inspectionTime = result.get("inspectionTime") == null
                             ? null
                             : LocalTime.parse((String) result.get("inspectionTime"));
