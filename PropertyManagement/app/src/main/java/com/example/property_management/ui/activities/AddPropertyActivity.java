@@ -54,7 +54,6 @@ public class AddPropertyActivity extends AppCompatActivity {
     private int price = 0;
     private ArrayList<String> images;
 
-
     AutocompleteFragment autocompleteFragment;
 
     @Override
@@ -65,53 +64,11 @@ public class AddPropertyActivity extends AppCompatActivity {
         setTitle(R.string.title_add_property);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // ================================== Components =======================================
-//        // inspection date label
-//        TextView inspectionDate = binding.inspectionDate;
-//        // date picker
-//        CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints.Builder().setValidator(DateValidatorPointForward.now());
-//        MaterialDatePicker<Long> datePicker =
-//                MaterialDatePicker
-//                .Builder
-//                .datePicker()
-//                .setTitleText("Select Inspection date")
-//                .setCalendarConstraints(constraintsBuilder.build())
-//                .build();
-//        // inspection time label
-//        TextView inspectionTime = findViewById(R.id.inspectionTime);
-//        // inspection time
-//        MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
-//                .setTimeFormat(TimeFormat.CLOCK_12H)
-//                .setHour(12)
-//                .setMinute(0)
-//                .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
-//                .setTitleText("Select Inspection Time")
-//                .build();
-
         // initialise components
         initSubmitButton();
         initUrlInputLayout();
         initScrapeUrlButton();
         initArrowNumberPickers();
-
-
-        // ================================== listeners =======================================
-//        datePicker.addOnPositiveButtonClickListener(selection -> {
-//            // on click set date
-//           inspectionDate.setText(datePicker.getHeaderText());
-//        });
-//        timePicker.addOnPositiveButtonClickListener(selection -> {
-//            // on click set time
-//            inspectionTime.setText(timePicker.getHour() + ":" + timePicker.getMinute());
-//        });
-//        inspectionDate.setOnClickListener(v -> {
-//            // on select date
-//            datePicker.show(getSupportFragmentManager(), "date_picker");
-//        });
-//        inspectionTime.setOnClickListener(v -> {
-//            // on select time
-//            timePicker.show(getSupportFragmentManager(), "time_picker");
-//        });
     }
 
     /**
@@ -153,22 +110,54 @@ public class AddPropertyActivity extends AppCompatActivity {
     }
 
     /**
-     * Enable and disable new property submission button
+     * Enable new property submission button
      */
     private void enableSubmit() {
         Button submitBtn = findViewById(R.id.submitBtn);
         submitBtn.setText("Submit");
         submitBtn.setEnabled(true);
     }
+
+    /**
+     * Disable new property submission button
+     */
     private void disableSubmit() {
         Button submitBtn = findViewById(R.id.submitBtn);
         submitBtn.setEnabled(false);
     }
+
+    /**
+     * Disable edit price and amenities
+     */
+    private void disableEditPrice() {
+        TextInputLayout priceInputLayout = findViewById(R.id.priceInputLayout);
+        priceInputLayout.setEnabled(false);
+    }
+
+    /**
+     * Disable edit price and amenities number picker
+     */
+    private void disableEditAmenities() {
+        ArrowNumberPicker bedroomNumberPicker = findViewById(R.id.bedroomNumberPicker);
+        ArrowNumberPicker bathroomNumberPicker = findViewById(R.id.bathroomNumberPicker);
+        ArrowNumberPicker parkingNumberPicker = findViewById(R.id.parkingNumberPicker);
+        bedroomNumberPicker.setEnabled(false);
+        bathroomNumberPicker.setEnabled(false);
+        parkingNumberPicker.setEnabled(false);
+    }
+
+    /**
+     * Set submit button to loading state
+     */
     public void setSubmitLoading() {
         Button submitBtn = findViewById(R.id.submitBtn);
         submitBtn.setText("Submitting...");
         submitBtn.setEnabled(false);
     }
+
+    /**
+     * Set submit button to fetching coordinates state
+     */
     public void setSubmitFetchingCoordinates() {
         Button submitBtn = findViewById(R.id.submitBtn);
         submitBtn.setText("Validating address...");
@@ -219,7 +208,11 @@ public class AddPropertyActivity extends AppCompatActivity {
                 // enable click action on finish scraping
                 scrapeUrlBtn.setEnabled(true);
                 fetchCoordinates(() -> {
-                    // enable submit button on finish fetching coordinates
+                    // run on finish fetching coordinates
+                    // assume scraped price and amenities are correct, disable edit
+                    disableEditPrice();
+                    disableEditAmenities();
+                    // enable submit button
                     enableSubmit();
                 });
             });
