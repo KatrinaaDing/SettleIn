@@ -20,9 +20,14 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.property_management.api.FirebaseAuthHelper;
 import com.example.property_management.api.FirebasePropertyRepository;
+import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.GetPropertyByIdCallback;
+import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.Property;
+import com.example.property_management.data.UserProperty;
+import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.example.property_management.ui.fragments.property.AmenitiesGroup;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.example.property_management.data.DistanceInfo;
@@ -35,11 +40,15 @@ import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class PropertyDetailActivity extends AppCompatActivity {
     private ActivityPropertyDetailBinding binding;
+
+    private String userId;
     private String propertyId;
 
     private Property property;
@@ -60,6 +69,12 @@ public class PropertyDetailActivity extends AppCompatActivity {
         setTitle("Property Detail");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        // get userId
+        FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(this);
+        FirebaseUser user = firebaseAuthHelper.getCurrentUser();
+        assert user != null;
+        this.userId = user.getUid();
+
         // get property id
         Intent intent = getIntent();
         this.propertyId = intent.getStringExtra("property_id"); // -1 is default value
@@ -70,45 +85,6 @@ public class PropertyDetailActivity extends AppCompatActivity {
 
 
         // ================================== Components =======================================
-        // TODO move to different functions
-        // ===== inspection time =====
-        Button addInspectionTimeBtn = binding.addInspectionTimeBtn;
-        ConstraintLayout inspectionTimeLayout = binding.inspectionTimeLayout;
-        TextView inspectionTimeTxt = binding.detailInspectionTimeTxt;
-        Button editInspectionTimeBtn = binding.editInspectionTimeBtn;
-
-        // Conditionally display Button or TextView
-//        String inspectionDate = "10/10/2023"; // TODO fetch ifInspectionDateExist from firebase
-//        String inspectionTime = "10:00"; // TODO fetch ifInspectionTimeExist from firebase
-        String inspectionDate = null;
-        String inspectionTime = null;
-        if (inspectionDate != null && inspectionTime != null) {
-            inspectionTimeTxt.setText(inspectionTime + " " + inspectionDate);
-            date = inspectionDate;
-            time = inspectionTime;
-            addInspectionTimeBtn.setVisibility(View.GONE);
-        } else if (inspectionDate != null) {
-            inspectionTimeTxt.setText(inspectionDate);
-            addInspectionTimeBtn.setVisibility(View.VISIBLE);
-            date = inspectionDate;
-            addInspectionTimeBtn.setVisibility(View.GONE);
-        } else {
-            inspectionTimeLayout.setVisibility(View.GONE);
-        }
-
-        addInspectionTimeBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showCustomDialog();
-            }
-        });
-
-        editInspectionTimeBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showCustomDialog();
-            }
-        });
 
         // ===== interested facilities distance =====
         ArrayList<DistanceInfo> distanceInfoList = new ArrayList<>();
@@ -180,13 +156,16 @@ public class PropertyDetailActivity extends AppCompatActivity {
                             inspectionTimeTxt.setText(time + " " + date);
                             addInspectionTimeBtn.setVisibility(View.GONE);
                             inspectionTimeLayout.setVisibility(View.VISIBLE);
+                            // update date and time to firebase
+                            updateInspectionDateTime();
+                        // no date and time
                         } else {
                             addInspectionTimeBtn.setVisibility(View.VISIBLE);
                             inspectionTimeLayout.setVisibility(View.GONE);
                         }
 
                         dialogInterface.dismiss();
-                        // TODO put date and time to firebase
+
                     }
                 }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
@@ -252,6 +231,7 @@ public class PropertyDetailActivity extends AppCompatActivity {
                 setAmenitiesGroup(property);
                 setCarousel(property);
                 setLinkButton(property);
+                setInspectionDateTime(userProperty);
             }
 
             @Override
@@ -313,6 +293,92 @@ public class PropertyDetailActivity extends AppCompatActivity {
 
                     // Start the web browser activity
                     startActivity(intent);
+                }
+            });
+        }
+    }
+
+    private void setInspectionDateTime(UserProperty userProperty) {
+        // ===== inspection time =====
+        Button addInspectionTimeBtn = binding.addInspectionTimeBtn;
+        ConstraintLayout inspectionTimeLayout = binding.inspectionTimeLayout;
+        TextView inspectionTimeTxt = binding.detailInspectionTimeTxt;
+        Button editInspectionTimeBtn = binding.editInspectionTimeBtn;
+
+        // Conditionally display Button or TextView
+        String inspectionDate = userProperty.getInspectionDate();
+        String inspectionTime = userProperty.getInspectionTime();
+        if (inspectionDate != null && inspectionTime != null) {
+            inspectionTimeTxt.setText(inspectionTime + " " + inspectionDate);
+            date = inspectionDate;
+            time = inspectionTime;
+            addInspectionTimeBtn.setVisibility(View.GONE);
+        } else if (inspectionDate != null) {
+            inspectionTimeTxt.setText(inspectionDate);
+            addInspectionTimeBtn.setVisibility(View.VISIBLE);
+            date = inspectionDate;
+            addInspectionTimeBtn.setVisibility(View.GONE);
+        } else {
+            inspectionTimeLayout.setVisibility(View.GONE);
+        }
+
+        addInspectionTimeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showCustomDialog();
+            }
+        });
+
+        editInspectionTimeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showCustomDialog();
+            }
+        });
+    }
+
+    // update inspection date and time to firebase
+    private void updateInspectionDateTime() {
+        // update date to firebase
+        if (this.date == "") {
+            HashMap<String, Object> updateDatePayload = new HashMap<>();
+            updateDatePayload.put("properties." + this.propertyId + ".inspectionDate", this.date);
+            FirebaseUserRepository userRepository = new FirebaseUserRepository();
+            userRepository.updateUserFields(this.userId, updateDatePayload, new UpdateUserCallback() {
+                @Override
+                public void onSuccess(String msg) {
+                    new BasicSnackbar(findViewById(android.R.id.content),
+                            "Inspection date added successfully",
+                            "success");
+                }
+
+                @Override
+                public void onError(String msg) {
+                    String errorMsg = "Error: " + msg;
+                    new BasicSnackbar(findViewById(android.R.id.content), errorMsg, "error");
+                    Log.e("add-property-failure", msg);
+                }
+            });
+        }
+
+        // update time to firebase
+        if (this.time == "") {
+            HashMap<String, Object> updateTimePayload = new HashMap<>();
+            updateTimePayload.put("properties." + this.propertyId + ".inspectionTime", this.time);
+            FirebaseUserRepository userRepository = new FirebaseUserRepository();
+            userRepository.updateUserFields(this.userId, updateTimePayload, new UpdateUserCallback() {
+                @Override
+                public void onSuccess(String msg) {
+                    new BasicSnackbar(findViewById(android.R.id.content),
+                            "Inspection time added successfully",
+                            "success");
+                }
+
+                @Override
+                public void onError(String msg) {
+                    String errorMsg = "Error: " + msg;
+                    new BasicSnackbar(findViewById(android.R.id.content), errorMsg, "error");
+                    Log.e("add-property-failure", msg);
                 }
             });
         }
