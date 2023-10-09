@@ -26,6 +26,12 @@ import com.example.property_management.callbacks.GetPropertyByIdCallback;
 import com.example.property_management.data.Property;
 import com.example.property_management.data.UserProperty;
 import com.example.property_management.ui.fragments.property.AmenitiesGroup;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.example.property_management.data.DistanceInfo;
 import com.example.property_management.R;
@@ -44,7 +50,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 
-public class PropertyDetailActivity extends AppCompatActivity {
+public class PropertyDetailActivity extends AppCompatActivity implements OnMapReadyCallback {
     private ActivityPropertyDetailBinding binding;
     private String propertyId;
 
@@ -58,6 +64,7 @@ public class PropertyDetailActivity extends AppCompatActivity {
     String date = "";
 
     String time = "";
+    GoogleMap gMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,6 +139,18 @@ public class PropertyDetailActivity extends AppCompatActivity {
             startActivity(newIntent);
         });
 
+    }
+
+    /**
+     * Initialize map fragment
+     */
+    private void initMap() {
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.propertyMap);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        } else {
+            Log.e("PropertyDetailActivity", "Map fragment is null.");
+        }
     }
 
     private void setDistanceRecycler(ArrayList<DistanceInfo> distanceInfoList){
@@ -288,6 +307,7 @@ public class PropertyDetailActivity extends AppCompatActivity {
                     setAmenitiesGroup(property);
                     setCarousel(property);
                     setLinkButton(property);
+                    initMap();
                 })
                 .addOnFailureListener(e -> {
                     // if error happens, show error message and hide detail content
@@ -350,5 +370,35 @@ public class PropertyDetailActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    /**
+     * Add marker to map showing current property location
+     * @param googleMap google map
+     */
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        if (property != null) {
+            LatLng propertyLatLng = new LatLng(property.getLat(), property.getLng());
+            // move camera to property location
+            googleMap.moveCamera(CameraUpdateFactory.newLatLng(propertyLatLng));
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(propertyLatLng, 13));
+            // add property marker
+            googleMap.addMarker(new MarkerOptions().position(propertyLatLng).title(property.getAddress()));
+
+            // disable scrolling in scrollview when map is moving
+            // reference: https://stackoverflow.com/questions/50505188/why-can-use-getparent-requ
+            // estdisallowintercepttouchevent-true-disallow-inte
+            googleMap.setOnCameraMoveListener(() -> {
+                ScrollView detailContent = binding.detailContent;
+                detailContent.requestDisallowInterceptTouchEvent(true);
+            });
+            // enable scrolling scrollview when map is idle
+            googleMap.setOnCameraIdleListener(() -> {
+                ScrollView detailContent = binding.detailContent;
+                detailContent.requestDisallowInterceptTouchEvent(false);
+            });
+        }
+        this.gMap = googleMap;
     }
 }
