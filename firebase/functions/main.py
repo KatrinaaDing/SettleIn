@@ -15,6 +15,8 @@ import json
 initialize_app()
 
 DEFAULT_AMENITIES_NUM = 0
+NEARBY_URL = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?'
+DISTANCE_URL = 'https://maps.googleapis.com/maps/api/distancematrix/json?'
 
 @https_fn.on_request()
 def hello_world(req: https_fn.Request) -> https_fn.Response:
@@ -341,11 +343,8 @@ def get_lnglat_by_address(req: https_fn.Request) -> Any:
 #             500,
 #             str(e),
 #         )
-        
-# get all properties of a user from firestore
-@https_fn.on_call()
-def get_user_properties(req:  https_fn.Request) -> Any:
-    user_id = req.data["userId"]
+
+def get_user_properties_helper(user_id):
     if user_id is None:
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
@@ -386,6 +385,54 @@ def get_user_properties(req:  https_fn.Request) -> Any:
             code=https_fn.FunctionsErrorCode.INTERNAL,
             message=(str(e)),
         )
+
+
+        
+# get all properties of a user from firestore
+@https_fn.on_call()
+def get_user_properties(req:  https_fn.Request) -> Any:
+    user_id = req.data["userId"]
+    return get_user_properties_helper(user_id)
+    # if user_id is None:
+    #     raise https_fn.HttpsError(
+    #         code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+    #         message=(
+    #             "The function must be called with an parameter, 'userId', which must be string."
+    #         ),
+    #     )
+    # try:
+    #     # get user document
+    #     coll_user = firestore.client().collection(u'users').document(user_id)
+    #     user = coll_user.get().to_dict()
+    #     if user is None:
+    #         raise https_fn.HttpsError(
+    #             code=https_fn.FunctionsErrorCode.NOT_FOUND,
+    #             message=("User not found."),
+    #         )
+    #     # for each propertyId in user document, get the property document
+    #     if 'properties' not in user:
+    #         print("[get-all-properties]", " user ", user_id, " has no properties")
+    #         return []
+    #     properties = []
+    #     for property_id in user['properties']:
+    #         property = firestore.client().collection(u'properties').document(property_id).get().to_dict()
+    #         # add user-side data to property document
+    #         property['propertyId'] = property_id
+    #         property['price'] = user['properties'][property_id]['price']
+    #         if ('inspected' in user['properties'][property_id]):
+    #             property['inspected'] = user['properties'][property_id]['inspected'] 
+    #         else:
+    #             property['inspected'] = False
+    #         properties.append(property)
+    #     print("[get-all-properties]", properties)
+    #     print("[get-all-properties]", " user ", user_id, " has properties")
+    #     return properties
+    
+    # except Exception as e:
+    #     raise https_fn.HttpsError(
+    #         code=https_fn.FunctionsErrorCode.INTERNAL,
+    #         message=(str(e)),
+    #     )
 
 # # get a property from firestore combined with user's collected data from that property
 # @https_fn.on_request()
@@ -547,3 +594,135 @@ def check_property_exist(req: https_fn.Request) -> Any:
             code=https_fn.FunctionsErrorCode.INTERNAL,
             message=(str(e)),
         )
+
+
+# get the closest facility address of a property winthin 5km
+def get_nearby(facility, lat, lng):
+    r = requests.get(NEARBY_URL + 'keyword=' + facility +
+                    '&location=' + str(lat) + '%2C' + str(lng) +
+                    '&rankby=distance' +
+                    # '&radius=' + str(radius) +
+                    '&key=' + os.environ.get("MAPS_API_KEY"))
+                        
+    # json method of response object
+    # return json format result
+    r = r.json()
+    status = r["status"]
+    if status == "OK":
+        # TODO name or address
+        return r["results"][0]["name"]
+    
+    # no interested facility within 5km from the property
+    elif status == "ZERO_RESULTS":
+        return None
+    else:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.PERMISSION_DENIED,
+            message=(r["error_message"]),
+        )
+
+
+# one property, one or multiple interested facilities/location addresses
+# input: 
+#   origin: property address, 
+#   destinations: a list of interested facilities/location specific addresses, 
+#   interests: a list of interested facilities general keyword (e.g. coles, kfc)
+def update_distance1(origin, destinations, interests, user_ref, path):
+    # get distance info from google distance matrix api
+    for mode in ['driving', 'transit', 'walking']:
+        r = requests.get(DISTANCE_URL + 'origins=' + origin +
+                        '&destinations=' + "|".join(destinations) +
+                        '&mode=' + mode +
+                        '&key=' + os.environ.get("MAPS_API_KEY"))
+                            
+        # json method of response object
+        x = r.json()
+        re= {}
+        
+        # Loop through the destinations
+        for i in range(len(destinations)):
+
+            # check if the destination in returned json is valid and clear
+            if x["destination_addresses"][i] == '':
+                # re[destinations[i]] = "LOCATION_NOT_FOUND"
+                # update_data = {
+                #     f"{path}.{destinations[i]}": "LOCATION_NOT_FOUND"
+                # }
+                # continue
+                raise https_fn.HttpsError(
+                    code=https_fn.FunctionsErrorCode.NOT_FOUND,
+                    message=("The address is invalid."),
+                )
+
+            address = x["destination_addresses"][i]
+            distance = x["rows"][0]["elements"][i]["distance"]["text"]
+            duration = x["rows"][0]["elements"][i]["duration"]["text"]
+
+            # if the destination is not in re, add the distance and travel time of the mode to the destination
+            if interests[i] not in re:
+                re[interests[i]] = {
+                    "address": address,
+                    "distance": distance, 
+                    mode: duration
+                }
+            # if the destination is in re, add travel time of the mode to the destination
+            else:
+                re[interests[i]][mode] = duration
+
+            # if last mode, update distance info to database
+            if mode == 'walking':
+                update_data = {}
+                for key, value in re[interests[i]].items():
+                    update_data[f"{path}.{interests[i]}.{key}"] = value
+                user_ref.update(update_data)
+
+
+# add a new interested facility
+@https_fn.on_request(secrets=["MAPS_API_KEY"])
+def add_interested_facility_restful(req: https_fn.Request) -> https_fn.Response:
+     # parameters passed from the client.
+    user_id = req.args.get("userId")
+    facility = req.args.get("facility")
+    if user_id is None or facility is None:
+        return create_error_response(
+            400,
+            "The function must be called with a parameter, 'userId', 'facility , which must be string.",
+        )
+    
+    # convert facility to lower case
+    facility = facility.lower()
+    # get all properties of the user
+    properties = get_user_properties_helper(user_id)
+    # if the user has no properties
+    if len(properties) == 0:
+        return
+    
+    for property in properties:
+        propertyId = property["propertyId"]
+        property_address = property["address"]
+        lat = property["lat"]
+        lng = property["lng"]
+        facility_address = get_nearby(facility, lat, lng)
+        # no interested facility within 5km from the property
+        if facility_address is None:
+            print(f"No {facility} within 5km from {property_address}")
+            continue
+
+        # get user document
+        user_ref = firestore.client().collection(u'users').document(user_id)
+        # Create the path using dot notation
+        path = f'properties.{propertyId}.distances'
+
+        # update distance info from property to the facility
+        update_distance1(property_address, [facility_address], [facility], user_ref, path)
+
+        
+    
+        
+
+        
+
+
+
+    
+
