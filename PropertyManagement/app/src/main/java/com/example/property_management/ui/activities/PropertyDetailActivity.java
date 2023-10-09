@@ -20,9 +20,11 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.property_management.api.FirebaseFunctionsHelper;
 import com.example.property_management.api.FirebasePropertyRepository;
 import com.example.property_management.callbacks.GetPropertyByIdCallback;
 import com.example.property_management.data.Property;
+import com.example.property_management.data.UserProperty;
 import com.example.property_management.ui.fragments.property.AmenitiesGroup;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.example.property_management.data.DistanceInfo;
@@ -37,12 +39,14 @@ import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class PropertyDetailActivity extends AppCompatActivity {
     private ActivityPropertyDetailBinding binding;
     private String propertyId;
 
     private Property property;
+    private UserProperty userProperty;
 
     DistanceAdapter distanceAdapter;
 
@@ -242,27 +246,50 @@ public class PropertyDetailActivity extends AppCompatActivity {
     }
 
     private void getPropertyById(String propertyId) {
-        FirebasePropertyRepository firebasePropertyRepository = new FirebasePropertyRepository();
-        firebasePropertyRepository.getPropertyById(propertyId, new GetPropertyByIdCallback() {
-            @Override
-            public void onSuccess(Property property) {
-                // if success, set property data to UI
-                PropertyDetailActivity.this.property = property;
-                binding.detailAddressTxt.setText(property.getAddress());
-                setAmenitiesGroup(property);
-                setCarousel(property);
-                setLinkButton(property);
-            }
-
-            @Override
-            public void onError(String msg) {
-                // if error happens, show error message and hide detail content
-                ScrollView detailContent = binding.detailContent;
-                TextView errorMessage = binding.errorMessage;
-                detailContent.setVisibility(View.GONE);
-                errorMessage.setVisibility(View.VISIBLE);
-            }
-        });
+//        FirebasePropertyRepository firebasePropertyRepository = new FirebasePropertyRepository();
+//        firebasePropertyRepository.getPropertyById(propertyId, new GetPropertyByIdCallback() {
+//            @Override
+//            public void onSuccess(Property property) {
+//                // if success, set property data to UI
+//                PropertyDetailActivity.this.property = property;
+//                binding.detailAddressTxt.setText(property.getAddress());
+//                setAmenitiesGroup(property);
+//                setCarousel(property);
+//                setLinkButton(property);
+//            }
+//
+//            @Override
+//            public void onError(String msg) {
+//                // if error happens, show error message and hide detail content
+//                ScrollView detailContent = binding.detailContent;
+//                TextView errorMessage = binding.errorMessage;
+//                detailContent.setVisibility(View.GONE);
+//                errorMessage.setVisibility(View.VISIBLE);
+//            }
+//        });
+        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+        firebaseFunctionsHelper.getPropertyById(propertyId)
+                .addOnSuccessListener(result -> {
+                    Map<String, Object> resultObj = (Map<String, Object>) result;
+                    // if success, set property data to UI
+                    Log.i("get-property-by-id-success",
+                            "successfully get property data " +
+                            "and user collected property data");
+                    property = (Property) resultObj.get("propertyData");
+                    userProperty = (UserProperty) resultObj.get("userPropertyData");
+                    binding.detailAddressTxt.setText(property.getAddress());
+                    setAmenitiesGroup(property);
+                    setCarousel(property);
+                    setLinkButton(property);
+                })
+                .addOnFailureListener(e -> {
+                    // if error happens, show error message and hide detail content
+                    Log.e("get-property-by-id-fail", e.getMessage());
+                    ScrollView detailContent = binding.detailContent;
+                    TextView errorMessage = binding.errorMessage;
+                    detailContent.setVisibility(View.GONE);
+                    errorMessage.setVisibility(View.VISIBLE);
+                });
     }
 
     // set amenities group data to UI
