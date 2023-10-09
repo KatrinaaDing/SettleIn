@@ -454,11 +454,11 @@ def get_property_by_id(req:  https_fn.Request) -> Any:
             code=https_fn.FunctionsErrorCode.NOT_FOUND,
             message=("The property does not belong to this user."),
         )
-    # merge property and user's collected data (user's property data will override property document data)
+    # combine user's collected data and property document
+    # user's property data will override property document data
     try:
-        property.update(user_property)
-        return_data = json.dumps({ "property": property })
-        return return_data
+        user_property.update(property)
+        return user_property
     except Exception as e:
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.INTERNAL,

@@ -4,9 +4,11 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.example.property_management.data.DistanceInfo;
 import com.example.property_management.data.NewProperty;
 import com.example.property_management.data.Property;
 import com.example.property_management.data.RoomData;
+import com.example.property_management.data.UserProperty;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -14,8 +16,12 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.HttpsCallableResult;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class FirebaseFunctionsHelper {
@@ -153,7 +159,7 @@ public class FirebaseFunctionsHelper {
      * @return a task that returns an a HashMap of longitude and latitude
      */
     public Task<Map<String, Double>> getLngLatByAddress(String address) {
-        // Create the arguments to the callable function, which is just a single "url" field
+        // Create the arguments to the callable function
         Map<String, String> data = new HashMap<>();
         data.put("address", address);
 
@@ -182,6 +188,134 @@ public class FirebaseFunctionsHelper {
                 }
 
             });
+    }
 
+    /**
+     * get a user's shortlisted property by property id
+     * @param propertyId the property id
+     * @return
+     */
+    public Task<Map<String, Object>> getPropertyById(String propertyId) {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        // create the arguments to the callable function
+        Map<String, String> payload = new HashMap<>();
+        payload.put("userId", userId);
+        payload.put("propertyId", propertyId);
+
+        return mFunctions
+                .getHttpsCallable("get_property_by_id")
+                .call(payload)
+                .continueWith((Continuation<HttpsCallableResult, Map<String, Object>>) task -> {
+                    Map<String, Object> result;
+
+                    // obtain results from the task
+                    try{
+                        result = (Map<String, Object>) task.getResult().getData();
+                    } catch (Exception e) {
+                        int msgIdx = e.getMessage().indexOf("n:") + 2;
+                        String msg = e.getMessage().substring(msgIdx);
+                        throw new Exception(msg);
+                    }
+                    // get result and create Property object
+                    Property propertyData = new Property(
+                            (String) result.get("propertyId"),
+                            (String) result.get("href"),
+                            (String) result.get("address"),
+                            (Double) result.get("lat"),
+                            (Double) result.get("lng"),
+                            (int) result.get("numBedrooms"),
+                            (int) result.get("numBathrooms"),
+                            (int) result.get("numParking"),
+                            getRoomsData(result, "propertyData"),
+                            (ArrayList<String>) result.get("images"),
+                            (int) result.get("price")
+                    );
+                    // get result and create userProperty object
+                    boolean inspected = result.get("inspected") == null
+                            ? false
+                            : (boolean) result.get("inspected");
+                    // parse date in certain format
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
+                            "dd MMM yyyy",
+                            Locale.ENGLISH);
+                    LocalDate inspectionDate = result.get("inspectionDate") == null
+                            ? null
+                            : LocalDate.parse((String) result.get("inspectionDate"), formatter);
+                    // parse time
+                    LocalTime inspectionTime = result.get("inspectionTime") == null
+                            ? null
+                            : LocalTime.parse((String) result.get("inspectionTime"));
+
+                    UserProperty userPropertyData = new UserProperty(
+                            (String) result.get("propertyId"),
+                            inspected,
+                            inspectionDate,
+                            inspectionTime,
+                            (String) result.get("notes"),
+                            getPropertyDistancesData(result),
+                            getRoomsData(result, "inspectedData"),
+                            (int) result.get("price")
+                    );
+                    Map<String, Object> res = new HashMap<>();
+                    res.put("propertyData", propertyData);
+                    res.put("userPropertyData", userPropertyData);
+                    return res;
+                });
+
+    }
+
+    /**
+     * Map the propertyData or inspectedData from firebase function results to
+     * HashMap<String, RoomData>
+     * @param result the result from firebase function
+     * @param key the key of the "propertyData" or "inspectedData"
+     * @return a HashMap<String, RoomData> where String is the room name and RoomData is the room
+     *        data object
+     */
+    private HashMap<String, RoomData> getRoomsData(Map<String, Object> result, String key) {
+        // convert propertyData for each room to HashMap<String, RoomData>
+        HashMap<String, RoomData> propertyRoomsData = new HashMap<>();
+        if (result.get("propertyData") != null) {
+            Map<String, Object> publicRoomsData = (Map<String, Object>) result.get(key);
+            for (String roomName : publicRoomsData.keySet()) {
+                Map<String, Object> entry = (Map<String, Object>) publicRoomsData.get(roomName);
+                float brightness = (float) entry.get("brightness");
+                float noise = (float) entry.get("noise");
+                String windowOrientation = (String) entry.get("windowOrientation");
+                ArrayList<String> images = (ArrayList<String>) entry.get("images");
+
+                RoomData singleRoomData = new RoomData(brightness, noise, windowOrientation, images);
+                propertyRoomsData.put(roomName, singleRoomData);
+            }
+        }
+        return propertyRoomsData;
+    }
+
+    /**
+     * Map the distances object from firebase function results to HashMap<String, DistanceInfo>
+     * @param result the result from firebase function
+     * @return a HashMap<String, DistanceInfo> where String is the insterested facilities/location
+     *        and DistanceInfo is the distance information object
+     */
+    private HashMap<String, DistanceInfo> getPropertyDistancesData(Map<String, Object> result) {
+        HashMap<String, DistanceInfo> distances = new HashMap<>();
+        if (result.get("distances") != null) {
+            Map<String, Object> distancesData = (Map<String, Object>) result.get("distances");
+            for (String key : distancesData.keySet()) {
+                Map<String, Object> entry = (Map<String, Object>) distancesData.get(key);
+                String businessName = (String) entry.get("businessName");
+                double distance = (double) entry.get("distance");
+                int driving = (int) entry.get("driving");
+                int publicTransport = (int) entry.get("publicTransport");
+                int walking = (int) entry.get("walking");
+                distances.put(key, new DistanceInfo(
+                        businessName,
+                        distance,
+                        driving,
+                        publicTransport,
+                        walking));
+            }
+        }
+        return distances;
     }
 }
