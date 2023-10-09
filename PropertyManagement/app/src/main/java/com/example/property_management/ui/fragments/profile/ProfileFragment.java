@@ -12,22 +12,36 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.property_management.R;
+import com.example.property_management.adapters.CustomListRecyclerViewAdapter;
 import com.example.property_management.api.FirebaseAuthHelper;
+import com.example.property_management.api.FirebaseUserRepository;
+import com.example.property_management.callbacks.BasicDialogCallback;
+import com.example.property_management.callbacks.GetUserInfoByIdCallback;
+import com.example.property_management.data.User;
 import com.example.property_management.databinding.FragmentProfileBinding;
 import com.example.property_management.ui.activities.LoginActivity;
 import com.example.property_management.ui.fragments.base.AutocompleteFragment;
+import com.example.property_management.ui.fragments.base.BasicDialog;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.android.libraries.places.api.net.PlacesClient;
+
+import java.util.ArrayList;
 
 public class ProfileFragment extends Fragment {
 
@@ -37,6 +51,10 @@ public class ProfileFragment extends Fragment {
     PlacesClient placesClient;
 
     String selectedAddress = "";
+
+    CustomListRecyclerViewAdapter interestedLocationsAdapter;
+    CustomListRecyclerViewAdapter interestedFacilitiesAdapter;
+
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -49,15 +67,28 @@ public class ProfileFragment extends Fragment {
         activity = (AppCompatActivity) getActivity();
 
         final TextView textView = binding.textProfile;
-        profileViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+//        profileViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
 
         // ========================= Components ==========================
+        ImageButton editBtn = binding.editBtn;
+        ImageButton addFacilityBtn = binding.addFacilityBtn;
         Button logoutBtn = binding.logoutBtn;
         TextView userEmail = binding.userEmail;
         TextView userId = binding.userId;
 
+        // ========================= Set Adapters ==========================
+        RecyclerView interestedLocationsRecyclerView = binding.interestedLocationsRecyclerView;
+        interestedLocationsAdapter = new CustomListRecyclerViewAdapter(new ArrayList<>());
+        interestedLocationsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        interestedLocationsRecyclerView.setAdapter(interestedLocationsAdapter);
+
+        RecyclerView interestedFacilitiesRecyclerView = binding.interestedFacilitiesRecyclerView;
+        interestedFacilitiesAdapter = new CustomListRecyclerViewAdapter(new ArrayList<>());
+        interestedFacilitiesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        interestedFacilitiesRecyclerView.setAdapter(interestedFacilitiesAdapter);
+
         // ===== Add Location Dialog =====
-        Button addLocationBtn = binding.addLocationBtn;
+        ImageButton addLocationBtn = binding.addLocationBtn;
         addLocationBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -71,6 +102,20 @@ public class ProfileFragment extends Fragment {
         });
 
         // ========================= Listeners ==========================
+        editBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                editProfile();
+            }
+        });
+
+        addFacilityBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addFacility();
+            }
+        });
+
         logoutBtn.setOnClickListener(v -> {
             logout();
         });
@@ -143,8 +188,39 @@ public class ProfileFragment extends Fragment {
         FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(activity);
         FirebaseUser user = firebaseAuthHelper.getCurrentUser();
         assert user != null;
-        binding.userEmail.setText("User Email: " + user.getEmail());
+        binding.userEmail.setText("Email: " + user.getEmail());
         binding.userId.setText("User ID: " + user.getUid());
+        binding.userId.setVisibility(View.INVISIBLE);
+        FirebaseUserRepository db = new FirebaseUserRepository();
+        db.getUserInfoById(user.getUid(), new GetUserInfoByIdCallback() {
+            @Override
+            public void onSuccess(User userObj) {
+                binding.userName.setText(userObj.getUserName());
+                ArrayList<String> userInterestedLocations = userObj.getInterestedLocations();
+                if (userInterestedLocations != null && !userInterestedLocations.isEmpty()) {
+                    interestedLocationsAdapter.updateData(userInterestedLocations);
+                }
 
+                ArrayList<String> userInterestedFacilities = userObj.getInterestedFacilities();
+                if (userInterestedFacilities != null && !userInterestedFacilities.isEmpty()) {
+                    interestedFacilitiesAdapter.updateData(userInterestedFacilities);
+                }
+            }
+
+            @Override
+            public void onError(String msg) {
+
+            }
+        });
+    }
+
+    public void editProfile() {
+        DialogFragment dialog = new EditProfileDialogFragment();
+        dialog.show(getChildFragmentManager(), "EditProfileDialogFragment");
+    }
+
+    public void addFacility() {
+        DialogFragment dialog = new AddNewFacilityDialogFragment();
+        dialog.show(getChildFragmentManager(), "AddNewFacilityDialogFragment");
     }
 }

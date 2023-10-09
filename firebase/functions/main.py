@@ -328,6 +328,11 @@ def get_lnglat_by_address(req: https_fn.Request) -> Any:
 #         for property_id in user['properties']:
 #             property = firestore.client().collection(u'properties').document(property_id).get().to_dict()
 #             property['propertyId'] = property_id
+#             property['price'] = user['properties'][property_id]['price']
+#             if ('inspected' in user['properties'][property_id]):
+#                 property['inspected'] = user['properties'][property_id]['inspected'] 
+#             else:
+#                 property['inspected'] = False
 #             properties.append(property)
 #         return_data = json.dumps({ "properties": properties })
 #         return https_fn.Response(return_data, status=200, headers={"Content-Type": "application/json"})
@@ -364,8 +369,15 @@ def get_user_properties(req:  https_fn.Request) -> Any:
         properties = []
         for property_id in user['properties']:
             property = firestore.client().collection(u'properties').document(property_id).get().to_dict()
+            # add user-side data to property document
             property['propertyId'] = property_id
+            property['price'] = user['properties'][property_id]['price']
+            if ('inspected' in user['properties'][property_id]):
+                property['inspected'] = user['properties'][property_id]['inspected'] 
+            else:
+                property['inspected'] = False
             properties.append(property)
+        print("[get-all-properties]", properties)
         print("[get-all-properties]", " user ", user_id, " has properties")
         return properties
     
@@ -524,7 +536,7 @@ def check_property_exist(req: https_fn.Request) -> Any:
             # get property document
             property = firestore.client().collection(u'properties').document(property_id).get().to_dict()
             # check if property exist, return propertyId if exist
-            if (address is not None and property['address'] == address) or (href is not None and property['href'] == href):
+            if (address is not None and address != '' and property['address'] == address) or (href is not None and href != '' and property['href'] == href):
                 return_data = { "exist": True, "propertyId": property_id }
                 return return_data
         # property not exist, return false
