@@ -10,17 +10,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.property_management.api.FirebaseAuthHelper;
+import com.example.property_management.api.FirebaseFunctionsHelper;
 import com.example.property_management.api.FirebasePropertyRepository;
 import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.GetPropertyByIdCallback;
@@ -28,7 +26,12 @@ import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.Property;
 import com.example.property_management.data.UserProperty;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
-import com.example.property_management.ui.fragments.property.AmenitiesGroup;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.example.property_management.data.DistanceInfo;
 import com.example.property_management.R;
@@ -41,17 +44,21 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 import com.google.firebase.auth.FirebaseUser;
-
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Map;
 
-public class PropertyDetailActivity extends AppCompatActivity {
+public class PropertyDetailActivity extends AppCompatActivity implements OnMapReadyCallback {
     private ActivityPropertyDetailBinding binding;
 
     private String userId;
     private String propertyId;
 
     private Property property;
+    private UserProperty userProperty;
 
     DistanceAdapter distanceAdapter;
 
@@ -60,6 +67,7 @@ public class PropertyDetailActivity extends AppCompatActivity {
     String date = "";
 
     String time = "";
+    GoogleMap gMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +109,18 @@ public class PropertyDetailActivity extends AppCompatActivity {
             startActivity(newIntent);
         });
 
+    }
+
+    /**
+     * Initialize map fragment
+     */
+    private void initMap() {
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.propertyMap);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        } else {
+            Log.e("PropertyDetailActivity", "Map fragment is null.");
+        }
     }
 
     private void setDistanceRecycler(ArrayList<DistanceInfo> distanceInfoList){
@@ -186,8 +206,10 @@ public class PropertyDetailActivity extends AppCompatActivity {
                         .build();
         // on click set date
         datePicker.addOnPositiveButtonClickListener(selection -> {
-            dateTxt.setText(datePicker.getHeaderText());
-            date = datePicker.getHeaderText();
+            // display more sensible date format
+            String formattedDate = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(new Date(selection));
+            dateTxt.setText(formattedDate);
+            date = formattedDate;
         });
         // on click show date picker
         addDateBtn.setOnClickListener(v -> {
@@ -203,8 +225,10 @@ public class PropertyDetailActivity extends AppCompatActivity {
                 .build();
         timePicker.addOnPositiveButtonClickListener(selection -> {
             // on click set time
-            timeTxt.setText(timePicker.getHour() + ":" + timePicker.getMinute());
-            time = timePicker.getHour() + ":" + timePicker.getMinute();
+            // store date in format for easily parsing by LocalTime
+            String formattedTime = String.format(Locale.getDefault(), "%02d:%02d", timePicker.getHour(), timePicker.getMinute());
+            timeTxt.setText(formattedTime);
+            time = formattedTime;
         });
         addTimeBtn.setOnClickListener(v -> {
             // on select time
@@ -221,29 +245,53 @@ public class PropertyDetailActivity extends AppCompatActivity {
     }
 
     private void getPropertyById(String propertyId) {
-        FirebasePropertyRepository firebasePropertyRepository = new FirebasePropertyRepository();
-        firebasePropertyRepository.getPropertyById(propertyId, new GetPropertyByIdCallback() {
-            @Override
-            public void onSuccess(Property property) {
-                // if success, set property data to UI
-                PropertyDetailActivity.this.property = property;
-                binding.detailAddressTxt.setText(property.getAddress());
-                setAmenitiesGroup(property);
-                setCarousel(property);
-                setLinkButton(property);
-                // TODO
+//        FirebasePropertyRepository firebasePropertyRepository = new FirebasePropertyRepository();
+//        firebasePropertyRepository.getPropertyById(propertyId, new GetPropertyByIdCallback() {
+//            @Override
+//            public void onSuccess(Property property) {
+//                // if success, set property data to UI
+//                PropertyDetailActivity.this.property = property;
+//                binding.detailAddressTxt.setText(property.getAddress());
+//                setAmenitiesGroup(property);
+//                setCarousel(property);
+//                setLinkButton(property);
+//            }
+//
+//            @Override
+//            public void onError(String msg) {
+//                // if error happens, show error message and hide detail content
+//                ScrollView detailContent = binding.detailContent;
+//                TextView errorMessage = binding.errorMessage;
+//                detailContent.setVisibility(View.GONE);
+//                errorMessage.setVisibility(View.VISIBLE);
+//            }
+//        });
+        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+        firebaseFunctionsHelper.getPropertyById(propertyId)
+                .addOnSuccessListener(result -> {
+                    Map<String, Object> resultObj = (Map<String, Object>) result;
+                    // if success, set property data to UI
+                    Log.i("get-property-by-id-success",
+                            "successfully get property data " +
+                            "and user collected property data");
+                    property = (Property) resultObj.get("propertyData");
+                    userProperty = (UserProperty) resultObj.get("userPropertyData");
+                    binding.detailAddressTxt.setText(property.getAddress());
+                    setAmenitiesGroup(property);
+                    setCarousel(property);
+                    setLinkButton(property);
+                    // TODO
 //                setInspectionDateTime(userProperty);
-            }
-
-            @Override
-            public void onError(String msg) {
-                // if error happens, show error message and hide detail content
-                ScrollView detailContent = binding.detailContent;
-                TextView errorMessage = binding.errorMessage;
-                detailContent.setVisibility(View.GONE);
-                errorMessage.setVisibility(View.VISIBLE);
-            }
-        });
+                    initMap();
+                })
+                .addOnFailureListener(e -> {
+                    // if error happens, show error message and hide detail content
+                    Log.e("get-property-by-id-fail", e.getMessage());
+                    ScrollView detailContent = binding.detailContent;
+                    TextView errorMessage = binding.errorMessage;
+                    detailContent.setVisibility(View.GONE);
+                    errorMessage.setVisibility(View.VISIBLE);
+                });
     }
 
     // set amenities group data to UI
@@ -341,7 +389,9 @@ public class PropertyDetailActivity extends AppCompatActivity {
         });
     }
 
-    // update inspection date and time to firebase
+    /**
+     * update inspection date and time to firebase
+     */
     private void updateInspectionDateTime() {
         // update date to firebase
         if (this.date == "") {
@@ -386,5 +436,36 @@ public class PropertyDetailActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+
+    /**
+     * Add marker to map showing current property location
+     * @param googleMap google map
+     */
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        if (property != null) {
+            LatLng propertyLatLng = new LatLng(property.getLat(), property.getLng());
+            // move camera to property location
+            googleMap.moveCamera(CameraUpdateFactory.newLatLng(propertyLatLng));
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(propertyLatLng, 13));
+            // add property marker
+            googleMap.addMarker(new MarkerOptions().position(propertyLatLng).title(property.getAddress()));
+
+            // disable scrolling in scrollview when map is moving
+            // reference: https://stackoverflow.com/questions/50505188/why-can-use-getparent-requ
+            // estdisallowintercepttouchevent-true-disallow-inte
+            googleMap.setOnCameraMoveListener(() -> {
+                ScrollView detailContent = binding.detailContent;
+                detailContent.requestDisallowInterceptTouchEvent(true);
+            });
+            // enable scrolling scrollview when map is idle
+            googleMap.setOnCameraIdleListener(() -> {
+                ScrollView detailContent = binding.detailContent;
+                detailContent.requestDisallowInterceptTouchEvent(false);
+            });
+        }
+        this.gMap = googleMap;
     }
 }

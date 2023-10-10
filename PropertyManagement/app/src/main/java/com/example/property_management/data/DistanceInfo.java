@@ -4,14 +4,14 @@ import java.util.HashMap;
 
 public class DistanceInfo {
     private String businessName;
-    private float distance;
+    private double distance;
     private int driving;
     private int publicTransport;
     private int walking;
 
     public DistanceInfo() {}
 
-    public DistanceInfo(String businessName, float distance, int driving, int publicTransport, int walking) {
+    public DistanceInfo(String businessName, double distance, int driving, int publicTransport, int walking) {
         this.businessName = businessName;
         this.distance = distance;
         this.driving = driving;
@@ -23,9 +23,9 @@ public class DistanceInfo {
 
     public void setBusinessName(String businessName) { this.businessName = businessName; }
 
-    public float getDistance() { return distance; }
+    public double getDistance() { return distance; }
 
-    public void setDistance(float distance) { this.distance = distance; }
+    public void setDistance(double distance) { this.distance = distance; }
 
     public int getDriving() { return driving; }
 
