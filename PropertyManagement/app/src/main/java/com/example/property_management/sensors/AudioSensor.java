@@ -37,7 +37,7 @@ public class AudioSensor {
                 byte[] audioBuffer = new byte[bufferSizeInShorts];
                 double sumDb = 0;
                 int count = 0;
-                while (isRecording && count < 30) {  // 3 seconds with 100ms sleep
+                while (isRecording && count < 30) {
                     int result = audioRecord.read(audioBuffer, 0, bufferSizeInShorts);
                     if (result > 0) {
                         double sum = 0;
@@ -49,7 +49,7 @@ public class AudioSensor {
                             double db = 10 * Math.log10(amplitude);
                             sumDb += db;
                             count++;
-                            callback.onCurrentDbCalculated(db);  // 更新当前分贝值
+                            callback.onCurrentDbCalculated(db);
                         }
                     }
 
@@ -60,7 +60,7 @@ public class AudioSensor {
                     }
                 }
                 double averageDb = sumDb / count;
-                callback.onAverageDbCalculated(averageDb);  // 更新平均分贝值
+                callback.onAverageDbCalculated(averageDb); 
             }
         }).start();
     }
