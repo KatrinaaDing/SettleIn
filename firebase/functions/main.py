@@ -681,8 +681,8 @@ def update_distance1(origin, destinations, interests, user_ref, path):
 @https_fn.on_call(secrets=["MAPS_API_KEY"])
 def add_interested_facility(req: https_fn.Request) -> Any:
      # parameters passed from the client.
-    user_id = req.args.get("userId")
-    facility = req.args.get("facility")
+    user_id = req.data["userId"]
+    facility = req.data["facility"]
     if user_id is None or facility is None:
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
@@ -735,7 +735,7 @@ def add_interested_facility(req: https_fn.Request) -> Any:
     properties = get_user_properties_helper(user_id)
     # if the user has no properties
     if len(properties) == 0:
-        return json.dumps({"message": "success"})
+        return "success"
      
     for property in properties:
         propertyId = property["propertyId"]
@@ -756,7 +756,7 @@ def add_interested_facility(req: https_fn.Request) -> Any:
         # update distance info from property to the facility
         update_distance1(property_address, [facility_address], [facility], user_ref, path)
         
-    return json.dumps({"message": "success"})
+    return "success"
 
 
 # # add a new interested facility
@@ -829,7 +829,7 @@ def add_interested_facility(req: https_fn.Request) -> Any:
 #         # update distance info from property to the facility
 #         update_distance1(property_address, [facility_address], [facility], user_ref, path)
         
-#     return json.dumps({"message": "success"})
+#     return "success"
 
         
     

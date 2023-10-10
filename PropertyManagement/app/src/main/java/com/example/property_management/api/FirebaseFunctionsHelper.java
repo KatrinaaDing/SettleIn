@@ -189,9 +189,9 @@ public class FirebaseFunctionsHelper {
     /**
      * add a new interested facility
      * get the distance info of the nearest facility from each property of the user
-     * @return a task that returns an null
+     * @return "success" if success, error message if fail
      */
-    public Task<Void> addInterestedFacility(String userId, String facility) {
+    public Task<String> addInterestedFacility(String userId, String facility) {
         Map<String, String> data = new HashMap<>();
         data.put("userId", userId);
         data.put("facility", facility);
@@ -199,21 +199,24 @@ public class FirebaseFunctionsHelper {
         return mFunctions
                 .getHttpsCallable("add_interested_facility")
                 .call(data)
-                .continueWith(new Continuation<HttpsCallableResult, Void>() {
+                .continueWith(new Continuation<HttpsCallableResult, String>() {
                     // This continuation runs on either success or failure, but if the task
                     // has failed then getResult() will throw an Exception which will be
                     // propagated down.
                     @Override
-                    public Void then(@NonNull Task<HttpsCallableResult> task) throws Exception {
+                    public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
+                        String result;
                         try{
-                            Map<String, Object> result = (Map<String, Object>) task.getResult().getData();
-                            return null;
+                            result = (String) task.getResult().getData();
                         } catch (Exception e) {
                             int msgIdx = e.getMessage().indexOf("n:") + 2;
                             String msg = e.getMessage().substring(msgIdx);
                             throw new Exception(msg);
                         }
+
+                        return result;
                     }
+
 
                 });
     }

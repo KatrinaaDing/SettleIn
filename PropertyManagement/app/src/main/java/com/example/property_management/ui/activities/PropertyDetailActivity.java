@@ -231,7 +231,8 @@ public class PropertyDetailActivity extends AppCompatActivity {
                 setAmenitiesGroup(property);
                 setCarousel(property);
                 setLinkButton(property);
-                setInspectionDateTime(userProperty);
+                // TODO
+//                setInspectionDateTime(userProperty);
             }
 
             @Override
@@ -306,8 +307,11 @@ public class PropertyDetailActivity extends AppCompatActivity {
         Button editInspectionTimeBtn = binding.editInspectionTimeBtn;
 
         // Conditionally display Button or TextView
-        String inspectionDate = userProperty.getInspectionDate();
-        String inspectionTime = userProperty.getInspectionTime();
+        // TODO
+//        String inspectionDate = userProperty.getInspectionDate();
+//        String inspectionTime = userProperty.getInspectionTime();
+        String inspectionDate = null;
+        String inspectionTime = null;
         if (inspectionDate != null && inspectionTime != null) {
             inspectionTimeTxt.setText(inspectionTime + " " + inspectionDate);
             date = inspectionDate;

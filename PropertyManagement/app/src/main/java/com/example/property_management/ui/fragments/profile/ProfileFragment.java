@@ -137,10 +137,17 @@ public class ProfileFragment extends Fragment {
                 String facility = "kmart";
                 firebaseFunctionsHelper.addInterestedFacility(userId, facility)
                         .addOnSuccessListener(result -> {
-                            new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Success: Added new facility.", "success");
+                            if (result.equals("success")) {
+                                System.out.println("Success: Added new facility.");
+                                new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Success: Added new facility.", "success");
+                            } else {
+                                System.out.println("Error: Failed to add new facility." + result);
+                                new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Error: Failed to add new facility.", "error");
+                            }
                         })
                         .addOnFailureListener(e -> {
                             // pop error at input box
+                            System.out.println(e.getMessage());
                             new BasicSnackbar(getActivity().findViewById(android.R.id.content), e.getMessage(), "error");
                         });
             }
@@ -195,7 +202,7 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        getUserInfo();
+//        getUserInfo();
     }
     @Override
     public void onDestroyView() {
