@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.property_management.R;
 import com.example.property_management.adapters.CustomListRecyclerViewAdapter;
 import com.example.property_management.api.FirebaseAuthHelper;
+import com.example.property_management.api.FirebaseFunctionsHelper;
 import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.BasicDialogCallback;
 import com.example.property_management.callbacks.GetUserInfoByIdCallback;
@@ -37,6 +38,7 @@ import com.example.property_management.databinding.FragmentProfileBinding;
 import com.example.property_management.ui.activities.LoginActivity;
 import com.example.property_management.ui.fragments.base.AutocompleteFragment;
 import com.example.property_management.ui.fragments.base.BasicDialog;
+import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -120,6 +122,31 @@ public class ProfileFragment extends Fragment {
             logout();
         });
 
+        // ========================= Add facility test ==========================
+        Button addFacilityTestBtn = binding.addFacilityTest;
+        addFacilityTestBtn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(activity);
+                FirebaseUser user = firebaseAuthHelper.getCurrentUser();
+                assert user != null;
+                String userId = user.getUid();
+                FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+                // TODO change hardcode here
+                String facility = "kmart";
+                firebaseFunctionsHelper.addInterestedFacility(userId, facility)
+                        .addOnSuccessListener(result -> {
+                            new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Success: Added new facility.", "success");
+                        })
+                        .addOnFailureListener(e -> {
+                            // pop error at input box
+                            new BasicSnackbar(getActivity().findViewById(android.R.id.content), e.getMessage(), "error");
+                        });
+            }
+        });
+
+        // ========================= End Add facility test ==========================
         return root;
     }
 

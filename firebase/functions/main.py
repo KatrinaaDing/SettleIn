@@ -644,11 +644,6 @@ def update_distance1(origin, destinations, interests, user_ref, path):
 
             # check if the destination in returned json is valid and clear
             if x["destination_addresses"][i] == '':
-                # re[destinations[i]] = "LOCATION_NOT_FOUND"
-                # update_data = {
-                #     f"{path}.{destinations[i]}": "LOCATION_NOT_FOUND"
-                # }
-                # continue
                 raise https_fn.HttpsError(
                     code=https_fn.FunctionsErrorCode.NOT_FOUND,
                     message=("The address is invalid."),
@@ -683,16 +678,21 @@ def update_distance1(origin, destinations, interests, user_ref, path):
 
 
 # add a new interested facility
-@https_fn.on_request(secrets=["MAPS_API_KEY"])
-def add_interested_facility_restful(req: https_fn.Request) -> https_fn.Response:
+@https_fn.on_call(secrets=["MAPS_API_KEY"])
+def add_interested_facility(req: https_fn.Request) -> Any:
      # parameters passed from the client.
     user_id = req.args.get("userId")
     facility = req.args.get("facility")
     if user_id is None or facility is None:
-        return create_error_response(
-            400,
-            "The function must be called with a parameter, 'userId', 'facility , which must be string.",
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+            message=(
+                "The function must be called with a parameter, 'userId', 'facility , which must be string."
+            ),
         )
+    
+    # convert facility to lower case
+    lower_facility = facility.lower()
     
     # get user document
     user_ref = firestore.client().collection(u'users').document(user_id)
@@ -700,20 +700,26 @@ def add_interested_facility_restful(req: https_fn.Request) -> https_fn.Response:
     # check duplicate
     if "interestedLocations" in user:
         current_interested_locations = user["interestedLocations"]
+        lower_current_interested_locations = [location.lower() for location in current_interested_locations]
         # if the facility is already in the user's interested locations, return error
-        if facility in current_interested_locations:
-            return create_error_response(
-                400,
-                "The facility is already in the user's interested locations.",
+        if lower_facility in lower_current_interested_locations:
+            raise https_fn.HttpsError(
+                code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+                message=(
+                    "Duplicate interested facility."
+                ),
             )
-        
+            
     if "interestedFacilities" in user:
         current_interested_facilities = user["interestedFacilities"]
+        lower_current_interested_facilities = [facility_.lower() for facility_ in current_interested_facilities]
         # if the facility is already in the user's interested facilities, return error
-        if facility in current_interested_facilities:
-            return create_error_response(
-                400,
-                "The facility is already in the user's interested facilities.",
+        if lower_facility in lower_current_interested_facilities:
+            raise https_fn.HttpsError(
+                code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+                message=(
+                    "Duplicate interested facility."
+                ),
             )
         # add the facility to the user's interested facilities
         else:
@@ -725,13 +731,11 @@ def add_interested_facility_restful(req: https_fn.Request) -> https_fn.Response:
         user_ref.update({"interestedFacilities": [facility]})
     
     # get distance info from all properties to the facility
-    # convert facility to lower case
-    facility = facility.lower()
     # get all properties of the user
     properties = get_user_properties_helper(user_id)
     # if the user has no properties
     if len(properties) == 0:
-        return
+        return json.dumps({"message": "success"})
      
     for property in properties:
         propertyId = property["propertyId"]
@@ -753,6 +757,79 @@ def add_interested_facility_restful(req: https_fn.Request) -> https_fn.Response:
         update_distance1(property_address, [facility_address], [facility], user_ref, path)
         
     return json.dumps({"message": "success"})
+
+
+# # add a new interested facility
+# @https_fn.on_request(secrets=["MAPS_API_KEY"])
+# def add_interested_facility_restful(req: https_fn.Request) -> https_fn.Response:
+#      # parameters passed from the client.
+#     user_id = req.args.get("userId")
+#     facility = req.args.get("facility")
+#     if user_id is None or facility is None:
+#         return create_error_response(
+#             400,
+#             "The function must be called with a parameter, 'userId', 'facility , which must be string.",
+#         )
+    
+#     # get user document
+#     user_ref = firestore.client().collection(u'users').document(user_id)
+#     user = user_ref.get().to_dict()
+#     # check duplicate
+#     if "interestedLocations" in user:
+#         current_interested_locations = user["interestedLocations"]
+#         # if the facility is already in the user's interested locations, return error
+#         if facility in current_interested_locations:
+#             return create_error_response(
+#                 400,
+#                 "The facility is already in the user's interested locations.",
+#             )
+        
+#     if "interestedFacilities" in user:
+#         current_interested_facilities = user["interestedFacilities"]
+#         # if the facility is already in the user's interested facilities, return error
+#         if facility in current_interested_facilities:
+#             return create_error_response(
+#                 400,
+#                 "The facility is already in the user's interested facilities.",
+#             )
+#         # add the facility to the user's interested facilities
+#         else:
+#             current_interested_facilities.append(facility)
+#             user_ref.update({"interestedFacilities": current_interested_facilities})
+
+#     if "interestedFacilities" not in user:
+#         # add the facility to the user's interested facilities
+#         user_ref.update({"interestedFacilities": [facility]})
+    
+#     # get distance info from all properties to the facility
+#     # convert facility to lower case
+#     facility = facility.lower()
+#     # get all properties of the user
+#     properties = get_user_properties_helper(user_id)
+#     # if the user has no properties
+#     if len(properties) == 0:
+#         return
+     
+#     for property in properties:
+#         propertyId = property["propertyId"]
+#         property_address = property["address"]
+#         lat = property["lat"]
+#         lng = property["lng"]
+#         facility_address = get_nearby(facility, lat, lng)
+    
+#         # no interested facility within 5km from the property
+#         if facility_address is None:
+#             print(f"No {facility} within 5km from {property_address}")
+#             continue
+
+        
+#         # Create the path using dot notation
+#         path = f'properties.{propertyId}.distances'
+
+#         # update distance info from property to the facility
+#         update_distance1(property_address, [facility_address], [facility], user_ref, path)
+        
+#     return json.dumps({"message": "success"})
 
         
     

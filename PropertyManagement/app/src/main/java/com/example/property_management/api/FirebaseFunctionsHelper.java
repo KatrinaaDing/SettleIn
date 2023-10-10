@@ -9,6 +9,7 @@ import com.example.property_management.data.Property;
 import com.example.property_management.data.RoomData;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.functions.FirebaseFunctions;
@@ -182,6 +183,38 @@ public class FirebaseFunctionsHelper {
                 }
 
             });
+    }
 
+
+    /**
+     * add a new interested facility
+     * get the distance info of the nearest facility from each property of the user
+     * @return a task that returns an null
+     */
+    public Task<Void> addInterestedFacility(String userId, String facility) {
+        Map<String, String> data = new HashMap<>();
+        data.put("userId", userId);
+        data.put("facility", facility);
+
+        return mFunctions
+                .getHttpsCallable("add_interested_facility")
+                .call(data)
+                .continueWith(new Continuation<HttpsCallableResult, Void>() {
+                    // This continuation runs on either success or failure, but if the task
+                    // has failed then getResult() will throw an Exception which will be
+                    // propagated down.
+                    @Override
+                    public Void then(@NonNull Task<HttpsCallableResult> task) throws Exception {
+                        try{
+                            Map<String, Object> result = (Map<String, Object>) task.getResult().getData();
+                            return null;
+                        } catch (Exception e) {
+                            int msgIdx = e.getMessage().indexOf("n:") + 2;
+                            String msg = e.getMessage().substring(msgIdx);
+                            throw new Exception(msg);
+                        }
+                    }
+
+                });
     }
 }
