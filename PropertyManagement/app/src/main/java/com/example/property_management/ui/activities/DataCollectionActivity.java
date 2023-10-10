@@ -84,8 +84,14 @@ public class DataCollectionActivity extends AppCompatActivity {
 
         // Define the list of room names
         List<String> roomNames = new ArrayList<>();
-        for (int i = 1; i <= 4; i++) { // assuming  3 rooms
-            roomNames.add("Room " + i);
+        for (int i = 0; i <= 3; i++) { // assuming  3 rooms
+            if (i == 0) {
+                roomNames.add("Lounge Room");
+            } else if (i == 3) {
+                roomNames.add("Others");
+            } else {
+                roomNames.add("Room " + i);
+            }
         }
 
         // Setup the adapter for rooms

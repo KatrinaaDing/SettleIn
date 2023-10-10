@@ -60,7 +60,7 @@ public class AudioSensor {
                     }
                 }
                 double averageDb = sumDb / count;
-                callback.onAverageDbCalculated(averageDb); 
+                callback.onAverageDbCalculated(averageDb);
             }
         }).start();
     }
