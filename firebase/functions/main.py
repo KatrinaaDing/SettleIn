@@ -609,8 +609,7 @@ def get_nearby(facility, lat, lng):
     r = r.json()
     status = r["status"]
     if status == "OK":
-        # TODO name or address
-        return r["results"][0]["name"]
+        return r["results"][0]["name"]+ ", " + r["results"][0]["vicinity"]
     
     # no interested facility within 5km from the property
     elif status == "ZERO_RESULTS":
@@ -629,6 +628,7 @@ def get_nearby(facility, lat, lng):
 #   interests: a list of interested facilities general keyword (e.g. coles, kfc)
 def update_distance1(origin, destinations, interests, user_ref, path):
     # get distance info from google distance matrix api
+    re= {}
     for mode in ['driving', 'transit', 'walking']:
         r = requests.get(DISTANCE_URL + 'origins=' + origin +
                         '&destinations=' + "|".join(destinations) +
@@ -637,7 +637,7 @@ def update_distance1(origin, destinations, interests, user_ref, path):
                             
         # json method of response object
         x = r.json()
-        re= {}
+        # print(x)
         
         # Loop through the destinations
         for i in range(len(destinations)):
@@ -653,6 +653,11 @@ def update_distance1(origin, destinations, interests, user_ref, path):
                     code=https_fn.FunctionsErrorCode.NOT_FOUND,
                     message=("The address is invalid."),
                 )
+            
+            if x["rows"][0]["elements"][i]["status"] == 'ZERO_RESULTS':
+                print(f"No {x['destination_addresses'][i]} within 5km from {origin}")
+                return
+
 
             address = x["destination_addresses"][i]
             distance = x["rows"][0]["elements"][i]["distance"]["text"]
@@ -689,6 +694,37 @@ def add_interested_facility_restful(req: https_fn.Request) -> https_fn.Response:
             "The function must be called with a parameter, 'userId', 'facility , which must be string.",
         )
     
+    # get user document
+    user_ref = firestore.client().collection(u'users').document(user_id)
+    user = user_ref.get().to_dict()
+    # check duplicate
+    if "interestedLocations" in user:
+        current_interested_locations = user["interestedLocations"]
+        # if the facility is already in the user's interested locations, return error
+        if facility in current_interested_locations:
+            return create_error_response(
+                400,
+                "The facility is already in the user's interested locations.",
+            )
+        
+    if "interestedFacilities" in user:
+        current_interested_facilities = user["interestedFacilities"]
+        # if the facility is already in the user's interested facilities, return error
+        if facility in current_interested_facilities:
+            return create_error_response(
+                400,
+                "The facility is already in the user's interested facilities.",
+            )
+        # add the facility to the user's interested facilities
+        else:
+            current_interested_facilities.append(facility)
+            user_ref.update({"interestedFacilities": current_interested_facilities})
+
+    if "interestedFacilities" not in user:
+        # add the facility to the user's interested facilities
+        user_ref.update({"interestedFacilities": [facility]})
+    
+    # get distance info from all properties to the facility
     # convert facility to lower case
     facility = facility.lower()
     # get all properties of the user
@@ -696,25 +732,27 @@ def add_interested_facility_restful(req: https_fn.Request) -> https_fn.Response:
     # if the user has no properties
     if len(properties) == 0:
         return
-    
+     
     for property in properties:
         propertyId = property["propertyId"]
         property_address = property["address"]
         lat = property["lat"]
         lng = property["lng"]
         facility_address = get_nearby(facility, lat, lng)
+    
         # no interested facility within 5km from the property
         if facility_address is None:
             print(f"No {facility} within 5km from {property_address}")
             continue
 
-        # get user document
-        user_ref = firestore.client().collection(u'users').document(user_id)
+        
         # Create the path using dot notation
         path = f'properties.{propertyId}.distances'
 
         # update distance info from property to the facility
         update_distance1(property_address, [facility_address], [facility], user_ref, path)
+        
+    return json.dumps({"message": "success"})
 
         
     
