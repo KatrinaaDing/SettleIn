@@ -42,8 +42,6 @@ public class FirebaseUserRepository {
     }
     public void addUser(User user, AddUserCallback callback) {
         Map<String, Object> userPayload = new HashMap<>();
-        userPayload.put("userName", user.getUserName());
-        userPayload.put("userEmail", user.getUserEmail());
         db.collection("users")
                 .document(user.getUserId())
                 .set(userPayload)

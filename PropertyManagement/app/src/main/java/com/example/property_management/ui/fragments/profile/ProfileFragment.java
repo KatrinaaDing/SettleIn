@@ -203,7 +203,6 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
         db.getUserInfoById(user.getUid(), new GetUserInfoByIdCallback() {
             @Override
             public void onSuccess(User userObj) {
-                username = userObj.getUserName();
                 ArrayList<String> userInterestedLocations = userObj.getInterestedLocations();
                 if (userInterestedLocations != null && !userInterestedLocations.isEmpty()) {
                     interestedLocationsAdapter.updateData(userInterestedLocations);
