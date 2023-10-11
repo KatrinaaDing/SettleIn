@@ -43,7 +43,7 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 
 import java.util.ArrayList;
 
-public class ProfileFragment extends Fragment {
+public class ProfileFragment extends Fragment implements EditProfileDialogFragment.OnProfileUpdatedListener{
 
     private FragmentProfileBinding binding;
     private AppCompatActivity activity;
@@ -222,12 +222,23 @@ public class ProfileFragment extends Fragment {
     }
 
     public void editProfile() {
-        DialogFragment dialog = new EditProfileDialogFragment(user, username);
+        EditProfileDialogFragment dialog = new EditProfileDialogFragment(user);
+        dialog.setOnProfileUpdatedListener(this);
         dialog.show(getChildFragmentManager(), "EditProfileDialogFragment");
     }
 
     public void addFacility() {
         DialogFragment dialog = new AddNewFacilityDialogFragment();
         dialog.show(getChildFragmentManager(), "AddNewFacilityDialogFragment");
+    }
+
+    @Override
+    public void onProfileUpdated(String newUsername, String newEmail) {
+
+        TextView UsernameTextView = getView().findViewById(R.id.userName);
+        UsernameTextView.setText(newUsername);
+
+        TextView emailTextView = getView().findViewById(R.id.userEmail);
+        emailTextView.setText(newEmail);
     }
 }

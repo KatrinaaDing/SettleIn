@@ -30,7 +30,7 @@
             android:id="@+id/editUsernameLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Username">
+            android:hint="New Username">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editUsername"
