@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -27,10 +28,14 @@ import com.example.property_management.ui.activities.PropertyDetailActivity;
 import com.example.property_management.ui.activities.TestActivity;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class HomeFragment extends Fragment {
 
@@ -65,6 +70,32 @@ public class HomeFragment extends Fragment {
         binding = null;
     }
 
+    private void initFilterMenu() {
+        TextInputLayout filterMenu = binding.filterMenu;
+        AutoCompleteTextView autoCompleteTextView = (AutoCompleteTextView) filterMenu.getEditText();
+        autoCompleteTextView.setText("All", false);
+        autoCompleteTextView.setOnItemClickListener((adapterView, view, i, l) -> {
+            String selected = (String) adapterView.getItemAtPosition(i);
+            if (selected.equals("All")) {
+                // on select "All", show all properties
+                renderProperties(allProperties);
+            } else {
+                // otherwise, filter properties by "inspected" status
+                // reference: https://stackoverflow.com/questions/9146224/arraylist-filter
+                boolean filterIsInspected = selected.equals("Inspected");
+                ArrayList<Property> filteredProperties = allProperties.stream()
+                        .filter(property -> property.getInspected() == filterIsInspected)
+                        .collect(Collectors.toCollection(ArrayList::new));
+
+                renderProperties(filteredProperties);
+            }
+        });
+    }
+
+    /**
+     * Wait for firebase authentication to finish
+     * @return true if authentication is successful, false otherwise
+     */
     private boolean waitForAuth() {
         // wait until firebase authentication is done
         binding.loadingText.setText("Signing you in...");
@@ -121,12 +152,11 @@ public class HomeFragment extends Fragment {
                         // show hint if no property exists
                         binding.hint.setVisibility(View.VISIBLE);
                     }
-                    RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
-                    propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
-                    RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties);
-                    propertiesRecyclerView.setAdapter(propertyCardAdapter);
+                    renderProperties(properties);
                     binding.loadingText.setVisibility(View.GONE);
                     allProperties = properties;
+                    // init filter menu after all properties are loaded
+                    initFilterMenu();
                 })
                 .addOnFailureListener(e -> {
                     Log.e("get-all-properties-fail", e.getMessage());
@@ -134,6 +164,12 @@ public class HomeFragment extends Fragment {
                 });
     }
 
+    private void renderProperties(ArrayList<Property> properties) {
+        RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
+        propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.VERTICAL, false));
+        RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties);
+        propertiesRecyclerView.setAdapter(propertyCardAdapter);
+    }
     public ArrayList<Property> getAllProperties() {
         return allProperties;
     }
