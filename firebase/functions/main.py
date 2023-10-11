@@ -5,6 +5,7 @@ from firebase_admin import initialize_app, firestore
 from typing import Any
 import os
 import google.cloud.firestore
+from urllib.parse import quote
 
 # libraries
 import re
@@ -621,11 +622,86 @@ def get_nearby(facility, lat, lng):
         )
 
 
-# one property, one or multiple interested facilities/location addresses
-# input: 
-#   origin: property address, 
-#   destinations: a list of interested facilities/location specific addresses, 
-#   interests: a list of interested facilities general keyword (e.g. coles, kfc)
+"""
+    multiple properties, one interested location addresses
+    input: 
+    origin: property address, 
+    destinations: a list of interested facilities/location specific addresses, 
+    interests: a list of interested facilities general keyword (e.g. coles, kfc)
+"""
+def update_distance2(origins, propertyIds, destination, user_ref):
+    # get distance info from google distance matrix api
+    re= {}
+    # encode destination address
+    encoded_destination = quote(destination)
+
+    # get distance info from google distance matrix api for each mode
+    for mode in ['driving', 'transit', 'walking']:
+        r = requests.get(DISTANCE_URL + 'origins=' + "|".join(origins) +
+                        '&destinations=' + destination +
+                        '&mode=' + mode +
+                        '&key=' + os.environ.get("MAPS_API_KEY"))
+                            
+        # json method of response object
+        x = r.json()
+        print(x)
+
+        # check if the destination in returned json is valid and clear
+        if x["destination_addresses"][0] == '':
+            raise https_fn.HttpsError(
+                code=https_fn.FunctionsErrorCode.NOT_FOUND,
+                message=("The address is invalid."),
+            )
+        
+        if x["status"] != 'OK':
+            raise https_fn.HttpsError(
+                code=https_fn.FunctionsErrorCode.NOT_FOUND,
+                message=("The address is invalid."),
+            )
+        
+        # Loop through the properties
+        for i in range(len(propertyIds)):
+            
+            if x["rows"][i]["elements"][0]["status"] == 'ZERO_RESULTS':
+                print(f"The address is invalid, or the {destination} is too far from {origins[i]}")
+                continue
+            
+            distance = x["rows"][i]["elements"][0]["distance"]["text"]
+            duration = x["rows"][i]["elements"][0]["duration"]["text"]
+
+            # if the destination is not in re, add the distance and travel time of the mode to the destination
+            if propertyIds[i] not in re:
+                re[propertyIds[i]] = {
+                    "address": destination,
+                    "distance": distance, 
+                    mode: duration
+                }
+            # if the destination is in re, add travel time of the mode to the destination
+            else:
+                re[propertyIds[i]][mode] = duration
+            print(re)
+
+            # if last mode, update distance info to database
+            if mode == 'walking':
+                update_data = {}
+                try:
+                    for key, value in re[propertyIds[i]].items():
+                        update_data[f"properties.{propertyIds[i]}.distances.{encoded_destination}.{key}"] = value
+                    user_ref.update(update_data)
+                except Exception as e:
+                    raise https_fn.HttpsError(
+                        code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+                        message=("The address is invalid, cannot include special characters"),
+                    )
+
+
+"""
+    one property, one or multiple interested facilities/location addresses
+    input: 
+    origin: property address, 
+    destinations: a list of interested facilities/location specific addresses, 
+    interests: a list of interested facilities general keyword (e.g. coles, kfc)
+"""
 def update_distance1(origin, destinations, interests, user_ref, path):
     # get distance info from google distance matrix api
     re= {}
@@ -654,14 +730,14 @@ def update_distance1(origin, destinations, interests, user_ref, path):
                 return
 
 
-            address = x["destination_addresses"][i]
+            # address = x["destination_addresses"][i]
             distance = x["rows"][0]["elements"][i]["distance"]["text"]
             duration = x["rows"][0]["elements"][i]["duration"]["text"]
 
             # if the destination is not in re, add the distance and travel time of the mode to the destination
             if interests[i] not in re:
                 re[interests[i]] = {
-                    "address": address,
+                    "address": destinations[i],
                     "distance": distance, 
                     mode: duration
                 }
@@ -756,6 +832,66 @@ def add_interested_facility(req: https_fn.Request) -> Any:
         # update distance info from property to the facility
         update_distance1(property_address, [facility_address], [facility], user_ref, path)
         
+    return "success"
+
+
+# add a new interested location
+@https_fn.on_request(secrets=["MAPS_API_KEY"])
+def add_interested_location_restful(req: https_fn.Request) -> https_fn.Response:
+     # parameters passed from the client.
+    user_id = req.args.get("userId")
+    location = req.args.get("location")
+    if user_id is None or location is None:
+        return create_error_response(
+            400,
+            "The function must be called with a parameter, 'userId', 'location' , which must be string.",
+        )
+    
+    # convert facility to lower case
+    lower_location = location.lower()
+    
+    # get user document
+    user_ref = firestore.client().collection(u'users').document(user_id)
+    user = user_ref.get().to_dict()
+    # check duplicate
+    if "interestedFacilities" in user:
+        current_interested_facilities = user["interestedFacilities"]
+        lower_current_interested_facilities = [facility_.lower() for facility_ in current_interested_facilities]
+        # if the location is already in the user's interested facilities, return error
+        if lower_location in lower_current_interested_facilities:
+            return create_error_response(
+                400,
+                "The location is already in the user's interested facilities.",
+            )
+
+    if "interestedLocations" in user:
+        current_interested_locations = user["interestedLocations"]
+        lower_current_interested_locations = [location.lower() for location in current_interested_locations]
+        # if the location is already in the user's interested locations, return error
+        if lower_location in lower_current_interested_locations:
+            return create_error_response(
+                400,
+                "The location is already in the user's interested locations.",
+            )
+        # add the location to the user's interested locations
+        else:
+            current_interested_locations.append(location)
+            user_ref.update({"interestedLocations": current_interested_locations})
+
+    if "interestedLocations" not in user:
+        # add the location to the user's interested locations
+        user_ref.update({"interestedLocations": [location]})
+    
+    # get distance info from all properties to the location
+    # get all properties of the user
+    properties = get_user_properties_helper(user_id)
+    # if the user has no properties
+    if len(properties) == 0:
+        return "success"
+    
+    propertyIds = [property["propertyId"] for property in properties]
+    property_addresses = [property["address"] for property in properties]
+    update_distance2(property_addresses, propertyIds, location, user_ref)
     return "success"
 
 
