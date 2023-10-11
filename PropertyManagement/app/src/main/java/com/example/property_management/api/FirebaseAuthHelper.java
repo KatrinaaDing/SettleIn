@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.property_management.callbacks.AuthCallback;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.FirebaseNetworkException;
@@ -14,6 +16,12 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import org.checkerframework.checker.nullness.qual.NonNull;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class FirebaseAuthHelper {
     private AppCompatActivity activity;

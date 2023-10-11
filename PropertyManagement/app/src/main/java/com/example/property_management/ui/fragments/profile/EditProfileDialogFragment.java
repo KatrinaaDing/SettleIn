@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -60,7 +61,8 @@ public class EditProfileDialogFragment extends DialogFragment {
         }
     }
 
-    public EditProfileDialogFragment(FirebaseUser user) {
+    public EditProfileDialogFragment(FirebaseUser user, String username) {
+        this.username = username;
         this.user = user;
         this.email = user.getEmail();
         this.uid = user.getUid();
@@ -98,7 +100,6 @@ public class EditProfileDialogFragment extends DialogFragment {
                     String userInputUsername = editUsername.getText().toString();
                     String userInputEmail = editEmail.getText().toString();
                     String userInputProvidePassword = providePassword.getText().toString();
-
                     View rootView = getActivity().findViewById(android.R.id.content);
                     if (userInputUsername.isEmpty() || userInputEmail.isEmpty()) {
                         new BasicSnackbar(rootView, "Username or Email Cannot be Empty.", "error");
@@ -133,8 +134,8 @@ public class EditProfileDialogFragment extends DialogFragment {
                                                         db.updateUserFields(uid, updates, new UpdateUserCallback() {
                                                             @Override
                                                             public void onSuccess(String msg) {
-//                                                                    editEmail.setText(userInputEmail);
-//                                                                    editUsername.setText(userInputUsername);
+//                                                                editEmail.setText(userInputEmail);
+//                                                                editUsername.setText(userInputUsername);
                                                                 notifyProfileUpdated(userInputUsername, userInputEmail);
                                                                 new BasicSnackbar(rootView, "Profile Updated Successfully.", "success");
                                                             }

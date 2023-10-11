@@ -222,7 +222,7 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
     }
 
     public void editProfile() {
-        EditProfileDialogFragment dialog = new EditProfileDialogFragment(user);
+        EditProfileDialogFragment dialog = new EditProfileDialogFragment(user, username);
         dialog.setOnProfileUpdatedListener(this);
         dialog.show(getChildFragmentManager(), "EditProfileDialogFragment");
     }
