@@ -194,14 +194,15 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
         assert user != null;
         email = user.getEmail();
         uid = user.getUid();
+        username = user.getDisplayName();
         binding.userEmail.setText("Email: " + email);
         binding.userId.setText("User ID: " + uid);
         binding.userId.setVisibility(View.INVISIBLE);
+        binding.userName.setText(username);
         FirebaseUserRepository db = new FirebaseUserRepository();
         db.getUserInfoById(user.getUid(), new GetUserInfoByIdCallback() {
             @Override
             public void onSuccess(User userObj) {
-                binding.userName.setText(userObj.getUserName());
                 username = userObj.getUserName();
                 ArrayList<String> userInterestedLocations = userObj.getInterestedLocations();
                 if (userInterestedLocations != null && !userInterestedLocations.isEmpty()) {
@@ -222,7 +223,7 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
     }
 
     public void editProfile() {
-        EditProfileDialogFragment dialog = new EditProfileDialogFragment(user, username);
+        EditProfileDialogFragment dialog = new EditProfileDialogFragment(user);
         dialog.setOnProfileUpdatedListener(this);
         dialog.show(getChildFragmentManager(), "EditProfileDialogFragment");
     }

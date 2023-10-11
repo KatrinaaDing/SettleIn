@@ -61,9 +61,9 @@ public class EditProfileDialogFragment extends DialogFragment {
         }
     }
 
-    public EditProfileDialogFragment(FirebaseUser user, String username) {
-        this.username = username;
+    public EditProfileDialogFragment(FirebaseUser user) {
         this.user = user;
+        this.username = user.getDisplayName();
         this.email = user.getEmail();
         this.uid = user.getUid();
     }
@@ -76,23 +76,11 @@ public class EditProfileDialogFragment extends DialogFragment {
 
         editUsername = view.findViewById(R.id.editUsername);
         editUsername.setText(username);
+        Log.d("update-name", "onCreateDialog: " + user.getDisplayName());
         editEmail = view.findViewById(R.id.editEmail);
         editEmail.setText(email);
         providePassword = view.findViewById(R.id.providePassword);
 
-//        // Get username
-//        FirebaseUserRepository db = new FirebaseUserRepository();
-//        db.getUserInfoById(user.getUid(), new GetUserInfoByIdCallback() {
-//            @Override
-//            public void onSuccess(User userObj) {
-//                username = userObj.getUserName();
-//            }
-//
-//            @Override
-//            public void onError(String msg) {
-//
-//            }
-//        });
         builder.setView(view)
             .setPositiveButton("Save", new DialogInterface.OnClickListener() {
                 @Override
@@ -125,26 +113,10 @@ public class EditProfileDialogFragment extends DialogFragment {
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if (task.isSuccessful()) {
                                                         Log.d("update-email", "User email address updated.");
-
-                                                        // update user collection
-                                                        FirebaseUserRepository db = new FirebaseUserRepository();
-                                                        HashMap<String, Object> updates = new HashMap<>();
-                                                        if (userInputUsername != username) updates.put("userName", userInputUsername);
-                                                        if (userInputEmail != email) updates.put("userEmail", userInputEmail);
-                                                        db.updateUserFields(uid, updates, new UpdateUserCallback() {
-                                                            @Override
-                                                            public void onSuccess(String msg) {
-//                                                                editEmail.setText(userInputEmail);
-//                                                                editUsername.setText(userInputUsername);
-                                                                notifyProfileUpdated(userInputUsername, userInputEmail);
-                                                                new BasicSnackbar(rootView, "Profile Updated Successfully.", "success");
-                                                            }
-
-                                                            @Override
-                                                            public void onError(String msg) {
-                                                                new BasicSnackbar(rootView, msg, "error");
-                                                            }
-                                                        });
+                                                        FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper((AppCompatActivity)getActivity());
+                                                        firebaseAuthHelper.addUsernameToFirestore(uid, userInputUsername);
+                                                        notifyProfileUpdated(userInputUsername, userInputEmail);
+                                                        new BasicSnackbar(rootView, "Profile Updated Successfully.", "success");
                                                     } else {
                                                         Log.d("update-email", "Update email failed.", task.getException());
                                                         new BasicSnackbar(rootView, "Update email failed.", "error");
