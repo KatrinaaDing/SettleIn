@@ -122,11 +122,13 @@ public class HomeFragment extends Fragment {
                         binding.hint.setVisibility(View.VISIBLE);
                     }
                     RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
-                    propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
-                    RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties);
-                    propertiesRecyclerView.setAdapter(propertyCardAdapter);
-                    binding.loadingText.setVisibility(View.GONE);
-                    allProperties = properties;
+                    if (propertiesRecyclerView != null) {
+                        propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
+                        RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties);
+                        propertiesRecyclerView.setAdapter(propertyCardAdapter);
+                        binding.loadingText.setVisibility(View.GONE);
+                        allProperties = properties;
+                    }
                 })
                 .addOnFailureListener(e -> {
                     Log.e("get-all-properties-fail", e.getMessage());

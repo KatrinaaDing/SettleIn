@@ -51,6 +51,9 @@ public class ProfileFragment extends Fragment {
     PlacesClient placesClient;
 
     String selectedAddress = "";
+    String username;
+    String email;
+    String uid;
 
     CustomListRecyclerViewAdapter interestedLocationsAdapter;
     CustomListRecyclerViewAdapter interestedFacilitiesAdapter;
@@ -188,14 +191,17 @@ public class ProfileFragment extends Fragment {
         FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(activity);
         FirebaseUser user = firebaseAuthHelper.getCurrentUser();
         assert user != null;
-        binding.userEmail.setText("Email: " + user.getEmail());
-        binding.userId.setText("User ID: " + user.getUid());
+        email = user.getEmail();
+        uid = user.getUid();
+        binding.userEmail.setText("Email: " + email);
+        binding.userId.setText("User ID: " + uid);
         binding.userId.setVisibility(View.INVISIBLE);
         FirebaseUserRepository db = new FirebaseUserRepository();
         db.getUserInfoById(user.getUid(), new GetUserInfoByIdCallback() {
             @Override
             public void onSuccess(User userObj) {
                 binding.userName.setText(userObj.getUserName());
+                username = userObj.getUserName();
                 ArrayList<String> userInterestedLocations = userObj.getInterestedLocations();
                 if (userInterestedLocations != null && !userInterestedLocations.isEmpty()) {
                     interestedLocationsAdapter.updateData(userInterestedLocations);
@@ -215,7 +221,7 @@ public class ProfileFragment extends Fragment {
     }
 
     public void editProfile() {
-        DialogFragment dialog = new EditProfileDialogFragment();
+        DialogFragment dialog = new EditProfileDialogFragment(username, email, uid);
         dialog.show(getChildFragmentManager(), "EditProfileDialogFragment");
     }
 
