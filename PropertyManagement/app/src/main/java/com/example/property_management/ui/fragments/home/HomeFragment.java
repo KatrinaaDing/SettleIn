@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -92,6 +93,12 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    private void initToolbar() {
+        ConstraintLayout toolbar = binding.toolbar;
+        initFilterMenu();
+        toolbar.setVisibility(View.VISIBLE);
+    }
+
     /**
      * Wait for firebase authentication to finish
      * @return true if authentication is successful, false otherwise
@@ -155,8 +162,8 @@ public class HomeFragment extends Fragment {
                     renderProperties(properties);
                     binding.loadingText.setVisibility(View.GONE);
                     allProperties = properties;
-                    // init filter menu after all properties are loaded
-                    initFilterMenu();
+                    // initialize and display toolbar after all properties are loaded
+                    initToolbar();
                 })
                 .addOnFailureListener(e -> {
                     Log.e("get-all-properties-fail", e.getMessage());
