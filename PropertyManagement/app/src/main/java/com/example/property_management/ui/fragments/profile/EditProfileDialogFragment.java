@@ -26,12 +26,14 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -88,9 +90,16 @@ public class EditProfileDialogFragment extends DialogFragment {
                     String userInputUsername = editUsername.getText().toString();
                     String userInputEmail = editEmail.getText().toString();
                     String userInputProvidePassword = providePassword.getText().toString();
+                    TextInputLayout editUsernameLayout = view.findViewById(R.id.editUsernameLayout);
+                    TextInputLayout editEmailLayout = view.findViewById(R.id.editEmailLayout);
+
                     View rootView = getActivity().findViewById(android.R.id.content);
-                    if (userInputUsername.isEmpty() || userInputEmail.isEmpty()) {
-                        new BasicSnackbar(rootView, "Username or Email Cannot be Empty.", "error");
+                    if (userInputUsername.isEmpty()) {
+//                        editUsernameLayout.setError("Username Cannot be Empty.");
+                        new BasicSnackbar(rootView, "Username Cannot be Empty.", "error");
+                    } else if (userInputEmail.isEmpty()) {
+//                        editEmailLayout.setError("Email Cannot be Empty.");
+                        new BasicSnackbar(rootView, "Email Cannot be Empty.", "error");
                     } else if (userInputUsername.equals(username) && userInputEmail.equalsIgnoreCase(email)) {
                         new BasicSnackbar(rootView, "Cannot Input the Same Username and Email.", "error");
                     } else if (userInputProvidePassword.isEmpty()) {
