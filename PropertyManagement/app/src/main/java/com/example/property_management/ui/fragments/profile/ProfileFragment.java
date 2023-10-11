@@ -54,7 +54,7 @@ public class ProfileFragment extends Fragment {
     String username;
     String email;
     String uid;
-
+    FirebaseUser user;
     CustomListRecyclerViewAdapter interestedLocationsAdapter;
     CustomListRecyclerViewAdapter interestedFacilitiesAdapter;
 
@@ -89,6 +89,8 @@ public class ProfileFragment extends Fragment {
         interestedFacilitiesAdapter = new CustomListRecyclerViewAdapter(new ArrayList<>());
         interestedFacilitiesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         interestedFacilitiesRecyclerView.setAdapter(interestedFacilitiesAdapter);
+
+        getUserInfo();
 
         // ===== Add Location Dialog =====
         ImageButton addLocationBtn = binding.addLocationBtn;
@@ -171,7 +173,6 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        getUserInfo();
     }
     @Override
     public void onDestroyView() {
@@ -189,7 +190,7 @@ public class ProfileFragment extends Fragment {
 
     private void getUserInfo() {
         FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(activity);
-        FirebaseUser user = firebaseAuthHelper.getCurrentUser();
+        user = firebaseAuthHelper.getCurrentUser();
         assert user != null;
         email = user.getEmail();
         uid = user.getUid();
@@ -221,7 +222,7 @@ public class ProfileFragment extends Fragment {
     }
 
     public void editProfile() {
-        DialogFragment dialog = new EditProfileDialogFragment(username, email, uid);
+        DialogFragment dialog = new EditProfileDialogFragment(user, username);
         dialog.show(getChildFragmentManager(), "EditProfileDialogFragment");
     }
 

@@ -16,11 +16,21 @@ import androidx.fragment.app.DialogFragment;
 
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseAuthHelper;
+import com.example.property_management.api.FirebaseUserRepository;
+import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import org.checkerframework.checker.nullness.qual.NonNull;
+
+import java.util.HashMap;
 
 public class EditProfileDialogFragment extends DialogFragment {
     private String username;
@@ -28,11 +38,14 @@ public class EditProfileDialogFragment extends DialogFragment {
     private String uid;
     private EditText editUsername;
     private EditText editEmail;
+    private EditText providePassword;
+    private FirebaseUser user;
 
-    public EditProfileDialogFragment(String username, String email, String uid) {
+    public EditProfileDialogFragment(FirebaseUser user, String username) {
+        this.user = user;
         this.username = username;
-        this.email = email;
-        this.uid = uid;
+        this.email = user.getEmail();
+        this.uid = user.getUid();
     }
 
     @Override
@@ -45,6 +58,7 @@ public class EditProfileDialogFragment extends DialogFragment {
         editUsername.setText(username);
         editEmail = view.findViewById(R.id.editEmail);
         editEmail.setText(email);
+        providePassword = view.findViewById(R.id.providePassword);
 
         builder.setView(view)
                 .setPositiveButton("Save", new DialogInterface.OnClickListener() {
@@ -52,22 +66,64 @@ public class EditProfileDialogFragment extends DialogFragment {
                     public void onClick(DialogInterface dialog, int id) {
                         String userInputUsername = editUsername.getText().toString();
                         String userInputEmail = editEmail.getText().toString();
-                        String msg = "";
-                        String type = "error";
+                        String userInputProvidePassword = providePassword.getText().toString();
+
                         View rootView = getActivity().findViewById(android.R.id.content);
                         if (userInputUsername.isEmpty() || userInputEmail.isEmpty()) {
-                            msg = "Username or email cannot be empty";
-                        } else if (userInputUsername.equals(username)) {
-                            msg = "Cannot input the same username";
-                        } else if (userInputEmail.equalsIgnoreCase(email)) {
-                            msg = "Cannot input the same email";
+                            new BasicSnackbar(rootView, "Username or Email Cannot be Empty.", "error");
+                        } else if (userInputUsername.equals(username) && userInputEmail.equalsIgnoreCase(email)) {
+                            new BasicSnackbar(rootView, "Cannot Input the Same Username and Email.", "error");
+                        } else if (userInputProvidePassword.isEmpty()) {
+                            new BasicSnackbar(rootView, "You Must Provide Password to Edit Profile.", "error");
                         } else {
-                            // valid input
-                            
+                            // re-authenticate user
+                            AuthCredential credential = EmailAuthProvider
+                                    .getCredential(email, providePassword.getText().toString());
+
+                            user.reauthenticate(credential)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            Log.d("user-auth", "User re-authenticated.");
+
+                                            user.updateEmail(userInputEmail)
+                                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                            if (task.isSuccessful()) {
+                                                                Log.d("update-email", "User email address updated.");
+
+                                                                // update user collection
+                                                                FirebaseUserRepository db = new FirebaseUserRepository();
+                                                                HashMap<String, Object> updates = new HashMap<>();
+                                                                if (userInputUsername != username) updates.put("userName", userInputUsername);
+                                                                if (userInputEmail != email) updates.put("userEmail", userInputEmail);
+                                                                db.updateUserFields(uid, updates, new UpdateUserCallback() {
+                                                                    @Override
+                                                                    public void onSuccess(String msg) {
+                                                                        new BasicSnackbar(rootView, "Profile Updated Successfully.", "success");
+                                                                    }
+
+                                                                    @Override
+                                                                    public void onError(String msg) {
+                                                                        new BasicSnackbar(rootView, msg, "error");
+                                                                    }
+                                                                });
+                                                            } else {
+                                                                Log.d("update-email", "Update email failed.", task.getException());
+                                                                new BasicSnackbar(rootView, "Update email failed.", "error");
+                                                            }
+                                                        }
+                                                    });
+                                        } else {
+                                            Log.d("user-auth", "User re-authentication failed.", task.getException());
+                                            new BasicSnackbar(rootView, "User re-authentication failed.", "error");
+                                        }
+                                    }
+                                });
+
                         }
-                        new BasicSnackbar(rootView, msg, type);
-
-
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
