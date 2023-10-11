@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +16,9 @@ import androidx.fragment.app.DialogFragment;
 
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseAuthHelper;
+import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -47,6 +50,24 @@ public class EditProfileDialogFragment extends DialogFragment {
                 .setPositiveButton("Save", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
+                        String userInputUsername = editUsername.getText().toString();
+                        String userInputEmail = editEmail.getText().toString();
+                        String msg = "";
+                        String type = "error";
+                        View rootView = getActivity().findViewById(android.R.id.content);
+                        if (userInputUsername.isEmpty() || userInputEmail.isEmpty()) {
+                            msg = "Username or email cannot be empty";
+                        } else if (userInputUsername.equals(username)) {
+                            msg = "Cannot input the same username";
+                        } else if (userInputEmail.equalsIgnoreCase(email)) {
+                            msg = "Cannot input the same email";
+                        } else {
+                            // valid input
+                            
+                        }
+                        new BasicSnackbar(rootView, msg, type);
+
+
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
