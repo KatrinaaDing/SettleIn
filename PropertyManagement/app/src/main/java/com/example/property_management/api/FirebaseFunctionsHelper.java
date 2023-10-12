@@ -377,16 +377,16 @@ public class FirebaseFunctionsHelper {
             Map<String, Object> distancesData = (Map<String, Object>) result.get("distances");
             for (String key : distancesData.keySet()) {
                 Map<String, Object> entry = (Map<String, Object>) distancesData.get(key);
-                String businessName = (String) entry.get("businessName");
-                double distance = (double) entry.get("distance");
-                int driving = (int) entry.get("driving");
-                int publicTransport = (int) entry.get("publicTransport");
-                int walking = (int) entry.get("walking");
+                String address = (String) entry.get("address");
+                String distance = (String) entry.get("distance");
+                String driving = (String) entry.get("driving");
+                String transit = (String) entry.get("transit");
+                String walking = (String) entry.get("walking");
                 distances.put(key, new DistanceInfo(
-                        businessName,
+                        address,
                         distance,
                         driving,
-                        publicTransport,
+                        transit,
                         walking));
             }
         }
