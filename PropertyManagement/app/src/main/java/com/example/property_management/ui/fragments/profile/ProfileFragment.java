@@ -49,11 +49,8 @@ public class ProfileFragment extends Fragment {
 
     private FragmentProfileBinding binding;
     private AppCompatActivity activity;
-
     PlacesClient placesClient;
-
     String selectedAddress = "";
-
     CustomListRecyclerViewAdapter interestedLocationsAdapter;
     CustomListRecyclerViewAdapter interestedFacilitiesAdapter;
 
@@ -130,34 +127,34 @@ public class ProfileFragment extends Fragment {
         FirebaseUser user = firebaseAuthHelper.getCurrentUser();
         assert user != null;
         addFacilityTestBtn.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View view) {
-
                 String userId = user.getUid();
                 FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
                 // TODO change hardcode here
-                String facility = "Melbourne Central";
+                String facility = "MelbourneCentral";
                 firebaseFunctionsHelper.addInterestedFacility(userId, facility)
                         .addOnSuccessListener(result -> {
                             if (result.equals("success")) {
-                                System.out.println("Success: Added new facility.");
-                                new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Success: Added new facility.", "success");
+                                Log.i("add-interested-facility-success", result);
+                                new BasicSnackbar(getActivity().findViewById(android.R.id.content),
+                                        "Success: Added new facility.", "success");
                             } else {
-                                System.out.println("Error: Failed to add new facility." + result);
-                                new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Error: Failed to add new facility.", "error");
+                                Log.e("add-interested-facility-fail", result);
+                                new BasicSnackbar(getActivity().findViewById(android.R.id.content),
+                                        "Error: Failed to add new facility.", "error");
                             }
                         })
                         .addOnFailureListener(e -> {
                             // pop error at input box
-                            System.out.println(e.getMessage());
-                            new BasicSnackbar(getActivity().findViewById(android.R.id.content), e.getMessage(), "error");
+                            Log.e("add-interested-facility-fail", e.getMessage());
+                            new BasicSnackbar(getActivity().findViewById(android.R.id.content),
+                                    e.getMessage(), "error");
                         });
             }
         });
 
         addLocationTestBtn.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View view) {
                 String userId = user.getUid();
@@ -167,17 +164,20 @@ public class ProfileFragment extends Fragment {
                 firebaseFunctionsHelper.addInterestedLocation(userId, location)
                         .addOnSuccessListener(result -> {
                             if (result.equals("success")) {
-                                System.out.println("Success: Added new location.");
-                                new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Success: Added new location.", "success");
+                                Log.i("add-interested-location-success", result);
+                                new BasicSnackbar(getActivity().findViewById(android.R.id.content),
+                                        "Success: Added new location.", "success");
                             } else {
-                                System.out.println("Error: Failed to add new location." + result);
-                                new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Error: Failed to add new location.", "error");
+                                Log.e("add-interested-location-fail", result);
+                                new BasicSnackbar(getActivity().findViewById(android.R.id.content),
+                                        "Error: Failed to add new location.", "error");
                             }
                         })
                         .addOnFailureListener(e -> {
                             // pop error at input box
-                            System.out.println(e.getMessage());
-                            new BasicSnackbar(getActivity().findViewById(android.R.id.content), e.getMessage(), "error");
+                            Log.e("add-interested-location-fail", e.getMessage());
+                            new BasicSnackbar(getActivity().findViewById(android.R.id.content),
+                                    e.getMessage(), "error");
                         });
             }
         });

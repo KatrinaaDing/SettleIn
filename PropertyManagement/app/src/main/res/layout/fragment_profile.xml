@@ -134,39 +134,39 @@
                 android:layout_width="match_parent"
                 android:layout_height="228dp"
                 android:scrollbars="vertical"/>
+            <Button
+                android:id="@+id/logoutBtn"
+                android:layout_width="340dp"
+                android:layout_height="44dp"
+                android:layout_gravity="bottom"
+                android:layout_weight="1"
+                android:text="Logout"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="1.0" />
 
+            <Button
+                android:id="@+id/addFacilityTest"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="add facility test"
+                app:layout_constraintTop_toBottomOf="@+id/logoutBtn"
+                tools:ignore="MissingConstraints" />
+
+            <Button
+                android:id="@+id/addLocationTest"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="add location test"
+                app:layout_constraintTop_toBottomOf="@+id/logoutBtn"
+                app:layout_constraintStart_toEndOf="@+id/addFacilityTest"
+                tools:ignore="MissingConstraints" />
         </LinearLayout>
+
     </androidx.core.widget.NestedScrollView>
 
-    <Button
-        android:id="@+id/logoutBtn"
-        android:layout_width="340dp"
-        android:layout_height="44dp"
-        android:layout_gravity="bottom"
-        android:layout_marginBottom="90dp"
-        android:layout_weight="1"
-        android:text="Logout"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
 
-    <Button
-        android:id="@+id/addFacilityTest"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="add facility test"
-        app:layout_constraintTop_toBottomOf="@+id/logoutBtn"
-        tools:ignore="MissingConstraints" />
-
-    <Button
-        android:id="@+id/addLocationTest"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="add facility test"
-        app:layout_constraintTop_toBottomOf="@+id/logoutBtn"
-        app:layout_constraintStart_toEndOf="@+id/addFacilityTest"
-        tools:ignore="MissingConstraints" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

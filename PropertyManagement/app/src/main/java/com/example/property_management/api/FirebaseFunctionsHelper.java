@@ -201,7 +201,7 @@ public class FirebaseFunctionsHelper {
         Map<String, String> data = new HashMap<>();
         data.put("userId", userId);
         data.put("facility", facility);
-
+        Log.i("add-interested-facility", "userId: " + userId + ", facility: " + facility);
         return mFunctions
                 .getHttpsCallable("add_interested_facility")
                 .call(data)
@@ -237,7 +237,7 @@ public class FirebaseFunctionsHelper {
         Map<String, String> data = new HashMap<>();
         data.put("userId", userId);
         data.put("location", location);
-
+        Log.i("add-interested-location", "userId: " + userId + ", location: " + location);
         return mFunctions
                 .getHttpsCallable("add_interested_location")
                 .call(data)
