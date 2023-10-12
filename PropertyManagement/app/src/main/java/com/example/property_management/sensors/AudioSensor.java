@@ -23,6 +23,7 @@ public class AudioSensor {
         this.callback = callback;
         this.bufferSizeInBytes = AudioRecord.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat);
         this.bufferSizeInShorts = bufferSizeInBytes / 2;
+
         this.audioRecord = new AudioRecord(audioSource, sampleRateInHz, channelConfig, audioFormat, bufferSizeInBytes);
     }
 
@@ -37,7 +38,6 @@ public class AudioSensor {
                 double sumDb = 0;
                 int count = 0;
                 while (isRecording && count < 30) {
-                    // 3 seconds with 100ms sleep
                     int result = audioRecord.read(audioBuffer, 0, bufferSizeInShorts);
                     if (result > 0) {
                         double sum = 0;
