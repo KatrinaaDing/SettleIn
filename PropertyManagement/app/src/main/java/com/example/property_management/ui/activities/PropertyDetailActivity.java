@@ -26,6 +26,7 @@ import com.example.property_management.callbacks.GetPropertyByIdCallback;
 import com.example.property_management.data.Property;
 import com.example.property_management.data.UserProperty;
 import com.example.property_management.ui.fragments.property.AmenitiesGroup;
+import com.example.property_management.utils.Helpers;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -45,6 +46,8 @@ import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
@@ -53,18 +56,19 @@ import java.util.Map;
 public class PropertyDetailActivity extends AppCompatActivity implements OnMapReadyCallback {
     private ActivityPropertyDetailBinding binding;
     private String propertyId;
-
     private Property property;
     private UserProperty userProperty;
-
     DistanceAdapter distanceAdapter;
-
     RecyclerView distanceRecycler;
-
+    // inspection date and time
     String date = "";
-
     String time = "";
+    // map fragment
     GoogleMap gMap;
+    // constant
+    String NO_DATE_HINT = "Date not set";
+    String NO_TIME_HINT = "Time not set";
+    String No_DATE_TIME_HINT = "Date and time not set";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -185,11 +189,11 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         if (date != "")
             dateTxt.setText(date);
         else
-            dateTxt.setText("Not Set");
+            dateTxt.setText(NO_DATE_HINT);
         if (time != "")
             timeTxt.setText(time);
         else
-            timeTxt.setText("Not Set");
+            timeTxt.setText(NO_TIME_HINT);
 
         // ===== dialog =====
         AlertDialog alertDialog = new MaterialAlertDialogBuilder(PropertyDetailActivity.this)
@@ -233,16 +237,14 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                         .build();
         // on click set date
         datePicker.addOnPositiveButtonClickListener(selection -> {
-            // display more sensible date format
-            String formattedDate = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(new Date(selection));
+            String formattedDate = setInspectionDate(new Date(selection));
             dateTxt.setText(formattedDate);
-            date = formattedDate;
         });
         // on click show date picker
         addDateBtn.setOnClickListener(v -> {
             datePicker.show(getSupportFragmentManager(), "date_picker");
         });
-
+        // ===== timePicker =====
         MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
                 .setTimeFormat(TimeFormat.CLOCK_12H)
                 .setHour(12)
@@ -252,10 +254,8 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 .build();
         timePicker.addOnPositiveButtonClickListener(selection -> {
             // on click set time
-            // store date in format for easily parsing by LocalTime
-            String formattedTime = String.format(Locale.getDefault(), "%02d:%02d", timePicker.getHour(), timePicker.getMinute());
+            String formattedTime = setInspectionTime(timePicker.getHour(), timePicker.getMinute());
             timeTxt.setText(formattedTime);
-            time = formattedTime;
         });
         addTimeBtn.setOnClickListener(v -> {
             // on select time
@@ -263,8 +263,8 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         });
         resetBtn.setOnClickListener(v -> {
             // on click reset date and time
-            dateTxt.setText("Not Set");
-            timeTxt.setText("Not Set");
+            dateTxt.setText(NO_DATE_HINT);
+            timeTxt.setText(NO_TIME_HINT);
             date = "";
             time = "";
         });
@@ -303,6 +303,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                             "and user collected property data");
                     property = (Property) resultObj.get("propertyData");
                     userProperty = (UserProperty) resultObj.get("userPropertyData");
+                    setInspectionDateTimeText();
                     binding.detailAddressTxt.setText(property.getAddress());
                     setAmenitiesGroup(property);
                     setCarousel(property);
@@ -319,6 +320,31 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 });
     }
 
+    private void setInspectionDateTimeText() {
+        if (userProperty == null)
+            return;
+        // get fetched inspection date and time
+        LocalDate date = userProperty.getInspectionDate();
+        LocalTime time = userProperty.getInspectionTime();
+        // get ui components
+        Button addInspectionTimeBtn = binding.addInspectionTimeBtn;
+        ConstraintLayout inspectionTimeLayout = binding.inspectionTimeLayout;
+        TextView inspectionTimeTxt = binding.detailInspectionTimeTxt;
+
+        if (date != null || time != null) {
+            String formattedDate = Helpers.dateFormatter(date);
+            String formattedTime = Helpers.timeFormatter(time.getHour(), time.getMinute());
+            // set field
+            this.date = formattedDate;
+            this.time = formattedTime;
+            // set ui
+            inspectionTimeTxt.setText(formattedTime + " " + formattedDate);
+            addInspectionTimeBtn.setVisibility(View.GONE);
+            inspectionTimeLayout.setVisibility(View.VISIBLE);
+        } else {
+            inspectionTimeTxt.setText(No_DATE_TIME_HINT);
+        }
+    }
     // set amenities group data to UI
     private void setAmenitiesGroup(Property property) {
         binding.detailPriceTxt.setText("$" + property.getPrice() + " per week");
@@ -401,4 +427,17 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         }
         this.gMap = googleMap;
     }
+
+    private String setInspectionTime(int hour, int minute) {
+        // store date in format for easily parsing by LocalTime
+        time = Helpers.timeFormatter(hour, minute);
+        return time;
+    }
+
+    private String setInspectionDate(Date newDate) {
+        // display more sensible date format
+        date = Helpers.dateFormatter(newDate);
+        return date;
+    }
+
 }
