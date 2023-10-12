@@ -11,6 +11,7 @@ import com.example.property_management.data.RoomData;
 import com.example.property_management.data.UserProperty;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.functions.FirebaseFunctions;
@@ -190,6 +191,79 @@ public class FirebaseFunctionsHelper {
             });
     }
 
+
+    /**
+     * add a new interested facility
+     * get the distance info of the nearest facility from each property of the user
+     * @return "success" if success, error message if fail
+     */
+    public Task<String> addInterestedFacility(String userId, String facility) {
+        Map<String, String> data = new HashMap<>();
+        data.put("userId", userId);
+        data.put("facility", facility);
+        Log.i("add-interested-facility", "userId: " + userId + ", facility: " + facility);
+        return mFunctions
+                .getHttpsCallable("add_interested_facility")
+                .call(data)
+                .continueWith(new Continuation<HttpsCallableResult, String>() {
+                    // This continuation runs on either success or failure, but if the task
+                    // has failed then getResult() will throw an Exception which will be
+                    // propagated down.
+                    @Override
+                    public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
+                        String result;
+                        try {
+                            result = (String) task.getResult().getData();
+                        } catch (Exception e) {
+                            int msgIdx = e.getMessage().indexOf("n:") + 2;
+                            String msg = e.getMessage().substring(msgIdx);
+                            throw new Exception(msg);
+                        }
+
+                        return result;
+                    }
+
+
+                });
+    }
+
+
+    /**
+     * add a new interested location
+     * get the distance info of the interested location from each property of the user
+     * @return "success" if success, error message if fail
+     */
+    public Task<String> addInterestedLocation(String userId, String location) {
+        Map<String, String> data = new HashMap<>();
+        data.put("userId", userId);
+        data.put("location", location);
+        Log.i("add-interested-location", "userId: " + userId + ", location: " + location);
+        return mFunctions
+                .getHttpsCallable("add_interested_location")
+                .call(data)
+                .continueWith(new Continuation<HttpsCallableResult, String>() {
+                    // This continuation runs on either success or failure, but if the task
+                    // has failed then getResult() will throw an Exception which will be
+                    // propagated down.
+                    @Override
+                    public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
+                        String result;
+                        try {
+                            result = (String) task.getResult().getData();
+                        } catch (Exception e) {
+                            int msgIdx = e.getMessage().indexOf("n:") + 2;
+                            String msg = e.getMessage().substring(msgIdx);
+                            throw new Exception(msg);
+                        }
+
+                        return result;
+                    }
+
+
+                });
+    }
+
+
     /**
      * get a user's shortlisted property by property id
      * @param propertyId the property id
@@ -303,16 +377,16 @@ public class FirebaseFunctionsHelper {
             Map<String, Object> distancesData = (Map<String, Object>) result.get("distances");
             for (String key : distancesData.keySet()) {
                 Map<String, Object> entry = (Map<String, Object>) distancesData.get(key);
-                String businessName = (String) entry.get("businessName");
-                double distance = (double) entry.get("distance");
-                int driving = (int) entry.get("driving");
-                int publicTransport = (int) entry.get("publicTransport");
-                int walking = (int) entry.get("walking");
+                String address = (String) entry.get("address");
+                String distance = (String) entry.get("distance");
+                String driving = (String) entry.get("driving");
+                String transit = (String) entry.get("transit");
+                String walking = (String) entry.get("walking");
                 distances.put(key, new DistanceInfo(
-                        businessName,
+                        address,
                         distance,
                         driving,
-                        publicTransport,
+                        transit,
                         walking));
             }
         }
