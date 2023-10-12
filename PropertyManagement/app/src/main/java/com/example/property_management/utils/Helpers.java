@@ -8,6 +8,7 @@ import android.view.inputmethod.InputMethodManager;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
@@ -27,10 +28,12 @@ public class Helpers {
     }
 
     public static String dateFormatter(Date date) {
+        if (date == null) return "";
         String formattedDate = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(date);
         return formattedDate;
     }
     public static String dateFormatter(LocalDate date) {
+        if (date == null) return "";
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.getDefault());
         String formattedDate = date.format(formatter);
         return formattedDate;
@@ -38,6 +41,13 @@ public class Helpers {
 
     public static String timeFormatter(int hour, int minute) {
         String formattedTime = String.format(Locale.getDefault(), "%02d:%02d", hour, minute);
+        return formattedTime;
+    }
+
+    public static String timeFormatter(LocalTime time) {
+        if (time == null) return "";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("%02d:%02d", Locale.getDefault());
+        String formattedTime = time.format(formatter);
         return formattedTime;
     }
 }

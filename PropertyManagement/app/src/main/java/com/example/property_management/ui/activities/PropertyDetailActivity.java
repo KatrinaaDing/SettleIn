@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -72,7 +73,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     // constant
     String NO_DATE_HINT = "Date not set";
     String NO_TIME_HINT = "Time not set";
-    String No_DATE_TIME_HINT = "Date and time not set";
+    String NO_DATE_TIME_HINT = "Not set";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,6 +147,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         Button resetBtn = dialogView.findViewById(R.id.resetBtn);
         TextView dateTxt = dialogView.findViewById(R.id.dateTxt);
         TextView timeTxt = dialogView.findViewById(R.id.timeTxt);
+        TextView inspectionTimeTxt = binding.detailInspectionTimeTxt;
 
         // display date and time
         if (date != "")
@@ -159,47 +161,45 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
 
         // ===== dialog =====
         AlertDialog alertDialog = new MaterialAlertDialogBuilder(PropertyDetailActivity.this)
-                .setTitle("Schedule Inspection")
-                .setView(dialogView)
-                .setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        Button addInspectionTimeBtn = binding.addInspectionTimeBtn;
-                        ConstraintLayout inspectionTimeLayout = binding.inspectionTimeLayout;
-                        TextView inspectionTimeTxt = binding.detailInspectionTimeTxt;
-                        // on click set date
-                        if (date != "" || time != "") {
-                            inspectionTimeTxt.setText(time + " " + date);
-                            addInspectionTimeBtn.setVisibility(View.GONE);
-                            inspectionTimeLayout.setVisibility(View.VISIBLE);
-                            // update date and time to firebase
-                            updateInspectionDateTime();
-                        // no date and time
-                        } else {
-                            addInspectionTimeBtn.setVisibility(View.VISIBLE);
-                            inspectionTimeLayout.setVisibility(View.GONE);
-                        }
+            .setTitle("Schedule Inspection")
+            .setView(dialogView)
+            .setPositiveButton("Save", (dialogInterface, i) -> {
+                // disable dismiss dialog on click outside during saving
+                ((AlertDialog) dialogInterface).setCanceledOnTouchOutside(false);
+                this.setTitle("Saving...");
+                // update to firebase
+                updateInspectionDateTime(() -> {
+                    // on success
+                    inspectionTimeTxt.setText((date != "" || time != "")
+                            ? formatDateTime(date, time)
+                            : NO_DATE_TIME_HINT
+                    );
+                }, () -> {
+                    // on error
+                    // enable dismiss dialog on click outside
+                    ((AlertDialog) dialogInterface).setCanceledOnTouchOutside(true);
+                });
 
-                        dialogInterface.dismiss();
+            }).setNegativeButton("Cancel", (dialogInterface, i) -> {
+                // reset date and time
+                setInspectionDateTimeText();
+                dialogInterface.dismiss();
 
-                    }
-                }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
-                    }
-                }).create();
+            }).create();
+
         alertDialog.show();
 
         // ===== datePicker =====
-        CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints.Builder().setValidator(DateValidatorPointForward.now());
+        CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints
+            .Builder()
+            .setValidator(DateValidatorPointForward.now());
         MaterialDatePicker<Long> datePicker =
-                MaterialDatePicker
-                        .Builder
-                        .datePicker()
-                        .setTitleText("Select Inspection date")
-                        .setCalendarConstraints(constraintsBuilder.build())
-                        .build();
+            MaterialDatePicker
+                .Builder
+                .datePicker()
+                .setTitleText("Select Inspection date")
+                .setCalendarConstraints(constraintsBuilder.build())
+                .build();
         // on click set date
         datePicker.addOnPositiveButtonClickListener(selection -> {
             String formattedDate = setInspectionDate(new Date(selection));
@@ -211,12 +211,12 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         });
         // ===== timePicker =====
         MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
-                .setTimeFormat(TimeFormat.CLOCK_12H)
-                .setHour(12)
-                .setMinute(0)
-                .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
-                .setTitleText("Select Inspection Time")
-                .build();
+            .setTimeFormat(TimeFormat.CLOCK_12H)
+            .setHour(12)
+            .setMinute(0)
+            .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
+            .setTitleText("Select Inspection Time")
+            .build();
         timePicker.addOnPositiveButtonClickListener(selection -> {
             // on click set time
             String formattedTime = setInspectionTime(timePicker.getHour(), timePicker.getMinute());
@@ -233,60 +233,36 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             date = "";
             time = "";
         });
-
     }
 
     private void getPropertyById(String propertyId) {
         setLoading(true);
-//        FirebasePropertyRepository firebasePropertyRepository = new FirebasePropertyRepository();
-//        firebasePropertyRepository.getPropertyById(propertyId, new GetPropertyByIdCallback() {
-//            @Override
-//            public void onSuccess(Property property) {
-//                // if success, set property data to UI
-//                PropertyDetailActivity.this.property = property;
-//                binding.detailAddressTxt.setText(property.getAddress());
-//                setAmenitiesGroup(property);
-//                setCarousel(property);
-//                setLinkButton(property);
-//            }
-//
-//            @Override
-//            public void onError(String msg) {
-//                // if error happens, show error message and hide detail content
-//                ScrollView detailContent = binding.detailContent;
-//                TextView errorMessage = binding.errorMessage;
-//                detailContent.setVisibility(View.GONE);
-//                errorMessage.setVisibility(View.VISIBLE);
-//            }
-//        });
         FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
         firebaseFunctionsHelper.getPropertyById(propertyId)
-                .addOnSuccessListener(result -> {
-                    Map<String, Object> resultObj = (Map<String, Object>) result;
-                    // if success, set property data to UI
-                    Log.i("get-property-by-id-success",
-                            "successfully get property data " +
-                            "and user collected property data");
-                    property = (Property) resultObj.get("propertyData");
-                    userProperty = (UserProperty) resultObj.get("userPropertyData");
-                    setInspectionDateTimeText();
-                    binding.detailAddressTxt.setText(property.getAddress());
-                    setAmenitiesGroup(property);
-                    setCarousel(property);
-                    setLinkButton(property);
-                    setDistances(userProperty.getDistances());
-                    // TODO
-//                setInspectionDateTime(userProperty);
-                    initMap();
-                    setLoading(false);
-                })
-                .addOnFailureListener(e -> {
-                    // if error happens, show error message and hide detail content
-                    Log.e("get-property-by-id-fail", e.getMessage());
-                    ScrollView detailContent = binding.detailContent;
-                    detailContent.setVisibility(View.GONE);
-                    setError(true);
-                });
+            .addOnSuccessListener(result -> {
+                Map<String, Object> resultObj = (Map<String, Object>) result;
+                // if success, set property data to UI
+                Log.i("get-property-by-id-success",
+                        "successfully get property data " +
+                        "and user collected property data");
+                property = (Property) resultObj.get("propertyData");
+                userProperty = (UserProperty) resultObj.get("userPropertyData");
+                setInspectionDateTimeText();
+                binding.detailAddressTxt.setText(property.getAddress());
+                setAmenitiesGroup(property);
+                setCarousel(property);
+                setLinkButton(property);
+                setDistances(userProperty.getDistances());
+                initMap();
+                setLoading(false);
+            })
+            .addOnFailureListener(e -> {
+                // if error happens, show error message and hide detail content
+                Log.e("get-property-by-id-fail", e.getMessage());
+                ScrollView detailContent = binding.detailContent;
+                detailContent.setVisibility(View.GONE);
+                setError(true);
+            });
     }
 
     private void setInspectionDateTimeText() {
@@ -296,28 +272,32 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         LocalDate date = userProperty.getInspectionDate();
         LocalTime time = userProperty.getInspectionTime();
         // get ui components
-        Button addInspectionTimeBtn = binding.addInspectionTimeBtn;
+        Button editInspectionTimeBtn = binding.editInspectionTimeBtn;
         ConstraintLayout inspectionTimeLayout = binding.inspectionTimeLayout;
         TextView inspectionTimeTxt = binding.detailInspectionTimeTxt;
 
         if (date != null || time != null) {
-            String formattedDate = Helpers.dateFormatter(date);
-            String formattedTime = Helpers.timeFormatter(time.getHour(), time.getMinute());
+            String formattedDate = date == null ? "" : Helpers.dateFormatter(date);
+            String formattedTime = time == null ? "" : Helpers.timeFormatter(time.getHour(), time.getMinute());
             // set field
             this.date = formattedDate;
             this.time = formattedTime;
             // set ui
-            inspectionTimeTxt.setText(formattedTime + " " + formattedDate);
-            addInspectionTimeBtn.setVisibility(View.GONE);
+            inspectionTimeTxt.setText(formatDateTime(formattedDate, formattedTime));
             inspectionTimeLayout.setVisibility(View.VISIBLE);
         } else {
-            inspectionTimeTxt.setText(No_DATE_TIME_HINT);
+            inspectionTimeTxt.setText(NO_DATE_TIME_HINT);
         }
+        editInspectionTimeBtn.setOnClickListener(v -> showCustomDialog());
     }
+
     // set amenities group data to UI
     private void setAmenitiesGroup(Property property) {
         binding.detailPriceTxt.setText("$" + property.getPrice() + " per week");
-        binding.amenitiesGroup.setValues(property.getNumBedrooms(), property.getNumBathrooms(), property.getNumParking());
+        binding.amenitiesGroup.setValues(
+                property.getNumBedrooms(),
+                property.getNumBathrooms(),
+                property.getNumParking());
     }
 
     // set images to carousel
@@ -366,97 +346,49 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         }
     }
 
-    private void setInspectionDateTime(UserProperty userProperty) {
-        // ===== inspection time =====
-        Button addInspectionTimeBtn = binding.addInspectionTimeBtn;
-        ConstraintLayout inspectionTimeLayout = binding.inspectionTimeLayout;
-        TextView inspectionTimeTxt = binding.detailInspectionTimeTxt;
-        Button editInspectionTimeBtn = binding.editInspectionTimeBtn;
-
-        // Conditionally display Button or TextView
-        // TODO
-//        String inspectionDate = userProperty.getInspectionDate();
-//        String inspectionTime = userProperty.getInspectionTime();
-        String inspectionDate = null;
-        String inspectionTime = null;
-        if (inspectionDate != null && inspectionTime != null) {
-            inspectionTimeTxt.setText(inspectionTime + " " + inspectionDate);
-            date = inspectionDate;
-            time = inspectionTime;
-            addInspectionTimeBtn.setVisibility(View.GONE);
-        } else if (inspectionDate != null) {
-            inspectionTimeTxt.setText(inspectionDate);
-            addInspectionTimeBtn.setVisibility(View.VISIBLE);
-            date = inspectionDate;
-            addInspectionTimeBtn.setVisibility(View.GONE);
-        } else {
-            inspectionTimeLayout.setVisibility(View.GONE);
-        }
-
-        addInspectionTimeBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showCustomDialog();
-            }
-        });
-
-        editInspectionTimeBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showCustomDialog();
-            }
-        });
-    }
-
     /**
      * update inspection date and time to firebase
      */
-    private void updateInspectionDateTime() {
+    private void updateInspectionDateTime(Runnable onSuccess, Runnable onError) {
         // update date to firebase
-        if (this.date == "") {
-            HashMap<String, Object> updateDatePayload = new HashMap<>();
-            updateDatePayload.put("properties." + this.propertyId + ".inspectionDate", this.date);
-            FirebaseUserRepository userRepository = new FirebaseUserRepository();
-            userRepository.updateUserFields(this.userId, updateDatePayload, new UpdateUserCallback() {
-                @Override
-                public void onSuccess(String msg) {
-                    new BasicSnackbar(findViewById(android.R.id.content),
-                            "Inspection date added successfully",
-                            "success");
-                }
+        HashMap<String, Object> updateDatePayload = new HashMap<>();
+        updateDatePayload.put("properties." + this.propertyId + ".inspectionDate", this.date);
+        FirebaseUserRepository userRepository = new FirebaseUserRepository();
+        userRepository.updateUserFields(this.userId, updateDatePayload, new UpdateUserCallback() {
+            @Override
+            public void onSuccess(String msg) {
+                // update time to firebase
+                HashMap<String, Object> updateTimePayload = new HashMap<>();
+                updateTimePayload.put("properties." + propertyId + ".inspectionTime", time);
+                FirebaseUserRepository userRepository = new FirebaseUserRepository();
+                userRepository.updateUserFields(userId, updateTimePayload, new UpdateUserCallback() {
+                    @Override
+                    public void onSuccess(String msg) {
+                        new BasicSnackbar(findViewById(android.R.id.content),
+                                "Inspection date and time added successfully",
+                                "success");
+                        Log.i("add-property-success", msg);
+                        onSuccess.run();
+                    }
+                    @Override
+                    public void onError(String msg) {
+                        String errorMsg = "Error: " + msg;
+                        new BasicSnackbar(findViewById(android.R.id.content), errorMsg, "error");
+                        Log.e("add-property-failure", msg);
+                        onError.run();
+                    }
+                });
+            }
+            @Override
+            public void onError(String msg) {
+                String errorMsg = "Error: " + msg;
+                new BasicSnackbar(findViewById(android.R.id.content), errorMsg, "error");
+                Log.e("add-property-failure", msg);
+                onError.run();
+            }
+        });
 
-                @Override
-                public void onError(String msg) {
-                    String errorMsg = "Error: " + msg;
-                    new BasicSnackbar(findViewById(android.R.id.content), errorMsg, "error");
-                    Log.e("add-property-failure", msg);
-                }
-            });
-        }
-
-        // update time to firebase
-        if (this.time == "") {
-            HashMap<String, Object> updateTimePayload = new HashMap<>();
-            updateTimePayload.put("properties." + this.propertyId + ".inspectionTime", this.time);
-            FirebaseUserRepository userRepository = new FirebaseUserRepository();
-            userRepository.updateUserFields(this.userId, updateTimePayload, new UpdateUserCallback() {
-                @Override
-                public void onSuccess(String msg) {
-                    new BasicSnackbar(findViewById(android.R.id.content),
-                            "Inspection time added successfully",
-                            "success");
-                }
-
-                @Override
-                public void onError(String msg) {
-                    String errorMsg = "Error: " + msg;
-                    new BasicSnackbar(findViewById(android.R.id.content), errorMsg, "error");
-                    Log.e("add-property-failure", msg);
-                }
-            });
-        }
     }
-
 
     /**
      * Add marker to map showing current property location
@@ -486,6 +418,13 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             });
         }
         this.gMap = googleMap;
+    }
+
+    private String formatDateTime(String date, String time) {
+        boolean noDate = date == null || date.equals("");
+        boolean noTime = time == null || time.equals("");
+        String separator = (noDate || noTime) ? "" : " on ";
+        return time + separator + date;
     }
 
     private void setLoading(boolean isLoading) {

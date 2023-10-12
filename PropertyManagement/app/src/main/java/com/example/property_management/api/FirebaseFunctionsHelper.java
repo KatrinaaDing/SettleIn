@@ -312,11 +312,13 @@ public class FirebaseFunctionsHelper {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
                             "dd MMM yyyy",
                             Locale.ENGLISH);
-                    LocalDate inspectionDate = result.get("inspectionDate") == null
+                    LocalDate inspectionDate = result.get("inspectionDate") == null ||
+                            ((String) result.get("inspectionDate")).equals("")
                             ? null
                             : LocalDate.parse((String) result.get("inspectionDate"), formatter);
                     // parse time
-                    LocalTime inspectionTime = result.get("inspectionTime") == null
+                    LocalTime inspectionTime = result.get("inspectionTime") == null ||
+                            ((String) result.get("inspectionTime")).equals("")
                             ? null
                             : LocalTime.parse((String) result.get("inspectionTime"));
 
