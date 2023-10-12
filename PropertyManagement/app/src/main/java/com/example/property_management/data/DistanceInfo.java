@@ -4,18 +4,18 @@ import java.util.HashMap;
 
 public class DistanceInfo {
     private String businessName;
-    private double distance;
-    private int driving;
-    private int publicTransport;
-    private int walking;
+    private String distance;
+    private String driving;
+    private String transit;
+    private String walking;
 
     public DistanceInfo() {}
 
-    public DistanceInfo(String businessName, double distance, int driving, int publicTransport, int walking) {
+    public DistanceInfo(String businessName, String distance, String driving, String transit, String walking) {
         this.businessName = businessName;
         this.distance = distance;
         this.driving = driving;
-        this.publicTransport = publicTransport;
+        this.transit = transit;
         this.walking = walking;
     }
 
@@ -23,19 +23,19 @@ public class DistanceInfo {
 
     public void setBusinessName(String businessName) { this.businessName = businessName; }
 
-    public double getDistance() { return distance; }
+    public String getDistance() { return distance; }
 
-    public void setDistance(double distance) { this.distance = distance; }
+    public void setDistance(String distance) { this.distance = distance; }
 
-    public int getDriving() { return driving; }
+    public String getDriving() { return driving; }
 
-    public void setDriving(int driving) { this.driving = driving; }
+    public void setDriving(String driving) { this.driving = driving; }
 
-    public int getPublicTransport() { return publicTransport; }
+    public String getTransit() { return transit; }
 
-    public void setPublicTransport(int publicTransport) { this.publicTransport = publicTransport; }
+    public void setTransit(String transit) { this.transit = transit; }
 
-    public int getWalking() { return walking; }
+    public String getWalking() { return walking; }
 
-    public void setWalking(int walking) { this.walking = walking; }
+    public void setWalking(String walking) { this.walking = walking; }
 }

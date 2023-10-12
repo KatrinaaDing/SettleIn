@@ -80,6 +80,35 @@
 <!--                android:text="Go to Test Screen"-->
 <!--                style="@style/Widget.Material3.Button.ElevatedButton"-->
 <!--                android:layout_marginVertical="20dp"/>-->
+
+            <!-- filter menu -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="20dp"
+                android:visibility="invisible">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/filter_menu"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="180dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:hint="Filter">
+
+                    <AutoCompleteTextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        app:simpleItems="@array/properties_filter_options"
+                        />
+
+                </com.google.android.material.textfield.TextInputLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- properties list -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/propertiesRecyclerView"
                 android:layout_width="match_parent"
