@@ -97,29 +97,30 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     int id = item.getItemId();
-                    if (id == R.id.property_option_get_direction) {
-                        // reference: https://developers.google.com/maps/documentation/urls/android-intents
-                        // view property location on map
-                        String address = property.getAddress();
-                         String uriString = "geo:0,0?q=" + Uri.encode(address);
-//                        String uriString = "google.navigation:?q=" + Uri.encode(address);
-                        Uri uri = Uri.parse(uriString);
-                        Intent mapIntent = new Intent(android.content.Intent.ACTION_VIEW, uri);
-                        // If Google Maps app is installed, open it. Else, redirect to web version.
-                        try {
-                            Log.d("property-view-on-map", "URI: " + uriString);
-                            context.startActivity(mapIntent);
-                        } catch (ActivityNotFoundException e) {
-                            // Google Maps app is not installed, redirect to web version
-                            Uri webUri = Uri.parse(
-                                    "https://www.google.com/maps/search/?api=1&query=" +
-                                    Uri.encode(address));
-                            Intent webIntent = new Intent(Intent.ACTION_VIEW, webUri);
-                            context.startActivity(webIntent);
-                        }
-                        return true;
+//                    if (id == R.id.property_option_get_direction) {
+//                        // reference: https://developers.google.com/maps/documentation/urls/android-intents
+//                        // view property location on map
+//                        String address = property.getAddress();
+//                         String uriString = "geo:0,0?q=" + Uri.encode(address);
+////                        String uriString = "google.navigation:?q=" + Uri.encode(address);
+//                        Uri uri = Uri.parse(uriString);
+//                        Intent mapIntent = new Intent(android.content.Intent.ACTION_VIEW, uri);
+//                        // If Google Maps app is installed, open it. Else, redirect to web version.
+//                        try {
+//                            Log.d("property-view-on-map", "URI: " + uriString);
+//                            context.startActivity(mapIntent);
+//                        } catch (ActivityNotFoundException e) {
+//                            // Google Maps app is not installed, redirect to web version
+//                            Uri webUri = Uri.parse(
+//                                    "https://www.google.com/maps/search/?api=1&query=" +
+//                                    Uri.encode(address));
+//                            Intent webIntent = new Intent(Intent.ACTION_VIEW, webUri);
+//                            context.startActivity(webIntent);
+//                        }
+//                        return true;
 
-                    } else if (id == R.id.property_option_delete) {
+//                    } else
+                    if (id == R.id.property_option_delete) {
                         // handle delete property
                         confirmDeleteProperty(property);
                         return true;

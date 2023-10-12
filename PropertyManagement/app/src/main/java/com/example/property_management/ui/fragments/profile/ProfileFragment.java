@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.property_management.R;
 import com.example.property_management.adapters.CustomListRecyclerViewAdapter;
 import com.example.property_management.api.FirebaseAuthHelper;
+import com.example.property_management.api.FirebaseFunctionsHelper;
 import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.BasicDialogCallback;
 import com.example.property_management.callbacks.GetUserInfoByIdCallback;
@@ -37,6 +38,7 @@ import com.example.property_management.databinding.FragmentProfileBinding;
 import com.example.property_management.ui.activities.LoginActivity;
 import com.example.property_management.ui.fragments.base.AutocompleteFragment;
 import com.example.property_management.ui.fragments.base.BasicDialog;
+import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -47,9 +49,7 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
 
     private FragmentProfileBinding binding;
     private AppCompatActivity activity;
-
     PlacesClient placesClient;
-
     String selectedAddress = "";
     String username;
     String email;
@@ -125,6 +125,70 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
             logout();
         });
 
+        // ========================= Add facility test ==========================
+        Button addFacilityTestBtn = binding.addFacilityTest;
+        Button addLocationTestBtn = binding.addLocationTest;
+
+        FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(activity);
+        FirebaseUser user = firebaseAuthHelper.getCurrentUser();
+        assert user != null;
+        addFacilityTestBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String userId = user.getUid();
+                FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+                // TODO change hardcode here
+                String facility = "MelbourneCentral";
+                firebaseFunctionsHelper.addInterestedFacility(userId, facility)
+                        .addOnSuccessListener(result -> {
+                            if (result.equals("success")) {
+                                Log.i("add-interested-facility-success", result);
+                                new BasicSnackbar(getActivity().findViewById(android.R.id.content),
+                                        "Success: Added new facility.", "success");
+                            } else {
+                                Log.e("add-interested-facility-fail", result);
+                                new BasicSnackbar(getActivity().findViewById(android.R.id.content),
+                                        "Error: Failed to add new facility.", "error");
+                            }
+                        })
+                        .addOnFailureListener(e -> {
+                            // pop error at input box
+                            Log.e("add-interested-facility-fail", e.getMessage());
+                            new BasicSnackbar(getActivity().findViewById(android.R.id.content),
+                                    e.getMessage(), "error");
+                        });
+            }
+        });
+
+        addLocationTestBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String userId = user.getUid();
+                FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+                // TODO change hardcode here
+                String location = "Melbourne Central";
+                firebaseFunctionsHelper.addInterestedLocation(userId, location)
+                        .addOnSuccessListener(result -> {
+                            if (result.equals("success")) {
+                                Log.i("add-interested-location-success", result);
+                                new BasicSnackbar(getActivity().findViewById(android.R.id.content),
+                                        "Success: Added new location.", "success");
+                            } else {
+                                Log.e("add-interested-location-fail", result);
+                                new BasicSnackbar(getActivity().findViewById(android.R.id.content),
+                                        "Error: Failed to add new location.", "error");
+                            }
+                        })
+                        .addOnFailureListener(e -> {
+                            // pop error at input box
+                            Log.e("add-interested-location-fail", e.getMessage());
+                            new BasicSnackbar(getActivity().findViewById(android.R.id.content),
+                                    e.getMessage(), "error");
+                        });
+            }
+        });
+
+        // ========================= End Add facility test ==========================
         return root;
     }
 

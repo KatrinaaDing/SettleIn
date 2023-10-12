@@ -59,4 +59,6 @@ public class UserProperty {
     public HashMap<String, RoomData> getInspectedData() { return inspectedData; }
 
     public void setInspectedData(HashMap<String, RoomData> inspectedData) { this.inspectedData = inspectedData; }
+    public boolean getInspected() { return inspected; }
+    public void setInspected() { this.inspected = inspected; }
 }

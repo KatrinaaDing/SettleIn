@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginVertical="5dp"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/propertyCard"
@@ -13,7 +12,9 @@
         android:clickable="true"
         android:focusable="true"
         app:layout_constraintHeight="120dp"
-        tools:ignore="MissingConstraints">
+        android:layout_margin="5dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -42,7 +43,6 @@
                         android:id="@+id/addressTextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Small"
                         android:layout_weight="1"
                         android:textStyle="bold"
                         android:text="No Address Available"/>
