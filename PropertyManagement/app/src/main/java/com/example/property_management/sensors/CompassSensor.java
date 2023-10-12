@@ -37,6 +37,7 @@ public class CompassSensor implements SensorEventListener {
         }
     };
 
+    // sensor rotate
     @Override
     public void onSensorChanged(SensorEvent sensorEvent){
         if(sensorEvent.sensor == accelerometerSensor){
@@ -70,13 +71,13 @@ public class CompassSensor implements SensorEventListener {
     public void startTest() {
         sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_GAME);
         sensorManager.registerListener(this, magnetometerSensor, SensorManager.SENSOR_DELAY_GAME);
-        handler.postDelayed(stopRunnable, 3000);  // 在3秒后停止测试
+        handler.postDelayed(stopRunnable, 3000);
     }
 
     public void stopTest() {
         sensorManager.unregisterListener(this, accelerometerSensor);
         sensorManager.unregisterListener(this, magnetometerSensor);
-        handler.removeCallbacks(stopRunnable);  // 取消所有挂起的Runnable任务
+        handler.removeCallbacks(stopRunnable);
     }
 
     private String getDirection(float degree) {
@@ -115,10 +116,10 @@ public class CompassSensor implements SensorEventListener {
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i){
+        // Handle sensor accuracy changes if needed
     }
 
     public void setCallback(SensorCallback callback) {
         this.callback = callback;
     }
-
 }
