@@ -18,9 +18,15 @@
             android:layout_height="wrap_content"
             android:text="Lounge room" />
 
+        <ImageView
+            android:id="@+id/editRoomNameIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:src="@drawable/ic_room_name" />
+
     </LinearLayout>
 
-    <!-- Row: camera -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -43,6 +49,12 @@
             android:paddingVertical="10dp"
             android:text="Photos" />
 
+        <androidx.camera.view.PreviewView
+            android:id="@+id/previewView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
         <TextView
             android:id="@+id/photoCount"
             android:layout_width="48dp"
@@ -59,6 +71,7 @@
             android:layout_height="wrap_content"
             android:text="Add" />
     </LinearLayout>
+
 
     <!-- Row 1: Noise -->
     <LinearLayout
