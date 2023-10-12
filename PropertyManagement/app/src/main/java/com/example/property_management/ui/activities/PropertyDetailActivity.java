@@ -149,16 +149,17 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         TextView dateTxt = dialogView.findViewById(R.id.dateTxt);
         TextView timeTxt = dialogView.findViewById(R.id.timeTxt);
         TextView inspectionTimeTxt = binding.detailInspectionTimeTxt;
+        Log.i("date-time", date + time);
 
         // display date and time
-        if (date != "")
-            dateTxt.setText(date);
-        else
+        if (date == null || date.equals(""))
             dateTxt.setText(NO_DATE_HINT);
-        if (time != "")
-            timeTxt.setText(time);
         else
+            dateTxt.setText(date);
+        if (time == null || time.equals(""))
             timeTxt.setText(NO_TIME_HINT);
+        else
+            timeTxt.setText(time);
 
         // ===== dialog =====
         AlertDialog alertDialog = new MaterialAlertDialogBuilder(PropertyDetailActivity.this)
@@ -307,7 +308,11 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             inspectionTimeLayout.setVisibility(View.VISIBLE);
         } else {
             inspectionTimeTxt.setText(NO_DATE_TIME_HINT);
+            this.date = "";
+            this.time = "";
+
         }
+        Log.i("date-time", "reseting date time to" + this.date + "," + this.time);
         editInspectionTimeBtn.setOnClickListener(v -> showCustomDialog());
     }
 
