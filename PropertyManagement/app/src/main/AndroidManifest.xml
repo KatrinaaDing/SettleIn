@@ -38,6 +38,11 @@
         <activity android:name="com.example.property_management.ui.activities.ImageViewActivity"/>
         <activity android:name=".ui.activities.TestActivity" />
 
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
+
     </application>
 
 </manifest>
