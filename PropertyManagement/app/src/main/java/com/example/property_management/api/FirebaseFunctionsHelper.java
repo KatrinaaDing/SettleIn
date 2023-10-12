@@ -229,6 +229,42 @@ public class FirebaseFunctionsHelper {
 
 
     /**
+     * add a new interested location
+     * get the distance info of the interested location from each property of the user
+     * @return "success" if success, error message if fail
+     */
+    public Task<String> addInterestedLocation(String userId, String location) {
+        Map<String, String> data = new HashMap<>();
+        data.put("userId", userId);
+        data.put("location", location);
+
+        return mFunctions
+                .getHttpsCallable("add_interested_location")
+                .call(data)
+                .continueWith(new Continuation<HttpsCallableResult, String>() {
+                    // This continuation runs on either success or failure, but if the task
+                    // has failed then getResult() will throw an Exception which will be
+                    // propagated down.
+                    @Override
+                    public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
+                        String result;
+                        try {
+                            result = (String) task.getResult().getData();
+                        } catch (Exception e) {
+                            int msgIdx = e.getMessage().indexOf("n:") + 2;
+                            String msg = e.getMessage().substring(msgIdx);
+                            throw new Exception(msg);
+                        }
+
+                        return result;
+                    }
+
+
+                });
+    }
+
+
+    /**
      * get a user's shortlisted property by property id
      * @param propertyId the property id
      * @return

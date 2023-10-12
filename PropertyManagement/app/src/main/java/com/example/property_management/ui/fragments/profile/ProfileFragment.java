@@ -124,17 +124,20 @@ public class ProfileFragment extends Fragment {
 
         // ========================= Add facility test ==========================
         Button addFacilityTestBtn = binding.addFacilityTest;
+        Button addLocationTestBtn = binding.addLocationTest;
+
+        FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(activity);
+        FirebaseUser user = firebaseAuthHelper.getCurrentUser();
+        assert user != null;
         addFacilityTestBtn.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
-                FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(activity);
-                FirebaseUser user = firebaseAuthHelper.getCurrentUser();
-                assert user != null;
+
                 String userId = user.getUid();
                 FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
                 // TODO change hardcode here
-                String facility = "kmart";
+                String facility = "Melbourne Central";
                 firebaseFunctionsHelper.addInterestedFacility(userId, facility)
                         .addOnSuccessListener(result -> {
                             if (result.equals("success")) {
@@ -143,6 +146,32 @@ public class ProfileFragment extends Fragment {
                             } else {
                                 System.out.println("Error: Failed to add new facility." + result);
                                 new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Error: Failed to add new facility.", "error");
+                            }
+                        })
+                        .addOnFailureListener(e -> {
+                            // pop error at input box
+                            System.out.println(e.getMessage());
+                            new BasicSnackbar(getActivity().findViewById(android.R.id.content), e.getMessage(), "error");
+                        });
+            }
+        });
+
+        addLocationTestBtn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                String userId = user.getUid();
+                FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+                // TODO change hardcode here
+                String location = "Melbourne Central";
+                firebaseFunctionsHelper.addInterestedLocation(userId, location)
+                        .addOnSuccessListener(result -> {
+                            if (result.equals("success")) {
+                                System.out.println("Success: Added new location.");
+                                new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Success: Added new location.", "success");
+                            } else {
+                                System.out.println("Error: Failed to add new location." + result);
+                                new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Error: Failed to add new location.", "error");
                             }
                         })
                         .addOnFailureListener(e -> {

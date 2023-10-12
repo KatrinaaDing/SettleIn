@@ -147,4 +147,7 @@ Access User Collection:
   });
   ```
 
+## Note for add new interested facility/location
+- Firebase path cannot include space, for example "Melbourne Central" cannot be a key. Instead, I use "Melbourne%20Central" instead.
+
   
