@@ -86,7 +86,6 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         // fetch property data from firebase
         getPropertyById(this.propertyId);
 
-
         // ================================== Components =======================================
         // TODO move to different functions
         // ===== inspection time =====
@@ -272,6 +271,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     }
 
     private void getPropertyById(String propertyId) {
+        setLoading(true);
 //        FirebasePropertyRepository firebasePropertyRepository = new FirebasePropertyRepository();
 //        firebasePropertyRepository.getPropertyById(propertyId, new GetPropertyByIdCallback() {
 //            @Override
@@ -309,14 +309,14 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                     setCarousel(property);
                     setLinkButton(property);
                     initMap();
+                    setLoading(false);
                 })
                 .addOnFailureListener(e -> {
                     // if error happens, show error message and hide detail content
                     Log.e("get-property-by-id-fail", e.getMessage());
                     ScrollView detailContent = binding.detailContent;
-                    TextView errorMessage = binding.errorMessage;
                     detailContent.setVisibility(View.GONE);
-                    errorMessage.setVisibility(View.VISIBLE);
+                    setError(true);
                 });
     }
 
@@ -383,7 +383,6 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             // if no href, hide linkButton
             linkButton.setVisibility(View.GONE);
         } else {
-
             // on click redirect to property ad site
             linkButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -426,6 +425,18 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             });
         }
         this.gMap = googleMap;
+    }
+
+    private void setLoading(boolean isLoading) {
+        binding.hintText.setText("Getting your property...");
+        binding.detailContent.setVisibility(isLoading ? View.GONE : View.VISIBLE);
+        binding.hintText.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+    }
+
+    private void setError(boolean isError) {
+        binding.hintText.setText("Error getting your property. Please try again later.");
+        binding.detailContent.setVisibility(isError ? View.GONE : View.VISIBLE);
+        binding.hintText.setVisibility(isError ? View.VISIBLE : View.GONE);
     }
 
     private String setInspectionTime(int hour, int minute) {
