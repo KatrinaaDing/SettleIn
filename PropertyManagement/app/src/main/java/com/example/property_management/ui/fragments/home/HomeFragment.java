@@ -71,12 +71,23 @@ public class HomeFragment extends Fragment {
         binding = null;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        // refresh properties when user returns to home fragment
+        getAllProperties(this.getContext());
+    }
+
+    /**
+     * Initialize the filter menu
+     */
     private void initFilterMenu() {
         TextInputLayout filterMenu = binding.filterMenu;
         AutoCompleteTextView autoCompleteTextView = (AutoCompleteTextView) filterMenu.getEditText();
         autoCompleteTextView.setText("All", false);
         autoCompleteTextView.setOnItemClickListener((adapterView, view, i, l) -> {
             String selected = (String) adapterView.getItemAtPosition(i);
+
             if (selected.equals("All")) {
                 // on select "All", show all properties
                 renderProperties(allProperties);
@@ -177,7 +188,5 @@ public class HomeFragment extends Fragment {
         RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties);
         propertiesRecyclerView.setAdapter(propertyCardAdapter);
     }
-    public ArrayList<Property> getAllProperties() {
-        return allProperties;
-    }
+
 }

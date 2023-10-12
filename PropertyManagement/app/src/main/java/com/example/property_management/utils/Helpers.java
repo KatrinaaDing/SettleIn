@@ -32,6 +32,7 @@ public class Helpers {
         String formattedDate = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(date);
         return formattedDate;
     }
+
     public static String dateFormatter(LocalDate date) {
         if (date == null) return "";
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.getDefault());
@@ -44,10 +45,16 @@ public class Helpers {
         return formattedTime;
     }
 
-    public static String timeFormatter(LocalTime time) {
-        if (time == null) return "";
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("%02d:%02d", Locale.getDefault());
-        String formattedTime = time.format(formatter);
+    public static LocalDate stringToDate(String date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.getDefault());
+        LocalDate formattedDate = LocalDate.parse(date, formatter);
+        return formattedDate;
+    }
+
+    public static LocalTime stringToTime(String time) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault());
+        LocalTime formattedTime = LocalTime.parse(time, formatter);
         return formattedTime;
     }
+
 }

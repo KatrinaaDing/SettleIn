@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -174,6 +175,8 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                             ? formatDateTime(date, time)
                             : NO_DATE_TIME_HINT
                     );
+                    this.userProperty.setInspectionDate(date == "" ? null : Helpers.stringToDate(date));
+                    this.userProperty.setInspectionTime(time == "" ? null : Helpers.stringToTime(time));
                 }, () -> {
                     // on error
                     // enable dismiss dialog on click outside
@@ -247,8 +250,10 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                         "and user collected property data");
                 property = (Property) resultObj.get("propertyData");
                 userProperty = (UserProperty) resultObj.get("userPropertyData");
-                setInspectionDateTimeText();
+                // set ui
                 binding.detailAddressTxt.setText(property.getAddress());
+                setInspectionDateTimeText();
+                setIsInspected();
                 setAmenitiesGroup(property);
                 setCarousel(property);
                 setLinkButton(property);
@@ -265,6 +270,21 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             });
     }
 
+    private void setIsInspected() {
+        CheckBox isInspectedCheckbox = findViewById(R.id.isInspectedCheckbox);
+        isInspectedCheckbox.setChecked(userProperty.getInspected());
+        isInspectedCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            updateIsInspectedStatus(isChecked, () -> {
+                // on success
+                buttonView.setChecked(isChecked);
+                this.userProperty.setInspected(isChecked);
+            });
+        });
+    }
+
+    /**
+     * Set inspection date and time to UI
+     */
     private void setInspectionDateTimeText() {
         if (userProperty == null)
             return;
@@ -291,7 +311,9 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         editInspectionTimeBtn.setOnClickListener(v -> showCustomDialog());
     }
 
-    // set amenities group data to UI
+    /**
+     * Set amenities group data to UI
+     */
     private void setAmenitiesGroup(Property property) {
         binding.detailPriceTxt.setText("$" + property.getPrice() + " per week");
         binding.amenitiesGroup.setValues(
@@ -347,7 +369,34 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     }
 
     /**
+     * update isInspected status to firebase
+     * @param isChecked checkbox status
+     * @param onSuccess callback on success
+     */
+    private void updateIsInspectedStatus(boolean isChecked, Runnable onSuccess) {
+        // update ispected status to firebase
+        HashMap<String, Object> updateDatePayload = new HashMap<>();
+        updateDatePayload.put("properties." + this.propertyId + ".inspected", isChecked);
+        FirebaseUserRepository userRepository = new FirebaseUserRepository();
+        userRepository.updateUserFields(this.userId, updateDatePayload, new UpdateUserCallback() {
+            @Override
+            public void onSuccess(String msg) {
+                Log.i("update-inspected-failure", msg);
+                onSuccess.run();
+            }
+            @Override
+            public void onError(String msg) {
+                String errorMsg = "Error: " + msg;
+                new BasicSnackbar(findViewById(android.R.id.content), errorMsg, "error");
+                Log.e("update-inspected-failure", msg);
+            }
+        });
+
+    }
+    /**
      * update inspection date and time to firebase
+     * @param onSuccess callback on success
+     * @param onError callback on error
      */
     private void updateInspectionDateTime(Runnable onSuccess, Runnable onError) {
         // update date to firebase
@@ -387,7 +436,6 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 onError.run();
             }
         });
-
     }
 
     /**

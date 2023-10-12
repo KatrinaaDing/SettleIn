@@ -102,7 +102,6 @@
                     android:textSize="@dimen/medium_title"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"/>
-
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/inspectionTimeLayout"
                     android:layout_width="match_parent"
@@ -134,23 +133,13 @@
                         app:layout_constraintStart_toEndOf="@id/detailInspectionTimeTxt"
                         app:layout_constraintTop_toTopOf="parent" />
                     <CheckBox
-                        android:id="@+id/inspectionTimeCheckBox"
+                        android:id="@+id/isInspectedCheckbox"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Inspected"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"/>
                 </androidx.constraintlayout.widget.ConstraintLayout>
-
-<!--                <Button-->
-<!--                    style="@style/Widget.Material3.Button.ElevatedButton"-->
-<!--                    android:id="@+id/addInspectionTimeBtn"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="match_parent"-->
-<!--                    android:text="Add Inspection Time"-->
-<!--                    app:layout_constraintTop_toBottomOf="@+id/detailInspectionTimeTitleTxt"-->
-<!--                    app:layout_constraintStart_toStartOf="@+id/detailInspectionTimeTitleTxt"-->
-<!--                    />-->
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <com.google.android.material.divider.MaterialDivider

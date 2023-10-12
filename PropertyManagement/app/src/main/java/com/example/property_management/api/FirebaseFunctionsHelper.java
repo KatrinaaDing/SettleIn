@@ -9,6 +9,7 @@ import com.example.property_management.data.NewProperty;
 import com.example.property_management.data.Property;
 import com.example.property_management.data.RoomData;
 import com.example.property_management.data.UserProperty;
+import com.example.property_management.utils.Helpers;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -113,45 +114,45 @@ public class FirebaseFunctionsHelper {
         payLoad.put("userId", userId);
 
         return mFunctions
-                .getHttpsCallable("get_user_properties")
-                .call(payLoad)
-                .continueWith(new Continuation<HttpsCallableResult, ArrayList<Property>>() {
-                    // This continuation runs on either success or failure, but if the task
-                    // has failed then getResult() will throw an Exception which will be
-                    // propagated down.
-                    @Override
-                    public ArrayList<Property> then(@NonNull Task<HttpsCallableResult> task) throws Exception {
-                        ArrayList<Map<String, Object>> result;
-                        try{
-                            result = (ArrayList<Map<String, Object>>) task.getResult().getData();
-                        } catch (Exception e) {
-                            int msgIdx = e.getMessage().indexOf("n:") + 2;
-                            String msg = e.getMessage().substring(msgIdx);
-                            throw new Exception(msg);
-                        }
-                        // iterate each object in the result and convert to Property object
-                        ArrayList<Property> properties = new ArrayList<>();
-                        Log.d("get-all-properties", "result: " + result);
-                        for (Map<String, Object> propertyObj : result) {
-                            Property property = new Property(
-                                    (String) propertyObj.get("propertyId"),
-                                    (String) propertyObj.get("href"),
-                                    (String) propertyObj.get("address"),
-                                    (Double) propertyObj.get("lat"),
-                                    (Double) propertyObj.get("lng"),
-                                    (int) propertyObj.get("numBedrooms"),
-                                    (int) propertyObj.get("numBathrooms"),
-                                    (int) propertyObj.get("numParking"),
-                                    new HashMap<>(),
-                                    (ArrayList<String>) propertyObj.get("images"),
-                                    (int) propertyObj.get("price")
-                            );
-                            property.setInspected((boolean) propertyObj.get("inspected"));
-                            properties.add(property);
-                        }
-                        return properties;
+            .getHttpsCallable("get_user_properties")
+            .call(payLoad)
+            .continueWith(new Continuation<HttpsCallableResult, ArrayList<Property>>() {
+                // This continuation runs on either success or failure, but if the task
+                // has failed then getResult() will throw an Exception which will be
+                // propagated down.
+                @Override
+                public ArrayList<Property> then(@NonNull Task<HttpsCallableResult> task) throws Exception {
+                    ArrayList<Map<String, Object>> result;
+                    try{
+                        result = (ArrayList<Map<String, Object>>) task.getResult().getData();
+                    } catch (Exception e) {
+                        int msgIdx = e.getMessage().indexOf("n:") + 2;
+                        String msg = e.getMessage().substring(msgIdx);
+                        throw new Exception(msg);
                     }
-                });
+                    // iterate each object in the result and convert to Property object
+                    ArrayList<Property> properties = new ArrayList<>();
+                    Log.d("get-all-properties", "result: " + result);
+                    for (Map<String, Object> propertyObj : result) {
+                        Property property = new Property(
+                            (String) propertyObj.get("propertyId"),
+                            (String) propertyObj.get("href"),
+                            (String) propertyObj.get("address"),
+                            (Double) propertyObj.get("lat"),
+                            (Double) propertyObj.get("lng"),
+                            (int) propertyObj.get("numBedrooms"),
+                            (int) propertyObj.get("numBathrooms"),
+                            (int) propertyObj.get("numParking"),
+                            new HashMap<>(),
+                            (ArrayList<String>) propertyObj.get("images"),
+                            (int) propertyObj.get("price")
+                        );
+                        property.setInspected((boolean) propertyObj.get("inspected"));
+                        properties.add(property);
+                    }
+                    return properties;
+                }
+            });
     }
 
 
@@ -187,7 +188,6 @@ public class FirebaseFunctionsHelper {
                     res.put("lat", (Double) result.get("lat"));
                     return res;
                 }
-
             });
     }
 
@@ -203,28 +203,26 @@ public class FirebaseFunctionsHelper {
         data.put("facility", facility);
         Log.i("add-interested-facility", "userId: " + userId + ", facility: " + facility);
         return mFunctions
-                .getHttpsCallable("add_interested_facility")
-                .call(data)
-                .continueWith(new Continuation<HttpsCallableResult, String>() {
-                    // This continuation runs on either success or failure, but if the task
-                    // has failed then getResult() will throw an Exception which will be
-                    // propagated down.
-                    @Override
-                    public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
-                        String result;
-                        try {
-                            result = (String) task.getResult().getData();
-                        } catch (Exception e) {
-                            int msgIdx = e.getMessage().indexOf("n:") + 2;
-                            String msg = e.getMessage().substring(msgIdx);
-                            throw new Exception(msg);
-                        }
-
-                        return result;
+            .getHttpsCallable("add_interested_facility")
+            .call(data)
+            .continueWith(new Continuation<HttpsCallableResult, String>() {
+                // This continuation runs on either success or failure, but if the task
+                // has failed then getResult() will throw an Exception which will be
+                // propagated down.
+                @Override
+                public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
+                    String result;
+                    try {
+                        result = (String) task.getResult().getData();
+                    } catch (Exception e) {
+                        int msgIdx = e.getMessage().indexOf("n:") + 2;
+                        String msg = e.getMessage().substring(msgIdx);
+                        throw new Exception(msg);
                     }
 
-
-                });
+                    return result;
+                }
+            });
     }
 
 
@@ -239,28 +237,28 @@ public class FirebaseFunctionsHelper {
         data.put("location", location);
         Log.i("add-interested-location", "userId: " + userId + ", location: " + location);
         return mFunctions
-                .getHttpsCallable("add_interested_location")
-                .call(data)
-                .continueWith(new Continuation<HttpsCallableResult, String>() {
-                    // This continuation runs on either success or failure, but if the task
-                    // has failed then getResult() will throw an Exception which will be
-                    // propagated down.
-                    @Override
-                    public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
-                        String result;
-                        try {
-                            result = (String) task.getResult().getData();
-                        } catch (Exception e) {
-                            int msgIdx = e.getMessage().indexOf("n:") + 2;
-                            String msg = e.getMessage().substring(msgIdx);
-                            throw new Exception(msg);
-                        }
-
-                        return result;
+            .getHttpsCallable("add_interested_location")
+            .call(data)
+            .continueWith(new Continuation<HttpsCallableResult, String>() {
+                // This continuation runs on either success or failure, but if the task
+                // has failed then getResult() will throw an Exception which will be
+                // propagated down.
+                @Override
+                public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
+                    String result;
+                    try {
+                        result = (String) task.getResult().getData();
+                    } catch (Exception e) {
+                        int msgIdx = e.getMessage().indexOf("n:") + 2;
+                        String msg = e.getMessage().substring(msgIdx);
+                        throw new Exception(msg);
                     }
 
+                    return result;
+                }
 
-                });
+
+            });
     }
 
 
@@ -277,67 +275,63 @@ public class FirebaseFunctionsHelper {
         payload.put("propertyId", propertyId);
 
         return mFunctions
-                .getHttpsCallable("get_property_by_id")
-                .call(payload)
-                .continueWith((Continuation<HttpsCallableResult, Map<String, Object>>) task -> {
-                    Map<String, Object> result;
+            .getHttpsCallable("get_property_by_id")
+            .call(payload)
+            .continueWith((Continuation<HttpsCallableResult, Map<String, Object>>) task -> {
+                Map<String, Object> result;
 
-                    // obtain results from the task
-                    try{
-                        result = (Map<String, Object>) task.getResult().getData();
-                    } catch (Exception e) {
-                        int msgIdx = e.getMessage().indexOf("n:") + 2;
-                        String msg = e.getMessage().substring(msgIdx);
-                        throw new Exception(msg);
-                    }
-                    // get result and create Property object
-                    Property propertyData = new Property(
-                            (String) result.get("propertyId"),
-                            (String) result.get("href"),
-                            (String) result.get("address"),
-                            (Double) result.get("lat"),
-                            (Double) result.get("lng"),
-                            (int) result.get("numBedrooms"),
-                            (int) result.get("numBathrooms"),
-                            (int) result.get("numParking"),
-                            getRoomsData(result, "propertyData"),
-                            (ArrayList<String>) result.get("images"),
-                            (int) result.get("price")
-                    );
-                    // get result and create userProperty object
-                    boolean inspected = result.get("inspected") == null
-                            ? false
-                            : (boolean) result.get("inspected");
-                    // parse date in certain format
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
-                            "dd MMM yyyy",
-                            Locale.ENGLISH);
-                    LocalDate inspectionDate = result.get("inspectionDate") == null ||
-                            ((String) result.get("inspectionDate")).equals("")
-                            ? null
-                            : LocalDate.parse((String) result.get("inspectionDate"), formatter);
-                    // parse time
-                    LocalTime inspectionTime = result.get("inspectionTime") == null ||
-                            ((String) result.get("inspectionTime")).equals("")
-                            ? null
-                            : LocalTime.parse((String) result.get("inspectionTime"));
+                // obtain results from the task
+                try{
+                    result = (Map<String, Object>) task.getResult().getData();
+                } catch (Exception e) {
+                    int msgIdx = e.getMessage().indexOf("n:") + 2;
+                    String msg = e.getMessage().substring(msgIdx);
+                    throw new Exception(msg);
+                }
+                // get result and create Property object
+                Property propertyData = new Property(
+                        (String) result.get("propertyId"),
+                        (String) result.get("href"),
+                        (String) result.get("address"),
+                        (Double) result.get("lat"),
+                        (Double) result.get("lng"),
+                        (int) result.get("numBedrooms"),
+                        (int) result.get("numBathrooms"),
+                        (int) result.get("numParking"),
+                        getRoomsData(result, "propertyData"),
+                        (ArrayList<String>) result.get("images"),
+                        (int) result.get("price")
+                );
+                // get result and create userProperty object
+                boolean inspected = result.get("inspected") == null
+                        ? false
+                        : (boolean) result.get("inspected");
+                // parse date in certain format
+                LocalDate inspectionDate = result.get("inspectionDate") == null ||
+                        ((String) result.get("inspectionDate")).equals("")
+                        ? null
+                        : Helpers.stringToDate((String) result.get("inspectionDate"));
+                // parse time
+                LocalTime inspectionTime = result.get("inspectionTime") == null ||
+                        ((String) result.get("inspectionTime")).equals("")
+                        ? null
+                        : Helpers.stringToTime((String) result.get("inspectionTime"));
 
-                    UserProperty userPropertyData = new UserProperty(
-                            (String) result.get("propertyId"),
-                            inspected,
-                            inspectionDate,
-                            inspectionTime,
-                            (String) result.get("notes"),
-                            getPropertyDistancesData(result),
-                            getRoomsData(result, "inspectedData"),
-                            (int) result.get("price")
-                    );
-                    Map<String, Object> res = new HashMap<>();
-                    res.put("propertyData", propertyData);
-                    res.put("userPropertyData", userPropertyData);
-                    return res;
-                });
-
+                UserProperty userPropertyData = new UserProperty(
+                        (String) result.get("propertyId"),
+                        inspected,
+                        inspectionDate,
+                        inspectionTime,
+                        (String) result.get("notes"),
+                        getPropertyDistancesData(result),
+                        getRoomsData(result, "inspectedData"),
+                        (int) result.get("price")
+                );
+                Map<String, Object> res = new HashMap<>();
+                res.put("propertyData", propertyData);
+                res.put("userPropertyData", userPropertyData);
+                return res;
+            });
     }
 
     /**
