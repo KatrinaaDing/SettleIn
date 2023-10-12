@@ -29,8 +29,6 @@ public class CompassSensor implements SensorEventListener {
         this.callback = callback;
     }
 
-
-    //处理3秒延迟启动的线程
     private Handler handler = new Handler();
     private Runnable stopRunnable = new Runnable() {
         @Override
@@ -39,8 +37,7 @@ public class CompassSensor implements SensorEventListener {
         }
     };
 
-
-    //传感器值变动时获取并计算方位
+    // sensor rotate
     @Override
     public void onSensorChanged(SensorEvent sensorEvent){
         if(sensorEvent.sensor == accelerometerSensor){
@@ -71,19 +68,16 @@ public class CompassSensor implements SensorEventListener {
         }
     }
 
-
-    //开始测试并在3秒后停止
     public void startTest() {
         sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_GAME);
         sensorManager.registerListener(this, magnetometerSensor, SensorManager.SENSOR_DELAY_GAME);
-        handler.postDelayed(stopRunnable, 3000);  // 在3秒后停止测试
+        handler.postDelayed(stopRunnable, 3000);
     }
-
 
     public void stopTest() {
         sensorManager.unregisterListener(this, accelerometerSensor);
         sensorManager.unregisterListener(this, magnetometerSensor);
-        handler.removeCallbacks(stopRunnable);  // 取消所有挂起的Runnable任务
+        handler.removeCallbacks(stopRunnable);
     }
 
     private String getDirection(float degree) {
@@ -128,39 +122,4 @@ public class CompassSensor implements SensorEventListener {
     public void setCallback(SensorCallback callback) {
         this.callback = callback;
     }
-
-
-    /**
-    @Override
-    public List<Float> onSensorValuesChanged() {
-        // Convert the float array to a List<Float>
-        List<Float> orientationList = new ArrayList<>();
-        for (float value : orientation) {
-            orientationList.add(value);
-        }
-        return orientationList;
-    }
-    **/
-
-    /**
-    @Override
-    public void onSensorAccuracyChanged(int accuracy) {
-        // Handle sensor accuracy changes if needed
-    }
-
-    @Override
-    public boolean hasSensor() {
-        return accelerometerSensor != null && magnetometerSensor != null;
-    }
-
-    @Override
-    public SensorManager requiresPermissions() {
-        // Optionally, check and request necessary permissions
-        return sensorManager;
-    }
-    **/
-
-
-
-
 }

@@ -2,19 +2,31 @@ package com.example.property_management.adapters;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import androidx.annotation.NonNull;
+import com.example.property_management.R;
+import com.example.property_management.callbacks.SensorCallback;
+import com.example.property_management.sensors.AudioSensor;
+import com.example.property_management.sensors.CompassSensor;
+import com.example.property_management.sensors.LightSensor;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.common.util.concurrent.ListenableFuture;
+
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -22,44 +34,50 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
+import androidx.camera.core.Camera;
+import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ImageCapture;
+import androidx.camera.core.ImageCaptureException;
+import androidx.camera.core.Preview;
+import androidx.camera.lifecycle.ProcessCameraProvider;
+import androidx.camera.view.PreviewView;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.property_management.R;
-import com.example.property_management.callbacks.SensorCallback;
-import com.example.property_management.sensors.AudioSensor;
-import com.example.property_management.sensors.CompassSensor;
-import com.example.property_management.sensors.LightSensor;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
+import android.app.AlertDialog;
+import android.widget.Toast;
 
 public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     private final List<String> roomNames;
     private int roomCount;
     private Context context;
     private Set<Integer> initializedRooms = new HashSet<>();
-
     public TextView photoCount;
-
     private LightSensor lightSensor;
     private CompassSensor compassSensor;
     private AudioSensor audioSensor;
     private static List<List<Bitmap>> roomImages = new ArrayList<>();
-
     private List<LightSensor> lightSensors = new ArrayList<>();
     private List<CompassSensor> compassSensors = new ArrayList<>();
     private List<AudioSensor> audioSensors = new ArrayList<>();
     private ArrayList<ArrayList<String>> roomImagePaths = new ArrayList<>();
-
-    public static Uri currentPhotoUri;
+    private List<Preview> cameraPreviews = new ArrayList<>();
+    private List<ImageCapture> imageCaptures = new ArrayList<>();
 
     public RoomAdapter(Context context, List<String> roomNames) {
         this.context = context;
@@ -70,53 +88,11 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             audioSensors.add(new AudioSensor(null));
             lightSensors.add(new LightSensor(context, null));
             compassSensors.add(new CompassSensor(context, null));
+
+            cameraPreviews.add(new Preview.Builder().build());
+            imageCaptures.add(new ImageCapture.Builder().build());
         }
     }
-
-    //新的camera功能，无法打开相机
-    /**
-     // 创建一个图像文件
-     private File createImageFile() throws IOException {
-     String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
-     String imageFileName = "JPEG_" + timeStamp + "_";
-     File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-     File image = File.createTempFile(imageFileName, ".jpg", storageDir);
-     return image;
-     }
-
-     // 启动相机
-     private void launchCamera(ViewHolder holder) {
-     Log.d("CameraDebug", "launchCamera called");
-
-     PackageManager packageManager = context.getPackageManager();
-
-     Intent open_camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-     if (open_camera.resolveActivity(context.getPackageManager()) != null) {
-     Log.d("CameraDebug", "Camera package found");
-     File photoFile;
-     try {
-     photoFile = createImageFile();
-     currentPhotoUri = FileProvider.getUriForFile(context,
-     context.getApplicationContext().getPackageName() + ".provider", photoFile);
-     open_camera.putExtra(MediaStore.EXTRA_OUTPUT, currentPhotoUri);
-     ((Activity) context).startActivityForResult(open_camera, position);
-     } catch (IOException e) {
-     e.printStackTrace();
-     Log.d("CameraDebug", "IOException: " + e.getMessage());
-     }
-     } else {
-     Log.d("CameraDebug", "Camera package not found");
-     List<ResolveInfo> listCam = packageManager.queryIntentActivities(open_camera, 0);
-     if (listCam.size() > 0) {
-     Intent chooserIntent = Intent.createChooser(open_camera, "Capture Image with...");
-     ((Activity) context).startActivityForResult(chooserIntent, holder.getAdapterPosition());
-     } else {
-     // 没有可用的相机应用
-     Toast.makeText(context, "No camera apps found!", Toast.LENGTH_SHORT).show();
-     }
-     }
-     }
-     */
 
     @NonNull
     @Override
@@ -130,24 +106,23 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         if (payloads.contains("UPDATE_ROOM_NAME")) {
             holder.roomName.setText(roomNames.get(position));
         } else if (!payloads.isEmpty() && payloads.get(0).equals("UPDATE_PHOTO_COUNT")) {
-            // 只更新照片数量的显示
+
             int updatedPhotoCount = roomImages.get(position).size();
             Log.d("RoomAdapter", "Updated photo count: " + updatedPhotoCount);
             holder.photoCount.setText(updatedPhotoCount + " added");
         } else {
-            // 全部重新绑定
+
             onBindViewHolder(holder, position);
         }
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
-        // Other room 的代码，可以使用，但为了测试方便
-
+        // Others room
         String currentRoomName = roomNames.get(position);
         if ("Others".equals(currentRoomName)) {
             holder.roomName.setText("Others");
-            // 显示摄像头按钮
+            // camera function
             holder.openCameraButton.setVisibility(View.VISIBLE);
             holder.openCameraButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -157,9 +132,8 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             });
 
             int currentPosition = holder.getAdapterPosition();
-            if (currentPosition != RecyclerView.NO_POSITION) {  // 检查位置是否有效
+            if (currentPosition != RecyclerView.NO_POSITION) {
                 holder.photoCount.setText(roomImages.get(currentPosition).size() + " added");
-
             }
 
             holder.photoCount.setOnClickListener(new View.OnClickListener() {
@@ -169,6 +143,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                 }
             });
 
+            // other components invisible
             holder.noiseIcon.setVisibility(View.GONE);
             holder.lightIcon.setVisibility(View.GONE);
             holder.compassIcon.setVisibility(View.GONE);
@@ -188,7 +163,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             holder.editRoomNameIcon.setVisibility(View.GONE);
             return;
         }
-
 
         // Bind room name
         if (position == 0) {
@@ -233,7 +207,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             }
         };
 
-
         currentAudioSensor.setCallback(roomCallback);
         currentLightSensor.setCallback(roomCallback);
         currentCompassSensor.setCallback(roomCallback);
@@ -253,18 +226,15 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         });
 
         if (!initializedRooms.contains(position)) {
-            // 初始化传感器
+            //Initialize sensors
             audioSensor = new AudioSensor(roomCallback);
             lightSensor = new LightSensor(context, roomCallback);
             compassSensor = new CompassSensor(context, roomCallback);
 
-            // 存储这个房间的传感器已经被初始化
             initializedRooms.add(position);
         }
 
-
         // camera function
-
         holder.openCameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -272,41 +242,9 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             }
         });
 
-
-
-
-        //之前的camera，缩略图，但可以正常运行
-        /**
-         holder.openCameraButton.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
         int currentPosition = holder.getAdapterPosition();
-        if (currentPosition != RecyclerView.NO_POSITION) {  // 检查位置是否有效
-        Intent open_camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        ((Activity) context).startActivityForResult(open_camera, currentPosition); // 使用currentPosition作为requestCode
-        }
-        }
-        });
-         */
-
-        /**
-         * 新的camera功能，无法打开相机
-         holder.openCameraButton.setTag(position);  // 将位置存储为标签
-         holder.openCameraButton.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-        Log.d("CameraDebug", "openCameraButton clicked");
-        int clickedPosition = (int) v.getTag();  // 从标签中检索位置
-        launchCamera(holder, clickedPosition);
-        }
-        });
-         */
-
-
-        int currentPosition = holder.getAdapterPosition();
-        if (currentPosition != RecyclerView.NO_POSITION) {  // 检查位置是否有效
+        if (currentPosition != RecyclerView.NO_POSITION) {
             holder.photoCount.setText(roomImages.get(currentPosition).size() + " added");
-
         }
 
         holder.photoCount.setOnClickListener(new View.OnClickListener() {
@@ -324,6 +262,84 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         });
     }
 
+    //Use cameraX library
+    private void startCamera(PreviewView previewView, Button captureButton, Dialog cameraDialog, ViewHolder holder) {
+        ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(context);
+
+        Executor executor = ContextCompat.getMainExecutor(context);
+        cameraProviderFuture.addListener(() -> {
+            try {
+                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
+                Preview preview = new Preview.Builder().build();
+                ImageCapture imageCapture = new ImageCapture.Builder().build();
+
+                CameraSelector cameraSelector = new CameraSelector.Builder()
+                        .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                        .build();
+
+                cameraProvider.unbindAll();
+                Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner) context, cameraSelector, preview, imageCapture);
+                preview.setSurfaceProvider(previewView.getSurfaceProvider());
+
+                captureButton.setOnClickListener(v -> {
+                    File photoFile = new File(context.getExternalFilesDir(null), System.currentTimeMillis() + ".jpg");
+                    ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(photoFile).build();
+                    imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback() {
+                        public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+                            String photoPath = photoFile.getAbsolutePath();
+                            Bitmap bitmap = BitmapFactory.decodeFile(photoPath);
+
+                            try {
+                                bitmap = rotateImageIfRequired(bitmap, photoPath);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                            roomImages.get(holder.getAdapterPosition()).add(bitmap);
+                            notifyDataSetChanged();
+                            //close camera page
+                            cameraDialog.dismiss();
+                        }
+
+                        @Override
+                        public void onError(@NonNull ImageCaptureException exception) {
+                            Log.e("RoomAdapter", "Image capture failed", exception);
+                            Toast.makeText(context, "Error capturing the image.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                });
+
+            } catch (ExecutionException | InterruptedException e) {
+                Log.e("RoomAdapter", "Use case binding failed", e);
+            }
+        }, executor);
+    }
+
+    // handle rotated photos
+    private Bitmap rotateImageIfRequired(Bitmap img, String path) throws IOException {
+        ExifInterface ei = new ExifInterface(path);
+        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+
+        switch (orientation) {
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                return rotateImage(img, 90);
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                return rotateImage(img, 180);
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                return rotateImage(img, 270);
+            default:
+                return img;
+        }
+    }
+
+    // keep original rotation
+    private Bitmap rotateImage(Bitmap img, int degree) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(degree);
+        return Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
+    }
+
+    // test save function
     private void showSaveImageDialog(Bitmap image, int roomPosition) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Save Image");
@@ -341,7 +357,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         builder.setNegativeButton("Cancel", null);
         builder.show();
     }
-
 
     private void saveImageToGallery(Bitmap image, int roomPosition) {
         String imageUri = MediaStore.Images.Media.insertImage(
@@ -374,6 +389,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         return imagePath;
     }
 
+    // test photo path
     private void logRoomImagePaths() {
         for (int i = 0; i < roomImagePaths.size(); i++) {
             List<String> imagePathList = roomImagePaths.get(i);
@@ -386,6 +402,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         }
     }
 
+    // take photo or upload from library
     private void showCameraOptionsDialog(ViewHolder holder) {
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
         View view = LayoutInflater.from(context).inflate(R.layout.dialog_camera_options, null);
@@ -398,9 +415,20 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             public void onClick(View v) {
                 int currentPosition = holder.getAdapterPosition();
                 if (currentPosition != RecyclerView.NO_POSITION) {
-                    Intent open_camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    ((Activity) context).startActivityForResult(open_camera, currentPosition);
+
+                    LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    View cameraView = inflater.inflate(R.layout.camera_preview_layout, null);
+
+                    PreviewView previewView = cameraView.findViewById(R.id.previewView);
+                    Button captureButton = cameraView.findViewById(R.id.captureButton);
+
+                    Dialog cameraDialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+                    cameraDialog.setContentView(cameraView);
+                    cameraDialog.show();
+
+                    startCamera(previewView, captureButton, cameraDialog, holder);
                 }
+
                 bottomSheetDialog.dismiss();
             }
         });
@@ -410,6 +438,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 ((Activity) context).startActivityForResult(intent, holder.getAdapterPosition());
+
                 bottomSheetDialog.dismiss();
             }
         });
@@ -418,17 +447,19 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         bottomSheetDialog.show();
     }
 
-
+   // test camera function
     public static List<List<Bitmap>> getRoomImages() {
         return roomImages;
     }
 
+    // photo display
     private void showPhotosDialog(int roomPosition) {
         Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.dialog_photo_gallery);
 
         RecyclerView recyclerView = dialog.findViewById(R.id.recyclerView);
 
+        // show photo with window size
         Window window = dialog.getWindow();
         if (window != null) {
             WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
@@ -445,7 +476,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                 holder.deleteButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        // 显示确认删除的对话框
+                        // delete notification
                         AlertDialog.Builder builder = new AlertDialog.Builder(context);
                         builder.setTitle("Delete Photo");
                         builder.setMessage("Are you sure to delete the photo?");
@@ -453,11 +484,13 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 roomImages.get(roomPosition).remove(position);
-                                notifyDataSetChanged();  // 通知数据发生变化
+                                // change made
+                                notifyDataSetChanged();
                                 updatePhotoCountForRoom(roomPosition);
                             }
                         });
-                        builder.setNegativeButton("No", null); // 不执行任何操作
+                        // No action
+                        builder.setNegativeButton("No", null);
                         builder.show();
                     }
                 });
@@ -478,11 +511,9 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         dialog.show();
     }
 
-
     private void updatePhotoCountForRoom(int roomPosition) {
         notifyItemChanged(roomPosition, "UPDATE_PHOTO_COUNT");
     }
-
 
     private void updateLightData(ViewHolder holder, float lightValue) {
         ((Activity) context).runOnUiThread(() -> {
@@ -500,7 +531,8 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     }
 
     private String getDirectionFromDecimal(float directionDecimal) {
-        int directionCode = (int)(directionDecimal * 100);  // Convert the decimal part to an integer
+        // Convert the decimal part to an integer
+        int directionCode = (int)(directionDecimal * 100);
         switch (directionCode) {
             case 1: return "N";
             case 2: return "NE";
@@ -510,10 +542,10 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             case 6: return "SW";
             case 7: return "W";
             case 8: return "NW";
-            default: return "";  // Return an empty string if the direction code is invalid
+            // Return an empty string if the direction code is invalid
+            default: return "";
         }
     }
-
 
     @Override
     public int getItemCount() {
@@ -524,9 +556,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         roomImages.get(roomPosition).add(image);
         notifyItemChanged(roomPosition, "UPDATE_PHOTO_COUNT");
     }
-
-
-
 
     private void showRenameRoomDialog(int position, ViewHolder holder) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -556,10 +585,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         builder.show();
     }
 
-
-
-
-
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView editRoomNameIcon;
         TextView roomName;
@@ -567,7 +592,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         TextView imageView, noiseView, lightView, compassView;
         TextView photoCount, noiseValueTextView, lightValueTextView, compassValueTextView;
         Button openCameraButton, noiseTestButton, lightTestButton, compassTestButton;
-
+        PreviewView previewView;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -594,27 +619,14 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             compassTestButton = itemView.findViewById(R.id.window_test1);
 
             editRoomNameIcon = itemView.findViewById(R.id.editRoomNameIcon);
+            previewView = itemView.findViewById(R.id.previewView);
         }
     }
-    /**
-     private void updatePhotoCount() {
-     String text = images.size() + " added";
-     photoCountTextView.setText(text);
-     }
-
-     public void addImageToRoom(int roomPosition, Bitmap image) {
-     roomImages.get(roomPosition).add(image);
-     notifyItemChanged(roomPosition);
-     }
-     */
-
-
 
     public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> {
 
         private final List<Bitmap> images;
         private final RecyclerView recyclerView;
-
         private final int roomPosition;
 
         public ImageAdapter(List<Bitmap> images, RecyclerView recyclerView, int roomPosition) {
@@ -640,14 +652,12 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             holder.deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // 显示确认删除的对话框
                     AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
                     builder.setTitle("Delete Photo");
                     builder.setMessage("Do you want to delete it?");
                     builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            // 删除照片
                             images.remove(position);
                             notifyItemRemoved(position);
                             notifyItemRangeChanged(position, images.size());
@@ -662,7 +672,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                 @Override
                 public boolean onLongClick(View v) {
                     showSaveImageDialog(images.get(position), roomPosition);
-                    return true;  // Indicate that the long click was handled
+                    return true;
                 }
             });
         }

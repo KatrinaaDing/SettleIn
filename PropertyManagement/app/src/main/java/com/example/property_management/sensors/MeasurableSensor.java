@@ -16,7 +16,6 @@ abstract public class MeasurableSensor implements SensorEventListener {
         this.callback = callback;
     }
 
-
     public abstract void onSensorChanged(SensorEvent sensorEvent);
 
     public abstract void onAccuracyChanged(Sensor sensor, int accuracy);

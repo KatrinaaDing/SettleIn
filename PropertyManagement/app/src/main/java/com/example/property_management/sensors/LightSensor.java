@@ -12,7 +12,6 @@ import java.util.Locale;
 
 public class LightSensor implements SensorEventListener{
 
-
     private SensorManager sensorManager;
     private Sensor lightSensor;
     private SensorCallback callback;
@@ -22,40 +21,36 @@ public class LightSensor implements SensorEventListener{
     private float totalValue = 0;
     private int readingCount = 0;
 
-
     public LightSensor(Context context, SensorCallback callback) {
         //super(callback);
-        this.callback = callback;  // 初始化 callback
+        this.callback = callback;
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
 
     }
 
-
     public void startTest() {
         totalValue = 0;
         readingCount = 0;
-        sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);  // 开始传感器读取
-        // 创建一个新线程来处理3秒后的停止测试
+        sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
         new Thread(() -> {
             try {
-                Thread.sleep(3000);  // 等待3秒
+                Thread.sleep(3000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            stopTest();  // 停止测试
+            stopTest();
         }).start();
     }
 
     public void stopTest() {
-        sensorManager.unregisterListener(this);  // 停止传感器读取
+        sensorManager.unregisterListener(this);
         float averageValue = totalValue / readingCount;
-        String formattedAverageValue = String.format(Locale.US, "%.2f", averageValue);  //format the averageValue
+        String formattedAverageValue = String.format(Locale.US, "%.2f", averageValue);
         if (callback != null) {
-            callback.onSensorDataChanged("Light", Float.valueOf(formattedAverageValue));  // 发送平均值
+            callback.onSensorDataChanged("Light", Float.valueOf(formattedAverageValue));
         }
     }
-
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
@@ -63,56 +58,16 @@ public class LightSensor implements SensorEventListener{
         totalValue += lightValue;
         readingCount++;
         if (callback != null) {
-            callback.onSensorDataChanged("Light", lightValue);  // 发送当前值
+            callback.onSensorDataChanged("Light", lightValue);
         }
     }
 
-
-
-
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // Handle sensor accuracy changes if needed
     }
 
     public void setCallback(SensorCallback callback) {
         this.callback = callback;
     }
 
-
-    /**
-    @Override
-    public List<Float> onSensorValuesChanged() {
-        // Return the latest sensor values
-        return Collections.singletonList(changedValue);
-    }
-
-    @Override
-    public void onSensorAccuracyChanged(int accuracy) {
-        // Handle sensor accuracy changes if needed
-    }
-
-    @Override
-    public boolean hasSensor() {
-        return lightSensor != null;
-    }
-
-    @Override
-    public void start() {
-        sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
-    }
-
-    @Override
-    public void stop() {
-        sensorManager.unregisterListener(this);
-    }
-
-
-
-    @Override
-    public SensorManager requiresPermissions() {
-        // Optionally, check and request necessary permissions
-        return sensorManager;
-    }
-    **/
 }
