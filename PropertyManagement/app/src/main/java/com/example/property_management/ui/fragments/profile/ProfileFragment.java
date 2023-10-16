@@ -73,7 +73,7 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
 //        profileViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
 
         // ========================= Components ==========================
-        ImageButton editBtn = binding.editBtn;
+        Button editBtn = binding.editBtn;
         ImageButton addFacilityBtn = binding.addFacilityBtn;
         Button logoutBtn = binding.logoutBtn;
         TextView userEmail = binding.userEmail;

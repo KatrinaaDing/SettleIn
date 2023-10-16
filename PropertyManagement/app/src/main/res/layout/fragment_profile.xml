@@ -50,13 +50,12 @@
                     android:textSize="30sp"
                     android:textStyle="bold" />
 
-                <ImageButton
+                <Button
                     android:id="@+id/editBtn"
-                    android:layout_width="55dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_gravity="end"
-                    android:background="@android:color/transparent"
-                    android:src="@drawable/baseline_edit_note_24" />
+                    android:text="Edit Profile" />
             </LinearLayout>
 
 
