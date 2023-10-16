@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,10 +33,14 @@ import com.example.property_management.api.FirebaseAuthHelper;
 import com.example.property_management.api.FirebaseFunctionsHelper;
 import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.BasicDialogCallback;
+import com.example.property_management.callbacks.DeleteInterestedFacilityCallback;
 import com.example.property_management.callbacks.GetUserInfoByIdCallback;
+import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.User;
 import com.example.property_management.databinding.FragmentProfileBinding;
+import com.example.property_management.ui.activities.AddPropertyActivity;
 import com.example.property_management.ui.activities.LoginActivity;
+import com.example.property_management.ui.activities.MainActivity;
 import com.example.property_management.ui.fragments.base.AutocompleteFragment;
 import com.example.property_management.ui.fragments.base.BasicDialog;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
@@ -122,10 +127,13 @@ public class ProfileFragment extends Fragment {
         // ========================= Add facility test ==========================
         Button addFacilityTestBtn = binding.addFacilityTest;
         Button addLocationTestBtn = binding.addLocationTest;
+        Button deleteFacilityTestBtn = binding.deleteFacilityTest;
+        Button deleteLocationTestBtn = binding.deleteLocationTest;
 
         FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(activity);
         FirebaseUser user = firebaseAuthHelper.getCurrentUser();
         assert user != null;
+        FirebaseUserRepository userRepository = new FirebaseUserRepository();
         addFacilityTestBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -285,5 +293,27 @@ public class ProfileFragment extends Fragment {
     public void addFacility() {
         DialogFragment dialog = new AddNewFacilityDialogFragment();
         dialog.show(getChildFragmentManager(), "AddNewFacilityDialogFragment");
+    }
+
+    // params: propertyIds: all the property ids of the user
+    // isFacility: true if the interest is a facility, false if it is a location
+    // interestedList: the list of interested facilities or locations before the delete
+    // interest_: the facility or location to be deleted
+    public void deleteInterest(FirebaseUserRepository userRepository, ArrayList<String> propertyIds, Boolean isFacility, ArrayList<String> interestedList,String interest_) {
+        userRepository.deleteInterestedFacilityLocation(propertyIds, isFacility, interestedList, interest_, new DeleteInterestedFacilityCallback() {
+            @Override
+            public void onSuccess(String msg) {
+                // redirect to main activity on success
+                new BasicSnackbar(getActivity().findViewById(android.R.id.content),
+                        "Success: Deleted interested " + interest_, "success");
+                // do more actions
+            }
+            @Override
+            public void onError(String msg) {
+                String errorMsg = "Error: " + msg;
+                new BasicSnackbar(getActivity().findViewById(android.R.id.content), errorMsg, "error");
+                Log.e("add-property-failure", msg);
+            }
+        });
     }
 }

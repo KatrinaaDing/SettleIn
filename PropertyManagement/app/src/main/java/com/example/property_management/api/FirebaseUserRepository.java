@@ -9,6 +9,7 @@ import com.example.property_management.callbacks.GetAllUserPropertiesCallback;
 import com.example.property_management.callbacks.GetAllUsersCallback;
 import com.example.property_management.callbacks.GetUserInfoByIdCallback;
 import com.example.property_management.callbacks.UpdateUserCallback;
+import com.example.property_management.callbacks.DeleteInterestedFacilityCallback;
 import com.example.property_management.data.Property;
 import com.example.property_management.data.User;
 import com.example.property_management.data.UserProperty;
@@ -27,6 +28,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.WriteBatch;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -296,6 +298,81 @@ public class FirebaseUserRepository {
             public void onError(String message) {
                 Log.d("delete-user-property", "onError: " + message);
                 callback.onError("Cannot delete property:" + message);
+            }
+        });
+
+    }
+
+    public void deleteInterestedFacilityLocation(ArrayList<String> propertyIds, Boolean isFacility, ArrayList<String> interestedList,String interest_, DeleteInterestedFacilityCallback callback) {
+        // retrieve current user id
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        String userId = mAuth.getCurrentUser().getUid();
+
+        DocumentReference userRef = db.collection("users").document(userId);
+
+        // remove the facility from the interestedList
+        interestedList.remove(interest_);
+        HashMap<String, Object> payload = new HashMap<>();
+
+        if (isFacility) {
+            // update the interestedFacilities field in firebase
+            payload.put("interestedFacilities", interestedList);
+        } else {
+            // update the interestedLocations field in firebase
+            payload.put("interestedLocations", interestedList);
+        }
+        userRef.update(payload);
+
+        // Create a WriteBatch for this document
+        WriteBatch batch = db.batch();
+        Map<String, Object> updates = new HashMap<>();
+
+        // keep only numbers and letters of interested facility/location to generate key
+        String interest = interest_.replaceAll("[^a-zA-Z0-9]", "");
+
+        // Iterate over each propertyId
+        for (String propertyId : propertyIds) {
+            String path = "properties."+propertyId+".distances."+interest;
+            // Specify the fields to delete
+            updates.put(path, FieldValue.delete());
+        }
+
+        // Update the document in the batch
+        batch.update(userRef, updates);
+
+        // Commit the batch
+        batch.commit().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                // Successfully deleted the specified fields
+                // Handle success here
+                callback.onSuccess("Successfully deleted "+interest);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                if (e instanceof FirebaseFirestoreException) {
+                    FirebaseFirestoreException firestoreException = (FirebaseFirestoreException) e;
+                    FirebaseFirestoreException.Code errorCode = firestoreException.getCode();
+
+                    switch (errorCode) {
+                        case PERMISSION_DENIED:
+                            Log.w("update-user-fields", "Error permission denied", e);
+                            callback.onError("Error permission denied");
+                            break;
+                        case NOT_FOUND:
+                            Log.w("update-user-fields", "Error user not found", e);
+                            callback.onError("Error user not found");
+                            break;
+                        default:
+                            Log.w("update-user-fields", "Error updating user", e);
+                            callback.onError("Error updating user");
+                            break;
+                    }
+                } else {
+                    Log.w("delete facility", "Non-Firebase Error deleting facility", e);
+                    callback.onError("Non-Firebase Error deleting facility");
+                }
             }
         });
 
