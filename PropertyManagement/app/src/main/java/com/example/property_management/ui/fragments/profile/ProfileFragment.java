@@ -37,6 +37,7 @@ import com.example.property_management.callbacks.DeleteInterestedFacilityCallbac
 import com.example.property_management.callbacks.GetUserInfoByIdCallback;
 import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.User;
+import com.example.property_management.data.UserProperty;
 import com.example.property_management.databinding.FragmentProfileBinding;
 import com.example.property_management.ui.activities.AddPropertyActivity;
 import com.example.property_management.ui.activities.LoginActivity;
@@ -49,6 +50,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ProfileFragment extends Fragment {
 
@@ -58,6 +60,7 @@ public class ProfileFragment extends Fragment {
     String selectedAddress = "";
     CustomListRecyclerViewAdapter interestedLocationsAdapter;
     CustomListRecyclerViewAdapter interestedFacilitiesAdapter;
+    User currentUser;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -134,14 +137,19 @@ public class ProfileFragment extends Fragment {
         FirebaseUser user = firebaseAuthHelper.getCurrentUser();
         assert user != null;
         FirebaseUserRepository userRepository = new FirebaseUserRepository();
+        String userID = user.getUid();
+        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+
+        // TODO: move it up
+        getUserInfo();
+
         addFacilityTestBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String userId = user.getUid();
                 FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
                 // TODO change hardcode here
                 String facility = "MelbourneCentral";
-                firebaseFunctionsHelper.addInterestedFacility(userId, facility)
+                firebaseFunctionsHelper.addInterestedFacility(userID, facility)
                         .addOnSuccessListener(result -> {
                             if (result.equals("success")) {
                                 Log.i("add-interested-facility-success", result);
@@ -165,11 +173,9 @@ public class ProfileFragment extends Fragment {
         addLocationTestBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String userId = user.getUid();
-                FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
                 // TODO change hardcode here
                 String location = "Melbourne Central";
-                firebaseFunctionsHelper.addInterestedLocation(userId, location)
+                firebaseFunctionsHelper.addInterestedLocation(userID, location)
                         .addOnSuccessListener(result -> {
                             if (result.equals("success")) {
                                 Log.i("add-interested-location-success", result);
@@ -187,6 +193,20 @@ public class ProfileFragment extends Fragment {
                             new BasicSnackbar(getActivity().findViewById(android.R.id.content),
                                     e.getMessage(), "error");
                         });
+            }
+        });
+
+        deleteFacilityTestBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (currentUser != null) {
+                    // Create an ArrayList to store the keys
+                    ArrayList<String> propertyIds = new ArrayList<>(currentUser.getProperties().keySet());
+                    ArrayList<String> interestedFacilities = currentUser.getInterestedFacilities();
+                    String facilityToDelete = "Melbourne Central";
+                    deleteInterest(userRepository, propertyIds, true, interestedFacilities, facilityToDelete);
+                }
+
             }
         });
 
@@ -257,13 +277,13 @@ public class ProfileFragment extends Fragment {
 
     private void getUserInfo() {
         FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(activity);
-        FirebaseUser user = firebaseAuthHelper.getCurrentUser();
-        assert user != null;
-        binding.userEmail.setText("Email: " + user.getEmail());
-        binding.userId.setText("User ID: " + user.getUid());
+        final FirebaseUser[] user = {firebaseAuthHelper.getCurrentUser()};
+        assert user[0] != null;
+        binding.userEmail.setText("Email: " + user[0].getEmail());
+        binding.userId.setText("User ID: " + user[0].getUid());
         binding.userId.setVisibility(View.INVISIBLE);
         FirebaseUserRepository db = new FirebaseUserRepository();
-        db.getUserInfoById(user.getUid(), new GetUserInfoByIdCallback() {
+        db.getUserInfoById(user[0].getUid(), new GetUserInfoByIdCallback() {
             @Override
             public void onSuccess(User userObj) {
                 binding.userName.setText(userObj.getUserName());
@@ -276,6 +296,7 @@ public class ProfileFragment extends Fragment {
                 if (userInterestedFacilities != null && !userInterestedFacilities.isEmpty()) {
                     interestedFacilitiesAdapter.updateData(userInterestedFacilities);
                 }
+                currentUser = userObj;
             }
 
             @Override
