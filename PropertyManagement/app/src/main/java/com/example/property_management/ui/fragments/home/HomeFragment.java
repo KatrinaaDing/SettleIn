@@ -141,54 +141,59 @@ public class HomeFragment extends Fragment {
      * @param context the context of the fragment
      */
     private void getAllProperties(Context context) {
-//        FirebaseUserRepository db = new FirebaseUserRepository();
-//        db.getAllUserProperties(new GetAllUserPropertiesCallback() {
-//            @Override
-//            public void onSuccess(ArrayList<Property> properties) {
-//                if (properties.isEmpty()) {
-//                    binding.hint.setVisibility(View.VISIBLE);
-//                }
+        FirebaseUserRepository db = new FirebaseUserRepository();
+        db.getAllUserProperties(new GetAllUserPropertiesCallback() {
+            @Override
+            public void onSuccess(ArrayList<Property> properties) {
+                if (properties.isEmpty()) {
+                    binding.hint.setVisibility(View.VISIBLE);
+                }
 //                RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
 //                propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
 //                RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties);
 //                binding.loadingText.setVisibility(View.GONE);
 //                propertiesRecyclerView.setAdapter(propertyCardAdapter);
-//
-//                allProperties = properties;
-//            }
-//
-//            @Override
-//            public void onError(String msg) {
-//                new BasicSnackbar(getView(), msg, "error", Snackbar.LENGTH_LONG);
-//            }
-//        });
-        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
-        firebaseFunctionsHelper.getAllProperties()
-                .addOnSuccessListener(result -> {
-                    ArrayList<Property> properties = (ArrayList<Property>) result;
-                    if (properties.isEmpty()) {
-                        // show hint if no property exists
-                        binding.hint.setVisibility(View.VISIBLE);
-                    }
+                renderProperties(properties);
+                binding.loadingText.setVisibility(View.GONE);
+                allProperties = properties;
+                // initialize and display toolbar after all properties are loaded
+                initToolbar();
 
-                    RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
-                    if (propertiesRecyclerView != null) {
-                        propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
-                        RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties);
-                        propertiesRecyclerView.setAdapter(propertyCardAdapter);
-                        binding.loadingText.setVisibility(View.GONE);
-                        allProperties = properties;
-                    }
-                    renderProperties(properties);
-                    binding.loadingText.setVisibility(View.GONE);
-                    allProperties = properties;
-                    // initialize and display toolbar after all properties are loaded
-                    initToolbar();
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("get-all-properties-fail", e.getMessage());
-                    binding.loadingText.setText("Failed to load properties. Please try again later.");
-                });
+                allProperties = properties;
+            }
+
+            @Override
+            public void onError(String msg) {
+                new BasicSnackbar(getView(), msg, "error", Snackbar.LENGTH_LONG);
+            }
+        });
+//        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+//        firebaseFunctionsHelper.getAllProperties()
+//                .addOnSuccessListener(result -> {
+//                    ArrayList<Property> properties = (ArrayList<Property>) result;
+//                    if (properties.isEmpty()) {
+//                        // show hint if no property exists
+//                        binding.hint.setVisibility(View.VISIBLE);
+//                    }
+//
+//                    RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
+//                    if (propertiesRecyclerView != null) {
+//                        propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
+//                        RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties);
+//                        propertiesRecyclerView.setAdapter(propertyCardAdapter);
+//                        binding.loadingText.setVisibility(View.GONE);
+//                        allProperties = properties;
+//                    }
+//                    renderProperties(properties);
+//                    binding.loadingText.setVisibility(View.GONE);
+//                    allProperties = properties;
+//                    // initialize and display toolbar after all properties are loaded
+//                    initToolbar();
+//                })
+//                .addOnFailureListener(e -> {
+//                    Log.e("get-all-properties-fail", e.getMessage());
+//                    binding.loadingText.setText("Failed to load properties. Please try again later.");
+//                });
     }
 
     private void renderProperties(ArrayList<Property> properties) {

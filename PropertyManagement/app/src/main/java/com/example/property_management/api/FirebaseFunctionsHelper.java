@@ -320,8 +320,8 @@ public class FirebaseFunctionsHelper {
                 UserProperty userPropertyData = new UserProperty(
                         (String) result.get("propertyId"),
                         inspected,
-                        inspectionDate,
-                        inspectionTime,
+                        inspectionDate.toString(),
+                        inspectionTime.toString(),
                         (String) result.get("notes"),
                         getPropertyDistancesData(result),
                         getRoomsData(result, "inspectedData"),

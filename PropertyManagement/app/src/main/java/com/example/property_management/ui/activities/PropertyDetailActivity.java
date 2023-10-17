@@ -176,8 +176,8 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                             ? formatDateTime(date, time)
                             : NO_DATE_TIME_HINT
                     );
-                    this.userProperty.setInspectionDate(date == "" ? null : Helpers.stringToDate(date));
-                    this.userProperty.setInspectionTime(time == "" ? null : Helpers.stringToTime(time));
+                    this.userProperty.setInspectionDate(date);
+                    this.userProperty.setInspectionTime(time);
                 }, () -> {
                     // on error
                     // enable dismiss dialog on click outside
@@ -290,16 +290,16 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         if (userProperty == null)
             return;
         // get fetched inspection date and time
-        LocalDate date = userProperty.getInspectionDate();
-        LocalTime time = userProperty.getInspectionTime();
+        String date = userProperty.getInspectionDate();
+        String time = userProperty.getInspectionTime();
         // get ui components
         Button editInspectionTimeBtn = binding.editInspectionTimeBtn;
         ConstraintLayout inspectionTimeLayout = binding.inspectionTimeLayout;
         TextView inspectionTimeTxt = binding.detailInspectionTimeTxt;
 
         if (date != null || time != null) {
-            String formattedDate = date == null ? "" : Helpers.dateFormatter(date);
-            String formattedTime = time == null ? "" : Helpers.timeFormatter(time.getHour(), time.getMinute());
+            String formattedDate = date == null ? "" : date;
+            String formattedTime = time == null ? "" : time;
             // set field
             this.date = formattedDate;
             this.time = formattedTime;
