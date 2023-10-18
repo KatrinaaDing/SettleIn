@@ -448,8 +448,12 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     }
 
    // test camera function
-    public static List<List<Bitmap>> getRoomImages() {
-        return roomImages;
+   public List<List<Bitmap>> getAllRoomImages() {
+       return roomImages;
+   }
+
+    public ArrayList<ArrayList<String>> getAllRoomImagePaths() {
+        return roomImagePaths;
     }
 
     // photo display

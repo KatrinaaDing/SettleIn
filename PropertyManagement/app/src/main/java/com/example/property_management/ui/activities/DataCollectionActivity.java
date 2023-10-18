@@ -5,12 +5,16 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,9 +44,13 @@ import com.example.property_management.sensors.LightSensor;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+
 import androidx.annotation.Nullable;
 
 public class DataCollectionActivity extends AppCompatActivity {
@@ -60,6 +68,7 @@ public class DataCollectionActivity extends AppCompatActivity {
     private List<String> roomNames = new ArrayList<>();
     private Dialog noteDialog;
     private SharedPreferences sharedPreferences;
+    private Map<Integer, List<String>> roomImagePathsMap = new LinkedHashMap<>();
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -141,8 +150,89 @@ public class DataCollectionActivity extends AppCompatActivity {
 
         binding.finishButton.setOnClickListener(view -> {
             //Need to define the logic of return tested data
-            finish();
+            onFinishButtonClicked();
+            //finish();
         });
+    }
+
+    public void onFinishButtonClicked() {
+        // get image from adapter
+        List<List<Bitmap>> allRoomImages = roomAdapter.getAllRoomImages();
+
+        // get and save image from each room
+        for (int roomPosition = 0; roomPosition < allRoomImages.size(); roomPosition++) {
+            List<Bitmap> images = allRoomImages.get(roomPosition);
+            for (Bitmap image : images) {
+                saveImageToGallery(image, roomPosition);
+            }
+        }
+
+        // get room image path
+        ArrayList<ArrayList<String>> allRoomImagePaths = roomAdapter.getAllRoomImagePaths();
+        for (int i = 0; i < allRoomImagePaths.size(); i++) {
+            List<String> imagePathList = allRoomImagePaths.get(i);
+            StringBuilder sb = new StringBuilder();
+            sb.append("Room ").append(i).append(": ");
+            for (String path : imagePathList) {
+                sb.append(path).append(", ");
+            }
+            Log.d("RoomImagePaths", sb.toString());
+        }
+        logRoomImagePaths();
+    }
+
+    private void saveImageToGallery(Bitmap image, int roomPosition) {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, "Image_" + System.currentTimeMillis() + ".jpg");
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+        values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Room_" + roomPosition);
+
+        Uri uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+        try {
+            OutputStream os = getContentResolver().openOutputStream(uri);
+            image.compress(Bitmap.CompressFormat.JPEG, 100, os);
+            os.flush();
+            os.close();
+
+            String realPath = getRealPathFromURI(uri);
+
+            Toast.makeText(this, "Image saved as: " + realPath, Toast.LENGTH_SHORT).show();
+
+            if (!roomImagePathsMap.containsKey(roomPosition)) {
+                roomImagePathsMap.put(roomPosition, new ArrayList<>());
+            }
+            roomImagePathsMap.get(roomPosition).add(realPath);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void logRoomImagePaths() {
+        StringBuilder logOutput = new StringBuilder("{\n");
+        for (Map.Entry<Integer, List<String>> entry : roomImagePathsMap.entrySet()) {
+            int roomPosition = entry.getKey();
+            List<String> imagePathList = entry.getValue();
+            logOutput.append("Room ").append(roomPosition).append(": ");
+            for (String path : imagePathList) {
+                logOutput.append(path).append(", ");
+            }
+            logOutput.append("\n");
+        }
+        logOutput.append("}");
+        Log.d("RoomImagePaths", logOutput.toString());
+    }
+
+    private String getRealPathFromURI(Uri uri) {
+        String path = "";
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        if (cursor != null) {
+            cursor.moveToFirst();
+            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+            path = cursor.getString(idx);
+            cursor.close();
+        }
+        return path;
     }
 
     @Override
