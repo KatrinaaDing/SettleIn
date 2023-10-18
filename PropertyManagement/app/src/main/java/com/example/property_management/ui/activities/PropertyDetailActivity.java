@@ -1,11 +1,9 @@
 package com.example.property_management.ui.activities;
 
 import android.app.ActivityOptions;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,14 +19,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.property_management.api.FirebaseAuthHelper;
 import com.example.property_management.api.FirebaseFunctionsHelper;
-import com.example.property_management.api.FirebasePropertyRepository;
 import com.example.property_management.api.FirebaseUserRepository;
-import com.example.property_management.callbacks.GetPropertyByIdCallback;
 import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.Property;
 import com.example.property_management.data.UserProperty;
-import com.example.property_management.ui.fragments.property.AmenitiesGroup;
-import com.example.property_management.utils.Helpers;
+import com.example.property_management.utils.DateTimeFormatter;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -48,13 +43,11 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 import com.google.firebase.auth.FirebaseUser;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
+
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Date;
-import java.util.Locale;
 import java.util.Map;
 
 public class PropertyDetailActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -149,7 +142,6 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         TextView dateTxt = dialogView.findViewById(R.id.dateTxt);
         TextView timeTxt = dialogView.findViewById(R.id.timeTxt);
         TextView inspectionTimeTxt = binding.detailInspectionTimeTxt;
-        Log.i("date-time", date + time);
 
         // display date and time
         if (date == null || date.equals(""))
@@ -168,7 +160,6 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             .setPositiveButton("Save", (dialogInterface, i) -> {
                 // disable dismiss dialog on click outside during saving
                 ((AlertDialog) dialogInterface).setCanceledOnTouchOutside(false);
-                this.setTitle("Saving...");
                 // update to firebase
                 updateInspectionDateTime(() -> {
                     // on success
@@ -176,8 +167,8 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                             ? formatDateTime(date, time)
                             : NO_DATE_TIME_HINT
                     );
-                    this.userProperty.setInspectionDate(date == "" ? null : Helpers.stringToDate(date));
-                    this.userProperty.setInspectionTime(time == "" ? null : Helpers.stringToTime(time));
+                    this.userProperty.setInspectionDate(date);
+                    this.userProperty.setInspectionTime(time);
                 }, () -> {
                     // on error
                     // enable dismiss dialog on click outside
@@ -194,6 +185,9 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         alertDialog.show();
 
         // ===== datePicker =====
+        Long currentDate = date == ""
+                ? MaterialDatePicker.todayInUtcMilliseconds()
+                : DateTimeFormatter.localDateToLong(DateTimeFormatter.stringToDate(date));
         CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints
             .Builder()
             .setValidator(DateValidatorPointForward.now());
@@ -201,6 +195,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             MaterialDatePicker
                 .Builder
                 .datePicker()
+                .setSelection(currentDate)
                 .setTitleText("Select Inspection date")
                 .setCalendarConstraints(constraintsBuilder.build())
                 .build();
@@ -213,11 +208,18 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         addDateBtn.setOnClickListener(v -> {
             datePicker.show(getSupportFragmentManager(), "date_picker");
         });
+        Log.i("date-time", "reseting date time to" + this.date + "," + this.time);
         // ===== timePicker =====
+        int currentHour = time == ""
+                ? LocalTime.now().getHour()
+                : DateTimeFormatter.stringToTime(time).getHour();
+        int currentMinute = time == ""
+                ? LocalTime.now().getMinute()
+                : DateTimeFormatter.stringToTime(time).getMinute();
         MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
             .setTimeFormat(TimeFormat.CLOCK_12H)
-            .setHour(12)
-            .setMinute(0)
+            .setHour(currentHour)
+            .setMinute(currentMinute)
             .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
             .setTitleText("Select Inspection Time")
             .build();
@@ -234,8 +236,8 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             // on click reset date and time
             dateTxt.setText(NO_DATE_HINT);
             timeTxt.setText(NO_TIME_HINT);
-            date = "";
-            time = "";
+            this.date = "";
+            this.time = "";
         });
     }
 
@@ -290,27 +292,21 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         if (userProperty == null)
             return;
         // get fetched inspection date and time
-        LocalDate date = userProperty.getInspectionDate();
-        LocalTime time = userProperty.getInspectionTime();
+        String date = userProperty.getInspectionDate();
+        String time = userProperty.getInspectionTime();
         // get ui components
         Button editInspectionTimeBtn = binding.editInspectionTimeBtn;
         ConstraintLayout inspectionTimeLayout = binding.inspectionTimeLayout;
         TextView inspectionTimeTxt = binding.detailInspectionTimeTxt;
-
-        if (date != null || time != null) {
-            String formattedDate = date == null ? "" : Helpers.dateFormatter(date);
-            String formattedTime = time == null ? "" : Helpers.timeFormatter(time.getHour(), time.getMinute());
-            // set field
-            this.date = formattedDate;
-            this.time = formattedTime;
-            // set ui
-            inspectionTimeTxt.setText(formatDateTime(formattedDate, formattedTime));
+        // set field
+        this.date = date;
+        this.time = time;
+        // set ui
+        if (!date.equals("") || !time.equals("")) {
+            inspectionTimeTxt.setText(formatDateTime(date, time));
             inspectionTimeLayout.setVisibility(View.VISIBLE);
         } else {
             inspectionTimeTxt.setText(NO_DATE_TIME_HINT);
-            this.date = "";
-            this.time = "";
-
         }
         Log.i("date-time", "reseting date time to" + this.date + "," + this.time);
         editInspectionTimeBtn.setOnClickListener(v -> showCustomDialog());
@@ -494,13 +490,13 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
 
     private String setInspectionTime(int hour, int minute) {
         // store date in format for easily parsing by LocalTime
-        time = Helpers.timeFormatter(hour, minute);
+        time = DateTimeFormatter.timeFormatter(hour, minute);
         return time;
     }
 
     private String setInspectionDate(Date newDate) {
         // display more sensible date format
-        date = Helpers.dateFormatter(newDate);
+        date = DateTimeFormatter.dateFormatter(newDate);
         return date;
     }
 
