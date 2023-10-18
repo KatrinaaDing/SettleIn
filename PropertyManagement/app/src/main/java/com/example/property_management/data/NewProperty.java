@@ -1,6 +1,8 @@
 package com.example.property_management.data;
 
+import java.security.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +16,7 @@ public class NewProperty {
     private int numParking;
     private int price;
     private ArrayList<String> images;
+    private Date createdAt;
 
     public NewProperty() {};
 
@@ -34,6 +37,7 @@ public class NewProperty {
         propertyPayload.put("href", href);
         propertyPayload.put("price", price);
         propertyPayload.put("propertyId", id);
+        propertyPayload.put("createdAt", createdAt);
         return propertyPayload;
     }
     public String getHref() { return href; }
@@ -71,4 +75,12 @@ public class NewProperty {
     public int getPrice() { return price; }
 
     public void setPrice(int price) { this.price = price; }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
 }

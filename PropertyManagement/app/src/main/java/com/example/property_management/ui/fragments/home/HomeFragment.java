@@ -150,8 +150,9 @@ public class HomeFragment extends Fragment {
             default:
                 // sort by create time by default
             case "Create Time":
-                // TODO: sort by create time
-                break;
+                comparator = Comparator.comparing(Property::getCreatedAt);
+                // default "sort by create time" is new to old
+                comparator = comparator.reversed();
         }
         if (comparator == null) {
             return;
@@ -163,6 +164,7 @@ public class HomeFragment extends Fragment {
         allProperties.sort(comparator);
         renderProperties(allProperties);
     }
+
     private void initToolbar() {
         ConstraintLayout toolbar = binding.toolbar;
         initFilterMenu();
@@ -205,16 +207,18 @@ public class HomeFragment extends Fragment {
         db.getAllUserProperties(new GetAllUserPropertiesCallback() {
             @Override
             public void onSuccess(ArrayList<Property> properties) {
-                if (properties.isEmpty()) {
-                    binding.hint.setVisibility(View.VISIBLE);
-                }
-                renderProperties(properties);
+                allProperties = properties;
+                // sort and render properties
+                sortProperties(binding.sortMenu.getEditText().getText().toString());
                 binding.loadingText.setVisibility(View.GONE);
-                allProperties = properties;
-                // initialize and display toolbar after all properties are loaded
-                initToolbar();
 
-                allProperties = properties;
+                if (properties.isEmpty()) {
+                    // show hint if no property exists
+                    binding.hint.setVisibility(View.VISIBLE);
+                } else {
+                    // otherwise initialize and display toolbar after all properties are loaded
+                    initToolbar();
+                }
             }
 
             @Override

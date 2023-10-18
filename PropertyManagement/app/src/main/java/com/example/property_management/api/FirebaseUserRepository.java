@@ -226,12 +226,10 @@ public class FirebaseUserRepository {
             public void onComplete(Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
                     List<String> docIds = new ArrayList<>();
-                    List<Boolean> inspecteds = new ArrayList<>();
-                    HashMap<String, UserProperty> properties = task.getResult().toObject(User.class).getProperties();
-                    if (properties != null && !properties.isEmpty()) {
-                        for (String docId : properties.keySet()) {
+                    HashMap<String, UserProperty> userProperties = task.getResult().toObject(User.class).getProperties();
+                    if (userProperties != null && !userProperties.isEmpty()) {
+                        for (String docId : userProperties.keySet()) {
                             docIds.add(docId);
-                            inspecteds.add(properties.get(docId).getInspected());
                         }
                     }
 
@@ -250,7 +248,8 @@ public class FirebaseUserRepository {
                                                             document.getId() + " => " + document.getData());
                                                     Property property = document.toObject(Property.class);
                                                     property.setPropertyId(document.getId());
-                                                    property.setInspected(inspecteds.get(docIds.indexOf(document.getId())));
+                                                    property.setInspected(userProperties.get(document.getId()).getInspected());
+                                                    property.setCreatedAt(userProperties.get(document.getId()).getCreatedAt());
                                                     properties.add(property);
                                                 }
                                                 callback.onSuccess(properties);

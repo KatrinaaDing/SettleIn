@@ -16,6 +16,7 @@ import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.HttpsCallableResult;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -316,7 +317,8 @@ public class FirebaseFunctionsHelper {
                         (String) result.get("notes"),
                         getPropertyDistancesData(result),
                         getRoomsData(result, "inspectedData"),
-                        (int) result.get("price")
+                        (int) result.get("price"),
+                        (Date) result.get("createdAt")
                 );
                 Map<String, Object> res = new HashMap<>();
                 res.put("propertyData", propertyData);
