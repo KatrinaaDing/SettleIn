@@ -376,7 +376,6 @@ def get_user_properties_helper(user_id):
             else:
                 property['inspected'] = False
             properties.append(property)
-        print("[get-all-properties]", properties)
         print("[get-all-properties]", " user ", user_id, " has properties")
         return properties
     
@@ -392,6 +391,7 @@ def get_user_properties_helper(user_id):
 @https_fn.on_call()
 def get_user_properties(req:  https_fn.Request) -> Any:
     user_id = req.data["userId"]
+    print("[get-all-properties]", " getting all properties for user", user_id)
     return get_user_properties_helper(user_id)
     # if user_id is None:
     #     raise https_fn.HttpsError(
