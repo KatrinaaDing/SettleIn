@@ -148,11 +148,6 @@ public class HomeFragment extends Fragment {
                 if (properties.isEmpty()) {
                     binding.hint.setVisibility(View.VISIBLE);
                 }
-//                RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
-//                propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
-//                RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties);
-//                binding.loadingText.setVisibility(View.GONE);
-//                propertiesRecyclerView.setAdapter(propertyCardAdapter);
                 renderProperties(properties);
                 binding.loadingText.setVisibility(View.GONE);
                 allProperties = properties;
@@ -178,17 +173,12 @@ public class HomeFragment extends Fragment {
 //
 //                    RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
 //                    if (propertiesRecyclerView != null) {
-//                        propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
-//                        RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties);
-//                        propertiesRecyclerView.setAdapter(propertyCardAdapter);
-//                        binding.loadingText.setVisibility(View.GONE);
-//                        allProperties = properties;
+    //                    renderProperties(properties);
+    //                    binding.loadingText.setVisibility(View.GONE);
+    //                    allProperties = properties;
+    //                    // initialize and display toolbar after all properties are loaded
+    //                    initToolbar();
 //                    }
-//                    renderProperties(properties);
-//                    binding.loadingText.setVisibility(View.GONE);
-//                    allProperties = properties;
-//                    // initialize and display toolbar after all properties are loaded
-//                    initToolbar();
 //                })
 //                .addOnFailureListener(e -> {
 //                    Log.e("get-all-properties-fail", e.getMessage());

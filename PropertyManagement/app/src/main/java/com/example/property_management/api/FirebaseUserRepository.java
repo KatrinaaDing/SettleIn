@@ -226,10 +226,12 @@ public class FirebaseUserRepository {
             public void onComplete(Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
                     List<String> docIds = new ArrayList<>();
+                    List<Boolean> inspecteds = new ArrayList<>();
                     HashMap<String, UserProperty> properties = task.getResult().toObject(User.class).getProperties();
                     if (properties != null && !properties.isEmpty()) {
                         for (String docId : properties.keySet()) {
                             docIds.add(docId);
+                            inspecteds.add(properties.get(docId).getInspected());
                         }
                     }
 
@@ -244,14 +246,18 @@ public class FirebaseUserRepository {
                                             if (task.isSuccessful()) {
                                                 ArrayList<Property> properties = new ArrayList<>();
                                                 for (QueryDocumentSnapshot document : task.getResult()) {
-                                                    Log.d("get-all-user-properties-success", document.getId() + " => " + document.getData());
+                                                    Log.d("get-all-user-properties-success",
+                                                            document.getId() + " => " + document.getData());
                                                     Property property = document.toObject(Property.class);
                                                     property.setPropertyId(document.getId());
+                                                    property.setInspected(inspecteds.get(docIds.indexOf(document.getId())));
                                                     properties.add(property);
                                                 }
                                                 callback.onSuccess(properties);
                                             } else {
-                                                Log.d("get-all-user-properties-failure", "Error getting all user properties: ", task.getException());
+                                                Log.d("get-all-user-properties-failure",
+                                                        "Error getting all user properties: ",
+                                                        task.getException());
                                                 callback.onError("Error getting all user properties");
                                             }
                                         }

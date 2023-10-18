@@ -1,13 +1,10 @@
 package com.example.property_management.ui.activities;
 
-import static android.content.ContentValues.TAG;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,26 +15,16 @@ import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.AddUserCallback;
 import com.example.property_management.callbacks.AuthCallback;
 import com.example.property_management.data.User;
-import com.example.property_management.data.UserProperty;
 import com.example.property_management.databinding.ActivityRegisterBinding;
 import com.example.property_management.utils.EmailValidator;
+import com.example.property_management.utils.DateTimeFormatter;
 import com.example.property_management.utils.Helpers;
 import com.example.property_management.utils.PasswordValidator;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity {
 
