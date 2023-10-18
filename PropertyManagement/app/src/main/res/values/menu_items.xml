@@ -7,6 +7,7 @@
     </string-array>
 
     <string-array name="properties_sort_options">
+        <item>Create Time</item>
         <item>Price</item>
         <item>Beds</item>
         <item>Bathrooms</item>

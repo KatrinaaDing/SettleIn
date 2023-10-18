@@ -308,7 +308,6 @@ public class FirebaseFunctionsHelper {
                 String inspectionTime = result.get("inspectionTime") == null
                         ? ""
                         : (String) result.get("inspectionTime");
-
                 UserProperty userPropertyData = new UserProperty(
                         (String) result.get("propertyId"),
                         inspected,
@@ -318,7 +317,7 @@ public class FirebaseFunctionsHelper {
                         getPropertyDistancesData(result),
                         getRoomsData(result, "inspectedData"),
                         (int) result.get("price"),
-                        (Date) result.get("createdAt")
+                        new Date(((Double) result.get("createdAt")).longValue())
                 );
                 Map<String, Object> res = new HashMap<>();
                 res.put("propertyData", propertyData);

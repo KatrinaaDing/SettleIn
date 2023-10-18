@@ -99,8 +99,9 @@
                     android:hint="Sort By">
                     <AutoCompleteTextView
                         style="@style/Widget.Material3.AutoCompleteTextView.OutlinedBox.Dense"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:dropDownWidth="150dp"
                         android:inputType="none"
                         android:ellipsize="end"
                         android:singleLine="true"

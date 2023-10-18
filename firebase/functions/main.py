@@ -11,6 +11,7 @@ import re
 from bs4 import BeautifulSoup
 import requests
 import json
+from datetime import datetime
 
 initialize_app()
 
@@ -459,6 +460,9 @@ def get_user_properties(req:  https_fn.Request) -> Any:
     
 #     try:
 #         user_property.update(property)
+#         # get milliseconds of createdAt timestamp
+#         millis_epoch = user_property['createdAt'].timestamp() * 1000 
+#         user_property['createdAt'] = millis_epoch
 #         return_data = json.dumps({ "property": user_property })
 #         return https_fn.Response(return_data, status=200, headers={"Content-Type": "application/json"})
 #     except Exception as e:
@@ -505,6 +509,11 @@ def get_property_by_id(req:  https_fn.Request) -> Any:
     # user's property data will override property document data
     try:
         user_property.update(property)
+        # get milliseconds of createdAt timestamp
+        # reference: https://stackoverflow.com/questions/5998245/how-do-i-get-the-current-time-in-milliseconds-in-python
+        if ('createdAt' in user_property):
+            millis_epoch = user_property['createdAt'].timestamp() * 1000 
+            user_property['createdAt'] = millis_epoch
         return user_property
     except Exception as e:
         raise https_fn.HttpsError(
