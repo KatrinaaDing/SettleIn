@@ -8,8 +8,8 @@ import java.util.HashMap;
 public class UserProperty {
     private String propertyId;
     private boolean inspected;
-    private LocalDate inspectionDate;
-    private LocalTime inspectionTime;
+    private String inspectionDate;
+    private String inspectionTime;
     private String notes;
     private int price;
     private HashMap<String, DistanceInfo> distances;
@@ -17,7 +17,7 @@ public class UserProperty {
 
     public UserProperty() {}
 
-    public UserProperty(String propertyId, boolean inspected, LocalDate inspectionDate, LocalTime inspectionTime, String notes, HashMap<String, DistanceInfo> distances, HashMap<String, RoomData> inspectedData, int price) {
+    public UserProperty(String propertyId, boolean inspected, String inspectionDate, String inspectionTime, String notes, HashMap<String, DistanceInfo> distances, HashMap<String, RoomData> inspectedData, int price) {
         this.propertyId = propertyId;
         this.inspected = inspected;
         this.inspectionDate = inspectionDate;
@@ -32,17 +32,17 @@ public class UserProperty {
 
     public void setPropertyId(String propertyId) { this.propertyId = propertyId; }
 
-    public boolean isInspected() { return inspected; }
+//    public boolean isInspected() { return inspected; }
 
     public void setInspected(boolean inspected) { this.inspected = inspected; }
 
-    public LocalDate getInspectionDate() { return inspectionDate; }
+    public String getInspectionDate() { return inspectionDate; }
 
-    public void setInspectionDate(LocalDate inspectionDate) { this.inspectionDate = inspectionDate; }
+    public void setInspectionDate(String inspectionDate) { this.inspectionDate = inspectionDate; }
 
-    public LocalTime getInspectionTime() { return inspectionTime; }
+    public String getInspectionTime() { return inspectionTime; }
 
-    public void setInspectionTime(LocalTime inspectionTime) { this.inspectionTime = inspectionTime; }
+    public void setInspectionTime(String inspectionTime) { this.inspectionTime = inspectionTime; }
 
     public String getNotes() { return notes; }
 

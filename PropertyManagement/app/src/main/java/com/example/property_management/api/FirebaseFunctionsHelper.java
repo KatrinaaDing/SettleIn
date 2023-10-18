@@ -9,21 +9,14 @@ import com.example.property_management.data.NewProperty;
 import com.example.property_management.data.Property;
 import com.example.property_management.data.RoomData;
 import com.example.property_management.data.UserProperty;
-import com.example.property_management.utils.Helpers;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.HttpsCallableResult;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 public class FirebaseFunctionsHelper {
@@ -307,15 +300,13 @@ public class FirebaseFunctionsHelper {
                         ? false
                         : (boolean) result.get("inspected");
                 // parse date in certain format
-                LocalDate inspectionDate = result.get("inspectionDate") == null ||
-                        ((String) result.get("inspectionDate")).equals("")
-                        ? null
-                        : Helpers.stringToDate((String) result.get("inspectionDate"));
+                String inspectionDate = result.get("inspectionDate") == null
+                        ? ""
+                        : (String) result.get("inspectionDate");
                 // parse time
-                LocalTime inspectionTime = result.get("inspectionTime") == null ||
-                        ((String) result.get("inspectionTime")).equals("")
-                        ? null
-                        : Helpers.stringToTime((String) result.get("inspectionTime"));
+                String inspectionTime = result.get("inspectionTime") == null
+                        ? ""
+                        : (String) result.get("inspectionTime");
 
                 UserProperty userPropertyData = new UserProperty(
                         (String) result.get("propertyId"),
