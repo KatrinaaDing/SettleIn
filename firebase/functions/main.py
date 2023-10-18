@@ -511,9 +511,11 @@ def get_property_by_id(req:  https_fn.Request) -> Any:
         user_property.update(property)
         # get milliseconds of createdAt timestamp
         # reference: https://stackoverflow.com/questions/5998245/how-do-i-get-the-current-time-in-milliseconds-in-python
-        if ('createdAt' in user_property):
+        if ('createdAt' in user_property and user_property['createdAt'] is not None):
             millis_epoch = user_property['createdAt'].timestamp() * 1000 
             user_property['createdAt'] = millis_epoch
+        else:
+            user_property['createdAt'] = None
         return user_property
     except Exception as e:
         raise https_fn.HttpsError(

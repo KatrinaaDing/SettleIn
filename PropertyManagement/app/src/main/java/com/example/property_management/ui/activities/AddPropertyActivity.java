@@ -405,8 +405,8 @@ public class AddPropertyActivity extends AppCompatActivity {
     private void updateUserProperty(AppCompatActivity activity, NewProperty newProperty, String propertyId) {
         Log.i("add-user-property", "updating user document" + propertyId);
         // create object to update user document
-        newProperty.setCreatedAt(new Date());
         HashMap<String, Object> propertyPayload = newProperty.toUpdateUserObject(propertyId);
+        propertyPayload.put("createdAt", new Date());
         HashMap<String, Object> userUpdatePayload = new HashMap<>();
         userUpdatePayload.put("properties." + propertyId, propertyPayload);
         // get user id

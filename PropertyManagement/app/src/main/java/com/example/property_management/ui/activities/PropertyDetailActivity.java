@@ -256,6 +256,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 // set ui
                 binding.detailAddressTxt.setText(property.getAddress());
                 setInspectionDateTimeText();
+                setCreatedAtTime();
                 setIsInspected();
                 setAmenitiesGroup(property);
                 setCarousel(property);
@@ -271,6 +272,11 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 detailContent.setVisibility(View.GONE);
                 setError(true);
             });
+    }
+
+    private void setCreatedAtTime() {
+        TextView createdAtText = findViewById(R.id.createdAtText);
+        createdAtText.setText("Added at " + DateTimeFormatter.dateTimeFormatter(userProperty.getCreatedAt()));
     }
 
     private void setIsInspected() {
@@ -343,6 +349,10 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                             ActivityOptions.makeSceneTransitionAnimation(PropertyDetailActivity.this, imageView, "image").toBundle());
                 }
             });
+            if (adapter.getItemCount() == 1) {
+                LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+                recyclerView.setLayoutManager(linearLayoutManager);
+            }
             recyclerView.setAdapter(adapter);
         }
     }

@@ -87,6 +87,13 @@
                     app:layout_constraintEnd_toEndOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <!-- create time -->
+            <TextView
+                android:id="@+id/createdAtText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/lightGrey"/>
+
             <!--  Inspection Time -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"

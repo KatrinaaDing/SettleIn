@@ -23,6 +23,12 @@ public class DateTimeFormatter {
         return formattedDate;
     }
 
+    public static String dateTimeFormatter(Date date) {
+        if (date == null) return "";
+        String formattedDate = new SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault()).format(date);
+        return formattedDate;
+    }
+
     /**
      * Format LocalDate object to "dd MMM yyyy"
      * @param date LocalDate object

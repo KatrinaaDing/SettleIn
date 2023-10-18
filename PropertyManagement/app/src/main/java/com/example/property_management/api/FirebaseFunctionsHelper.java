@@ -308,6 +308,10 @@ public class FirebaseFunctionsHelper {
                 String inspectionTime = result.get("inspectionTime") == null
                         ? ""
                         : (String) result.get("inspectionTime");
+                // parse createdAt timestamp
+                Date createdAt = result.get("createdAt") == null
+                        ? new Date()
+                        : new Date(((Double) result.get("createdAt")).longValue());
                 UserProperty userPropertyData = new UserProperty(
                         (String) result.get("propertyId"),
                         inspected,
