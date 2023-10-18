@@ -19,12 +19,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import android.Manifest;
 
 import com.example.property_management.api.FirebaseAuthHelper;
 import com.example.property_management.api.FirebaseFunctionsHelper;
@@ -32,6 +28,7 @@ import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.Property;
 import com.example.property_management.data.UserProperty;
+import com.example.property_management.sensors.Calendar;
 import com.example.property_management.sensors.LocationSensor;
 import com.example.property_management.utils.DateTimeFormatter;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
@@ -41,6 +38,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.example.property_management.data.DistanceInfo;
 import com.example.property_management.R;
@@ -62,7 +60,9 @@ import java.util.Map;
 
 public class PropertyDetailActivity extends AppCompatActivity implements OnMapReadyCallback {
     private ActivityPropertyDetailBinding binding;
-
+    // add calendar event flag
+    private boolean firstTimeAddingCalendarEvent = false;
+    // property data
     private String userId;
     private String propertyId;
     private Property property;
@@ -177,6 +177,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                                 ? formatDateTime(date, time)
                                 : NO_DATE_TIME_HINT
                         );
+                        setAddToCalendarButton();
                         this.userProperty.setInspectionDate(date);
                         this.userProperty.setInspectionTime(time);
                     }, () -> {
@@ -197,7 +198,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         // ===== datePicker =====
         Long currentDate = date == ""
                 ? MaterialDatePicker.todayInUtcMilliseconds()
-                : DateTimeFormatter.localDateToLong(DateTimeFormatter.stringToDate(date));
+                : DateTimeFormatter.localDateToMillis(DateTimeFormatter.stringToDate(date));
         CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints
                 .Builder()
                 .setValidator(DateValidatorPointForward.now());
@@ -267,6 +268,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                     binding.detailAddressTxt.setText(property.getAddress());
                     setInspectionDateTimeText();
                     setCreatedAtTime();
+                    setAddToCalendarButton();
                     setIsInspected();
                     setAmenitiesGroup(property);
                     setCarousel(property);
@@ -392,6 +394,43 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     }
 
     /**
+     * set add to calendar button if inspection date (and time if any) is added
+     */
+    private void setAddToCalendarButton() {
+        MaterialButton addToCalendarBtn = findViewById(R.id.addToCalendarBtn);
+        Calendar calendar = new Calendar(this, null);
+        // show add to calendar button if date is set
+        if (date != null && !date.equals("")) {
+            addToCalendarBtn.setVisibility(View.VISIBLE);
+        }
+        addToCalendarBtn.setOnClickListener(view -> {
+            // if first time adding calendar event, check calendar permission
+            if (!calendar.getHasPermission(this)) {
+                firstTimeAddingCalendarEvent = true;
+                calendar.requiresPermissions();
+            } else {
+                firstTimeAddingCalendarEvent = false;
+                addInspectionToCalendar();
+            }
+
+        });
+    }
+
+    /**
+     * add inspection event to calendar
+     */
+    private void addInspectionToCalendar() {
+        Calendar calendar = new Calendar(this, null);
+        String address = property.getAddress();
+        String title = "Inspection at " + address;
+        String description = "Inspection at " + address + " on " + date + " " + time;
+        try {
+            calendar.createEvent(date, time, 30, title, description, address);
+        } catch (Exception e) {
+            new BasicSnackbar(findViewById(android.R.id.content), e.getMessage(), "error");
+        }
+    }
+    /**
      * update isInspected status to firebase
      * @param isChecked checkbox status
      * @param onSuccess callback on success
@@ -474,9 +513,8 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     public void onMapReady(GoogleMap googleMap) {
         // request location permission
         LocationSensor locationSensor = new LocationSensor(this, null);
-        if (!locationSensor.hasPermission(this)) {
-            locationSensor.requiresPermissions(this);
-        }
+        locationSensor.requiresPermissions(this);
+
         // render map
         if (property != null) {
             LatLng propertyLatLng = new LatLng(property.getLat(), property.getLng());
@@ -532,6 +570,29 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         }
         this.gMap = googleMap;
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        Calendar calendar = new Calendar(this, null);
+        // calendar permission granted asynchroneously, need to check before adding event
+        if (calendar.getMyCalendarRequestCode() == requestCode) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted
+                if (firstTimeAddingCalendarEvent) {
+                    // if first time permission granted, need to add event here
+                    addInspectionToCalendar();
+                }
+            } else {
+                // Permission denied
+                new BasicSnackbar(findViewById(android.R.id.content),
+                        "Permission denied. Please go to settings and enable calendar permission.",
+                        "error");
+            }
+        }
+    }
+
 
     private String formatDateTime(String date, String time) {
         boolean noDate = date == null || date.equals("");

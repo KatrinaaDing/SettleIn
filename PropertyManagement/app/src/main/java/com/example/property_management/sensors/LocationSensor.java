@@ -15,11 +15,10 @@ import com.example.property_management.callbacks.SensorCallback;
 import java.util.List;
 
 public class LocationSensor {
-
     private static final int MY_LOCATION_REQUEST_CODE = 1;
-
-    Activity activity;
-    SensorCallback callback;
+    private Activity activity;
+    private SensorCallback callback;
+    private boolean hasPermission = false;
 
     public LocationSensor(Activity activity, SensorCallback callback) {
         this.activity = activity;
@@ -29,13 +28,12 @@ public class LocationSensor {
     public boolean hasPermission(Context context) {
         return ActivityCompat.checkSelfPermission(context,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                    ActivityCompat.checkSelfPermission(context,
-                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+                ActivityCompat.checkSelfPermission(context,
+                        Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
     public void requiresPermissions(Activity activity) {
-        if (ContextCompat.checkSelfPermission(activity.getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
+        if (!hasPermission) {
             ActivityCompat.requestPermissions(activity,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     MY_LOCATION_REQUEST_CODE);
