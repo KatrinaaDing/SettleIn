@@ -6,4 +6,11 @@
         <item>All</item>
     </string-array>
 
+    <string-array name="properties_sort_options">
+        <item>Price</item>
+        <item>Beds</item>
+        <item>Bathrooms</item>
+        <item>Parking Spaces</item>
+    </string-array>
+
 </resources>
