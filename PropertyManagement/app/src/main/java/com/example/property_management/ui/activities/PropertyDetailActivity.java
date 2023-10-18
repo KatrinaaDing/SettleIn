@@ -349,8 +349,10 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                             ActivityOptions.makeSceneTransitionAnimation(PropertyDetailActivity.this, imageView, "image").toBundle());
                 }
             });
+            // if only one image, set linear layout to center the image
             if (adapter.getItemCount() == 1) {
-                LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+                LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this,
+                        LinearLayoutManager.HORIZONTAL, false);
                 recyclerView.setLayoutManager(linearLayoutManager);
             }
             recyclerView.setAdapter(adapter);
