@@ -1,6 +1,7 @@
 package com.example.property_management.ui.activities;
 
 import android.app.ActivityOptions;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -476,6 +477,33 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             googleMap.setOnCameraIdleListener(() -> {
                 ScrollView detailContent = binding.detailContent;
                 detailContent.requestDisallowInterceptTouchEvent(false);
+            });
+
+            googleMap.setOnMarkerClickListener(marker -> {
+                // on click open google map
+                //reference: https://developers.google.com/maps/documentation/urls/android-intents
+                // view property location on map
+                String address = property.getAddress();
+                 String uriString = "geo:0,0?q=" + Uri.encode(address);
+//                        String uriString = "google.navigation:?q=" + Uri.encode(address);
+                Uri uri = Uri.parse(uriString);
+                Intent mapIntent = new Intent(android.content.Intent.ACTION_VIEW, uri);
+                // If Google Maps app is installed, open it. Else, redirect to web version.
+                try {
+                    Log.d("property-view-on-map", "URI: " + uriString);
+                    startActivity(mapIntent);
+
+                } catch (ActivityNotFoundException e) {
+                    // Google Maps app is not installed, redirect to web version
+                    Uri webUri = Uri.parse(
+                            "https://www.google.com/maps/search/?api=1&query=" +
+                            Uri.encode(address));
+                    Intent webIntent = new Intent(Intent.ACTION_VIEW, webUri);
+                    startActivity(webIntent);
+                } finally {
+                    return true;
+                }
+
             });
         }
         this.gMap = googleMap;
