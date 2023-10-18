@@ -1,8 +1,10 @@
 package com.example.property_management.ui.activities;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,17 +15,24 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.Manifest;
+
 import com.example.property_management.api.FirebaseAuthHelper;
 import com.example.property_management.api.FirebaseFunctionsHelper;
 import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.Property;
 import com.example.property_management.data.UserProperty;
+import com.example.property_management.sensors.LocationSensor;
 import com.example.property_management.utils.DateTimeFormatter;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -115,7 +124,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         }
     }
 
-    private void setDistanceRecycler(ArrayList<DistanceInfo> distanceInfoList){
+    private void setDistanceRecycler(ArrayList<DistanceInfo> distanceInfoList) {
         distanceRecycler = binding.distanceRecycler;
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
         distanceRecycler.setLayoutManager(layoutManager);
@@ -156,32 +165,32 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
 
         // ===== dialog =====
         AlertDialog alertDialog = new MaterialAlertDialogBuilder(PropertyDetailActivity.this)
-            .setTitle("Schedule Inspection")
-            .setView(dialogView)
-            .setPositiveButton("Save", (dialogInterface, i) -> {
-                // disable dismiss dialog on click outside during saving
-                ((AlertDialog) dialogInterface).setCanceledOnTouchOutside(false);
-                // update to firebase
-                updateInspectionDateTime(() -> {
-                    // on success
-                    inspectionTimeTxt.setText((date != "" || time != "")
-                            ? formatDateTime(date, time)
-                            : NO_DATE_TIME_HINT
-                    );
-                    this.userProperty.setInspectionDate(date);
-                    this.userProperty.setInspectionTime(time);
-                }, () -> {
-                    // on error
-                    // enable dismiss dialog on click outside
-                    ((AlertDialog) dialogInterface).setCanceledOnTouchOutside(true);
-                });
+                .setTitle("Schedule Inspection")
+                .setView(dialogView)
+                .setPositiveButton("Save", (dialogInterface, i) -> {
+                    // disable dismiss dialog on click outside during saving
+                    ((AlertDialog) dialogInterface).setCanceledOnTouchOutside(false);
+                    // update to firebase
+                    updateInspectionDateTime(() -> {
+                        // on success
+                        inspectionTimeTxt.setText((date != "" || time != "")
+                                ? formatDateTime(date, time)
+                                : NO_DATE_TIME_HINT
+                        );
+                        this.userProperty.setInspectionDate(date);
+                        this.userProperty.setInspectionTime(time);
+                    }, () -> {
+                        // on error
+                        // enable dismiss dialog on click outside
+                        ((AlertDialog) dialogInterface).setCanceledOnTouchOutside(true);
+                    });
 
-            }).setNegativeButton("Cancel", (dialogInterface, i) -> {
-                // reset date and time
-                setInspectionDateTimeText();
-                dialogInterface.dismiss();
+                }).setNegativeButton("Cancel", (dialogInterface, i) -> {
+                    // reset date and time
+                    setInspectionDateTimeText();
+                    dialogInterface.dismiss();
 
-            }).create();
+                }).create();
 
         alertDialog.show();
 
@@ -190,16 +199,16 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 ? MaterialDatePicker.todayInUtcMilliseconds()
                 : DateTimeFormatter.localDateToLong(DateTimeFormatter.stringToDate(date));
         CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints
-            .Builder()
-            .setValidator(DateValidatorPointForward.now());
+                .Builder()
+                .setValidator(DateValidatorPointForward.now());
         MaterialDatePicker<Long> datePicker =
-            MaterialDatePicker
-                .Builder
-                .datePicker()
-                .setSelection(currentDate)
-                .setTitleText("Select Inspection date")
-                .setCalendarConstraints(constraintsBuilder.build())
-                .build();
+                MaterialDatePicker
+                        .Builder
+                        .datePicker()
+                        .setSelection(currentDate)
+                        .setTitleText("Select Inspection date")
+                        .setCalendarConstraints(constraintsBuilder.build())
+                        .build();
         // on click set date
         datePicker.addOnPositiveButtonClickListener(selection -> {
             String formattedDate = setInspectionDate(new Date(selection));
@@ -218,12 +227,12 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 ? LocalTime.now().getMinute()
                 : DateTimeFormatter.stringToTime(time).getMinute();
         MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
-            .setTimeFormat(TimeFormat.CLOCK_12H)
-            .setHour(currentHour)
-            .setMinute(currentMinute)
-            .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
-            .setTitleText("Select Inspection Time")
-            .build();
+                .setTimeFormat(TimeFormat.CLOCK_12H)
+                .setHour(currentHour)
+                .setMinute(currentMinute)
+                .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
+                .setTitleText("Select Inspection Time")
+                .build();
         timePicker.addOnPositiveButtonClickListener(selection -> {
             // on click set time
             String formattedTime = setInspectionTime(timePicker.getHour(), timePicker.getMinute());
@@ -246,33 +255,33 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         setLoading(true);
         FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
         firebaseFunctionsHelper.getPropertyById(propertyId)
-            .addOnSuccessListener(result -> {
-                Map<String, Object> resultObj = (Map<String, Object>) result;
-                // if success, set property data to UI
-                Log.i("get-property-by-id-success",
-                        "successfully get property data " +
-                        "and user collected property data");
-                property = (Property) resultObj.get("propertyData");
-                userProperty = (UserProperty) resultObj.get("userPropertyData");
-                // set ui
-                binding.detailAddressTxt.setText(property.getAddress());
-                setInspectionDateTimeText();
-                setCreatedAtTime();
-                setIsInspected();
-                setAmenitiesGroup(property);
-                setCarousel(property);
-                setLinkButton(property);
-                setDistances(userProperty.getDistances());
-                initMap();
-                setLoading(false);
-            })
-            .addOnFailureListener(e -> {
-                // if error happens, show error message and hide detail content
-                Log.e("get-property-by-id-fail", e.getMessage());
-                ScrollView detailContent = binding.detailContent;
-                detailContent.setVisibility(View.GONE);
-                setError(true);
-            });
+                .addOnSuccessListener(result -> {
+                    Map<String, Object> resultObj = (Map<String, Object>) result;
+                    // if success, set property data to UI
+                    Log.i("get-property-by-id-success",
+                            "successfully get property data " +
+                                    "and user collected property data");
+                    property = (Property) resultObj.get("propertyData");
+                    userProperty = (UserProperty) resultObj.get("userPropertyData");
+                    // set ui
+                    binding.detailAddressTxt.setText(property.getAddress());
+                    setInspectionDateTimeText();
+                    setCreatedAtTime();
+                    setIsInspected();
+                    setAmenitiesGroup(property);
+                    setCarousel(property);
+                    setLinkButton(property);
+                    setDistances(userProperty.getDistances());
+                    initMap();
+                    setLoading(false);
+                })
+                .addOnFailureListener(e -> {
+                    // if error happens, show error message and hide detail content
+                    Log.e("get-property-by-id-fail", e.getMessage());
+                    ScrollView detailContent = binding.detailContent;
+                    detailContent.setVisibility(View.GONE);
+                    setError(true);
+                });
     }
 
     private void setCreatedAtTime() {
@@ -398,6 +407,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 Log.i("update-inspected-failure", msg);
                 onSuccess.run();
             }
+
             @Override
             public void onError(String msg) {
                 String errorMsg = "Error: " + msg;
@@ -407,6 +417,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         });
 
     }
+
     /**
      * update inspection date and time to firebase
      * @param onSuccess callback on success
@@ -433,6 +444,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                         Log.i("add-property-success", msg);
                         onSuccess.run();
                     }
+
                     @Override
                     public void onError(String msg) {
                         String errorMsg = "Error: " + msg;
@@ -442,6 +454,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                     }
                 });
             }
+
             @Override
             public void onError(String msg) {
                 String errorMsg = "Error: " + msg;
@@ -456,8 +469,15 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
      * Add marker to map showing current property location
      * @param googleMap google map
      */
+    @SuppressLint("MissingPermission")
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        // request location permission
+        LocationSensor locationSensor = new LocationSensor(this, null);
+        if (!locationSensor.hasPermission(this)) {
+            locationSensor.requiresPermissions(this);
+        }
+        // render map
         if (property != null) {
             LatLng propertyLatLng = new LatLng(property.getLat(), property.getLng());
             // move camera to property location
@@ -465,6 +485,10 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(propertyLatLng, 13));
             // add property marker
             googleMap.addMarker(new MarkerOptions().position(propertyLatLng).title(property.getAddress()));
+            // add user Location
+            if (locationSensor.hasPermission(this)) {
+                googleMap.setMyLocationEnabled(true);
+            }
 
             // disable scrolling in scrollview when map is moving
             // reference: https://stackoverflow.com/questions/50505188/why-can-use-getparent-requ
@@ -473,19 +497,20 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 ScrollView detailContent = binding.detailContent;
                 detailContent.requestDisallowInterceptTouchEvent(true);
             });
+
             // enable scrolling scrollview when map is idle
             googleMap.setOnCameraIdleListener(() -> {
                 ScrollView detailContent = binding.detailContent;
                 detailContent.requestDisallowInterceptTouchEvent(false);
             });
 
+            // go to googlemap or web version on marker click
             googleMap.setOnMarkerClickListener(marker -> {
                 // on click open google map
                 //reference: https://developers.google.com/maps/documentation/urls/android-intents
                 // view property location on map
                 String address = property.getAddress();
-                 String uriString = "geo:0,0?q=" + Uri.encode(address);
-//                        String uriString = "google.navigation:?q=" + Uri.encode(address);
+                String uriString = "geo:0,0?q=" + Uri.encode(address);
                 Uri uri = Uri.parse(uriString);
                 Intent mapIntent = new Intent(android.content.Intent.ACTION_VIEW, uri);
                 // If Google Maps app is installed, open it. Else, redirect to web version.
@@ -503,7 +528,6 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 } finally {
                     return true;
                 }
-
             });
         }
         this.gMap = googleMap;
