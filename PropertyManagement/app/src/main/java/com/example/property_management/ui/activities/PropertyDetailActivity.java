@@ -32,6 +32,7 @@ import com.example.property_management.sensors.Calendar;
 import com.example.property_management.sensors.LocationSensor;
 import com.example.property_management.utils.DateTimeFormatter;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
+import com.example.property_management.utils.Helpers;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -545,27 +546,9 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             // go to googlemap or web version on marker click
             googleMap.setOnMarkerClickListener(marker -> {
                 // on click open google map
-                //reference: https://developers.google.com/maps/documentation/urls/android-intents
-                // view property location on map
                 String address = property.getAddress();
-                String uriString = "geo:0,0?q=" + Uri.encode(address);
-                Uri uri = Uri.parse(uriString);
-                Intent mapIntent = new Intent(android.content.Intent.ACTION_VIEW, uri);
-                // If Google Maps app is installed, open it. Else, redirect to web version.
-                try {
-                    Log.d("property-view-on-map", "URI: " + uriString);
-                    startActivity(mapIntent);
-
-                } catch (ActivityNotFoundException e) {
-                    // Google Maps app is not installed, redirect to web version
-                    Uri webUri = Uri.parse(
-                            "https://www.google.com/maps/search/?api=1&query=" +
-                            Uri.encode(address));
-                    Intent webIntent = new Intent(Intent.ACTION_VIEW, webUri);
-                    startActivity(webIntent);
-                } finally {
-                    return true;
-                }
+                Helpers.openInGoogleMap(address, this);
+                return true;
             });
         }
         this.gMap = googleMap;
