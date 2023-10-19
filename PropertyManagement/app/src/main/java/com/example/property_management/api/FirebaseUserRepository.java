@@ -44,8 +44,6 @@ public class FirebaseUserRepository {
     }
     public void addUser(User user, AddUserCallback callback) {
         Map<String, Object> userPayload = new HashMap<>();
-        userPayload.put("userName", user.getUserName());
-        userPayload.put("userEmail", user.getUserEmail());
         db.collection("users")
                 .document(user.getUserId())
                 .set(userPayload)
@@ -230,9 +228,9 @@ public class FirebaseUserRepository {
             public void onComplete(Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
                     List<String> docIds = new ArrayList<>();
-                    HashMap<String, UserProperty> properties = task.getResult().toObject(User.class).getProperties();
-                    if (properties != null && !properties.isEmpty()) {
-                        for (String docId : properties.keySet()) {
+                    HashMap<String, UserProperty> userProperties = task.getResult().toObject(User.class).getProperties();
+                    if (userProperties != null && !userProperties.isEmpty()) {
+                        for (String docId : userProperties.keySet()) {
                             docIds.add(docId);
                         }
                     }
@@ -248,14 +246,19 @@ public class FirebaseUserRepository {
                                             if (task.isSuccessful()) {
                                                 ArrayList<Property> properties = new ArrayList<>();
                                                 for (QueryDocumentSnapshot document : task.getResult()) {
-                                                    Log.d("get-all-user-properties-success", document.getId() + " => " + document.getData());
+                                                    Log.d("get-all-user-properties-success",
+                                                            document.getId() + " => " + document.getData());
                                                     Property property = document.toObject(Property.class);
                                                     property.setPropertyId(document.getId());
+                                                    property.setInspected(userProperties.get(document.getId()).getInspected());
+                                                    property.setCreatedAt(userProperties.get(document.getId()).getCreatedAt());
                                                     properties.add(property);
                                                 }
                                                 callback.onSuccess(properties);
                                             } else {
-                                                Log.d("get-all-user-properties-failure", "Error getting all user properties: ", task.getException());
+                                                Log.d("get-all-user-properties-failure",
+                                                        "Error getting all user properties: ",
+                                                        task.getException());
                                                 callback.onError("Error getting all user properties");
                                             }
                                         }

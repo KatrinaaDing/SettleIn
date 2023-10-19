@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.property_management.R;
 import com.example.property_management.data.DistanceInfo;
+import com.example.property_management.utils.Helpers;
 
 import java.util.ArrayList;
 
@@ -34,12 +35,18 @@ public class DistanceAdapter extends RecyclerView.Adapter<DistanceAdapter.Distan
 
     @Override
     public void onBindViewHolder(@NonNull DistanceViewHolder holder, int position) {
+        String address = distanceInfoList.get(position).getBusinessName();
 
-        holder.businessName.setText(distanceInfoList.get(position).getBusinessName());
+        holder.businessName.setText(address);
         holder.distance.setText(String.valueOf(distanceInfoList.get(position).getDistance()));
         holder.driving.setText(distanceInfoList.get(position).getDriving());
         holder.transit.setText(distanceInfoList.get(position).getTransit());
         holder.walking.setText(distanceInfoList.get(position).getWalking());
+
+        // open in google map when click on business name
+        holder.businessName.setOnClickListener(view -> {
+            Helpers.openInGoogleMap(address, context);
+        });
     }
 
     @Override

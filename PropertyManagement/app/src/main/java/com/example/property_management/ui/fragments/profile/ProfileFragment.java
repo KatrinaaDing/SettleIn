@@ -52,12 +52,16 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class ProfileFragment extends Fragment {
+public class ProfileFragment extends Fragment implements EditProfileDialogFragment.OnProfileUpdatedListener{
 
     private FragmentProfileBinding binding;
     private AppCompatActivity activity;
     PlacesClient placesClient;
     String selectedAddress = "";
+    String username;
+    String email;
+    String uid;
+    FirebaseUser user;
     CustomListRecyclerViewAdapter interestedLocationsAdapter;
     CustomListRecyclerViewAdapter interestedFacilitiesAdapter;
     User currentUser;
@@ -77,7 +81,7 @@ public class ProfileFragment extends Fragment {
 //        profileViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
 
         // ========================= Components ==========================
-        ImageButton editBtn = binding.editBtn;
+        Button editBtn = binding.editBtn;
         ImageButton addFacilityBtn = binding.addFacilityBtn;
         Button logoutBtn = binding.logoutBtn;
         TextView userEmail = binding.userEmail;
@@ -93,6 +97,8 @@ public class ProfileFragment extends Fragment {
         interestedFacilitiesAdapter = new CustomListRecyclerViewAdapter(new ArrayList<>());
         interestedFacilitiesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         interestedFacilitiesRecyclerView.setAdapter(interestedFacilitiesAdapter);
+
+        getUserInfo();
 
         // ===== Add Location Dialog =====
         ImageButton addLocationBtn = binding.addLocationBtn;
@@ -259,7 +265,6 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-//        getUserInfo();
     }
     @Override
     public void onDestroyView() {
@@ -277,16 +282,19 @@ public class ProfileFragment extends Fragment {
 
     private void getUserInfo() {
         FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(activity);
-        final FirebaseUser[] user = {firebaseAuthHelper.getCurrentUser()};
-        assert user[0] != null;
-        binding.userEmail.setText("Email: " + user[0].getEmail());
-        binding.userId.setText("User ID: " + user[0].getUid());
+        user = firebaseAuthHelper.getCurrentUser();
+        assert user != null;
+        email = user.getEmail();
+        uid = user.getUid();
+        username = user.getDisplayName();
+        binding.userEmail.setText("Email: " + email);
+        binding.userId.setText("User ID: " + uid);
         binding.userId.setVisibility(View.INVISIBLE);
+        binding.userName.setText(username);
         FirebaseUserRepository db = new FirebaseUserRepository();
-        db.getUserInfoById(user[0].getUid(), new GetUserInfoByIdCallback() {
+        db.getUserInfoById(user.getUid(), new GetUserInfoByIdCallback() {
             @Override
             public void onSuccess(User userObj) {
-                binding.userName.setText(userObj.getUserName());
                 ArrayList<String> userInterestedLocations = userObj.getInterestedLocations();
                 if (userInterestedLocations != null && !userInterestedLocations.isEmpty()) {
                     interestedLocationsAdapter.updateData(userInterestedLocations);
@@ -307,13 +315,24 @@ public class ProfileFragment extends Fragment {
     }
 
     public void editProfile() {
-        DialogFragment dialog = new EditProfileDialogFragment();
+        EditProfileDialogFragment dialog = new EditProfileDialogFragment(user);
+        dialog.setOnProfileUpdatedListener(this);
         dialog.show(getChildFragmentManager(), "EditProfileDialogFragment");
     }
 
     public void addFacility() {
         DialogFragment dialog = new AddNewFacilityDialogFragment();
         dialog.show(getChildFragmentManager(), "AddNewFacilityDialogFragment");
+    }
+
+    @Override
+    public void onProfileUpdated(String newUsername, String newEmail) {
+
+        TextView UsernameTextView = getView().findViewById(R.id.userName);
+        UsernameTextView.setText(newUsername);
+
+        TextView emailTextView = getView().findViewById(R.id.userEmail);
+        emailTextView.setText(newEmail);
     }
 
     // params: propertyIds: all the property ids of the user
@@ -325,10 +344,11 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onSuccess(String msg) {
                 // redirect to main activity on success
-                new BasicSnackbar(getActivity().findViewById(android.R.id.content),
-                        "Success: Deleted interested " + interest_, "success");
+                new BasicSnackbar(getActivity().findViewById(android.R.id.content), msg, "success");
+//                        "Success: Deleted interested " + interest_, "success");
                 // do more actions
             }
+
             @Override
             public void onError(String msg) {
                 String errorMsg = "Error: " + msg;

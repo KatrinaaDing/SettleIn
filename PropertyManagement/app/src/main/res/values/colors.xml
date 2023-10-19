@@ -13,4 +13,6 @@
     <color name="warning">#FFEB3B</color>
     <color name="grey">#767676</color>
     <color name="lightGrey">#C5C5C5</color>
+    <color name="extraLightGrey">#85EDEDED</color>
+    <color name="blue">#1060C1</color>
 </resources>

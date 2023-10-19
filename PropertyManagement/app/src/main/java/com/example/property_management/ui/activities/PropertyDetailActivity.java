@@ -1,11 +1,12 @@
 package com.example.property_management.ui.activities;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
-import android.content.DialogInterface;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,28 +15,31 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.property_management.api.FirebaseAuthHelper;
 import com.example.property_management.api.FirebaseFunctionsHelper;
-import com.example.property_management.api.FirebasePropertyRepository;
 import com.example.property_management.api.FirebaseUserRepository;
-import com.example.property_management.callbacks.GetPropertyByIdCallback;
 import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.Property;
 import com.example.property_management.data.UserProperty;
-import com.example.property_management.ui.fragments.property.AmenitiesGroup;
-import com.example.property_management.utils.Helpers;
+import com.example.property_management.sensors.Calendar;
+import com.example.property_management.sensors.LocationSensor;
+import com.example.property_management.utils.DateTimeFormatter;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
+import com.example.property_management.utils.Helpers;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.example.property_management.data.DistanceInfo;
 import com.example.property_management.R;
@@ -48,18 +52,18 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 import com.google.firebase.auth.FirebaseUser;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
+
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Date;
-import java.util.Locale;
 import java.util.Map;
 
 public class PropertyDetailActivity extends AppCompatActivity implements OnMapReadyCallback {
     private ActivityPropertyDetailBinding binding;
-
+    // add calendar event flag
+    private boolean firstTimeAddingCalendarEvent = false;
+    // property data
     private String userId;
     private String propertyId;
     private Property property;
@@ -121,7 +125,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         }
     }
 
-    private void setDistanceRecycler(ArrayList<DistanceInfo> distanceInfoList){
+    private void setDistanceRecycler(ArrayList<DistanceInfo> distanceInfoList) {
         distanceRecycler = binding.distanceRecycler;
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
         distanceRecycler.setLayoutManager(layoutManager);
@@ -149,7 +153,6 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         TextView dateTxt = dialogView.findViewById(R.id.dateTxt);
         TextView timeTxt = dialogView.findViewById(R.id.timeTxt);
         TextView inspectionTimeTxt = binding.detailInspectionTimeTxt;
-        Log.i("date-time", date + time);
 
         // display date and time
         if (date == null || date.equals(""))
@@ -163,47 +166,51 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
 
         // ===== dialog =====
         AlertDialog alertDialog = new MaterialAlertDialogBuilder(PropertyDetailActivity.this)
-            .setTitle("Schedule Inspection")
-            .setView(dialogView)
-            .setPositiveButton("Save", (dialogInterface, i) -> {
-                // disable dismiss dialog on click outside during saving
-                ((AlertDialog) dialogInterface).setCanceledOnTouchOutside(false);
-                this.setTitle("Saving...");
-                // update to firebase
-                updateInspectionDateTime(() -> {
-                    // on success
-                    inspectionTimeTxt.setText((date != "" || time != "")
-                            ? formatDateTime(date, time)
-                            : NO_DATE_TIME_HINT
-                    );
-                    this.userProperty.setInspectionDate(date == "" ? null : Helpers.stringToDate(date));
-                    this.userProperty.setInspectionTime(time == "" ? null : Helpers.stringToTime(time));
-                }, () -> {
-                    // on error
-                    // enable dismiss dialog on click outside
-                    ((AlertDialog) dialogInterface).setCanceledOnTouchOutside(true);
-                });
+                .setTitle("Schedule Inspection")
+                .setView(dialogView)
+                .setPositiveButton("Save", (dialogInterface, i) -> {
+                    // disable dismiss dialog on click outside during saving
+                    ((AlertDialog) dialogInterface).setCanceledOnTouchOutside(false);
+                    // update to firebase
+                    updateInspectionDateTime(() -> {
+                        // on success
+                        inspectionTimeTxt.setText((date != "" || time != "")
+                                ? formatDateTime(date, time)
+                                : NO_DATE_TIME_HINT
+                        );
+                        setAddToCalendarButton();
+                        this.userProperty.setInspectionDate(date);
+                        this.userProperty.setInspectionTime(time);
+                    }, () -> {
+                        // on error
+                        // enable dismiss dialog on click outside
+                        ((AlertDialog) dialogInterface).setCanceledOnTouchOutside(true);
+                    });
 
-            }).setNegativeButton("Cancel", (dialogInterface, i) -> {
-                // reset date and time
-                setInspectionDateTimeText();
-                dialogInterface.dismiss();
+                }).setNegativeButton("Cancel", (dialogInterface, i) -> {
+                    // reset date and time
+                    setInspectionDateTimeText();
+                    dialogInterface.dismiss();
 
-            }).create();
+                }).create();
 
         alertDialog.show();
 
         // ===== datePicker =====
+        Long currentDate = date == ""
+                ? MaterialDatePicker.todayInUtcMilliseconds()
+                : DateTimeFormatter.localDateToMillis(DateTimeFormatter.stringToDate(date));
         CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints
-            .Builder()
-            .setValidator(DateValidatorPointForward.now());
+                .Builder()
+                .setValidator(DateValidatorPointForward.now());
         MaterialDatePicker<Long> datePicker =
-            MaterialDatePicker
-                .Builder
-                .datePicker()
-                .setTitleText("Select Inspection date")
-                .setCalendarConstraints(constraintsBuilder.build())
-                .build();
+                MaterialDatePicker
+                        .Builder
+                        .datePicker()
+                        .setSelection(currentDate)
+                        .setTitleText("Select Inspection date")
+                        .setCalendarConstraints(constraintsBuilder.build())
+                        .build();
         // on click set date
         datePicker.addOnPositiveButtonClickListener(selection -> {
             String formattedDate = setInspectionDate(new Date(selection));
@@ -213,14 +220,21 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         addDateBtn.setOnClickListener(v -> {
             datePicker.show(getSupportFragmentManager(), "date_picker");
         });
+        Log.i("date-time", "reseting date time to" + this.date + "," + this.time);
         // ===== timePicker =====
+        int currentHour = time == ""
+                ? LocalTime.now().getHour()
+                : DateTimeFormatter.stringToTime(time).getHour();
+        int currentMinute = time == ""
+                ? LocalTime.now().getMinute()
+                : DateTimeFormatter.stringToTime(time).getMinute();
         MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
-            .setTimeFormat(TimeFormat.CLOCK_12H)
-            .setHour(12)
-            .setMinute(0)
-            .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
-            .setTitleText("Select Inspection Time")
-            .build();
+                .setTimeFormat(TimeFormat.CLOCK_12H)
+                .setHour(currentHour)
+                .setMinute(currentMinute)
+                .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
+                .setTitleText("Select Inspection Time")
+                .build();
         timePicker.addOnPositiveButtonClickListener(selection -> {
             // on click set time
             String formattedTime = setInspectionTime(timePicker.getHour(), timePicker.getMinute());
@@ -234,8 +248,8 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             // on click reset date and time
             dateTxt.setText(NO_DATE_HINT);
             timeTxt.setText(NO_TIME_HINT);
-            date = "";
-            time = "";
+            this.date = "";
+            this.time = "";
         });
     }
 
@@ -243,32 +257,39 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         setLoading(true);
         FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
         firebaseFunctionsHelper.getPropertyById(propertyId)
-            .addOnSuccessListener(result -> {
-                Map<String, Object> resultObj = (Map<String, Object>) result;
-                // if success, set property data to UI
-                Log.i("get-property-by-id-success",
-                        "successfully get property data " +
-                        "and user collected property data");
-                property = (Property) resultObj.get("propertyData");
-                userProperty = (UserProperty) resultObj.get("userPropertyData");
-                // set ui
-                binding.detailAddressTxt.setText(property.getAddress());
-                setInspectionDateTimeText();
-                setIsInspected();
-                setAmenitiesGroup(property);
-                setCarousel(property);
-                setLinkButton(property);
-                setDistances(userProperty.getDistances());
-                initMap();
-                setLoading(false);
-            })
-            .addOnFailureListener(e -> {
-                // if error happens, show error message and hide detail content
-                Log.e("get-property-by-id-fail", e.getMessage());
-                ScrollView detailContent = binding.detailContent;
-                detailContent.setVisibility(View.GONE);
-                setError(true);
-            });
+                .addOnSuccessListener(result -> {
+                    Map<String, Object> resultObj = (Map<String, Object>) result;
+                    // if success, set property data to UI
+                    Log.i("get-property-by-id-success",
+                            "successfully get property data " +
+                                    "and user collected property data");
+                    property = (Property) resultObj.get("propertyData");
+                    userProperty = (UserProperty) resultObj.get("userPropertyData");
+                    // set ui
+                    binding.detailAddressTxt.setText(property.getAddress());
+                    setInspectionDateTimeText();
+                    setCreatedAtTime();
+                    setAddToCalendarButton();
+                    setIsInspected();
+                    setAmenitiesGroup(property);
+                    setCarousel(property);
+                    setLinkButton(property);
+                    setDistances(userProperty.getDistances());
+                    initMap();
+                    setLoading(false);
+                })
+                .addOnFailureListener(e -> {
+                    // if error happens, show error message and hide detail content
+                    Log.e("get-property-by-id-fail", e.getMessage());
+                    ScrollView detailContent = binding.detailContent;
+                    detailContent.setVisibility(View.GONE);
+                    setError(true);
+                });
+    }
+
+    private void setCreatedAtTime() {
+        TextView createdAtText = findViewById(R.id.createdAtText);
+        createdAtText.setText("Added at " + DateTimeFormatter.dateTimeFormatter(userProperty.getCreatedAt()));
     }
 
     private void setIsInspected() {
@@ -290,27 +311,21 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         if (userProperty == null)
             return;
         // get fetched inspection date and time
-        LocalDate date = userProperty.getInspectionDate();
-        LocalTime time = userProperty.getInspectionTime();
+        String date = userProperty.getInspectionDate();
+        String time = userProperty.getInspectionTime();
         // get ui components
         Button editInspectionTimeBtn = binding.editInspectionTimeBtn;
         ConstraintLayout inspectionTimeLayout = binding.inspectionTimeLayout;
         TextView inspectionTimeTxt = binding.detailInspectionTimeTxt;
-
-        if (date != null || time != null) {
-            String formattedDate = date == null ? "" : Helpers.dateFormatter(date);
-            String formattedTime = time == null ? "" : Helpers.timeFormatter(time.getHour(), time.getMinute());
-            // set field
-            this.date = formattedDate;
-            this.time = formattedTime;
-            // set ui
-            inspectionTimeTxt.setText(formatDateTime(formattedDate, formattedTime));
+        // set field
+        this.date = date;
+        this.time = time;
+        // set ui
+        if (!date.equals("") || !time.equals("")) {
+            inspectionTimeTxt.setText(formatDateTime(date, time));
             inspectionTimeLayout.setVisibility(View.VISIBLE);
         } else {
             inspectionTimeTxt.setText(NO_DATE_TIME_HINT);
-            this.date = "";
-            this.time = "";
-
         }
         Log.i("date-time", "reseting date time to" + this.date + "," + this.time);
         editInspectionTimeBtn.setOnClickListener(v -> showCustomDialog());
@@ -347,6 +362,12 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                             ActivityOptions.makeSceneTransitionAnimation(PropertyDetailActivity.this, imageView, "image").toBundle());
                 }
             });
+            // if only one image, set linear layout to center the image
+            if (adapter.getItemCount() == 1) {
+                LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this,
+                        LinearLayoutManager.HORIZONTAL, false);
+                recyclerView.setLayoutManager(linearLayoutManager);
+            }
             recyclerView.setAdapter(adapter);
         }
     }
@@ -374,6 +395,43 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     }
 
     /**
+     * set add to calendar button if inspection date (and time if any) is added
+     */
+    private void setAddToCalendarButton() {
+        MaterialButton addToCalendarBtn = findViewById(R.id.addToCalendarBtn);
+        Calendar calendar = new Calendar(this, null);
+        // show add to calendar button if date is set
+        if (date != null && !date.equals("")) {
+            addToCalendarBtn.setVisibility(View.VISIBLE);
+        }
+        addToCalendarBtn.setOnClickListener(view -> {
+            // if first time adding calendar event, check calendar permission
+            if (!calendar.getHasPermission(this)) {
+                firstTimeAddingCalendarEvent = true;
+                calendar.requiresPermissions();
+            } else {
+                firstTimeAddingCalendarEvent = false;
+                addInspectionToCalendar();
+            }
+
+        });
+    }
+
+    /**
+     * add inspection event to calendar
+     */
+    private void addInspectionToCalendar() {
+        Calendar calendar = new Calendar(this, null);
+        String address = property.getAddress();
+        String title = "Inspection at " + address;
+        String description = "Inspection at " + address + " on " + date + " " + time;
+        try {
+            calendar.createEvent(date, time, 30, title, description, address);
+        } catch (Exception e) {
+            new BasicSnackbar(findViewById(android.R.id.content), e.getMessage(), "error");
+        }
+    }
+    /**
      * update isInspected status to firebase
      * @param isChecked checkbox status
      * @param onSuccess callback on success
@@ -389,6 +447,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 Log.i("update-inspected-failure", msg);
                 onSuccess.run();
             }
+
             @Override
             public void onError(String msg) {
                 String errorMsg = "Error: " + msg;
@@ -398,6 +457,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         });
 
     }
+
     /**
      * update inspection date and time to firebase
      * @param onSuccess callback on success
@@ -424,6 +484,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                         Log.i("add-property-success", msg);
                         onSuccess.run();
                     }
+
                     @Override
                     public void onError(String msg) {
                         String errorMsg = "Error: " + msg;
@@ -433,6 +494,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                     }
                 });
             }
+
             @Override
             public void onError(String msg) {
                 String errorMsg = "Error: " + msg;
@@ -447,8 +509,14 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
      * Add marker to map showing current property location
      * @param googleMap google map
      */
+    @SuppressLint("MissingPermission")
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        // request location permission
+        LocationSensor locationSensor = new LocationSensor(this, null);
+        locationSensor.requiresPermissions(this);
+
+        // render map
         if (property != null) {
             LatLng propertyLatLng = new LatLng(property.getLat(), property.getLng());
             // move camera to property location
@@ -456,6 +524,10 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(propertyLatLng, 13));
             // add property marker
             googleMap.addMarker(new MarkerOptions().position(propertyLatLng).title(property.getAddress()));
+            // add user Location
+            if (locationSensor.hasPermission(this)) {
+                googleMap.setMyLocationEnabled(true);
+            }
 
             // disable scrolling in scrollview when map is moving
             // reference: https://stackoverflow.com/questions/50505188/why-can-use-getparent-requ
@@ -464,14 +536,46 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 ScrollView detailContent = binding.detailContent;
                 detailContent.requestDisallowInterceptTouchEvent(true);
             });
+
             // enable scrolling scrollview when map is idle
             googleMap.setOnCameraIdleListener(() -> {
                 ScrollView detailContent = binding.detailContent;
                 detailContent.requestDisallowInterceptTouchEvent(false);
             });
+
+            // go to googlemap or web version on marker click
+            googleMap.setOnMarkerClickListener(marker -> {
+                // on click open google map
+                String address = property.getAddress();
+                Helpers.openInGoogleMap(address, this);
+                return true;
+            });
         }
         this.gMap = googleMap;
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        Calendar calendar = new Calendar(this, null);
+        // calendar permission granted asynchroneously, need to check before adding event
+        if (calendar.getMyCalendarRequestCode() == requestCode) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted
+                if (firstTimeAddingCalendarEvent) {
+                    // if first time permission granted, need to add event here
+                    addInspectionToCalendar();
+                }
+            } else {
+                // Permission denied
+                new BasicSnackbar(findViewById(android.R.id.content),
+                        "Permission denied. Please go to settings and enable calendar permission.",
+                        "error");
+            }
+        }
+    }
+
 
     private String formatDateTime(String date, String time) {
         boolean noDate = date == null || date.equals("");
@@ -494,13 +598,13 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
 
     private String setInspectionTime(int hour, int minute) {
         // store date in format for easily parsing by LocalTime
-        time = Helpers.timeFormatter(hour, minute);
+        time = DateTimeFormatter.timeFormatter(hour, minute);
         return time;
     }
 
     private String setInspectionDate(Date newDate) {
         // display more sensible date format
-        date = Helpers.dateFormatter(newDate);
+        date = DateTimeFormatter.dateFormatter(newDate);
         return date;
     }
 

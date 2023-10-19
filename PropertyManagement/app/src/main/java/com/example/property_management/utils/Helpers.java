@@ -1,17 +1,13 @@
 package com.example.property_management.utils;
 
-
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.Locale;
 
 public class Helpers {
 
@@ -27,34 +23,29 @@ public class Helpers {
         }
     }
 
-    public static String dateFormatter(Date date) {
-        if (date == null) return "";
-        String formattedDate = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(date);
-        return formattedDate;
-    }
+    /**
+     * Open the location in Google Map
+     * @param address the address of the location
+     * @param context the context of the activity
+     */
+    public static void openInGoogleMap(String address, Context context) {
+        //reference: https://developers.google.com/maps/documentation/urls/android-intents
+        // view location on map
+        String uriString = "geo:0,0?q=" + Uri.encode(address);
+        Uri uri = Uri.parse(uriString);
+        Intent mapIntent = new Intent(android.content.Intent.ACTION_VIEW, uri);
+        // If Google Maps app is installed, open it. Else, redirect to web version.
+        try {
+            Log.d("property-view-on-map", "URI: " + uriString);
+            context.startActivity(mapIntent);
 
-    public static String dateFormatter(LocalDate date) {
-        if (date == null) return "";
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.getDefault());
-        String formattedDate = date.format(formatter);
-        return formattedDate;
+        } catch (ActivityNotFoundException e) {
+            // Google Maps app is not installed, redirect to web version
+            Uri webUri = Uri.parse(
+                    "https://www.google.com/maps/search/?api=1&query=" +
+                            Uri.encode(address));
+            Intent webIntent = new Intent(Intent.ACTION_VIEW, webUri);
+            context.startActivity(webIntent);
+        }
     }
-
-    public static String timeFormatter(int hour, int minute) {
-        String formattedTime = String.format(Locale.getDefault(), "%02d:%02d", hour, minute);
-        return formattedTime;
-    }
-
-    public static LocalDate stringToDate(String date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.getDefault());
-        LocalDate formattedDate = LocalDate.parse(date, formatter);
-        return formattedDate;
-    }
-
-    public static LocalTime stringToTime(String time) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault());
-        LocalTime formattedTime = LocalTime.parse(time, formatter);
-        return formattedTime;
-    }
-
 }

@@ -15,9 +15,9 @@ import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.AddUserCallback;
 import com.example.property_management.callbacks.AuthCallback;
 import com.example.property_management.data.User;
-import com.example.property_management.data.UserProperty;
 import com.example.property_management.databinding.ActivityRegisterBinding;
 import com.example.property_management.utils.EmailValidator;
+import com.example.property_management.utils.DateTimeFormatter;
 import com.example.property_management.utils.Helpers;
 import com.example.property_management.utils.PasswordValidator;
 import com.google.android.material.textfield.TextInputLayout;
@@ -171,7 +171,7 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onSuccess(FirebaseUser user) {
                 // add created user to firestore
-                User newUserObj = new User(user.getUid(), "New User", email, new ArrayList<>(), new ArrayList<>(), new HashMap<>());
+                User newUserObj = new User(user.getUid(), new ArrayList<>(), new ArrayList<>(), new HashMap<>());
                 FirebaseUserRepository firebaseUserRepository = new FirebaseUserRepository();
                 firebaseUserRepository.addUser(newUserObj, new AddUserCallback() {
                     @Override
@@ -187,10 +187,12 @@ public class RegisterActivity extends AppCompatActivity {
                         System.out.println("Error: " + msg);
                     }
                 });
+                firebaseAuthHelper.addUsernameToFirestore(user.getUid(), "New User");
             }
             @Override
             public void onFailure(Exception e) {}
         });
 
     }
+
 }
