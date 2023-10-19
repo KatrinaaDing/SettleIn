@@ -3,6 +3,7 @@ package com.example.property_management.data;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 public class UserProperty {
@@ -12,12 +13,15 @@ public class UserProperty {
     private String inspectionTime;
     private String notes;
     private int price;
+    private Date createdAt;
     private HashMap<String, DistanceInfo> distances;
     private HashMap<String, RoomData> inspectedData;
 
     public UserProperty() {}
 
-    public UserProperty(String propertyId, boolean inspected, String inspectionDate, String inspectionTime, String notes, HashMap<String, DistanceInfo> distances, HashMap<String, RoomData> inspectedData, int price) {
+    public UserProperty(String propertyId, boolean inspected, String inspectionDate,
+                        String inspectionTime, String notes, HashMap<String, DistanceInfo> distances,
+                        HashMap<String, RoomData> inspectedData, int price, Date createdAt) {
         this.propertyId = propertyId;
         this.inspected = inspected;
         this.inspectionDate = inspectionDate;
@@ -26,6 +30,7 @@ public class UserProperty {
         this.price = price;
         this.distances = distances;
         this.inspectedData = inspectedData;
+        this.createdAt = createdAt;
     }
 
     public String getPropertyId() { return propertyId; }
@@ -61,4 +66,7 @@ public class UserProperty {
     public void setInspectedData(HashMap<String, RoomData> inspectedData) { this.inspectedData = inspectedData; }
     public boolean getInspected() { return inspected; }
     public void setInspected() { this.inspected = inspected; }
+    public Date getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
+
 }

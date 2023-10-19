@@ -1,6 +1,8 @@
 package com.example.property_management.data;
 
+import java.security.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,4 +73,5 @@ public class NewProperty {
     public int getPrice() { return price; }
 
     public void setPrice(int price) { this.price = price; }
+
 }

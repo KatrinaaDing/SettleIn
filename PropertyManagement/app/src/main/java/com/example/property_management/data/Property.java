@@ -1,6 +1,7 @@
 package com.example.property_management.data;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 public class Property {
@@ -17,6 +18,7 @@ public class Property {
     private int price;
     private ArrayList<String> images;
     private boolean inspected;
+    private Date createdAt;
 
     public Property() {};
     public Property(String propertyId, String href, String address, double lat, double lng, int numBedrooms, int numBathrooms, int numParking, HashMap<String, RoomData> propertyData, ArrayList<String> images, int price) {
@@ -76,6 +78,12 @@ public class Property {
     public int getPrice() { return price; }
 
     public void setPrice(int price) { this.price = price; }
+
     public void setInspected(boolean isInspected) { this.inspected = isInspected; }
+
     public boolean getInspected() { return inspected; }
+
+    public Date getCreatedAt() { return createdAt; }
+
+    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
 }

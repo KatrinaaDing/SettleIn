@@ -2,6 +2,7 @@ package com.example.property_management.utils;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -12,6 +13,8 @@ import java.util.Locale;
  */
 public class DateTimeFormatter {
 
+    final static ZoneId zoneId = ZoneId.of("UTC");
+
     /**
      * Format date object to "dd MMM yyyy"
      * @param date Date object
@@ -20,6 +23,12 @@ public class DateTimeFormatter {
     public static String dateFormatter(Date date) {
         if (date == null) return "";
         String formattedDate = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(date);
+        return formattedDate;
+    }
+
+    public static String dateTimeFormatter(Date date) {
+        if (date == null) return "";
+        String formattedDate = new SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault()).format(date);
         return formattedDate;
     }
 
@@ -52,6 +61,7 @@ public class DateTimeFormatter {
      * @return LocalDate object
      */
     public static LocalDate stringToDate(String date) {
+        if (date == null || date.equals("")) return null;
         java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.getDefault());
         LocalDate formattedDate = LocalDate.parse(date, formatter);
         return formattedDate;
@@ -63,6 +73,7 @@ public class DateTimeFormatter {
      * @return LocalTime object
      */
     public static LocalTime stringToTime(String time) {
+        if (time == null || time.equals("")) return null;
         java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault());
         LocalTime formattedTime = LocalTime.parse(time, formatter);
         return formattedTime;
@@ -75,9 +86,19 @@ public class DateTimeFormatter {
      * @param date LocalDate
      * @return long epoch millis in long
      */
-    public static long localDateToLong(LocalDate date) {
-        ZoneId zoneId = ZoneId.of("UTC");
+    public static long localDateToMillis(LocalDate date) {
         return date.atStartOfDay(zoneId).toInstant().toEpochMilli();
     }
+
+    /**
+     * get epoch millis from LocalDateTime.
+     * @param datetime LocalDateTime
+     * @return long epoch millis in long
+     */
+    public static long localDateToMillis(LocalDateTime datetime) {
+        return datetime.atZone(zoneId).toInstant().toEpochMilli();
+    }
+
+
 
 }

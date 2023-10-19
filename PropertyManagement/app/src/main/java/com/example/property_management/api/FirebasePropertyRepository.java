@@ -35,10 +35,12 @@ public class FirebasePropertyRepository {
     }
 
     /**
-     * Check if the property exists in the db, if not exists, then add the property
-     * To be added successfully, <address + href> must be unique
-     * @param newProperty
-     * @param callback
+     * Check if the property exists in the db. If not exists, then add the property
+     * To be added successfully, address and href must be unique; if a same property
+     * exists, return the document id of the property.
+     * "Same property" is defined as having the same address or href.
+     * @param newProperty the new property to be added
+     * @param callback callback to handle success and error
      */
     public void addProperty(NewProperty newProperty, AddPropertyCallback callback) {
         // check if the property exists by having the same address or href

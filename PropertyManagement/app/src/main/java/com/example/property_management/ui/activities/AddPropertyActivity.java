@@ -29,7 +29,9 @@ import com.example.property_management.utils.UrlValidator;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.security.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -265,7 +267,8 @@ public class AddPropertyActivity extends AppCompatActivity {
             url = null;
         }
         NewProperty newProperty = new NewProperty(url, bedroomNumber, bathroomNumber, parkingNumber,
-                autocompleteFragment.getSelectedAddress(), autocompleteFragment.getLat(), autocompleteFragment.getLng(), price, images);
+                autocompleteFragment.getSelectedAddress(), autocompleteFragment.getLat(),
+                autocompleteFragment.getLng(), price, images);
         FirebasePropertyRepository db = new FirebasePropertyRepository();
         db.addProperty(newProperty, new AddPropertyCallback() {
             @Override
@@ -403,6 +406,7 @@ public class AddPropertyActivity extends AppCompatActivity {
         Log.i("add-user-property", "updating user document" + propertyId);
         // create object to update user document
         HashMap<String, Object> propertyPayload = newProperty.toUpdateUserObject(propertyId);
+        propertyPayload.put("createdAt", new Date());
         HashMap<String, Object> userUpdatePayload = new HashMap<>();
         userUpdatePayload.put("properties." + propertyId, propertyPayload);
         // get user id

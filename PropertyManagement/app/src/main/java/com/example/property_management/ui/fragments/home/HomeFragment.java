@@ -1,15 +1,12 @@
 package com.example.property_management.ui.fragments.home;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -18,24 +15,20 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.property_management.R;
 import com.example.property_management.adapters.PropertyCardAdapter;
-import com.example.property_management.api.FirebaseFunctionsHelper;
-import com.example.property_management.api.FirebasePropertyRepository;
 import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.GetAllUserPropertiesCallback;
 import com.example.property_management.data.Property;
 import com.example.property_management.databinding.FragmentHomeBinding;
-import com.example.property_management.ui.activities.PropertyDetailActivity;
-import com.example.property_management.ui.activities.TestActivity;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 public class HomeFragment extends Fragment {
@@ -43,6 +36,8 @@ public class HomeFragment extends Fragment {
     private FragmentHomeBinding binding;
 
     private ArrayList<Property> allProperties;
+
+    private boolean sortAscending = true;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -83,9 +78,9 @@ public class HomeFragment extends Fragment {
      */
     private void initFilterMenu() {
         TextInputLayout filterMenu = binding.filterMenu;
-        AutoCompleteTextView autoCompleteTextView = (AutoCompleteTextView) filterMenu.getEditText();
-        autoCompleteTextView.setText("All", false);
-        autoCompleteTextView.setOnItemClickListener((adapterView, view, i, l) -> {
+        AutoCompleteTextView filterTypeMenu = (AutoCompleteTextView) filterMenu.getEditText();
+        filterTypeMenu.setText("All", false);
+        filterTypeMenu.setOnItemClickListener((adapterView, view, i, l) -> {
             String selected = (String) adapterView.getItemAtPosition(i);
 
             if (selected.equals("All")) {
@@ -98,15 +93,82 @@ public class HomeFragment extends Fragment {
                 ArrayList<Property> filteredProperties = allProperties.stream()
                         .filter(property -> property.getInspected() == filterIsInspected)
                         .collect(Collectors.toCollection(ArrayList::new));
-
+                // render filtered properties
                 renderProperties(filteredProperties);
             }
         });
     }
 
+    /**
+     * Initialize the sort menu
+     */
+    private void initSortMenu() {
+        // handle select sort type
+        TextInputLayout sortMenu = binding.sortMenu;
+        AutoCompleteTextView autoCompleteTextView = (AutoCompleteTextView) sortMenu.getEditText();
+        autoCompleteTextView.setText("Create Time", false);
+        autoCompleteTextView.setOnItemClickListener((adapterView, view, i, l) -> {
+            String selected = (String) adapterView.getItemAtPosition(i);
+            sortProperties(selected);
+        });
+
+        // handle toggle sort order
+        MaterialButton sortOrderBtn = binding.sortOrderButton;
+        sortOrderBtn.setOnClickListener(view -> {
+            sortAscending = !sortAscending;
+            // change icon
+            if (sortAscending) {
+                sortOrderBtn.setIconResource(R.drawable.baseline_arrow_upward_24);
+            } else {
+                sortOrderBtn.setIconResource(R.drawable.baseline_arrow_downward_24);
+            }
+            // sort and render properties
+            sortProperties(autoCompleteTextView.getText().toString());
+        });
+    }
+
+    /**
+     * Sort and rendre properties by the given sort type and existing sort order
+     * @param sortType the sort type
+     */
+    private void sortProperties(String sortType) {
+        // create comparator
+        Comparator<Property> comparator = null;
+        switch (sortType) {
+            case "Price":
+                comparator = Comparator.comparing(Property::getPrice);
+                break;
+            case "Beds":
+                comparator = Comparator.comparing(Property::getNumBedrooms);
+                break;
+            case "Bathrooms":
+                comparator = Comparator.comparing(Property::getNumBathrooms);
+                break;
+            case "Parking Spaces":
+                comparator = Comparator.comparing(Property::getNumParking);
+                break;
+            default:
+                // sort by create time by default
+            case "Create Time":
+                comparator = Comparator.comparing(Property::getCreatedAt);
+                // default "sort by create time" is new to old
+                comparator = comparator.reversed();
+        }
+        if (comparator == null) {
+            return;
+        }
+        // apply sort order
+        if (!sortAscending) {
+            comparator = comparator.reversed();
+        }
+        allProperties.sort(comparator);
+        renderProperties(allProperties);
+    }
+
     private void initToolbar() {
         ConstraintLayout toolbar = binding.toolbar;
         initFilterMenu();
+        initSortMenu();
         toolbar.setVisibility(View.VISIBLE);
     }
 
@@ -145,16 +207,18 @@ public class HomeFragment extends Fragment {
         db.getAllUserProperties(new GetAllUserPropertiesCallback() {
             @Override
             public void onSuccess(ArrayList<Property> properties) {
-                if (properties.isEmpty()) {
-                    binding.hint.setVisibility(View.VISIBLE);
-                }
-                renderProperties(properties);
+                allProperties = properties;
+                // sort and render properties
+                sortProperties(binding.sortMenu.getEditText().getText().toString());
                 binding.loadingText.setVisibility(View.GONE);
-                allProperties = properties;
-                // initialize and display toolbar after all properties are loaded
-                initToolbar();
 
-                allProperties = properties;
+                if (properties.isEmpty()) {
+                    // show hint if no property exists
+                    binding.hint.setVisibility(View.VISIBLE);
+                } else {
+                    // otherwise initialize and display toolbar after all properties are loaded
+                    initToolbar();
+                }
             }
 
             @Override

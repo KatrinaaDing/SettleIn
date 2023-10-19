@@ -81,30 +81,69 @@
 <!--                style="@style/Widget.Material3.Button.ElevatedButton"-->
 <!--                android:layout_marginVertical="20dp"/>-->
 
-            <!-- filter menu -->
+            <!-- filter and sort menu -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingBottom="20dp"
                 android:visibility="invisible">
+                <!-- sort menu -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/sort_menu"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="130dp"
+                    android:layout_height="25pt"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:hint="Sort By">
+                    <AutoCompleteTextView
+                        style="@style/Widget.Material3.AutoCompleteTextView.OutlinedBox.Dense"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:dropDownWidth="150dp"
+                        android:inputType="none"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        app:simpleItems="@array/properties_sort_options" />
+                </com.google.android.material.textfield.TextInputLayout>
 
+                <!-- sort menu ascending/descending button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/sort_order_button"
+                    style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toEndOf="@+id/sort_menu"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:checkable="false"
+                    android:padding="10dp"
+                    android:insetBottom="10dp"
+                    android:backgroundTint="@color/extraLightGrey"
+                    android:insetTop="10dp"
+                    android:drawableTint="@color/black"
+                    app:icon="@drawable/baseline_arrow_upward_24"
+                    app:iconGravity="textStart"
+                    app:iconSize="20dp" />
+
+                <!-- filter menu -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/filter_menu"
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                    android:layout_width="180dp"
-                    android:layout_height="wrap_content"
+                    android:layout_width="150dp"
+                    android:layout_height="25pt"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    android:hint="Filter">
+                    android:hint="Filter" >
 
-                    <AutoCompleteTextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="none"
-                        app:simpleItems="@array/properties_filter_options"
-                        />
-
+                <AutoCompleteTextView
+                    style="@style/Widget.Material3.AutoCompleteTextView.OutlinedBox.Dense"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    app:simpleItems="@array/properties_filter_options" />
                 </com.google.android.material.textfield.TextInputLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
 

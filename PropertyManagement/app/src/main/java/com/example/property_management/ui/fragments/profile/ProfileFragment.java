@@ -138,7 +138,7 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
                 String userId = user.getUid();
                 FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
                 // TODO change hardcode here
-                String facility = "MelbourneCentral";
+                String facility = "Coles";
                 firebaseFunctionsHelper.addInterestedFacility(userId, facility)
                         .addOnSuccessListener(result -> {
                             if (result.equals("success")) {
