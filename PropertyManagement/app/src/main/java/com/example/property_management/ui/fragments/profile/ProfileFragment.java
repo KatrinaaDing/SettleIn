@@ -148,7 +148,7 @@ public class ProfileFragment extends Fragment {
             public void onClick(View view) {
                 FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
                 // TODO change hardcode here
-                String facility = "MelbourneCentral";
+                String facility = "coles";
                 firebaseFunctionsHelper.addInterestedFacility(userID, facility)
                         .addOnSuccessListener(result -> {
                             if (result.equals("success")) {
@@ -203,7 +203,7 @@ public class ProfileFragment extends Fragment {
                     // Create an ArrayList to store the keys
                     ArrayList<String> propertyIds = new ArrayList<>(currentUser.getProperties().keySet());
                     ArrayList<String> interestedFacilities = currentUser.getInterestedFacilities();
-                    String facilityToDelete = "Melbourne Central";
+                    String facilityToDelete = "coles";
                     deleteInterest(userRepository, propertyIds, true, interestedFacilities, facilityToDelete);
                 }
 
