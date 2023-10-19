@@ -45,6 +45,9 @@ public class EditProfileDialogFragment extends DialogFragment {
     private EditText editUsername;
     private EditText editEmail;
     private EditText providePassword;
+    private EditText editOldPassword;
+    private EditText editNewPassword;
+    private EditText editConfirmPassword;
     private FirebaseUser user;
 
     public interface OnProfileUpdatedListener {
@@ -82,71 +85,89 @@ public class EditProfileDialogFragment extends DialogFragment {
         editEmail = view.findViewById(R.id.editEmail);
         editEmail.setText(email);
         providePassword = view.findViewById(R.id.providePassword);
+        editOldPassword = view.findViewById(R.id.editOldPassword);
+        editNewPassword = view.findViewById(R.id.editNewPassword);
+        editConfirmPassword = view.findViewById(R.id.editConfirmPassword);
 
         builder.setView(view)
-            .setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int id) {
-                    String userInputUsername = editUsername.getText().toString();
-                    String userInputEmail = editEmail.getText().toString();
-                    String userInputProvidePassword = providePassword.getText().toString();
-                    TextInputLayout editUsernameLayout = view.findViewById(R.id.editUsernameLayout);
-                    TextInputLayout editEmailLayout = view.findViewById(R.id.editEmailLayout);
+                .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        String userInputUsername = editUsername.getText().toString();
+                        String userInputEmail = editEmail.getText().toString();
+                        String userInputProvidePassword = providePassword.getText().toString();
+                        String oldPassword = editOldPassword.getText().toString();
+                        String newPassword = editNewPassword.getText().toString();
+                        String confirmPassword = editConfirmPassword.getText().toString();
+                        TextInputLayout editUsernameLayout = view.findViewById(R.id.editUsernameLayout);
+                        TextInputLayout editEmailLayout = view.findViewById(R.id.editEmailLayout);
 
-                    View rootView = getActivity().findViewById(android.R.id.content);
-                    if (userInputUsername.isEmpty()) {
-//                        editUsernameLayout.setError("Username Cannot be Empty.");
-                        new BasicSnackbar(rootView, "Username Cannot be Empty.", "error");
-                    } else if (userInputEmail.isEmpty()) {
+
+                        View rootView = getActivity().findViewById(android.R.id.content);
+                        if (userInputUsername.isEmpty()) {
+                            editUsernameLayout.setError("Username Cannot be Empty.");
+                            new BasicSnackbar(rootView, "Username Cannot be Empty.", "error");
+                        } else if (userInputEmail.isEmpty()) {
 //                        editEmailLayout.setError("Email Cannot be Empty.");
-                        new BasicSnackbar(rootView, "Email Cannot be Empty.", "error");
-                    } else if (userInputUsername.equals(username) && userInputEmail.equalsIgnoreCase(email)) {
-                        new BasicSnackbar(rootView, "Cannot Input the Same Username and Email.", "error");
-                    } else if (userInputProvidePassword.isEmpty()) {
-                        new BasicSnackbar(rootView, "You Must Provide Password to Edit Profile.", "error");
-                    } else {
-                        // re-authenticate user
-                        AuthCredential credential = EmailAuthProvider
-                                .getCredential(email, providePassword.getText().toString());
+                            new BasicSnackbar(rootView, "Email Cannot be Empty.", "error");
+                        } else if (userInputUsername.equals(username) && userInputEmail.equalsIgnoreCase(email)) {
+                            new BasicSnackbar(rootView, "Cannot Input the Same Username and Email.", "error");
+                        } else if (userInputProvidePassword.isEmpty()) {
+                            new BasicSnackbar(rootView, "You Must Provide Password to Edit Profile.", "error");
+                        } else {
+                            // re-authenticate user
+                            AuthCredential credential = EmailAuthProvider
+                                    .getCredential(email, providePassword.getText().toString());
 
-                        user.reauthenticate(credential)
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        Log.d("user-auth", "User re-authenticated.");
+                            user.reauthenticate(credential)
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                Log.d("user-auth", "User re-authenticated.");
 
-                                        user.updateEmail(userInputEmail)
-                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-                                                    if (task.isSuccessful()) {
-                                                        Log.d("update-email", "User email address updated.");
-                                                        FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper((AppCompatActivity)getActivity());
-                                                        firebaseAuthHelper.addUsernameToFirestore(uid, userInputUsername);
-                                                        notifyProfileUpdated(userInputUsername, userInputEmail);
-                                                        new BasicSnackbar(rootView, "Profile Updated Successfully.", "success");
-                                                    } else {
-                                                        Log.d("update-email", "Update email failed.", task.getException());
-                                                        new BasicSnackbar(rootView, "Update email failed.", "error");
-                                                    }
-                                                }
-                                            });
-                                    } else {
-                                        Log.d("user-auth", "User re-authentication failed.", task.getException());
-                                        new BasicSnackbar(rootView, "User re-authentication failed.", "error");
-                                    }
-                                }
-                            });
+                                                user.updateEmail(userInputEmail)
+                                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                if (task.isSuccessful()) {
+                                                                    Log.d("update-email", "User email address updated.");
+                                                                    FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper((AppCompatActivity)getActivity());
+                                                                    firebaseAuthHelper.addUsernameToFirestore(uid, userInputUsername);
+                                                                    notifyProfileUpdated(userInputUsername, userInputEmail);
+                                                                    new BasicSnackbar(rootView, "Profile Updated Successfully.", "success");
+                                                                } else {
+                                                                    Log.d("update-email", "Update email failed.", task.getException());
+                                                                    new BasicSnackbar(rootView, "Update email failed.", "error");
+                                                                }
+                                                            }
+                                                        });
+                                            } else {
+                                                Log.d("user-auth", "User re-authentication failed.", task.getException());
+                                                new BasicSnackbar(rootView, "User re-authentication failed.", "error");
+                                            }
+                                        }
+                                    });
 
+                        }
+                        if (!oldPassword.isEmpty()) {
+                            if (newPassword.isEmpty()) {
+                                new BasicSnackbar(rootView, "New Password Cannot be Empty.", "error");
+                            } else if (!newPassword.isEmpty() && confirmPassword.isEmpty()) {
+                                new BasicSnackbar(rootView, "Please Confirm New Password.", "error");
+                            } else if (!newPassword.isEmpty() && !confirmPassword.isEmpty() && !newPassword.equals(confirmPassword)) {
+                                new BasicSnackbar(rootView, "Different New Password and Confirm Password.", "error");
+                            } else if (!oldPassword.isEmpty() && !newPassword.isEmpty() && oldPassword.equals(newPassword)) {
+                                new BasicSnackbar(rootView, "Same Old Password and New Password.", "error");
+                            }
+                        }
                     }
-                }
-            })
-            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    EditProfileDialogFragment.this.getDialog().cancel();
-                }
-            });
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        EditProfileDialogFragment.this.getDialog().cancel();
+                    }
+                });
         return builder.create();
     }
 
@@ -163,4 +184,3 @@ public class EditProfileDialogFragment extends DialogFragment {
     }
 
 }
-
