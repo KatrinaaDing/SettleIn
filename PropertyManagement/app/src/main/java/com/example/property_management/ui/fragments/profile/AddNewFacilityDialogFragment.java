@@ -1,9 +1,12 @@
 package com.example.property_management.ui.fragments.profile;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -11,6 +14,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.property_management.R;
+import com.example.property_management.api.FirebaseFunctionsHelper;
+import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 public class AddNewFacilityDialogFragment extends DialogFragment {
@@ -23,6 +28,21 @@ public class AddNewFacilityDialogFragment extends DialogFragment {
         builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
+                        // get profile fragment
+                        ProfileFragment profileFragment = (ProfileFragment) AddNewFacilityDialogFragment.this.getParentFragment();
+
+                        if (profileFragment != null) {
+                            // add new facility
+                            profileFragment.addNewFacility();
+                            // refresh ProfileFragment
+                            new Handler().postDelayed(() -> {
+                                profileFragment.refreshFragment();
+                            }, 5000);
+                        } else {
+                            Log.d("AddNewFacilityDialogFragmentError", "ProfileFragment is null");
+                            new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Error: ProfileFragment is null", "error");
+                        }
+
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

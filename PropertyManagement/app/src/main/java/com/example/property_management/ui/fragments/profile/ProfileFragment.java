@@ -23,6 +23,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -356,5 +357,39 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
                 Log.e("add-property-failure", msg);
             }
         });
+    }
+
+
+
+    public void refreshFragment() {
+        new BasicSnackbar(getActivity().findViewById(android.R.id.content), "test.", "success");
+        // refresh the fragment
+        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+        transaction.attach(this);
+        transaction.commit();
+    }
+
+    public void addNewFacility() {
+        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+        // TODO change hardcode here
+        String facility = "coles";
+        firebaseFunctionsHelper.addInterestedFacility(user.getUid(), facility)
+                .addOnSuccessListener(result -> {
+                    if (result.equals("success")) {
+                        Log.i("add-interested-facility-success", result);
+                        new BasicSnackbar(getActivity().findViewById(android.R.id.content),
+                                "Success: Added new facility.", "success");
+                    } else {
+                        Log.e("add-interested-facility-fail", result);
+                        new BasicSnackbar(getActivity().findViewById(android.R.id.content),
+                                "Error: Failed to add new facility.", "error");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // pop error at input box
+                    Log.e("add-interested-facility-fail", e.getMessage());
+                    new BasicSnackbar(getActivity().findViewById(android.R.id.content),
+                            e.getMessage(), "error");
+                });
     }
 }
