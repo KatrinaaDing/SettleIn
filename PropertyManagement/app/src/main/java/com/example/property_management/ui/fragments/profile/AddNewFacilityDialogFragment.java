@@ -8,7 +8,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
@@ -24,7 +26,9 @@ public class AddNewFacilityDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
         LayoutInflater inflater = requireActivity().getLayoutInflater();
-        builder.setView(inflater.inflate(R.layout.custom_add_new_facility_dialog, null));
+        View rootView = inflater.inflate(R.layout.custom_add_new_facility_dialog, null);
+        builder.setView(rootView);
+
         builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
@@ -33,11 +37,18 @@ public class AddNewFacilityDialogFragment extends DialogFragment {
 
                         if (profileFragment != null) {
                             // add new facility
-                            profileFragment.addNewFacility();
+                            if (rootView == null) {
+                                System.out.println("getView() is null");
+                                return;
+                            }
+                            EditText facilityEditText = rootView.findViewById(R.id.facilityEditText);
+                            String facilityToAdd = facilityEditText.getText().toString();
+                            profileFragment.addNewFacility(facilityToAdd);
                             // refresh ProfileFragment
                             new Handler().postDelayed(() -> {
                                 profileFragment.refreshFragment();
                             }, 5000);
+
                         } else {
                             Log.d("AddNewFacilityDialogFragmentError", "ProfileFragment is null");
                             new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Error: ProfileFragment is null", "error");

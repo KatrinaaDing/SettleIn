@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -362,18 +363,15 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
 
 
     public void refreshFragment() {
-        new BasicSnackbar(getActivity().findViewById(android.R.id.content), "test.", "success");
         // refresh the fragment
-        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-        transaction.attach(this);
-        transaction.commit();
+        getParentFragmentManager().beginTransaction().detach(this).commitNowAllowingStateLoss();
+        getParentFragmentManager().beginTransaction().attach(this).commitAllowingStateLoss();
     }
 
-    public void addNewFacility() {
+    public void addNewFacility(String facilityToAdd) {
         FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
-        // TODO change hardcode here
-        String facility = "coles";
-        firebaseFunctionsHelper.addInterestedFacility(user.getUid(), facility)
+
+        firebaseFunctionsHelper.addInterestedFacility(user.getUid(), facilityToAdd)
                 .addOnSuccessListener(result -> {
                     if (result.equals("success")) {
                         Log.i("add-interested-facility-success", result);
