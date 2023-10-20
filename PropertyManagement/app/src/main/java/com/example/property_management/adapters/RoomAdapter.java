@@ -117,59 +117,66 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
-        // Others room
-        String currentRoomName = roomNames.get(position);
-        if ("Others".equals(currentRoomName)) {
-            holder.roomName.setText("Others");
-            // camera function
-            holder.openCameraButton.setVisibility(View.VISIBLE);
-            holder.openCameraButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    showCameraOptionsDialog(holder);
-                }
-            });
+        public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
+            // Others room
+            String currentRoomName = roomNames.get(position);
+            if ("Others".equals(currentRoomName)) {
+                holder.roomName.setText("Others");
+                // camera function
+                holder.openCameraButton.setVisibility(View.VISIBLE);
+                holder.openCameraButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showCameraOptionsDialog(holder);
+                    }
+                });
 
-            int currentPosition = holder.getAdapterPosition();
-            if (currentPosition != RecyclerView.NO_POSITION) {
-                holder.photoCount.setText(roomImages.get(currentPosition).size() + " added");
+                int currentPosition = holder.getAdapterPosition();
+                if (currentPosition != RecyclerView.NO_POSITION) {
+                    holder.photoCount.setText(roomImages.get(currentPosition).size() + " added");
+                }
+
+                holder.photoCount.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showPhotosDialog(holder.getAdapterPosition());
+                    }
+                });
+
+                // other components invisible
+                holder.noiseIcon.setVisibility(View.GONE);
+                holder.lightIcon.setVisibility(View.GONE);
+                holder.compassIcon.setVisibility(View.GONE);
+
+                holder.noiseView.setVisibility(View.GONE);
+                holder.lightView.setVisibility(View.GONE);
+                holder.compassView.setVisibility(View.GONE);
+
+                holder.noiseValueTextView.setVisibility(View.GONE);
+                holder.lightValueTextView.setVisibility(View.GONE);
+                holder.compassValueTextView.setVisibility(View.GONE);
+
+                holder.noiseTestButton.setVisibility(View.GONE);
+                holder.lightTestButton.setVisibility(View.GONE);
+                holder.compassTestButton.setVisibility(View.GONE);
+
+                holder.editRoomNameIcon.setVisibility(View.GONE);
+                return;
             }
 
-            holder.photoCount.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    showPhotosDialog(holder.getAdapterPosition());
-                }
-            });
+            // Bind room name
+            if (position == 0) {
+                holder.roomName.setText("Lounge Room");
+            } else {
+                holder.roomName.setText("Room " + position);
+            }
 
-            // other components invisible
-            holder.noiseIcon.setVisibility(View.GONE);
-            holder.lightIcon.setVisibility(View.GONE);
-            holder.compassIcon.setVisibility(View.GONE);
+            //测试
+                holder.lightValueTextView.setText("11");
+                holder.noiseValueTextView.setText("11");
+                holder.compassValueTextView.setText("11");
 
-            holder.noiseView.setVisibility(View.GONE);
-            holder.lightView.setVisibility(View.GONE);
-            holder.compassView.setVisibility(View.GONE);
 
-            holder.noiseValueTextView.setVisibility(View.GONE);
-            holder.lightValueTextView.setVisibility(View.GONE);
-            holder.compassValueTextView.setVisibility(View.GONE);
-
-            holder.noiseTestButton.setVisibility(View.GONE);
-            holder.lightTestButton.setVisibility(View.GONE);
-            holder.compassTestButton.setVisibility(View.GONE);
-
-            holder.editRoomNameIcon.setVisibility(View.GONE);
-            return;
-        }
-
-        // Bind room name
-        if (position == 0) {
-            holder.roomName.setText("Lounge Room");
-        } else {
-            holder.roomName.setText("Room " + position);
-        }
 
         AudioSensor currentAudioSensor = audioSensors.get(position);
         LightSensor currentLightSensor = lightSensors.get(position);
@@ -215,6 +222,10 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         holder.noiseTestButton.setOnClickListener(v -> {
             currentAudioSensor.startTest();
             Log.d("AiSensor", "startTest() called");
+
+
+
+
         });
 
         holder.lightTestButton.setOnClickListener(v -> {
@@ -591,10 +602,13 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView editRoomNameIcon;
-        TextView roomName;
+        public TextView roomName;
         ImageView cameraIcon, noiseIcon, lightIcon, compassIcon;
         TextView imageView, noiseView, lightView, compassView;
-        TextView photoCount, noiseValueTextView, lightValueTextView, compassValueTextView;
+        public TextView photoCount;
+        public TextView noiseValueTextView;
+        public TextView lightValueTextView;
+        public TextView compassValueTextView;
         Button openCameraButton, noiseTestButton, lightTestButton, compassTestButton;
         PreviewView previewView;
 

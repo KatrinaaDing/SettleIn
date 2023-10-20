@@ -27,7 +27,9 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import android.util.Log;
+import java.util.HashMap;
+import java.util.Map;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -150,8 +152,37 @@ public class DataCollectionActivity extends AppCompatActivity {
 
         binding.finishButton.setOnClickListener(view -> {
             //Need to define the logic of return tested data
-            onFinishButtonClicked();
-            //finish();
+            //onFinishButtonClicked();
+
+            // 创建一个映射来保存所有房间的数据
+            Map<String, Map<String, String>> roomDataMap = new HashMap<>();
+
+            for (int i = 0; i < roomsRecyclerView.getChildCount(); i++) {
+                View itemView = roomsRecyclerView.getChildAt(i);
+                RoomAdapter.ViewHolder viewHolder = (RoomAdapter.ViewHolder) roomsRecyclerView.getChildViewHolder(itemView);
+
+                String roomName = viewHolder.roomName.getText().toString();
+                String photoCount = viewHolder.photoCount.getText().toString();
+                String noiseValue = viewHolder.noiseValueTextView.getText().toString();
+                String lightValue = viewHolder.lightValueTextView.getText().toString();
+                String compassValue = viewHolder.compassValueTextView.getText().toString();
+
+                Map<String, String> roomInfo = new HashMap<>();
+                roomInfo.put("PhotoCount", photoCount);
+                roomInfo.put("NoiseValue", noiseValue);
+                roomInfo.put("LightValue", lightValue);
+                roomInfo.put("CompassValue", compassValue);
+
+                roomDataMap.put(roomName, roomInfo);
+            }
+
+            // 现在，您有一个包含所有房间信息的映射结构
+            // 您可以使用 Log.d 或其他记录机制一次性记录整个结构
+
+            // 转换为字符串并记录
+            Log.d("AllRoomData", "Rooms Data: " + roomDataMap.toString());
+
+            finish();
         });
     }
 
