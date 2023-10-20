@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
@@ -203,6 +204,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                 ((Activity) context).runOnUiThread(() -> {
 
                     holder.noiseValueTextView.setText(String.format("%.2f dB", currentDb));
+                    Log.d("onCurrentDbCalculated", "onCurrentDbCalculated called");
                 });
             }
 
@@ -210,6 +212,16 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             public void onAverageDbCalculated(double averageDb) {
                 ((Activity) context).runOnUiThread(() -> {
                     holder.noiseValueTextView.setText(String.format("%.2f dB", averageDb));
+                    Log.d("onAverageDbCalculated", "onAverageDbCalculated called");
+                });
+            }
+
+            @Override
+            public void ontestCompleted() {
+                ((Activity) context).runOnUiThread(() -> {
+                    holder.noiseTestButton.setText("Test");
+                    holder.noiseTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
+                    holder.isTesting = false;
                 });
             }
         };
@@ -220,11 +232,37 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
         // Use the callback with the sensors
         holder.noiseTestButton.setOnClickListener(v -> {
-            currentAudioSensor.startTest();
-            Log.d("AiSensor", "startTest() called");
 
+            if (!holder.isTesting) {
+                // 开始测试
+                holder.isTesting = true;
+                holder.noiseTestButton.setText("Cancel");
+                holder.noiseTestButton.setBackgroundColor(Color.RED); // 设置为您选择的红色色值
 
+                // 启动测试线程
+                holder.testThread = new Thread(() -> {
+                    currentAudioSensor.startTest();
+                    // 你可以在这里添加其他逻辑
+                });
+                holder.testThread.start();
 
+            } else {
+                // 取消测试
+                holder.isTesting = false;
+                holder.noiseTestButton.setText("Test");
+                holder.noiseTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
+
+                // 停止测试线程
+                if (holder.testThread != null) {
+                    currentAudioSensor.stopTest(); // 这将设置isRecording为false，并停止音频记录
+                    holder.testThread.interrupt(); // 这将中断线程
+                    holder.testThread = null;
+
+                    // 清除TextView
+                    holder.noiseValueTextView.setText("--");
+                    Log.d("noiseValue set to --","noiseValue set to -- ");
+                }
+            }
 
         });
 
@@ -601,6 +639,10 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
+        //测试
+        public boolean isTesting = false;
+        public Thread testThread;
+
         ImageView editRoomNameIcon;
         public TextView roomName;
         ImageView cameraIcon, noiseIcon, lightIcon, compassIcon;

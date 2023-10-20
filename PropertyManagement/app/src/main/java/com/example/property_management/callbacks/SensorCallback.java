@@ -4,4 +4,5 @@ public interface SensorCallback {
     void onSensorDataChanged(String sensorType, float value);
     void onCurrentDbCalculated(double currentDb);
     void onAverageDbCalculated(double averageDb);
+    void ontestCompleted ();
 }
