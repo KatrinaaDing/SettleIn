@@ -217,11 +217,29 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             }
 
             @Override
-            public void ontestCompleted() {
+            public void onAudioTestCompleted() {
                 ((Activity) context).runOnUiThread(() -> {
                     holder.noiseTestButton.setText("Test");
                     holder.noiseTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
-                    holder.isTesting = false;
+                    holder.isNoiseTesting = false;
+                });
+            }
+
+            @Override
+            public void onLightTestCompleted() {
+                ((Activity) context).runOnUiThread(() -> {
+                    holder.lightTestButton.setText("Test");
+                    holder.lightTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
+                    holder.isLightTesting = false;
+                });
+            }
+
+            @Override
+            public void onCompassTestCompleted() {
+                ((Activity) context).runOnUiThread(() -> {
+                    holder.compassTestButton.setText("Test");
+                    holder.compassTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
+                    holder.isCompassTesting = false;
                 });
             }
         };
@@ -233,30 +251,30 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         // Use the callback with the sensors
         holder.noiseTestButton.setOnClickListener(v -> {
 
-            if (!holder.isTesting) {
+            if (!holder.isNoiseTesting) {
                 // 开始测试
-                holder.isTesting = true;
+                holder.isNoiseTesting = true;
                 holder.noiseTestButton.setText("Cancel");
                 holder.noiseTestButton.setBackgroundColor(Color.RED); // 设置为您选择的红色色值
 
                 // 启动测试线程
-                holder.testThread = new Thread(() -> {
+                holder.testAudioThread = new Thread(() -> {
                     currentAudioSensor.startTest();
                     // 你可以在这里添加其他逻辑
                 });
-                holder.testThread.start();
+                holder.testAudioThread.start();
 
             } else {
                 // 取消测试
-                holder.isTesting = false;
+                holder.isNoiseTesting = false;
                 holder.noiseTestButton.setText("Test");
                 holder.noiseTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
 
                 // 停止测试线程
-                if (holder.testThread != null) {
+                if (holder.testAudioThread != null) {
                     currentAudioSensor.stopTest(); // 这将设置isRecording为false，并停止音频记录
-                    holder.testThread.interrupt(); // 这将中断线程
-                    holder.testThread = null;
+                    holder.testAudioThread.interrupt(); // 这将中断线程
+                    holder.testAudioThread = null;
 
                     // 清除TextView
                     holder.noiseValueTextView.setText("--");
@@ -267,11 +285,75 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         });
 
         holder.lightTestButton.setOnClickListener(v -> {
-            currentLightSensor.startTest();
+            if (!holder.isLightTesting) {
+                // 开始测试
+                holder.isLightTesting = true;
+                holder.lightTestButton.setText("Cancel");
+                holder.lightTestButton.setBackgroundColor(Color.RED); // 设置为您选择的红色色值
+
+                // 启动测试线程
+                holder.testLightThread = new Thread(() -> {
+                    currentLightSensor.startTest();
+                    // 你可以在这里添加其他逻辑
+                });
+                holder.testLightThread.start();
+
+            } else {
+                // 取消测试
+                holder.isLightTesting = false;
+                holder.lightTestButton.setText("Test");
+                holder.lightTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
+
+                // 停止测试线程
+                if (holder.testLightThread != null) {
+                    currentLightSensor.stopTest(); // 这将设置isRecording为false，并停止音频记录
+                    holder.testLightThread.interrupt(); // 这将中断线程
+                    holder.testLightThread = null;
+
+                    // 清除TextView
+                    holder.lightValueTextView.setText("--");
+                    Log.d("lightValue set to --","lightValue set to -- ");
+                }
+            }
+
+
         });
 
         holder.compassTestButton.setOnClickListener(v -> {
-            currentCompassSensor.startTest();
+
+
+            if (!holder.isCompassTesting) {
+                // 开始测试
+                holder.isCompassTesting = true;
+                holder.compassTestButton.setText("Cancel");
+                holder.compassTestButton.setBackgroundColor(Color.RED); // 设置为您选择的红色色值
+
+                // 启动测试线程
+                holder.testCompassThread = new Thread(() -> {
+                    currentCompassSensor.startTest();
+                    // 你可以在这里添加其他逻辑
+                });
+                holder.testCompassThread.start();
+
+            } else {
+                // 取消测试
+                holder.isCompassTesting = false;
+                holder.compassTestButton.setText("Test");
+                holder.compassTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
+
+                // 停止测试线程
+                if (holder.testCompassThread != null) {
+                    currentCompassSensor.stopTest(); // 这将设置isRecording为false，并停止音频记录
+                    holder.testCompassThread.interrupt(); // 这将中断线程
+                    holder.testCompassThread = null;
+
+                    // 清除TextView
+                    holder.compassValueTextView.setText("--");
+                    Log.d("comapssValue set to --","compassValue set to -- ");
+                }
+            }
+
+
         });
 
         if (!initializedRooms.contains(position)) {
@@ -640,8 +722,13 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         //测试
-        public boolean isTesting = false;
-        public Thread testThread;
+        public boolean isNoiseTesting = false;
+        public boolean isLightTesting = false;
+        public boolean isCompassTesting = false;
+
+        public Thread testAudioThread;
+        public Thread testLightThread;
+        public Thread testCompassThread;
 
         ImageView editRoomNameIcon;
         public TextView roomName;
