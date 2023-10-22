@@ -2,16 +2,12 @@ package com.example.property_management.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseAuthHelper;
-import com.example.property_management.api.FirebasePropertyRepository;
 import com.example.property_management.api.FirebaseUserRepository;
-import com.example.property_management.callbacks.AddPropertyCallback;
-import com.example.property_management.callbacks.DeletePropertyByIdCallback;
+import com.example.property_management.callbacks.GetAllUserPropertiesCallback;
 import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.Property;
 import com.google.android.material.bottomappbar.BottomAppBar;
@@ -54,23 +50,26 @@ public class MainActivity extends AppCompatActivity {
         BottomAppBar bottomAppBar = findViewById(R.id.bottomAppBar);
 
         // =================================== Listeners =======================================
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, AddPropertyActivity.class);
-                startActivity(intent);
-            }
+        // go to "add property page" when click on plus button
+        fab.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, AddPropertyActivity.class);
+            startActivity(intent);
         });
         bottomAppBar.setNavigationOnClickListener(view -> {
-            navController.navigate(R.id.navigation_home);
+            // can only navigate from other activity to home page
+            if (navController.getCurrentDestination().getId() != R.id.navigation_home) {
+                navController.navigate(R.id.navigation_home);
+            }
         });
-
+        // navigate to home page when click on home icon or profile page for profile icon
         bottomAppBar.setOnMenuItemClickListener(menuItem -> {
             int id = menuItem.getItemId();
-            if (id == R.id.navigation_home) {
+            int currentItem = navController.getCurrentDestination().getId();
+            // can only navigate from other activity to the page
+            if (id == R.id.navigation_home && currentItem != R.id.navigation_home) {
                 navController.navigate(R.id.navigation_home);
                 return true;
-            } else if (id == R.id.navigation_profile) {
+            } else if (id == R.id.navigation_profile && currentItem != R.id.navigation_profile) {
                 navController.navigate(R.id.navigation_profile);
                 return true;
             } else {

@@ -1,37 +1,50 @@
 package com.example.property_management.ui.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.MenuItem;
-import android.widget.TextView;
+import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.property_management.R;
+import com.example.property_management.api.FirebaseAuthHelper;
 import com.example.property_management.api.FirebaseFunctionsHelper;
-import com.example.property_management.callbacks.onValueChangeCallback;
+import com.example.property_management.api.FirebasePropertyRepository;
+import com.example.property_management.api.FirebaseUserRepository;
+import com.example.property_management.callbacks.AddPropertyCallback;
+import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.NewProperty;
 import com.example.property_management.databinding.ActivityAddPropertyBinding;
 import com.example.property_management.ui.fragments.base.ArrowNumberPicker;
+import com.example.property_management.ui.fragments.base.AutocompleteFragment;
+import com.example.property_management.ui.fragments.base.BasicSnackbar;
+import com.example.property_management.utils.DateTimeFormatter;
 import com.example.property_management.utils.Helpers;
 import com.example.property_management.utils.UrlValidator;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.datepicker.CalendarConstraints;
-import com.google.android.material.datepicker.DateValidatorPointForward;
-import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.android.material.timepicker.MaterialTimePicker;
-import com.google.android.material.timepicker.TimeFormat;
+
+import java.security.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AddPropertyActivity extends AppCompatActivity {
-    private ActivityAddPropertyBinding binding;
-
+    public ActivityAddPropertyBinding binding;
     private String url = "";
-    private String address = "";
     private int bedroomNumber = 0;
     private int bathroomNumber = 0;
     private int parkingNumber = 0;
+    private int price = 0;
+    private ArrayList<String> images;
+
+    AutocompleteFragment autocompleteFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,108 +54,18 @@ public class AddPropertyActivity extends AppCompatActivity {
         setTitle(R.string.title_add_property);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // ================================== Components =======================================
-        // inspection date label
-        TextView inspectionDate = binding.inspectionDate;
-        // date picker
-        CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints.Builder().setValidator(DateValidatorPointForward.now());
-        MaterialDatePicker<Long> datePicker =
-                MaterialDatePicker
-                .Builder
-                .datePicker()
-                .setTitleText("Select Inspection date")
-                .setCalendarConstraints(constraintsBuilder.build())
-                .build();
-        // inspection time label
-        TextView inspectionTime = findViewById(R.id.inspectionTime);
-        // inspection time
-        MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
-                .setTimeFormat(TimeFormat.CLOCK_12H)
-                .setHour(12)
-                .setMinute(0)
-                .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
-                .setTitleText("Select Inspection Time")
-                .build();
-        // url input
-        TextInputLayout urlInputLayout = findViewById(R.id.urlInputLayout);
-        // scrape url button
-        MaterialButton scrapeUrlBtn = findViewById(R.id.scrapeUrlBtn);
-        // property info
-        TextView propertyAddress = findViewById(R.id.propertyAddress);
-        // number pickers
-        ArrowNumberPicker bedroomNumberPicker = findViewById(R.id.bedroomNumberPicker);
-        ArrowNumberPicker bathroomNumberPicker = findViewById(R.id.bathroomNumberPicker);
-        ArrowNumberPicker parkingNumberPicker = findViewById(R.id.parkingNumberPicker);
-
-        // ================================== listeners =======================================
-        datePicker.addOnPositiveButtonClickListener(selection -> {
-            // on click set date
-           inspectionDate.setText(datePicker.getHeaderText());
-        });
-        timePicker.addOnPositiveButtonClickListener(selection -> {
-            // on click set time
-            inspectionTime.setText(timePicker.getHour() + ":" + timePicker.getMinute());
-        });
-        inspectionDate.setOnClickListener(v -> {
-            // on select date
-            datePicker.show(getSupportFragmentManager(), "date_picker");
-        });
-        inspectionTime.setOnClickListener(v -> {
-            // on select time
-            timePicker.show(getSupportFragmentManager(), "time_picker");
-        });
-        // on change url text
-        urlInputLayout.addOnEditTextAttachedListener(textInputLayout ->
-                textInputLayout.getEditText().addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-                    @Override
-                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                        urlInputLayout.setError(null);
-                    }
-                    @Override
-                    public void afterTextChanged(Editable editable) {}
-                })
-        );
-
-        findViewById(R.id.submitBtn).setOnClickListener(v -> {
-            // on submit new property
-            // TODO: post data here
-            System.out.println("bedroom: " + bedroomNumber + ", bathroom: " + bathroomNumber + ", parking: " + parkingNumber);
-//            Intent intent = new Intent(AddPropertyActivity.this, MainActivity.class);
-//            startActivity(intent);
-        });
-        scrapeUrlBtn.setOnClickListener(v -> {
-            Helpers.closeKeyboard(this, urlInputLayout);
-            // on scrape url
-            if (!validateUrl()) {
-                return;
-            }
-            urlInputLayout.setHelperText("Getting information...");
-            FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
-            firebaseFunctionsHelper.scrapeProperty(urlInputLayout.getEditText().getText().toString())
-                .addOnSuccessListener(result -> {
-                    // set property info
-                    NewProperty resultProperty = (NewProperty) result;
-                    setPropertyInfo(resultProperty);
-                    // set url input helper text
-                    urlInputLayout.setHelperText("");
-                })
-                .addOnFailureListener(e -> {
-                    // pop error at input box
-                    System.out.println(e.getMessage());
-                    urlInputLayout.setError("Error: " + e.getMessage());
-                });
-         });
-        // handle number picker value change
-        bedroomNumberPicker.setOnValueChangeListener(new onValueChangeCallback() {
-            @Override
-            public void onChange(int newValue) {
-                bedroomNumber = newValue;
-            }});
-        bathroomNumberPicker.setOnValueChangeListener(newValue -> bathroomNumber = newValue);
-        parkingNumberPicker.setOnValueChangeListener(newValue -> parkingNumber = newValue);
+        // initialise components
+        initSubmitButton();
+        initUrlInputLayout();
+        initScrapeUrlButton();
+        initArrowNumberPickers();
     }
+
+    /**
+     * Handle back button on action bar
+     * @param item menu item
+     * @return true if handled, false otherwise
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -154,6 +77,278 @@ public class AddPropertyActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Initialise property amenities arrow number pickers
+     */
+    private void initArrowNumberPickers() {
+        ArrowNumberPicker bedroomNumberPicker = findViewById(R.id.bedroomNumberPicker);
+        ArrowNumberPicker bathroomNumberPicker = findViewById(R.id.bathroomNumberPicker);
+        ArrowNumberPicker parkingNumberPicker = findViewById(R.id.parkingNumberPicker);
+        bedroomNumberPicker.setOnValueChangeListener(newValue -> bedroomNumber = newValue);
+        bathroomNumberPicker.setOnValueChangeListener(newValue -> bathroomNumber = newValue);
+        parkingNumberPicker.setOnValueChangeListener(newValue -> parkingNumber = newValue);
+    }
+    /**
+     * Initialise submit property button
+     */
+    private void initSubmitButton() {
+        // on submit new property
+        Button submitBtn = findViewById(R.id.submitBtn);
+        // disable submit button by default
+        submitBtn.setEnabled(false);
+        submitBtn.setOnClickListener(v -> submitProperty(this));
+    }
+
+    /**
+     * Enable new property submission button
+     */
+    private void enableSubmit() {
+        Button submitBtn = findViewById(R.id.submitBtn);
+        submitBtn.setText("Submit");
+        submitBtn.setEnabled(true);
+    }
+
+    /**
+     * Disable new property submission button
+     */
+    private void disableSubmit() {
+        Button submitBtn = findViewById(R.id.submitBtn);
+        submitBtn.setEnabled(false);
+    }
+
+    /**
+     * Disable edit price and amenities
+     */
+    private void disableEditPrice() {
+        TextInputLayout priceInputLayout = findViewById(R.id.priceInputLayout);
+        priceInputLayout.setEnabled(false);
+    }
+
+    /**
+     * Disable edit price and amenities number picker
+     */
+    private void disableEditAmenities() {
+        ArrowNumberPicker bedroomNumberPicker = findViewById(R.id.bedroomNumberPicker);
+        ArrowNumberPicker bathroomNumberPicker = findViewById(R.id.bathroomNumberPicker);
+        ArrowNumberPicker parkingNumberPicker = findViewById(R.id.parkingNumberPicker);
+        bedroomNumberPicker.setEnabled(false);
+        bathroomNumberPicker.setEnabled(false);
+        parkingNumberPicker.setEnabled(false);
+    }
+
+    /**
+     * Set submit button to loading state
+     */
+    public void setSubmitLoading() {
+        Button submitBtn = findViewById(R.id.submitBtn);
+        submitBtn.setText("Submitting...");
+        submitBtn.setEnabled(false);
+    }
+
+    /**
+     * Set submit button to fetching coordinates state
+     */
+    public void setSubmitFetchingCoordinates() {
+        Button submitBtn = findViewById(R.id.submitBtn);
+        submitBtn.setText("Validating address...");
+        submitBtn.setEnabled(false);
+    }
+
+    /**
+     * Initialise url text input layout
+     */
+    private void initUrlInputLayout() {
+        TextInputLayout urlInputLayout = findViewById(R.id.urlInputLayout);
+        MaterialButton scrapeUrlBtn = findViewById(R.id.scrapeUrlBtn);
+        // on change url text
+        urlInputLayout.addOnEditTextAttachedListener(textInputLayout ->
+            textInputLayout.getEditText().addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                    urlInputLayout.setError(null);
+                    urlInputLayout.setHelperText("");
+                    scrapeUrlBtn.setEnabled(true);
+                }
+                @Override
+                public void afterTextChanged(Editable editable) {}
+            })
+        );
+    }
+
+    /**
+     * Initialise scrape url button
+     */
+    private void initScrapeUrlButton() {
+        // scrape url button
+        MaterialButton scrapeUrlBtn = findViewById(R.id.scrapeUrlBtn);
+        // url input
+        TextInputLayout urlInputLayout = findViewById(R.id.urlInputLayout);
+        scrapeUrlBtn.setOnClickListener(v -> {
+            // close keyboard on click
+            Helpers.closeKeyboard(this);
+            // scrape advertisement from url
+            if (!validateUrl()) return;
+            // disable search and submit button on start scraping
+            scrapeUrlBtn.setEnabled(false);
+            disableSubmit();
+            urlInputLayout.setHelperText("Getting information...");
+            fetchPropertyInfo(urlInputLayout, () -> {
+                // enable click action on finish scraping
+                scrapeUrlBtn.setEnabled(true);
+                fetchCoordinates(() -> {
+                    // run on finish fetching coordinates
+                    // assume scraped price and amenities are correct, disable edit
+                    disableEditPrice();
+                    disableEditAmenities();
+                    // enable submit button
+                    enableSubmit();
+                });
+            });
+
+        });
+    }
+
+    /**
+     * Submit new property to firebase
+     * @param activity current activity
+     */
+    private void submitProperty(AppCompatActivity activity) {
+        autocompleteFragment = (AutocompleteFragment) getSupportFragmentManager().findFragmentById(R.id.auto_property_fragment);
+        // invalid address if lat or lng is NaN
+        if (Double.isNaN(autocompleteFragment.getLat()) || Double.isNaN(autocompleteFragment.getLng())) {
+            new BasicSnackbar(findViewById(android.R.id.content), "Invalid address", "error");
+            return;
+        }
+
+        // set submit button to loading state
+        setSubmitLoading();
+        // check if property exists
+        Map<String, String> payLoad = new HashMap<>();
+        payLoad.put("href", url);
+        payLoad.put("address", autocompleteFragment.getSelectedAddress());
+        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+        firebaseFunctionsHelper.checkPropertyExists(payLoad)
+            .addOnSuccessListener(result -> {
+                if (result == null) {
+                    // property does not exist, add the property
+                    Log.d("add-property-exists", "can add property");
+                    addProperty(activity);
+                } else {
+                    // property exists, return the document id
+                    // TODO: pop dialog to ask user if redirect to property page
+                    Log.d("add-property-exists", "property exists with document id " + result);
+                    enableSubmit();
+                    new BasicSnackbar(findViewById(android.R.id.content),
+                            "You have already added this property.",
+                            "error");
+                }
+            })
+            .addOnFailureListener(e -> {
+                // pop error at input box
+                Log.e("add-property", e.getMessage());
+                enableSubmit();
+                new BasicSnackbar(findViewById(android.R.id.content),
+                        "Error: " + e.getMessage(),
+                        "error");
+            });
+
+    }
+
+    /**
+     * Add new property to firebase
+     * @param activity current activity
+     */
+    private void addProperty(AppCompatActivity activity) {
+        // post to firebase
+        // create new property object
+        if (url == "") {
+            url = null;
+        }
+        NewProperty newProperty = new NewProperty(url, bedroomNumber, bathroomNumber, parkingNumber,
+                autocompleteFragment.getSelectedAddress(), autocompleteFragment.getLat(),
+                autocompleteFragment.getLng(), price, images);
+        FirebasePropertyRepository db = new FirebasePropertyRepository();
+        db.addProperty(newProperty, new AddPropertyCallback() {
+            @Override
+            public void onSuccess(String documentId) {
+                Log.i("add-property-success", "property added with id " + documentId);
+                updateUserProperty(activity, newProperty, documentId);
+            }
+            @Override
+            public void onError(String msg) {
+                String errorMsg = "Error: " + msg;
+                new BasicSnackbar(findViewById(android.R.id.content), errorMsg, "error");
+                Log.e("add-property-failure", msg);
+            }
+        });
+    }
+
+    /**
+     * Fetch coordinates from address
+     * @param onSuccess callback task that runs on success
+     */
+    private void fetchCoordinates(Runnable onSuccess) {
+        // check if autocompleteFragment is null
+        if (autocompleteFragment == null) {
+            System.out.println("fetch coordinate, autocompleteFragment is null");
+            new BasicSnackbar(findViewById(android.R.id.content), "Error: Cannot fetch property location. Try again later.", "error");
+            return;
+        }
+        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+        Log.i("fetch-coordinates", "fetching coordinates of " + autocompleteFragment.getSelectedAddress());
+        setSubmitFetchingCoordinates();
+        // call firebase function to get lat and lng
+        firebaseFunctionsHelper.getLngLatByAddress(autocompleteFragment.getSelectedAddress())
+            .addOnSuccessListener(result -> {
+                // set lat and lng
+                double lat = result.get("lat");
+                double lng = result.get("lng");
+                Log.i("fetch-coordinates", "lat: " + lat + ", lng: " + lng);
+
+                // set lat and lng to autocompleteFragment
+                autocompleteFragment.setLat(lat);
+                autocompleteFragment.setLng(lng);
+                // run callback task (allow submit)
+                // only allow submit when coordinates are successfully fetched
+                onSuccess.run();
+            })
+            .addOnFailureListener(e -> {
+                // pop error at input box
+                Log.e("get lng lat error", e.getMessage());
+                new BasicSnackbar(findViewById(android.R.id.content), "Error: Cannot fetch property location. Try again later.", "error");
+            });
+    }
+
+    /**
+     * Fetch property info from url
+     * @param urlInputLayout the text input layout to enter url
+     * @param onSuccess callback task that run on success
+     */
+    private void fetchPropertyInfo(TextInputLayout urlInputLayout, Runnable onSuccess) {
+        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+        firebaseFunctionsHelper.scrapeProperty(urlInputLayout.getEditText().getText().toString())
+            .addOnSuccessListener(resultProperty -> {
+                // set property info
+                setPropertyInfo(resultProperty);
+                // set url input helper text
+                urlInputLayout.setHelperText("");
+                // run callback task
+                onSuccess.run();
+            })
+            .addOnFailureListener(e -> {
+                // pop error at input box
+                Log.e("scrape-url-error", e.getMessage());
+                urlInputLayout.setError("Error: " + e.getMessage());
+            });
+
+    }
+
+    /**
+     * Validate url input
+     * @return true if valid, false otherwise
+     */
     private boolean validateUrl() {
         String urlInput = binding.urlInputLayout.getEditText().getText().toString().trim();
         if (urlInput.isEmpty()) {
@@ -168,22 +363,77 @@ public class AddPropertyActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Set scrapped property info to UI
+     * @param property property object returned from scraping
+     */
     private void setPropertyInfo(NewProperty property) {
         // set properties
-        this.bedroomNumber = property.getBedroomNum();
-        this.bathroomNumber = property.getBathroomNum();
-        this.parkingNumber = property.getParkingNum();
-        this.address = property.getAddress();
+        this.bedroomNumber = property.getNumBedrooms();
+        this.bathroomNumber = property.getNumBathrooms();
+        this.parkingNumber = property.getNumParking();
+        this.url = property.getHref();
+        this.price = property.getPrice();
+        this.images = property.getImages();
 
         // set UI
+        TextInputLayout priceInputLayout = findViewById(R.id.priceInputLayout);
         ArrowNumberPicker bedroomNumberPicker = findViewById(R.id.bedroomNumberPicker);
         ArrowNumberPicker bathroomNumberPicker = findViewById(R.id.bathroomNumberPicker);
         ArrowNumberPicker parkingNumberPicker = findViewById(R.id.parkingNumberPicker);
-        TextView propertyAddress = findViewById(R.id.propertyAddress);
+        priceInputLayout.getEditText().setText(String.valueOf(this.price));
         bedroomNumberPicker.setValue(this.bedroomNumber);
         bathroomNumberPicker.setValue(this.bathroomNumber);
         parkingNumberPicker.setValue(this.parkingNumber);
-        propertyAddress.setText(this.address);
+
+        // set address to autocomplete fragment
+        autocompleteFragment = (AutocompleteFragment) getSupportFragmentManager().findFragmentById(R.id.auto_property_fragment);
+        if (autocompleteFragment == null) {
+            Log.e("isnull", "autocompleteFragment is null");
+            return;
+        }
+        // set address text to UI
+        autocompleteFragment.setAddressText(property.getAddress());
     }
 
+    /**
+     * Update user document with new property
+     * @param activity current activity
+     * @param newProperty new property object
+     * @param propertyId property id returned from firebase
+     */
+    private void updateUserProperty(AppCompatActivity activity, NewProperty newProperty, String propertyId) {
+        Log.i("add-user-property", "updating user document" + propertyId);
+        // create object to update user document
+        HashMap<String, Object> propertyPayload = newProperty.toUpdateUserObject(propertyId);
+        propertyPayload.put("createdAt", new Date());
+        HashMap<String, Object> userUpdatePayload = new HashMap<>();
+        userUpdatePayload.put("properties." + propertyId, propertyPayload);
+        // get user id
+        String userId = new FirebaseAuthHelper(activity).getCurrentUser().getUid();
+        // update user document
+        FirebaseUserRepository userRepository = new FirebaseUserRepository();
+        userRepository.updateUserFields(userId, userUpdatePayload, new UpdateUserCallback() {
+            @Override
+            public void onSuccess(String msg) {
+                enableSubmit();
+                // redirect to main activity on success
+                new BasicSnackbar(findViewById(android.R.id.content),
+                        "Property added successfully",
+                        "success");
+                // delay redirection to main activity for showing snackbar
+                new Handler().postDelayed(() -> {
+                    Intent intent = new Intent(AddPropertyActivity.this, MainActivity.class);
+                    startActivity(intent);
+                }, 1000);
+            }
+            @Override
+            public void onError(String msg) {
+                enableSubmit();
+                String errorMsg = "Error: " + msg;
+                new BasicSnackbar(findViewById(android.R.id.content), errorMsg, "error");
+                Log.e("add-property-failure", msg);
+            }
+        });
+    }
 }

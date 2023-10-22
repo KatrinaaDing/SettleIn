@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.property_management.R;
 import com.example.property_management.data.DistanceInfo;
+import com.example.property_management.utils.Helpers;
 
 import java.util.ArrayList;
 
@@ -34,12 +35,18 @@ public class DistanceAdapter extends RecyclerView.Adapter<DistanceAdapter.Distan
 
     @Override
     public void onBindViewHolder(@NonNull DistanceViewHolder holder, int position) {
+        String address = distanceInfoList.get(position).getBusinessName();
 
-        holder.businessName.setText(distanceInfoList.get(position).getBusinessName());
-        holder.distance.setText(String.valueOf(distanceInfoList.get(position).getDistance()) +" km");
-        holder.driving.setText(distanceInfoList.get(position).getDriving() + " min");
-        holder.publicTransport.setText(distanceInfoList.get(position).getPublicTransport() + " min");
-        holder.walking.setText(distanceInfoList.get(position).getWalking() + " min");
+        holder.businessName.setText(address);
+        holder.distance.setText(String.valueOf(distanceInfoList.get(position).getDistance()));
+        holder.driving.setText(distanceInfoList.get(position).getDriving());
+        holder.transit.setText(distanceInfoList.get(position).getTransit());
+        holder.walking.setText(distanceInfoList.get(position).getWalking());
+
+        // open in google map when click on business name
+        holder.businessName.setOnClickListener(view -> {
+            Helpers.openInGoogleMap(address, context);
+        });
     }
 
     @Override
@@ -48,7 +55,7 @@ public class DistanceAdapter extends RecyclerView.Adapter<DistanceAdapter.Distan
     }
 
     public static final class DistanceViewHolder extends RecyclerView.ViewHolder{
-        TextView businessName, distance, driving, publicTransport, walking;
+        TextView businessName, distance, driving, transit, walking;
 
         public DistanceViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -56,7 +63,7 @@ public class DistanceAdapter extends RecyclerView.Adapter<DistanceAdapter.Distan
             businessName = itemView.findViewById(R.id.detail_business_name);
             distance = itemView.findViewById(R.id.detail_distance);
             driving = itemView.findViewById(R.id.driveTime);
-            publicTransport = itemView.findViewById(R.id.transitTime);
+            transit = itemView.findViewById(R.id.transitTime);
             walking = itemView.findViewById(R.id.walkTime);
 
         }

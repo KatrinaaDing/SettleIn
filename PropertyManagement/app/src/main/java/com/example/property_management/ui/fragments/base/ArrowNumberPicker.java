@@ -66,18 +66,40 @@ public class ArrowNumberPicker extends LinearLayout {
         LinearLayout layout = findViewById(R.id.layout);
         if (direction == 0) {
             layout.setOrientation(LinearLayout.HORIZONTAL);
+            layout.setLayoutDirection(LAYOUT_DIRECTION_RTL);
         } else if (direction == 1) {
             layout.setOrientation(LinearLayout.VERTICAL);
         } else {
             throw new IllegalArgumentException("Invalid 'direction' attribute value. It must be either 'horizontal' or 'vertical'.");
         }
     }
+
+    /**
+     * Set callback for value change
+     * @param callback callback
+     */
     public void setOnValueChangeListener(onValueChangeCallback callback) {
         this.callback = callback;
     }
+
+    /**
+     * Set value of the number picker
+     * @param value value to set
+     */
     public void setValue(int value) {
         this.value = value;
         TextView textViewNumber = findViewById(R.id.textViewNumber);
         textViewNumber.setText(String.valueOf(this.value));
+    }
+
+    /**
+     * Set enabled state of the number picker
+     * @param enabled enabled state
+     */
+    public void setEnabled(boolean enabled) {
+        MaterialButton buttonUp = findViewById(R.id.buttonUp);
+        MaterialButton buttonDown = findViewById(R.id.buttonDown);
+        buttonUp.setEnabled(enabled);
+        buttonDown.setEnabled(enabled);
     }
 }

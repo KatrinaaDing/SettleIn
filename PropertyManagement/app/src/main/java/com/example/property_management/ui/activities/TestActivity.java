@@ -17,7 +17,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
 
-public class TestActivity  extends AppCompatActivity {
+public class TestActivity extends AppCompatActivity {
     private ActivityTestBinding binding;
 
     @Override
@@ -86,39 +86,39 @@ public class TestActivity  extends AppCompatActivity {
         properties.add(new Property("0000000000000",
                 "https://www.example1.com",
                 "11 Charming Street Hampton East VIC 3188",
-                (float) 144.022, (float) 132.102,
+                (double) 144.022, (double) 132.102,
                 4, 2, 1,
-                null, images));
+                null, images, 0));
         properties.add(new Property("1111111111111",
                 "https://www.example2.com",
                 "12 Charming Street Hampton East VIC 3188",
-                (float) 143.022, (float) 132.102,
+                (double) 143.022, (double) 132.102,
                 2, 1, 0,
-                null, images));
+                null, images, 0));
         properties.add(new Property("2222222222222",
                 "https://www.example3.com",
                 "13 Charming Street Hampton East VIC 3188",
-                (float) 145.022, (float) 132.102,
+                (double) 145.022, (double) 132.102,
                 3, 2, 2,
-                null, null));
+                null, null, 0));
         properties.add(new Property("0000000000000",
                 "https://www.example1.com",
                 "11 Charming Street Hampton East VIC 3188",
-                (float) 144.022, (float) 132.102,
+                (double) 144.022, (double) 132.102,
                 4, 2, 1,
-                null, images));
+                null, images, 0));
         properties.add(new Property("1111111111111",
                 "https://www.example2.com",
                 "12 Charming Street Hampton East VIC 3188",
-                (float) 143.022, (float) 132.102,
+                (double) 143.022, (double) 132.102,
                 2, 1, 0,
-                null, images));
+                null, images, 0));
         properties.add(new Property("2222222222222",
                 "https://www.example3.com",
                 "13 Charming Street Hampton East VIC 3188",
-                (float) 145.022, (float) 132.102,
+                (double) 145.022, (double) 132.102,
                 3, 2, 2,
-                null, null));
+                null, null, 0));
 
         RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
         propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));

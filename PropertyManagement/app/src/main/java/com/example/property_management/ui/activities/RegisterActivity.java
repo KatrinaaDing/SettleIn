@@ -2,6 +2,7 @@ package com.example.property_management.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.Button;
@@ -10,12 +11,20 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseAuthHelper;
+import com.example.property_management.api.FirebaseUserRepository;
+import com.example.property_management.callbacks.AddUserCallback;
 import com.example.property_management.callbacks.AuthCallback;
+import com.example.property_management.data.User;
 import com.example.property_management.databinding.ActivityRegisterBinding;
 import com.example.property_management.utils.EmailValidator;
+import com.example.property_management.utils.DateTimeFormatter;
+import com.example.property_management.utils.Helpers;
 import com.example.property_management.utils.PasswordValidator;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseUser;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -37,6 +46,8 @@ public class RegisterActivity extends AppCompatActivity {
 
         // ========================== Listeners ==========================
         submitRegisterBtn.setOnClickListener(view -> {
+            // close keyboard
+            Helpers.closeKeyboard(this);
             if (validateEmail() && validatePassword()) {
 //                Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
 //                startActivity(intent);
@@ -151,20 +162,37 @@ public class RegisterActivity extends AppCompatActivity {
     }
     private void clearConfirmPasswordError() {
         TextInputLayout confirmPasswordLayout = findViewById(R.id.editTextConfirmPassword);
-        String confirmPassword = confirmPasswordLayout.getEditText().getText().toString();
         confirmPasswordLayout.setError(null);
     }
     private void registerUser(String email, String password) {
+        // create user in firebase auth
         FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(this);
         firebaseAuthHelper.createUser(email, password, new AuthCallback() {
             @Override
             public void onSuccess(FirebaseUser user) {
-                Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
-                startActivity(intent);
+                // add created user to firestore
+                User newUserObj = new User(user.getUid(), new ArrayList<>(), new ArrayList<>(), new HashMap<>());
+                FirebaseUserRepository firebaseUserRepository = new FirebaseUserRepository();
+                firebaseUserRepository.addUser(newUserObj, new AddUserCallback() {
+                    @Override
+                    public void onSuccess(String documentId) {
+                        // go to home screen after snackbar displayed
+                        new Handler().postDelayed(() -> {
+                            Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                            startActivity(intent);
+                        }, 1000);
+                    }
+                    @Override
+                    public void onError(String msg) {
+                        System.out.println("Error: " + msg);
+                    }
+                });
+                firebaseAuthHelper.addUsernameToFirestore(user.getUid(), "New User");
             }
             @Override
             public void onFailure(Exception e) {}
         });
 
     }
+
 }

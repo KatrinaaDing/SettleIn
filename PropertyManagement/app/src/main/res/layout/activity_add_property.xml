@@ -12,70 +12,33 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:paddingVertical="50dp"
+        android:paddingBottom="50dp"
         android:paddingHorizontal="20dp"
         >
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-                <TextView
-                    android:id="@+id/inspectionDateLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Inspection Date"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_bias="0.1" />
-
-                <TextView
-                    android:id="@+id/inspectionDate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:clickable="true"
-                    android:text="@string/placeholder_text"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_bias="0.1" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="20dp">
-            <TextView
-                android:id="@+id/inspectionTimeLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Inspection Time"
-                android:paddingTop="20dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintVertical_bias="0.1" />
-
-                <TextView
-                    android:id="@+id/inspectionTime"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:clickable="true"
-                    android:paddingTop="20dp"
-                    android:text="@string/placeholder_text"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="a valid url (can copy): https://www.example.com"
+                android:text="a valid url (can copy): https://www.example.com,
+                https://www.domain.com.au/3-01-83-bay-street-brighton-vic-3186-2018787564,
+                https://www.domain.com.au/24-gardiner-parade-glen-iris-vic-3146-16674780,
+                https://www.domain.com.au/1207-408-lonsdale-street-melbourne-vic-3000-2018776858,
+                https://www.domain.com.au/410-673-latrobe-street-docklands-vic-3008-16651885"
                 android:textIsSelectable="true"
                 android:paddingTop="20dp"
                 android:textColor="@color/purple_500"
+                />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Add from advertisement"
+                android:textStyle="bold"
+                android:textSize="@dimen/medium_title"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
                 />
             <LinearLayout
                 android:layout_width="match_parent"
@@ -87,8 +50,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    app:endIconMode="clear_text"
                     android:hint="Enter url here"
-                    android:paddingVertical="20dp">
+                    android:paddingBottom="20dp">
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -112,13 +76,31 @@
                     app:iconPadding="0dp"
                     app:iconSize="24dp" />
             </LinearLayout>
-
-
             <TextView
-                android:id="@+id/propertyAddress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="" />
+                android:text="---- Or enter information manually ----"
+                android:textSize="@dimen/medium_title"
+                android:textAlignment="center"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Address"
+                android:textStyle="bold"
+                android:textSize="@dimen/medium_title"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                />
+            <fragment
+                android:id="@+id/auto_property_fragment"
+                android:name="com.example.property_management.ui.fragments.base.AutocompleteFragment"
+                tools:layout="@layout/fragment_autocomplete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
 
             <!--  property amenities settings  -->
             <LinearLayout
@@ -126,6 +108,37 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingVertical="10dp">
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    >
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:text="Price"
+                        android:textSize="10pt"
+                        android:layout_weight="1"
+                        android:paddingVertical="10dp"/>
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/priceInputLayout"
+                        android:layout_width="150dp"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:prefixText="$"
+                        app:suffixText="pw"
+                        android:layout_weight="1"
+                        android:hint="Enter Price">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:inputType="number"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
                 <!--  bedroom  -->
                 <LinearLayout
                     android:layout_width="match_parent"

@@ -24,8 +24,9 @@ PropertyManagement/app/src/main
 │           └── property_management
 │               ├── adapters
 │               ├── api (Firebase related classes)
+│               ├── callbacks (Callback interfaces)
 │               ├── data (Entity classes)
-│               ├── mappers (Map entity to model and vice versa)
+│               ├── sensors (Sensor classes)
 │               ├── ui 
 │               │   ├── activities
 │               │   └── fragments
@@ -34,15 +35,9 @@ PropertyManagement/app/src/main
     ├── drawable (Icons and images)
     ├── layout
     ├── menu
-    ├── mipmap-anydpi-v26
-    ├── mipmap-hdpi
-    ├── mipmap-mdpi
-    ├── mipmap-xhdpi
-    ├── mipmap-xxhdpi
-    ├── mipmap-xxxhdpi
+    ├── mipmap
     ├── navigation
     ├── values (constant values and styles)
-    ├── values-night
     └── xml
 
 ```
@@ -59,7 +54,7 @@ Access Property Collection:
 - Add a Property
 
   ```java
-  Property p1 = new Property();
+  NewProperty p1 = new NewProperty();
   p1.setAddress("address");
   p1.setHref("href");
   db.addProperty(p1, new AddPropertyCallback() {
@@ -107,11 +102,39 @@ Access Property Collection:
       }
   });
   ```
+  
 
-- Get all Properties
+Access User Collection:
 
+- Get Instance:
+
+  ```java
+  FirebaseUserRepository db = new FirebaseUserRepository();
   ```
-  db.getAllProperties(new GetAllPropertiesCallback() {
+
+- Update Nested User fields
+
+  ```java
+  HashMap<String, Object> updates = new HashMap<>();
+  String newPropertyId = "abcde";
+  updates.put("properties." + newPropertyId + ".price", 100);
+  db.updateUserFields("t0d69WGyhUMoc1RkckCRfg3Cb7d2", updates, new UpdateUserCallback() {
+          @Override
+      public void onSuccess(String msg) {
+  
+      }
+  
+      @Override
+      public void onError(String msg) {
+  
+      }
+  });
+  ```
+
+- Get all User's Properties
+
+  ```java
+  db.getAllUserProperties(new GetAllUserPropertiesCallback() {
       @Override
       public void onSuccess(ArrayList<Property> properties) {
           Log.d("get-all-properties-onSuccess", "onSuccess: " + properties.size());
@@ -124,33 +147,7 @@ Access Property Collection:
   });
   ```
 
-  
-
-Access User Collection:
-
-- Get Instance:
-
-  ```java
-  FirebaseUserRepository db = new FirebaseUserRepository();
-  ```
-
-- Update User fields
-
-  ```java
-  HashMap<String, Object> updates = new HashMap<>();
-  updates.put("userEmail", "test@email.com");
-  updates.put("userName", "Bob");
-  db.updateUserFields("co9z891lbRxIIDV7zP8L", updates, new UpdateUserCallback() {
-      @Override
-      public void onSuccess(String msg) {
-          Log.d("test", "onSuccess: " + msg);
-      }
-  
-      @Override
-      public void onError(String msg) {
-  
-      }
-  });
-  ```
+## Note for add new interested facility/location
+- Firebase path cannot include space, for example "Melbourne Central" cannot be a key. Instead, I use "Melbourne%20Central" instead.
 
   

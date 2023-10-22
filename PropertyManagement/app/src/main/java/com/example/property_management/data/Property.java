@@ -1,23 +1,27 @@
 package com.example.property_management.data;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 public class Property {
     private String propertyId;
     private String href;
     private String address;
-    private float lat;
-    private float lng;
+    private double lat;
+    private double lng;
     private int numBedrooms;
     private int numBathrooms;
     private int numParking;
+    // public property sensor data
     private HashMap<String, RoomData> propertyData;
-
+    private int price;
     private ArrayList<String> images;
+    private boolean inspected;
+    private Date createdAt;
 
     public Property() {};
-    public Property(String propertyId, String href, String address, float lat, float lng, int numBedrooms, int numBathrooms, int numParking, HashMap<String, RoomData> propertyData, ArrayList<String> images) {
+    public Property(String propertyId, String href, String address, double lat, double lng, int numBedrooms, int numBathrooms, int numParking, HashMap<String, RoomData> propertyData, ArrayList<String> images, int price) {
         this.propertyId = propertyId;
         this.href = href;
         this.address = address;
@@ -28,6 +32,7 @@ public class Property {
         this.numParking = numParking;
         this.propertyData = propertyData;
         this.images = images;
+        this.price = price;
     }
 
     public String getPropertyId() { return propertyId; }
@@ -42,13 +47,13 @@ public class Property {
 
     public void setAddress(String address) { this.address = address; }
 
-    public float getLat() { return lat; }
+    public double getLat() { return lat; }
 
-    public void setLat(float lat) { this.lat = lat; }
+    public void setLat(double lat) { this.lat = lat; }
 
-    public float getLng() { return lng; }
+    public double getLng() { return lng; }
 
-    public void setLng(float lng) { this.lng = lng; }
+    public void setLng(double lng) { this.lng = lng; }
 
     public int getNumBedrooms() { return numBedrooms; }
 
@@ -69,4 +74,16 @@ public class Property {
     public ArrayList<String> getImages() { return images; }
 
     public void setImages(ArrayList<String> images) { this.images = images; }
+
+    public int getPrice() { return price; }
+
+    public void setPrice(int price) { this.price = price; }
+
+    public void setInspected(boolean isInspected) { this.inspected = isInspected; }
+
+    public boolean getInspected() { return inspected; }
+
+    public Date getCreatedAt() { return createdAt; }
+
+    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
 }
