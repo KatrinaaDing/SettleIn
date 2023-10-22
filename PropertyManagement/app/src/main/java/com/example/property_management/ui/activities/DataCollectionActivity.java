@@ -1,5 +1,6 @@
 package com.example.property_management.ui.activities;
 import com.example.property_management.adapters.RoomAdapter;
+import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.SensorCallback;
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -39,10 +40,12 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.property_management.R;
+import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.databinding.ActivityDataCollectionBinding;
 import com.example.property_management.sensors.AudioSensor;
 import com.example.property_management.sensors.CompassSensor;
 import com.example.property_management.sensors.LightSensor;
+import com.example.property_management.ui.fragments.base.BasicSnackbar;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -155,7 +158,7 @@ public class DataCollectionActivity extends AppCompatActivity {
             //onFinishButtonClicked();
 
             // 创建一个映射来保存所有房间的数据
-            Map<String, Map<String, String>> roomDataMap = new HashMap<>();
+            HashMap<String, Object> roomDataMap = new HashMap<>();
 
             for (int i = 0; i < roomsRecyclerView.getChildCount(); i++) {
                 View itemView = roomsRecyclerView.getChildAt(i);
@@ -167,11 +170,11 @@ public class DataCollectionActivity extends AppCompatActivity {
                 String lightValue = viewHolder.lightValueTextView.getText().toString();
                 String compassValue = viewHolder.compassValueTextView.getText().toString();
 
-                Map<String, String> roomInfo = new HashMap<>();
-                roomInfo.put("PhotoCount", photoCount);
-                roomInfo.put("NoiseValue", noiseValue);
-                roomInfo.put("LightValue", lightValue);
-                roomInfo.put("CompassValue", compassValue);
+                HashMap<String, String> roomInfo = new HashMap<>();
+                roomInfo.put("images", photoCount);
+                roomInfo.put("noise", noiseValue);
+                roomInfo.put("brightness", lightValue);
+                roomInfo.put("windowOrientation", compassValue);
 
                 roomDataMap.put(roomName, roomInfo);
             }
@@ -182,11 +185,14 @@ public class DataCollectionActivity extends AppCompatActivity {
             // 转换为字符串并记录
             Log.d("AllRoomData", "Rooms Data: " + roomDataMap.toString());
 
+            //updateInspectedData(roomDataMap);
+            //collectRoomPhotos();
+
             finish();
         });
     }
 
-    public void onFinishButtonClicked() {
+    public void collectRoomPhotos() {
         // get image from adapter
         List<List<Bitmap>> allRoomImages = roomAdapter.getAllRoomImages();
 
@@ -200,16 +206,19 @@ public class DataCollectionActivity extends AppCompatActivity {
 
         // get room image path
         ArrayList<ArrayList<String>> allRoomImagePaths = roomAdapter.getAllRoomImagePaths();
-        for (int i = 0; i < allRoomImagePaths.size(); i++) {
-            List<String> imagePathList = allRoomImagePaths.get(i);
-            StringBuilder sb = new StringBuilder();
-            sb.append("Room ").append(i).append(": ");
-            for (String path : imagePathList) {
-                sb.append(path).append(", ");
-            }
-            Log.d("RoomImagePaths", sb.toString());
-        }
-        logRoomImagePaths();
+
+         for (int i = 0; i < allRoomImagePaths.size(); i++) {
+             List<String> imagePathList = allRoomImagePaths.get(i);
+             StringBuilder sb = new StringBuilder();
+             sb.append("Room ").append(i).append(": ");
+             for (String path : imagePathList) {
+                 sb.append(path).append(", ");
+             }
+             Log.d("RoomImagePaths", sb.toString());
+         }
+         logRoomImagePaths();
+
+
     }
 
     private void saveImageToGallery(Bitmap image, int roomPosition) {
@@ -326,4 +335,27 @@ public class DataCollectionActivity extends AppCompatActivity {
         // Save the note in SharedPreferences
         sharedPreferences.edit().putString("note", note).apply();
     }
+
+    private void updateInspectedData(HashMap<String, Object> inspectedData) {
+        // update ispected status to firebase
+        HashMap<String, Object> payload = new HashMap<>();
+        payload.put("properties." + "AegAQm1de6rcwfhMtJog" + ".inspectedData: ", inspectedData);
+        FirebaseUserRepository userRepository = new FirebaseUserRepository();
+        userRepository.updateUserFields("cvOi8Z768aOvqWZxuCt0nifpsMy1", payload, new UpdateUserCallback() {
+            @Override
+            public void onSuccess(String msg) {
+                Log.i("update-inspectedData-successfully", msg);
+            }
+            @Override
+            public void onError(String msg) {
+                String errorMsg = "Error: " + msg;
+                new BasicSnackbar(findViewById(android.R.id.content), errorMsg, "error");
+                Log.e("update-inspected-failure", msg);
+            }
+        });
+
+    }
+
+
+
 }
