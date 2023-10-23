@@ -201,6 +201,10 @@ public class DataCollectionActivity extends AppCompatActivity {
                 ArrayList<String> imgs = new ArrayList<>();
                 imgs.add(singleRoomData.get("images"));
 
+                Log.d("brightness",String.valueOf(singleRoomData.get("brightness")) );
+                Log.d("noise",String.valueOf(singleRoomData.get("noise")) );
+                Log.d("windowOrientation",String.valueOf(singleRoomData.get("windowOrientation")) );
+
                 RoomData singleRoom = new RoomData(Float.valueOf(singleRoomData.get("brightness")), Float.valueOf(singleRoomData.get("noise")),singleRoomData.get("windowOrientation"), imgs);
 
                 roomData.put(roomName, singleRoom);
