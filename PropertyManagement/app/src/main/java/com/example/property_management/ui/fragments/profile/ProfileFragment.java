@@ -90,15 +90,15 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
         TextView userId = binding.userId;
 
         // ========================= Set Adapters ==========================
-        RecyclerView interestedLocationsRecyclerView = binding.interestedLocationsRecyclerView;
-        interestedLocationsAdapter = new CustomListRecyclerViewAdapter(new ArrayList<>());
-        interestedLocationsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        interestedLocationsRecyclerView.setAdapter(interestedLocationsAdapter);
-
-        RecyclerView interestedFacilitiesRecyclerView = binding.interestedFacilitiesRecyclerView;
-        interestedFacilitiesAdapter = new CustomListRecyclerViewAdapter(new ArrayList<>());
-        interestedFacilitiesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        interestedFacilitiesRecyclerView.setAdapter(interestedFacilitiesAdapter);
+//        RecyclerView interestedLocationsRecyclerView = binding.interestedLocationsRecyclerView;
+//        interestedLocationsAdapter = new CustomListRecyclerViewAdapter();
+//        interestedLocationsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+//        interestedLocationsRecyclerView.setAdapter(interestedLocationsAdapter);
+//
+//        RecyclerView interestedFacilitiesRecyclerView = binding.interestedFacilitiesRecyclerView;
+//        interestedFacilitiesAdapter = new CustomListRecyclerViewAdapter();
+//        interestedFacilitiesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+//        interestedFacilitiesRecyclerView.setAdapter(interestedFacilitiesAdapter);
 
         getUserInfo();
 
@@ -212,7 +212,7 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
                     ArrayList<String> propertyIds = new ArrayList<>(currentUser.getProperties().keySet());
                     ArrayList<String> interestedFacilities = currentUser.getInterestedFacilities();
                     String facilityToDelete = "coles";
-                    deleteInterest(userRepository, propertyIds, true, interestedFacilities, facilityToDelete);
+//                    deleteInterest(userRepository, propertyIds, true, interestedFacilities, facilityToDelete);
                 }
 
             }
@@ -297,14 +297,19 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
         db.getUserInfoById(user.getUid(), new GetUserInfoByIdCallback() {
             @Override
             public void onSuccess(User userObj) {
+                ArrayList propertyIds = new ArrayList<>(userObj.getProperties().keySet());
                 ArrayList<String> userInterestedLocations = userObj.getInterestedLocations();
                 if (userInterestedLocations != null && !userInterestedLocations.isEmpty()) {
-                    interestedLocationsAdapter.updateData(userInterestedLocations);
+//                    interestedLocationsAdapter.setPropertyIds(new ArrayList<>(userObj.getProperties().keySet()));
+//                    interestedLocationsAdapter.updateData(userInterestedLocations);
+                    setInterestedLocationsRecycleView(userInterestedLocations, propertyIds);
                 }
 
                 ArrayList<String> userInterestedFacilities = userObj.getInterestedFacilities();
                 if (userInterestedFacilities != null && !userInterestedFacilities.isEmpty()) {
-                    interestedFacilitiesAdapter.updateData(userInterestedFacilities);
+//                    interestedFacilitiesAdapter.setPropertyIds(new ArrayList<>(userObj.getProperties().keySet()));
+//                    interestedFacilitiesAdapter.updateData(userInterestedFacilities);
+                    setInterestedFacilitiesRecycleView(userInterestedFacilities, propertyIds);
                 }
                 currentUser = userObj;
             }
@@ -337,27 +342,19 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
         emailTextView.setText(newEmail);
     }
 
-    // params: propertyIds: all the property ids of the user
-    // isFacility: true if the interest is a facility, false if it is a location
-    // interestedList: the list of interested facilities or locations before the delete
-    // interest_: the facility or location to be deleted
-    public void deleteInterest(FirebaseUserRepository userRepository, ArrayList<String> propertyIds, Boolean isFacility, ArrayList<String> interestedList,String interest_) {
-        userRepository.deleteInterestedFacilityLocation(propertyIds, isFacility, interestedList, interest_, new DeleteInterestedFacilityCallback() {
-            @Override
-            public void onSuccess(String msg) {
-                // redirect to main activity on success
-                new BasicSnackbar(getActivity().findViewById(android.R.id.content), msg, "success");
-//                        "Success: Deleted interested " + interest_, "success");
-                // do more actions
-            }
+    public void setInterestedLocationsRecycleView(ArrayList<String> interests, ArrayList<String> propertyIds){
+        RecyclerView interestedLocationsRecyclerView = binding.interestedLocationsRecyclerView;
+        interestedLocationsAdapter = new CustomListRecyclerViewAdapter(interests, propertyIds, false);
+        interestedLocationsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        interestedLocationsRecyclerView.setAdapter(interestedLocationsAdapter);
+    }
 
-            @Override
-            public void onError(String msg) {
-                String errorMsg = "Error: " + msg;
-                new BasicSnackbar(getActivity().findViewById(android.R.id.content), errorMsg, "error");
-                Log.e("add-property-failure", msg);
-            }
-        });
+    public void setInterestedFacilitiesRecycleView(ArrayList<String> interests, ArrayList<String> propertyIds){
+        RecyclerView interestedFacilitiesRecyclerView = binding.interestedFacilitiesRecyclerView;
+        interestedFacilitiesAdapter = new CustomListRecyclerViewAdapter(interests, propertyIds, true);
+        interestedFacilitiesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        interestedFacilitiesRecyclerView.setAdapter(interestedFacilitiesAdapter);
+
     }
 
 

@@ -314,7 +314,6 @@ public class FirebaseUserRepository {
         DocumentReference userRef = db.collection("users").document(userId);
 
         // remove the facility from the interestedList
-        interestedList.remove(interest_);
         HashMap<String, Object> payload = new HashMap<>();
 
         if (isFacility) {
