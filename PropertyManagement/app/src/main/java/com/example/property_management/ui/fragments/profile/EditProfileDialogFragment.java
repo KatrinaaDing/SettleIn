@@ -23,6 +23,7 @@ import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.User;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
@@ -110,9 +111,9 @@ public class EditProfileDialogFragment extends DialogFragment {
                         } else if (userInputEmail.isEmpty()) {
 //                        editEmailLayout.setError("Email Cannot be Empty.");
                             new BasicSnackbar(rootView, "Email Cannot be Empty.", "error");
-                        } else if (userInputUsername.equals(username) && userInputEmail.equalsIgnoreCase(email)) {
+                        } else if (userInputUsername.equals(username) && userInputEmail.equalsIgnoreCase(email) && !providePassword.getText().toString().isEmpty()) {
                             new BasicSnackbar(rootView, "Cannot Input the Same Username and Email.", "error");
-                        } else if (userInputProvidePassword.isEmpty()) {
+                        } else if (userInputProvidePassword.isEmpty() && (!userInputUsername.equals(username) || !userInputEmail.equalsIgnoreCase(email)))  {
                             new BasicSnackbar(rootView, "You Must Provide Password to Edit Profile.", "error");
                         } else {
                             // re-authenticate user
@@ -159,6 +160,49 @@ public class EditProfileDialogFragment extends DialogFragment {
                                 new BasicSnackbar(rootView, "Different New Password and Confirm Password.", "error");
                             } else if (!oldPassword.isEmpty() && !newPassword.isEmpty() && oldPassword.equals(newPassword)) {
                                 new BasicSnackbar(rootView, "Same Old Password and New Password.", "error");
+                            } else {
+                                AuthCredential credential = EmailAuthProvider
+                                        .getCredential(user.getEmail(), oldPassword);
+
+                                user.reauthenticate(credential)
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    Log.d("user-auth", "User re-authenticated.");
+                                                    user.updatePassword(newPassword)
+                                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                    if (task.isSuccessful()) {
+                                                                        Log.d("reset-password-success", "User password updated.");
+                                                                        new BasicSnackbar(rootView, "Password Updated Successfully.", "success");
+                                                                    } else {
+                                                                        Log.d("reset-password-failed", "Reset password failed.", task.getException());
+                                                                        new BasicSnackbar(rootView, "Reset password failed.", "error");
+                                                                    }
+                                                                }
+                                                            })
+                                                            .addOnFailureListener(new OnFailureListener() {
+                                                                @Override
+                                                                public void onFailure(@NonNull Exception e) {
+                                                                    Log.e("update-password-error", e.getMessage());
+                                                                }
+                                                            });
+                                                } else {
+                                                    Log.d("user-auth", "User re-authentication failed.", task.getException());
+                                                    new BasicSnackbar(rootView, "User re-authentication failed.", "error");
+                                                }
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                // Handle specific exceptions here for re-authentication
+                                                Log.e("re-auth-error", e.getMessage());
+                                            }
+                                        });
+
                             }
                         }
                     }
