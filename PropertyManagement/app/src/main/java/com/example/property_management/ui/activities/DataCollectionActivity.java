@@ -41,6 +41,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.property_management.R;
 import com.example.property_management.callbacks.UpdateUserCallback;
+import com.example.property_management.data.RoomData;
 import com.example.property_management.databinding.ActivityDataCollectionBinding;
 import com.example.property_management.sensors.AudioSensor;
 import com.example.property_management.sensors.CompassSensor;
@@ -185,7 +186,20 @@ public class DataCollectionActivity extends AppCompatActivity {
             // 转换为字符串并记录
             Log.d("AllRoomData", "Rooms Data: " + roomDataMap.toString());
 
-            //updateInspectedData(roomDataMap);
+            HashMap<String, RoomData> roomData = new HashMap<>(); //将获取的房间数据转化为roomData类
+
+            for (String roomName:roomDataMap.keySet()){
+                HashMap<String,String> singleRoomData = (HashMap<String,String>)roomDataMap.get(roomName);
+                ArrayList<String> imgs = new ArrayList<>();
+                imgs.add(singleRoomData.get("images"));
+
+                RoomData singleRoom = new RoomData(Float.valueOf(singleRoomData.get("brightness")), Float.valueOf(singleRoomData.get("noise")),singleRoomData.get("windowOrientation"), imgs);
+
+                roomData.put(roomName, singleRoom);
+            }
+
+
+            updateInspectedData(roomData);
             //collectRoomPhotos();
 
             finish();
@@ -336,7 +350,7 @@ public class DataCollectionActivity extends AppCompatActivity {
         sharedPreferences.edit().putString("note", note).apply();
     }
 
-    private void updateInspectedData(HashMap<String, Object> inspectedData) {
+    private void updateInspectedData(HashMap<String, RoomData> inspectedData) {
         // update ispected status to firebase
         HashMap<String, Object> payload = new HashMap<>();
         payload.put("properties." + "AegAQm1de6rcwfhMtJog" + ".inspectedData: ", inspectedData);
