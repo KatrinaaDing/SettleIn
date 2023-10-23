@@ -1,5 +1,6 @@
 package com.example.property_management.ui.activities;
 import com.example.property_management.adapters.RoomAdapter;
+import com.example.property_management.api.FirebaseFunctionsHelper;
 import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.SensorCallback;
 import android.Manifest;
@@ -26,6 +27,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.util.Log;
@@ -41,7 +43,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.property_management.R;
 import com.example.property_management.callbacks.UpdateUserCallback;
+import com.example.property_management.data.Property;
 import com.example.property_management.data.RoomData;
+import com.example.property_management.data.UserProperty;
 import com.example.property_management.databinding.ActivityDataCollectionBinding;
 import com.example.property_management.sensors.AudioSensor;
 import com.example.property_management.sensors.CompassSensor;
@@ -115,6 +119,12 @@ public class DataCollectionActivity extends AppCompatActivity {
         //recycle room
         //int roomCount = 3;
 
+
+
+
+
+
+
         // Initialize rooms RecyclerView
         roomsRecyclerView = findViewById(R.id.recycler_view);
 
@@ -180,8 +190,6 @@ public class DataCollectionActivity extends AppCompatActivity {
                 roomDataMap.put(roomName, roomInfo);
             }
 
-            // 现在，您有一个包含所有房间信息的映射结构
-            // 您可以使用 Log.d 或其他记录机制一次性记录整个结构
 
             // 转换为字符串并记录
             Log.d("AllRoomData", "Rooms Data: " + roomDataMap.toString());
@@ -369,6 +377,7 @@ public class DataCollectionActivity extends AppCompatActivity {
         });
 
     }
+
 
 
 
