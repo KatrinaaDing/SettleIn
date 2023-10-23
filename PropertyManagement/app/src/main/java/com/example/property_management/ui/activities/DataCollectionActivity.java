@@ -119,7 +119,25 @@ public class DataCollectionActivity extends AppCompatActivity {
         //recycle room
         //int roomCount = 3;
 
+        //测试，尝试得到指定property的数据，根据默认的id
+        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+        firebaseFunctionsHelper.getPropertyById("Y1HlGIGz52If4Gu6S2dL")
+                .addOnSuccessListener(result -> {
+                    Map<String, Object> resultObj = (Map<String, Object>) result;
+                    // if success, set property data to UI
+                    Log.i("get-property-by-id-success",
+                            "successfully get property data " +
+                                    "and user collected property data");
+                    Property property = (Property) resultObj.get("propertyData");
+                    UserProperty userProperty = (UserProperty) resultObj.get("userPropertyData");
 
+                    Log.d("room num",String.valueOf(property.getNumBedrooms()));
+                    Log.d("room Data", userProperty.getInspectedData().toString());
+                })
+                .addOnFailureListener(e -> {
+                    // if error happens, show error message and hide detail content
+                    Log.e("get-property-by-id-fail", e.getMessage());
+                });
 
 
 
