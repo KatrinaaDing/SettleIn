@@ -162,6 +162,9 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                 holder.compassTestButton.setVisibility(View.GONE);
 
                 holder.editRoomNameIcon.setVisibility(View.GONE);
+                holder.lightValueTextView.setText("11");
+                holder.noiseValueTextView.setText("11");
+                holder.compassValueTextView.setText("11");
                 return;
             }
 

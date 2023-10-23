@@ -365,7 +365,7 @@ public class DataCollectionActivity extends AppCompatActivity {
     private void updateInspectedData(HashMap<String, RoomData> inspectedData) {
         // update ispected status to firebase
         HashMap<String, Object> payload = new HashMap<>();
-        payload.put("properties." + "AegAQm1de6rcwfhMtJog" + ".inspectedData: ", inspectedData);
+        payload.put("properties." + "Y1HlGIGz52If4Gu6S2dL" + ".inspectedData: ", inspectedData);
         FirebaseUserRepository userRepository = new FirebaseUserRepository();
         userRepository.updateUserFields("cvOi8Z768aOvqWZxuCt0nifpsMy1", payload, new UpdateUserCallback() {
             @Override
