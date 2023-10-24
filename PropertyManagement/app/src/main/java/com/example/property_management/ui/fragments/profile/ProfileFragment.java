@@ -224,12 +224,15 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
 
     // ========================= Functions ==========================
     private void showCustomDialog() throws PackageManager.NameNotFoundException {
-        Log.i("dialogView", "here");
+        // remove the existing fragment if exists to avoid duplicate id
+        AutocompleteFragment existingFragment = (AutocompleteFragment)
+                getChildFragmentManager().findFragmentById(R.id.auto_fragment);
+        // if fragment exists, remove it
+        if (existingFragment != null) {
+            getChildFragmentManager().beginTransaction().remove(existingFragment).commitNow();
+        }
+        // inflate the dialog
         View dialogView = getLayoutInflater().inflate(R.layout.custom_interested_location_dialog, null);
-        Log.i("dialogView", "here2");
-
-//        View autocompleteView = dialogView.findViewById(R.id.auto_fragment);
-
 
         // ===== dialog =====
         AlertDialog alertDialog = new MaterialAlertDialogBuilder(getContext())
@@ -251,14 +254,14 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
                             return;
                         }
                         // TODO POST new location to firebase
-                        dialogInterface.dismiss();
+//                        dialogInterface.dismiss();
                     }
                 }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         // clear selected address
                         selectedAddress = "";
-                        dialogInterface.dismiss();
+//                        dialogInterface.dismiss();
                     }
                 }).create();
         alertDialog.show();
