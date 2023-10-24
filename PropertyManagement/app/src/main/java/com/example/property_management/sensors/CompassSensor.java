@@ -5,6 +5,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
+import android.util.Log;
 
 import com.example.property_management.callbacks.SensorCallback;
 
@@ -20,6 +21,8 @@ public class CompassSensor implements SensorEventListener {
     boolean isLastAccelerometerArrayCopied = false;
     boolean isLastMagnetometerArrayCopied = false;
     long lastUpdatedTime = 0;
+
+    private boolean isRecording;
 
     public CompassSensor(Context context, SensorCallback callback) {
         //super(callback);
@@ -69,15 +72,39 @@ public class CompassSensor implements SensorEventListener {
     }
 
     public void startTest() {
+        isRecording = true;
         sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_GAME);
         sensorManager.registerListener(this, magnetometerSensor, SensorManager.SENSOR_DELAY_GAME);
         handler.postDelayed(stopRunnable, 3000);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int count = 0;
+                while (isRecording && count < 30) {
+                    Log.d("isCompassRecording","true");
+                    count++;
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (isRecording) { // 只有当仍在记录时才更新平均值
+                    Log.d("Final compass stop","called");
+                    stopTest();
+                }
+            }
+        }).start();
+
+
     }
 
     public void stopTest() {
         sensorManager.unregisterListener(this, accelerometerSensor);
         sensorManager.unregisterListener(this, magnetometerSensor);
         handler.removeCallbacks(stopRunnable);
+        callback.onCompassTestCompleted();
     }
 
     private String getDirection(float degree) {

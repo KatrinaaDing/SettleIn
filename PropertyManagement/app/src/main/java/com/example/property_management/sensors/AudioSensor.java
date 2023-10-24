@@ -60,7 +60,10 @@ public class AudioSensor {
                     }
                 }
                 double averageDb = sumDb / count;
-                callback.onAverageDbCalculated(averageDb);
+                if (isRecording) { // 只有当仍在记录时才更新平均值
+                    callback.onAverageDbCalculated(averageDb);
+                }
+                callback.onAudioTestCompleted();
             }
         }).start();
     }

@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
@@ -117,59 +118,69 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
-        // Others room
-        String currentRoomName = roomNames.get(position);
-        if ("Others".equals(currentRoomName)) {
-            holder.roomName.setText("Others");
-            // camera function
-            holder.openCameraButton.setVisibility(View.VISIBLE);
-            holder.openCameraButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    showCameraOptionsDialog(holder);
-                }
-            });
+        public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
+            // Others room
+            String currentRoomName = roomNames.get(position);
+            if ("Others".equals(currentRoomName)) {
+                holder.roomName.setText("Others");
+                // camera function
+                holder.openCameraButton.setVisibility(View.VISIBLE);
+                holder.openCameraButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showCameraOptionsDialog(holder);
+                    }
+                });
 
-            int currentPosition = holder.getAdapterPosition();
-            if (currentPosition != RecyclerView.NO_POSITION) {
-                holder.photoCount.setText(roomImages.get(currentPosition).size() + " added");
+                int currentPosition = holder.getAdapterPosition();
+                if (currentPosition != RecyclerView.NO_POSITION) {
+                    holder.photoCount.setText(roomImages.get(currentPosition).size() + " added");
+                }
+
+                holder.photoCount.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showPhotosDialog(holder.getAdapterPosition());
+                    }
+                });
+
+                // other components invisible
+                holder.noiseIcon.setVisibility(View.GONE);
+                holder.lightIcon.setVisibility(View.GONE);
+                holder.compassIcon.setVisibility(View.GONE);
+
+                holder.noiseView.setVisibility(View.GONE);
+                holder.lightView.setVisibility(View.GONE);
+                holder.compassView.setVisibility(View.GONE);
+
+                holder.noiseValueTextView.setVisibility(View.GONE);
+                holder.lightValueTextView.setVisibility(View.GONE);
+                holder.compassValueTextView.setVisibility(View.GONE);
+
+                holder.noiseTestButton.setVisibility(View.GONE);
+                holder.lightTestButton.setVisibility(View.GONE);
+                holder.compassTestButton.setVisibility(View.GONE);
+
+                holder.editRoomNameIcon.setVisibility(View.GONE);
+                holder.lightValueTextView.setText("11");
+                holder.noiseValueTextView.setText("11");
+                holder.compassValueTextView.setText("11");
+                return;
             }
 
-            holder.photoCount.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    showPhotosDialog(holder.getAdapterPosition());
-                }
-            });
+            // Bind room name
+            if (position == 0) {
+                holder.roomName.setText("Lounge Room");
+            } else {
+                holder.roomName.setText("Room " + position);
+            }
 
-            // other components invisible
-            holder.noiseIcon.setVisibility(View.GONE);
-            holder.lightIcon.setVisibility(View.GONE);
-            holder.compassIcon.setVisibility(View.GONE);
+            //测试
+                holder.lightValueTextView.setText("11");
+                holder.noiseValueTextView.setText("11");
+                holder.compassValueTextView.setText("11");
 
-            holder.noiseView.setVisibility(View.GONE);
-            holder.lightView.setVisibility(View.GONE);
-            holder.compassView.setVisibility(View.GONE);
 
-            holder.noiseValueTextView.setVisibility(View.GONE);
-            holder.lightValueTextView.setVisibility(View.GONE);
-            holder.compassValueTextView.setVisibility(View.GONE);
-
-            holder.noiseTestButton.setVisibility(View.GONE);
-            holder.lightTestButton.setVisibility(View.GONE);
-            holder.compassTestButton.setVisibility(View.GONE);
-
-            holder.editRoomNameIcon.setVisibility(View.GONE);
-            return;
-        }
-
-        // Bind room name
-        if (position == 0) {
-            holder.roomName.setText("Lounge Room");
-        } else {
-            holder.roomName.setText("Room " + position);
-        }
 
         AudioSensor currentAudioSensor = audioSensors.get(position);
         LightSensor currentLightSensor = lightSensors.get(position);
@@ -196,6 +207,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                 ((Activity) context).runOnUiThread(() -> {
 
                     holder.noiseValueTextView.setText(String.format("%.2f dB", currentDb));
+                    Log.d("onCurrentDbCalculated", "onCurrentDbCalculated called");
                 });
             }
 
@@ -203,6 +215,34 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             public void onAverageDbCalculated(double averageDb) {
                 ((Activity) context).runOnUiThread(() -> {
                     holder.noiseValueTextView.setText(String.format("%.2f dB", averageDb));
+                    Log.d("onAverageDbCalculated", "onAverageDbCalculated called");
+                });
+            }
+
+            @Override
+            public void onAudioTestCompleted() {
+                ((Activity) context).runOnUiThread(() -> {
+                    holder.noiseTestButton.setText("Test");
+                    holder.noiseTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
+                    holder.isNoiseTesting = false;
+                });
+            }
+
+            @Override
+            public void onLightTestCompleted() {
+                ((Activity) context).runOnUiThread(() -> {
+                    holder.lightTestButton.setText("Test");
+                    holder.lightTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
+                    holder.isLightTesting = false;
+                });
+            }
+
+            @Override
+            public void onCompassTestCompleted() {
+                ((Activity) context).runOnUiThread(() -> {
+                    holder.compassTestButton.setText("Test");
+                    holder.compassTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
+                    holder.isCompassTesting = false;
                 });
             }
         };
@@ -213,16 +253,110 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
         // Use the callback with the sensors
         holder.noiseTestButton.setOnClickListener(v -> {
-            currentAudioSensor.startTest();
-            Log.d("AiSensor", "startTest() called");
+
+            if (!holder.isNoiseTesting) {
+                // 开始测试
+                holder.isNoiseTesting = true;
+                holder.noiseTestButton.setText("Cancel");
+                holder.noiseTestButton.setBackgroundColor(Color.RED); // 设置为您选择的红色色值
+
+                // 启动测试线程
+                holder.testAudioThread = new Thread(() -> {
+                    currentAudioSensor.startTest();
+                    // 你可以在这里添加其他逻辑
+                });
+                holder.testAudioThread.start();
+
+            } else {
+                // 取消测试
+                holder.isNoiseTesting = false;
+                holder.noiseTestButton.setText("Test");
+                holder.noiseTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
+
+                // 停止测试线程
+                if (holder.testAudioThread != null) {
+                    currentAudioSensor.stopTest(); // 这将设置isRecording为false，并停止音频记录
+                    holder.testAudioThread.interrupt(); // 这将中断线程
+                    holder.testAudioThread = null;
+
+                    // 清除TextView
+                    holder.noiseValueTextView.setText("--");
+                    Log.d("noiseValue set to --","noiseValue set to -- ");
+                }
+            }
+
         });
 
         holder.lightTestButton.setOnClickListener(v -> {
-            currentLightSensor.startTest();
+            if (!holder.isLightTesting) {
+                // 开始测试
+                holder.isLightTesting = true;
+                holder.lightTestButton.setText("Cancel");
+                holder.lightTestButton.setBackgroundColor(Color.RED); // 设置为您选择的红色色值
+
+                // 启动测试线程
+                holder.testLightThread = new Thread(() -> {
+                    currentLightSensor.startTest();
+                    // 你可以在这里添加其他逻辑
+                });
+                holder.testLightThread.start();
+
+            } else {
+                // 取消测试
+                holder.isLightTesting = false;
+                holder.lightTestButton.setText("Test");
+                holder.lightTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
+
+                // 停止测试线程
+                if (holder.testLightThread != null) {
+                    currentLightSensor.stopTest(); // 这将设置isRecording为false，并停止音频记录
+                    holder.testLightThread.interrupt(); // 这将中断线程
+                    holder.testLightThread = null;
+
+                    // 清除TextView
+                    holder.lightValueTextView.setText("--");
+                    Log.d("lightValue set to --","lightValue set to -- ");
+                }
+            }
+
+
         });
 
         holder.compassTestButton.setOnClickListener(v -> {
-            currentCompassSensor.startTest();
+
+
+            if (!holder.isCompassTesting) {
+                // 开始测试
+                holder.isCompassTesting = true;
+                holder.compassTestButton.setText("Cancel");
+                holder.compassTestButton.setBackgroundColor(Color.RED); // 设置为您选择的红色色值
+
+                // 启动测试线程
+                holder.testCompassThread = new Thread(() -> {
+                    currentCompassSensor.startTest();
+                    // 你可以在这里添加其他逻辑
+                });
+                holder.testCompassThread.start();
+
+            } else {
+                // 取消测试
+                holder.isCompassTesting = false;
+                holder.compassTestButton.setText("Test");
+                holder.compassTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
+
+                // 停止测试线程
+                if (holder.testCompassThread != null) {
+                    currentCompassSensor.stopTest(); // 这将设置isRecording为false，并停止音频记录
+                    holder.testCompassThread.interrupt(); // 这将中断线程
+                    holder.testCompassThread = null;
+
+                    // 清除TextView
+                    holder.compassValueTextView.setText("--");
+                    Log.d("comapssValue set to --","compassValue set to -- ");
+                }
+            }
+
+
         });
 
         if (!initializedRooms.contains(position)) {
@@ -448,8 +582,12 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     }
 
    // test camera function
-    public static List<List<Bitmap>> getRoomImages() {
-        return roomImages;
+   public List<List<Bitmap>> getAllRoomImages() {
+       return roomImages;
+   }
+
+    public ArrayList<ArrayList<String>> getAllRoomImagePaths() {
+        return roomImagePaths;
     }
 
     // photo display
@@ -586,11 +724,23 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
+        //测试
+        public boolean isNoiseTesting = false;
+        public boolean isLightTesting = false;
+        public boolean isCompassTesting = false;
+
+        public Thread testAudioThread;
+        public Thread testLightThread;
+        public Thread testCompassThread;
+
         ImageView editRoomNameIcon;
-        TextView roomName;
+        public TextView roomName;
         ImageView cameraIcon, noiseIcon, lightIcon, compassIcon;
         TextView imageView, noiseView, lightView, compassView;
-        TextView photoCount, noiseValueTextView, lightValueTextView, compassValueTextView;
+        public TextView photoCount;
+        public TextView noiseValueTextView;
+        public TextView lightValueTextView;
+        public TextView compassValueTextView;
         Button openCameraButton, noiseTestButton, lightTestButton, compassTestButton;
         PreviewView previewView;
 
