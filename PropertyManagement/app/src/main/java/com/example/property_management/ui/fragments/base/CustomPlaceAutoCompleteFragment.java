@@ -1,6 +1,7 @@
 package com.example.property_management.ui.fragments.base;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +21,12 @@ public class CustomPlaceAutoCompleteFragment extends AutocompleteSupportFragment
     public void onActivityResult(int i, int i1, Intent intent) {
         super.onActivityResult(i, i1, intent);
         // set full address to search bar
-        setText(place.getAddress());
+        if (place != null) {
+            Log.i("autocomplete-place", "onActivityResult: " + place.getAddress());
+            setText(place.getAddress());
+        } else {
+            Log.i("autocomplete-place", "Place is null");
+        }
     }
 
     public void setPlace(Place place) {

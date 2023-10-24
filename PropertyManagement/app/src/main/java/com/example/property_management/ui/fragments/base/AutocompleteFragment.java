@@ -2,6 +2,7 @@ package com.example.property_management.ui.fragments.base;
 
 import static android.content.ContentValues.TAG;
 
+import android.app.Activity;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import com.example.property_management.R;
 import com.example.property_management.databinding.FragmentAutocompleteBinding;
 import com.example.property_management.ui.activities.AddPropertyActivity;
+import com.example.property_management.ui.activities.MainActivity;
 import com.google.android.gms.common.api.Status;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
@@ -74,11 +76,15 @@ public class AutocompleteFragment extends Fragment {
                     lng = place.getLatLng().longitude;
 
                     // Access the parent activity
-                    AddPropertyActivity parentActivity = (AddPropertyActivity) getActivity();
+                    Activity parentActivity = getActivity();
+                    View submitBtn = null;
+                    if (parentActivity instanceof AddPropertyActivity) {
+                        AddPropertyActivity addPropertyActivity = (AddPropertyActivity) parentActivity;
+                        submitBtn = addPropertyActivity.binding.submitBtn;
+                    }
 
-                    if (parentActivity != null) {
+                    if (submitBtn != null) {
                         // Call the method in the parent activity
-                        View submitBtn = parentActivity.binding.submitBtn;
                         submitBtn.setEnabled(true);
                     }
                 }
