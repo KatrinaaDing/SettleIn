@@ -297,21 +297,12 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
         db.getUserInfoById(user.getUid(), new GetUserInfoByIdCallback() {
             @Override
             public void onSuccess(User userObj) {
-                ArrayList propertyIds = new ArrayList<>(userObj.getProperties().keySet());
-                ArrayList<String> userInterestedLocations = userObj.getInterestedLocations();
-                if (userInterestedLocations != null && !userInterestedLocations.isEmpty()) {
-//                    interestedLocationsAdapter.setPropertyIds(new ArrayList<>(userObj.getProperties().keySet()));
-//                    interestedLocationsAdapter.updateData(userInterestedLocations);
-                    setInterestedLocationsRecycleView(userInterestedLocations, propertyIds);
-                }
-
-                ArrayList<String> userInterestedFacilities = userObj.getInterestedFacilities();
-                if (userInterestedFacilities != null && !userInterestedFacilities.isEmpty()) {
-//                    interestedFacilitiesAdapter.setPropertyIds(new ArrayList<>(userObj.getProperties().keySet()));
-//                    interestedFacilitiesAdapter.updateData(userInterestedFacilities);
-                    setInterestedFacilitiesRecycleView(userInterestedFacilities, propertyIds);
-                }
                 currentUser = userObj;
+
+//                ArrayList propertyIds = new ArrayList<>(userObj.getProperties().keySet());
+//                ArrayList<String> userInterestedLocations = userObj.getInterestedLocations();
+                setInterestedLocationsRecycleView();
+                setInterestedFacilitiesRecycleView();
             }
 
             @Override
@@ -342,22 +333,24 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
         emailTextView.setText(newEmail);
     }
 
-    public void setInterestedLocationsRecycleView(ArrayList<String> interests, ArrayList<String> propertyIds){
+    public void setInterestedLocationsRecycleView(){
         RecyclerView interestedLocationsRecyclerView = binding.interestedLocationsRecyclerView;
-        interestedLocationsAdapter = new CustomListRecyclerViewAdapter(interests, propertyIds, false);
+        interestedLocationsAdapter = new CustomListRecyclerViewAdapter(currentUser, false);
         interestedLocationsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         interestedLocationsRecyclerView.setAdapter(interestedLocationsAdapter);
     }
 
-    public void setInterestedFacilitiesRecycleView(ArrayList<String> interests, ArrayList<String> propertyIds){
+    public void setInterestedFacilitiesRecycleView(){
         RecyclerView interestedFacilitiesRecyclerView = binding.interestedFacilitiesRecyclerView;
-        interestedFacilitiesAdapter = new CustomListRecyclerViewAdapter(interests, propertyIds, true);
+        interestedFacilitiesAdapter = new CustomListRecyclerViewAdapter(currentUser, true);
         interestedFacilitiesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         interestedFacilitiesRecyclerView.setAdapter(interestedFacilitiesAdapter);
 
     }
 
-
+    public User getProfileUser() {
+        return currentUser;
+    }
 
     public void refreshFragment() {
         // refresh the fragment
@@ -366,25 +359,6 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
     }
 
     public void addNewFacility(String facilityToAdd) {
-        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
-
-        firebaseFunctionsHelper.addInterestedFacility(user.getUid(), facilityToAdd)
-                .addOnSuccessListener(result -> {
-                    if (result.equals("success")) {
-                        Log.i("add-interested-facility-success", result);
-                        new BasicSnackbar(getActivity().findViewById(android.R.id.content),
-                                "Success: Added new facility.", "success");
-                    } else {
-                        Log.e("add-interested-facility-fail", result);
-                        new BasicSnackbar(getActivity().findViewById(android.R.id.content),
-                                "Error: Failed to add new facility.", "error");
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    // pop error at input box
-                    Log.e("add-interested-facility-fail", e.getMessage());
-                    new BasicSnackbar(getActivity().findViewById(android.R.id.content),
-                            e.getMessage(), "error");
-                });
+        interestedFacilitiesAdapter.addNewFacility(facilityToAdd);
     }
 }

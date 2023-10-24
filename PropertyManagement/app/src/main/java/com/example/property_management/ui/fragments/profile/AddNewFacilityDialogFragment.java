@@ -17,10 +17,15 @@ import androidx.fragment.app.DialogFragment;
 
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseFunctionsHelper;
+import com.example.property_management.data.User;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import java.util.ArrayList;
+
 public class AddNewFacilityDialogFragment extends DialogFragment {
+
+    User user;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -41,13 +46,18 @@ public class AddNewFacilityDialogFragment extends DialogFragment {
                                 System.out.println("getView() is null");
                                 return;
                             }
+
+                            ArrayList<String> interestedFacilities = profileFragment.getProfileUser().getInterestedFacilities();
                             EditText facilityEditText = rootView.findViewById(R.id.facilityEditText);
                             String facilityToAdd = facilityEditText.getText().toString();
+                            // check duplication
+                            if (interestedFacilities.contains(facilityToAdd)) {
+                                new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Error: Facility already exists", "error");
+                                return;
+                            }
+
+                            // add new facility
                             profileFragment.addNewFacility(facilityToAdd);
-                            // refresh ProfileFragment
-                            new Handler().postDelayed(() -> {
-                                profileFragment.refreshFragment();
-                            }, 5000);
 
                         } else {
                             Log.d("AddNewFacilityDialogFragmentError", "ProfileFragment is null");

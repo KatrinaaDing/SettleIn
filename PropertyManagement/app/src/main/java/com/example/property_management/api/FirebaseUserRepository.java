@@ -87,7 +87,13 @@ public class FirebaseUserRepository {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
                         Log.d("get-userinfo-by-id-success", "DocumentSnapshot data: " + document.getData());
-                        callback.onSuccess(document.toObject(User.class));
+                        User user = new User(
+                                document.getId(),
+                                document.get("interestedFacilities") == null ? new ArrayList<>() : (ArrayList<String>) document.get("interestedFacilities"),
+                                document.get("interestedLocations") == null ? new ArrayList<>() : (ArrayList<String>) document.get("interestedLocations"),
+                                document.get("properties") == null ? new HashMap<>() : (HashMap<String, UserProperty>) document.get("properties")
+                        );
+                        callback.onSuccess(user);
                     } else {
                         Log.d("get-userinfo-by-id-failure", "No such user");
                         callback.onError("No such user");
