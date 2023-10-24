@@ -56,6 +56,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -65,6 +66,10 @@ import androidx.annotation.Nullable;
 
 public class DataCollectionActivity extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_CAMERA = 1;
+    // initial room data and property id
+    private HashMap<String, RoomData> initialInspectedData;
+    private String propertyId;
+
     private @NonNull ActivityDataCollectionBinding binding;
     private LightSensor lightSensor;
     private CompassSensor compassSensor;
@@ -119,6 +124,13 @@ public class DataCollectionActivity extends AppCompatActivity {
         //recycle room
         //int roomCount = 3;
 
+        // retrieve user's collected data from previous intent
+        // if no inspected data, initialInspectedDat will be empty HashMap {}
+        Intent intent = getIntent();
+        initialInspectedData = (HashMap<String, RoomData>) intent.getSerializableExtra("inspectedData");
+        propertyId = intent.getStringExtra("propertyId");
+        Log.i("get-initial-inspectedData", initialInspectedData.toString());
+
         //测试，尝试得到指定property的数据，根据默认的id
         FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
         firebaseFunctionsHelper.getPropertyById("Y1HlGIGz52If4Gu6S2dL")
@@ -138,10 +150,6 @@ public class DataCollectionActivity extends AppCompatActivity {
                     // if error happens, show error message and hide detail content
                     Log.e("get-property-by-id-fail", e.getMessage());
                 });
-
-
-
-
 
         // Initialize rooms RecyclerView
         roomsRecyclerView = findViewById(R.id.recycler_view);

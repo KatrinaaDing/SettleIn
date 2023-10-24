@@ -1,8 +1,9 @@
 package com.example.property_management.data;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class RoomData {
+public class RoomData implements Serializable {
     private float brightness;
     private float noise;
     private String windowOrientation;

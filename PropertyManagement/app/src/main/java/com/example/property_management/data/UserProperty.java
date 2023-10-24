@@ -1,5 +1,7 @@
 package com.example.property_management.data;
 
+import androidx.annotation.NonNull;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -69,4 +71,19 @@ public class UserProperty {
     public Date getCreatedAt() { return createdAt; }
     public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
 
+    @NonNull
+    @Override
+    public String toString() {
+        return "UserProperty{" +
+                "propertyId='" + propertyId + '\'' +
+                ", inspected=" + inspected +
+                ", inspectionDate='" + inspectionDate + '\'' +
+                ", inspectionTime='" + inspectionTime + '\'' +
+                ", notes='" + notes + '\'' +
+                ", price=" + price +
+                ", createdAt=" + createdAt +
+                ", distances=" + distances +
+                ", inspectedData=" + inspectedData +
+                '}';
+    }
 }
