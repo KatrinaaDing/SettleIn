@@ -108,6 +108,8 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         Button dataCollectionBtn = findViewById(R.id.dataCollectionBtn);
         dataCollectionBtn.setOnClickListener(view -> {
             Intent newIntent = new Intent(this, DataCollectionActivity.class);
+            newIntent.putExtra("propertyId", this.propertyId);
+            newIntent.putExtra("inspectedData", this.userProperty.getInspectedData());
             startActivity(newIntent);
         });
 
@@ -265,6 +267,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                                     "and user collected property data");
                     property = (Property) resultObj.get("propertyData");
                     userProperty = (UserProperty) resultObj.get("userPropertyData");
+
                     // set ui
                     binding.detailAddressTxt.setText(property.getAddress());
                     setInspectionDateTimeText();
@@ -280,7 +283,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 })
                 .addOnFailureListener(e -> {
                     // if error happens, show error message and hide detail content
-                    Log.e("get-property-by-id-fail", e.getMessage());
+                    Log.e("get-property-by-id-fail", "failed to get property: " + e.getMessage());
                     ScrollView detailContent = binding.detailContent;
                     detailContent.setVisibility(View.GONE);
                     setError(true);

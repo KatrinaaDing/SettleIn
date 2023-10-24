@@ -308,10 +308,7 @@ public class FirebaseFunctionsHelper {
                 String inspectionTime = result.get("inspectionTime") == null
                         ? ""
                         : (String) result.get("inspectionTime");
-                // parse createdAt timestamp
-                Date createdAt = result.get("createdAt") == null
-                        ? new Date()
-                        : new Date(((Double) result.get("createdAt")).longValue());
+
                 UserProperty userPropertyData = new UserProperty(
                         (String) result.get("propertyId"),
                         inspected,
@@ -341,13 +338,20 @@ public class FirebaseFunctionsHelper {
     private HashMap<String, RoomData> getRoomsData(Map<String, Object> result, String key) {
         // convert propertyData for each room to HashMap<String, RoomData>
         HashMap<String, RoomData> propertyRoomsData = new HashMap<>();
-        if (result.get("propertyData") != null) {
-            Map<String, Object> publicRoomsData = (Map<String, Object>) result.get(key);
-            for (String roomName : publicRoomsData.keySet()) {
-                Map<String, Object> entry = (Map<String, Object>) publicRoomsData.get(roomName);
-                float brightness = (float) entry.get("brightness");
-                float noise = (float) entry.get("noise");
-                String windowOrientation = (String) entry.get("windowOrientation");
+        if (result.get(key) != null) {
+            Map<String, Object> roomsData = (Map<String, Object>) result.get(key);
+            // for each room, create RoomData object
+            for (String roomName : roomsData.keySet()) {
+                Map<String, Object> entry = (Map<String, Object>) roomsData.get(roomName);
+                float brightness = entry.get("brightness")  == null
+                        ? 0
+                        : ((Double) entry.get("brightness")).floatValue();
+                float noise = entry.get("noise") == null
+                        ? 0
+                        : ((Double) entry.get("noise")).floatValue();
+                String windowOrientation = entry.get("windowOrientation") == null
+                        ? null
+                        : (String) entry.get("windowOrientation");
                 ArrayList<String> images = (ArrayList<String>) entry.get("images");
 
                 RoomData singleRoomData = new RoomData(brightness, noise, windowOrientation, images);

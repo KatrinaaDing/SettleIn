@@ -33,6 +33,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.property_management.R;
+import com.example.property_management.data.RoomData;
 import com.example.property_management.databinding.ActivityDataCollectionBinding;
 import com.example.property_management.sensors.AudioSensor;
 import com.example.property_management.sensors.CompassSensor;
@@ -41,12 +42,17 @@ import com.example.property_management.sensors.LightSensor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import androidx.annotation.Nullable;
 
 public class DataCollectionActivity extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_CAMERA = 1;
+    // initial room data and property id
+    private HashMap<String, RoomData> initialInspectedData;
+    private String propertyId;
+
     private @NonNull ActivityDataCollectionBinding binding;
     private LightSensor lightSensor;
     private CompassSensor compassSensor;
@@ -99,6 +105,12 @@ public class DataCollectionActivity extends AppCompatActivity {
         requestStoragePermission();
         //recycle room
         //int roomCount = 3;
+
+        // retrieve user's collected data from previous intent
+        // if no inspected data, initialInspectedDat will be empty HashMap {}
+        Intent intent = getIntent();
+        initialInspectedData = (HashMap<String, RoomData>) intent.getSerializableExtra("inspectedData");
+        propertyId = intent.getStringExtra("propertyId");
 
         // Initialize rooms RecyclerView
         roomsRecyclerView = findViewById(R.id.recycler_view);
