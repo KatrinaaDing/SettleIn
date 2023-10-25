@@ -298,11 +298,14 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
 
     @Override
     public void onProfileUpdated(String newUsername, String newEmail) {
+        if (!newUsername.isEmpty()) {
+            TextView UsernameTextView = getView().findViewById(R.id.userName);
+            UsernameTextView.setText(newUsername);
+        }
 
-        TextView UsernameTextView = getView().findViewById(R.id.userName);
-        UsernameTextView.setText(newUsername);
-
-        TextView emailTextView = getView().findViewById(R.id.userEmail);
-        emailTextView.setText(newEmail);
+        if (!newEmail.isEmpty()) {
+            TextView emailTextView = getView().findViewById(R.id.userEmail);
+            emailTextView.setText(newEmail);
+        }
     }
 }

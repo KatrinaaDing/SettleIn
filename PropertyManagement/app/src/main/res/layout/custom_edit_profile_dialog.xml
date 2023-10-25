@@ -79,7 +79,7 @@
                 android:id="@+id/providePassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPassword"/>
+                android:inputType="textPassword" />
 
             <Button
                 android:id="@+id/btnUpdateEmail"
@@ -98,52 +98,11 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="10dp"/>
 
-<!--        <com.google.android.material.textfield.TextInputLayout-->
-<!--            android:id="@+id/editOldPasswordLayout"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:hint="Old Password"-->
-<!--            app:endIconMode="password_toggle">-->
-
-<!--            <com.google.android.material.textfield.TextInputEditText-->
-<!--                android:id="@+id/editOldPassword"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:inputType="textPassword"/>-->
-<!--        </com.google.android.material.textfield.TextInputLayout>-->
-
-<!--        <com.google.android.material.textfield.TextInputLayout-->
-<!--            android:id="@+id/editNewPasswordLayout"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:hint="New Password"-->
-<!--            app:endIconMode="password_toggle">-->
-
-<!--            <com.google.android.material.textfield.TextInputEditText-->
-<!--                android:id="@+id/editNewPassword"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:inputType="textPassword"/>-->
-<!--        </com.google.android.material.textfield.TextInputLayout>-->
-
-<!--        <com.google.android.material.textfield.TextInputLayout-->
-<!--            android:id="@+id/editConfirmPasswordLayout"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:hint="Confirm Password"-->
-<!--            app:endIconMode="password_toggle">-->
-
-<!--            <com.google.android.material.textfield.TextInputEditText-->
-<!--                android:id="@+id/editConfirmPassword"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:inputType="textPassword"/>-->
-<!--        </com.google.android.material.textfield.TextInputLayout>-->
-        <EditText
-            android:id="@+id/etEmail"
+        <TextView
+            android:id="@+id/textView5"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Enter your email"/>
+            android:text="We will send you a link to your email to reset your password." />
 
         <Button
             android:id="@+id/btnResetPassword"
