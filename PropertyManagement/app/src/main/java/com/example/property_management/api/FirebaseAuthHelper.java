@@ -49,16 +49,33 @@ public class FirebaseAuthHelper {
     public FirebaseUser getCurrentUser() {
         return mAuth.getCurrentUser();
     }
-    public void createUser(String email, String password, AuthCallback callback) {
+    public void createUser(String email, String username, String password, AuthCallback callback) {
         mAuth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     // Sign in success, update UI with the signed-in user's information
                     Log.d(TAG, "createUserWithEmail:success");
                     FirebaseUser user = mAuth.getCurrentUser();
-                    showSuccess("User created successfully.");
-                    System.out.println(user);
-                    callback.onSuccess(user);
+
+                    if (user != null) {
+                        // Create a request to update the user's profile with the desired username
+                        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                .setDisplayName(username)
+                                .build();
+
+                        // Update the user's profile with the request
+                        user.updateProfile(profileUpdates)
+                                .addOnCompleteListener(profileTask -> {
+                                    if (profileTask.isSuccessful()) {
+                                        Log.d(TAG, "Username added to user profile");
+                                        showSuccess("User created successfully.");
+                                        callback.onSuccess(user);
+                                    } else {
+                                        Log.w(TAG, "Failed to add username to user profile", profileTask.getException());
+                                        callback.onFailure(profileTask.getException());
+                                    }
+                                });
+                    }
 
                 } else {
                     // If sign in fails, display a message to the user.
