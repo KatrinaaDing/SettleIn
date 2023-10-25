@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,10 +51,20 @@ public class AddNewFacilityDialogFragment extends DialogFragment {
                             ArrayList<String> interestedFacilities = profileFragment.getProfileUser().getInterestedFacilities();
                             EditText facilityEditText = rootView.findViewById(R.id.facilityEditText);
                             String facilityToAdd = facilityEditText.getText().toString();
-                            // check duplication
-                            if (interestedFacilities.contains(facilityToAdd)) {
-                                new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Error: Facility already exists", "error");
+
+                            // check if facilityToAdd is empty
+                            if (TextUtils.isEmpty(facilityToAdd)) {
+                                new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Error: Facility cannot be empty", "error");
                                 return;
+                            }
+
+                            // check duplication
+                            for (String facility : interestedFacilities) {
+                                String facility_lower = facility.toLowerCase();
+                                if (facility_lower.equals(facilityToAdd.toLowerCase())) {
+                                    new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Error: Facility already exists", "error");
+                                    return;
+                                }
                             }
 
                             // add new facility

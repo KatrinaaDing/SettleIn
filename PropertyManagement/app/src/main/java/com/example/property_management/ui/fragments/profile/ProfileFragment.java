@@ -85,36 +85,10 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
         // ========================= Components ==========================
         Button editBtn = binding.editBtn;
         ImageButton addFacilityBtn = binding.addFacilityBtn;
+        ImageButton addLocationBtn = binding.addLocationBtn;
         Button logoutBtn = binding.logoutBtn;
-        TextView userEmail = binding.userEmail;
-        TextView userId = binding.userId;
-
-        // ========================= Set Adapters ==========================
-//        RecyclerView interestedLocationsRecyclerView = binding.interestedLocationsRecyclerView;
-//        interestedLocationsAdapter = new CustomListRecyclerViewAdapter();
-//        interestedLocationsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-//        interestedLocationsRecyclerView.setAdapter(interestedLocationsAdapter);
-//
-//        RecyclerView interestedFacilitiesRecyclerView = binding.interestedFacilitiesRecyclerView;
-//        interestedFacilitiesAdapter = new CustomListRecyclerViewAdapter();
-//        interestedFacilitiesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-//        interestedFacilitiesRecyclerView.setAdapter(interestedFacilitiesAdapter);
 
         getUserInfo();
-
-        // ===== Add Location Dialog =====
-        ImageButton addLocationBtn = binding.addLocationBtn;
-        addLocationBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    // launch dialog
-                    showCustomDialog();
-                } catch (PackageManager.NameNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
 
         // ========================= Listeners ==========================
         editBtn.setOnClickListener(new View.OnClickListener() {
@@ -124,10 +98,21 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
             }
         });
 
+        addLocationBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    showAddLocationDialog();
+                } catch (PackageManager.NameNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
         addFacilityBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addFacility();
+                showAddFacilityDialog();
             }
         });
 
@@ -223,49 +208,6 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
     }
 
     // ========================= Functions ==========================
-    private void showCustomDialog() throws PackageManager.NameNotFoundException {
-        // remove the existing fragment if exists to avoid duplicate id
-        AutocompleteFragment existingFragment = (AutocompleteFragment)
-                getChildFragmentManager().findFragmentById(R.id.auto_fragment);
-        // if fragment exists, remove it
-        if (existingFragment != null) {
-            getChildFragmentManager().beginTransaction().remove(existingFragment).commitNow();
-        }
-        // inflate the dialog
-        View dialogView = getLayoutInflater().inflate(R.layout.custom_interested_location_dialog, null);
-
-        // ===== dialog =====
-        AlertDialog alertDialog = new MaterialAlertDialogBuilder(getContext())
-                .setTitle("Add Interested Location")
-                .setView(dialogView)
-                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        AutocompleteFragment autocompleteFragment = (AutocompleteFragment)
-                                getChildFragmentManager().findFragmentById(R.id.auto_fragment);
-                        if (autocompleteFragment == null) {
-                            Log.e("isnull", "autocompleteFragment is null");
-                            return;
-                        }
-                        selectedAddress = autocompleteFragment.getSelectedAddress();
-                        System.out.println("Add Location: " + selectedAddress);
-                        if (selectedAddress.equals("")) {
-                            Toast.makeText(getContext(), "Please select a location", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        // TODO POST new location to firebase
-//                        dialogInterface.dismiss();
-                    }
-                }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        // clear selected address
-                        selectedAddress = "";
-//                        dialogInterface.dismiss();
-                    }
-                }).create();
-        alertDialog.show();
-    }
 
     @Override
     public void onStart() {
@@ -321,10 +263,68 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
         dialog.show(getChildFragmentManager(), "EditProfileDialogFragment");
     }
 
-    public void addFacility() {
+    public void showAddFacilityDialog() {
         DialogFragment dialog = new AddNewFacilityDialogFragment();
         dialog.show(getChildFragmentManager(), "AddNewFacilityDialogFragment");
     }
+
+    private void showAddLocationDialog() throws PackageManager.NameNotFoundException {
+        // remove the existing fragment if exists to avoid duplicate id
+        AutocompleteFragment existingFragment = (AutocompleteFragment)
+                getChildFragmentManager().findFragmentById(R.id.auto_fragment);
+        // if fragment exists, remove it
+        if (existingFragment != null) {
+            getChildFragmentManager().beginTransaction().remove(existingFragment).commitNow();
+        }
+        // inflate the dialog
+        View dialogView = getLayoutInflater().inflate(R.layout.custom_interested_location_dialog, null);
+
+        // ===== dialog =====
+        AlertDialog alertDialog = new MaterialAlertDialogBuilder(getContext())
+                .setTitle("Add Interested Location")
+                .setView(dialogView)
+                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        AutocompleteFragment autocompleteFragment = (AutocompleteFragment)
+                                getChildFragmentManager().findFragmentById(R.id.auto_fragment);
+                        if (autocompleteFragment == null) {
+                            Log.e("isnull", "autocompleteFragment is null");
+                            return;
+                        }
+
+                        selectedAddress = autocompleteFragment.getSelectedAddress();
+                        System.out.println("Add Location: " + selectedAddress);
+
+                        if (selectedAddress == null || selectedAddress.equals("")) {
+                            new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Error: Location cannot be empty", "error");
+                            return;
+                        }
+                        // check duplication
+                        for (String location : currentUser.getInterestedLocations()) {
+                            String location_lower = location.toLowerCase();
+                            if (location_lower.equals(selectedAddress.toLowerCase())) {
+                                new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Error: Location already exists", "error");
+                                return;
+                            }
+                        }
+                        addNewLocation(selectedAddress);
+                    }
+                }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // clear selected address
+                        selectedAddress = "";
+//                        dialogInterface.dismiss();
+                    }
+                }).create();
+        alertDialog.show();
+    }
+
+//    public void showAddLocationDialog() {
+//        DialogFragment dialog = new AddNewLocationDialogFragment();
+//        dialog.show(getChildFragmentManager(), "AddNewLocationDialogFragment");
+//    }
 
     @Override
     public void onProfileUpdated(String newUsername, String newEmail) {
@@ -355,13 +355,11 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
         return currentUser;
     }
 
-    public void refreshFragment() {
-        // refresh the fragment
-        getParentFragmentManager().beginTransaction().detach(this).commitNowAllowingStateLoss();
-        getParentFragmentManager().beginTransaction().attach(this).commitAllowingStateLoss();
-    }
-
     public void addNewFacility(String facilityToAdd) {
         interestedFacilitiesAdapter.addNewFacility(facilityToAdd);
+    }
+
+    public void addNewLocation(String locationToAdd) {
+        interestedLocationsAdapter.addNewLocation(locationToAdd);
     }
 }
