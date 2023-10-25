@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
@@ -131,6 +132,16 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         distanceRecycler.setLayoutManager(layoutManager);
         distanceAdapter = new DistanceAdapter(this, distanceInfoList);
         distanceRecycler.setAdapter(distanceAdapter);
+
+        // dynamically set height according to the number of items (max 400dp)
+        int itemHeight = Helpers.dpToPx(this, 80);
+        int totalHeight = distanceInfoList.size() * itemHeight + Helpers.dpToPx(this, 10);
+        int maxHeight = Helpers.dpToPx(this, 400);
+        totalHeight = Math.min(totalHeight, maxHeight);
+
+        ViewGroup.LayoutParams params = distanceRecycler.getLayoutParams();
+        params.height = totalHeight;
+        distanceRecycler.setLayoutParams(params);
     }
 
     @Override
