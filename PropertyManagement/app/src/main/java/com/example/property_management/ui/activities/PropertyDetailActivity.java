@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
@@ -30,6 +31,7 @@ import com.example.property_management.data.Property;
 import com.example.property_management.data.UserProperty;
 import com.example.property_management.sensors.Calendar;
 import com.example.property_management.sensors.LocationSensor;
+import com.example.property_management.ui.fragments.base.InfoButton;
 import com.example.property_management.utils.DateTimeFormatter;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.example.property_management.utils.Helpers;
@@ -103,6 +105,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         getPropertyById(this.propertyId);
 
         // ================================== Components =======================================
+        initInfoButtons();
 
         // ===== dataCollectionBtn =====
         Button dataCollectionBtn = findViewById(R.id.dataCollectionBtn);
@@ -125,12 +128,32 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         }
     }
 
+    private void initInfoButtons() {
+        InfoButton infoButton = findViewById(R.id.distanceHintBtn);
+        infoButton.setTitle("Distances from interested facilities");
+        infoButton.setContent(
+                "- Here list the distance from the property to the nearest interested facilities and locations. \n" +
+                "- You can add more interested locations in the profile page.\n" +
+                "- The facilities that are not within 5km will not be shown here.\n" +
+                "- For new added interested locations/facilities, the distance will be updated in 3 minutes.");
+    }
+
     private void setDistanceRecycler(ArrayList<DistanceInfo> distanceInfoList) {
         distanceRecycler = binding.distanceRecycler;
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
         distanceRecycler.setLayoutManager(layoutManager);
         distanceAdapter = new DistanceAdapter(this, distanceInfoList);
         distanceRecycler.setAdapter(distanceAdapter);
+
+        // dynamically set height according to the number of items (max 400dp)
+        int itemHeight = Helpers.dpToPx(this, 80);
+        int totalHeight = distanceInfoList.size() * itemHeight + Helpers.dpToPx(this, 10);
+        int maxHeight = Helpers.dpToPx(this, 400);
+        totalHeight = Math.min(totalHeight, maxHeight);
+
+        ViewGroup.LayoutParams params = distanceRecycler.getLayoutParams();
+        params.height = totalHeight;
+        distanceRecycler.setLayoutParams(params);
     }
 
     @Override
