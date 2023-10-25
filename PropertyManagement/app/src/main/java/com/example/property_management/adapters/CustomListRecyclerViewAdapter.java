@@ -115,7 +115,7 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
             @Override
             public void onError(String msg) {
                 String errorMsg = "Error: " + msg + ". Please try again.";
-                new BasicSnackbar(((Activity) view.getContext()).findViewById(android.R.id.content), errorMsg, "error");
+                new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), errorMsg, "error");
                 Log.e("add-property-failure", msg);
             }
         });
@@ -152,6 +152,28 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
     public void addNewLocation(String locationToAdd) {
         // TODO
         System.out.println("6666666666666666"+locationToAdd);
+        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+        firebaseFunctionsHelper.addInterestedLocation(user.getUserId(), locationToAdd)
+                .addOnSuccessListener(result -> {
+                    if (result.equals("success")) {
+//                        new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Successfully add new facility", "success");
+                        Log.i("add-interested-facility-success", result);
+
+                        // add new facility to local data
+                        ArrayList<String> interestedLocations = getInterests();
+                        interestedLocations.add(locationToAdd);
+                        notifyItemInserted(interestedLocations.size() - 1);
+                    } else {
+                        new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Error: " + result + " Please try again.", "error");
+                        Log.e("add-interested-location-fail", result);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // pop error at input box
+                    Log.e("add-interested-location-fail", e.getMessage());
+                    new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Error: " + e.getMessage() + " Please try again.", "error");
+                });
+
     }
 }
 
