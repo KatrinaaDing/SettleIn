@@ -1,12 +1,16 @@
 package com.example.property_management.ui.fragments.home;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
+import android.widget.ScrollView;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -21,17 +25,31 @@ import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.GetAllUserPropertiesCallback;
 import com.example.property_management.data.Property;
 import com.example.property_management.databinding.FragmentHomeBinding;
+import com.example.property_management.sensors.LocationSensor;
+import com.example.property_management.ui.activities.PropertyDetailActivity;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
+import com.example.property_management.ui.fragments.base.PropertyCard;
+import com.example.property_management.utils.Helpers;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     private FragmentHomeBinding binding;
 
@@ -39,6 +57,8 @@ public class HomeFragment extends Fragment {
 
     private boolean sortAscending = true;
     private boolean sortTypeIsTime = true;
+    // map fragment
+    GoogleMap gMap;
     private final String ASCENDING_LABEL = "Asc";
     private final String DESCENDING_LABEL = "Desc";
     private final String OLDEST_LABEL = "Oldest";
@@ -75,7 +95,7 @@ public class HomeFragment extends Fragment {
     public void onResume() {
         super.onResume();
         // refresh properties when user returns to home fragment
-        getAllProperties(this.getContext());
+//        getAllProperties(this.getContext());
     }
 
     /**
@@ -91,6 +111,11 @@ public class HomeFragment extends Fragment {
             if (selected.equals("All")) {
                 // on select "All", show all properties
                 renderProperties(allProperties);
+                // reset map
+                if (gMap != null) {
+                    gMap.clear();
+                    addMarkersToMap(gMap, allProperties);
+                }
             } else {
                 // otherwise, filter properties by "inspected" status
                 // reference: https://stackoverflow.com/questions/9146224/arraylist-filter
@@ -100,6 +125,11 @@ public class HomeFragment extends Fragment {
                         .collect(Collectors.toCollection(ArrayList::new));
                 // render filtered properties
                 renderProperties(filteredProperties);
+                // reset map
+                if (gMap != null) {
+                    gMap.clear();
+                    addMarkersToMap(gMap, filteredProperties);
+                }
             }
         });
     }
@@ -173,13 +203,140 @@ public class HomeFragment extends Fragment {
         }
         allProperties.sort(comparator);
         renderProperties(allProperties);
+
     }
 
+    /**
+     * Initialize the toolbar
+     */
     private void initToolbar() {
         ConstraintLayout toolbar = binding.toolbar;
         initFilterMenu();
         initSortMenu();
+        initViewSelectionGroup();
         toolbar.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Initialize the view selection group buttons
+     */
+    private void initViewSelectionGroup() {
+        MaterialButtonToggleGroup listMapToggleButtons = binding.listMapToggleButtons;
+        // select List view by default
+        listMapToggleButtons.check(R.id.listViewBtn);
+        listMapToggleButtons.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            // show corresponding view
+            if (isChecked) {
+                if (checkedId == R.id.listViewBtn) {
+                    binding.propertiesRecyclerView.setVisibility(View.VISIBLE);
+                    binding.sortMenuContainer.setVisibility(View.VISIBLE);
+                    binding.propertiesMapView.setVisibility(View.INVISIBLE);
+
+                } else if (checkedId == R.id.mapViewBtn) {
+                    binding.propertiesRecyclerView.setVisibility(View.GONE);
+                    binding.sortMenuContainer.setVisibility(View.GONE);
+                    binding.propertiesMapView.setVisibility(View.VISIBLE);
+                    binding.selectedPropertyCard.setVisibility(View.GONE);
+                }
+            }
+        });
+    }
+
+    /**
+     * Initialize map fragment
+     */
+    private void initMap() {
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.propertiesMap);
+
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        } else {
+            Log.e("home-fragment", "Map fragment is null.");
+        }
+    }
+
+    /**
+     * Add marker to map showing current property location
+     * @param googleMap google map
+     */
+    @SuppressLint("MissingPermission")
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        // request location permission
+        LocationSensor locationSensor = new LocationSensor(getActivity(), null);
+        locationSensor.requiresPermissions(getActivity());
+        // add user Location
+        if (locationSensor.hasPermission(getActivity())) {
+            googleMap.setMyLocationEnabled(true);
+            // move camera to my location
+            locationSensor.getCurrentLocation().addOnSuccessListener(myLocation -> {
+                if (myLocation != null) {
+                    LatLng myLatLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLng(myLatLng));
+                    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLatLng, 12));
+                }
+            });
+
+        }
+        addMarkersToMap(googleMap, allProperties);
+
+        // show property card onclick markers
+        googleMap.setOnMarkerClickListener(marker -> {
+            Property clickedProperty = (Property) marker.getTag();
+            if (clickedProperty == null) {
+                return false;
+            }
+            // show property card on click open google map
+            PropertyCard propertyCard = binding.selectedPropertyCard;
+            String image;
+            if (clickedProperty.getImages() == null || clickedProperty.getImages().isEmpty()) {
+                image = null;
+            } else {
+                image = clickedProperty.getImages().get(0);
+            }
+            propertyCard.setValues(
+                    clickedProperty.getPropertyId(),
+                    clickedProperty.getAddress(),
+                    clickedProperty.getPrice(),
+                    image,
+                    clickedProperty.getInspected(),
+                    clickedProperty.getNumBedrooms(),
+                    clickedProperty.getNumBathrooms(),
+                    clickedProperty.getNumParking()
+            );
+
+            propertyCard.bringToFront();
+            propertyCard.setVisibility(View.VISIBLE);
+            return true;
+        });
+
+        // hide selected property card when map is clicked
+        googleMap.setOnMapClickListener(latLng -> {
+            binding.selectedPropertyCard.setVisibility(View.GONE);
+        });
+
+        this.gMap = googleMap;
+    }
+
+    private void addMarkersToMap(GoogleMap googleMap, ArrayList<Property> properties) {
+        // add markers to map
+        // add markers
+        for (Property property : properties) {
+            LatLng propertyLatLng = new LatLng(property.getLat(), property.getLng());
+            // add property marker
+            // reference: https://developers.google.com/maps/documentation/android-sdk/marker#maps_android_markers_tag_sample-java
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions
+                    .position(propertyLatLng)
+                    .title(property.getAddress());
+            // set color to indicate if property is inspected
+            if (property.getInspected()) {
+                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+            }
+
+            Marker marker = googleMap.addMarker(markerOptions);
+            marker.setTag(property);
+        }
     }
 
     private void updateSortOrderBtnIcon() {
@@ -236,6 +393,8 @@ public class HomeFragment extends Fragment {
                 } else {
                     // otherwise initialize and display toolbar after all properties are loaded
                     initToolbar();
+                    initMap();
+
                 }
             }
 
@@ -273,6 +432,7 @@ public class HomeFragment extends Fragment {
         propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.VERTICAL, false));
         RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties);
         propertiesRecyclerView.setAdapter(propertyCardAdapter);
+
     }
 
 }

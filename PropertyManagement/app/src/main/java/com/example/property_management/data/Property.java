@@ -86,4 +86,15 @@ public class Property {
     public Date getCreatedAt() { return createdAt; }
 
     public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
+
+    public String toformattedString() {
+        return
+                "Bedrooms: " + numBedrooms + "\n" +
+                "Bathrooms: " + numBathrooms + "\n" +
+                "Parking spaces: " + numParking + "\n" +
+                "Price: " + price + "\n" +
+                "Inspected: " + inspected + "\n" +
+                "Added at: " + createdAt
+                ;
+    }
 }

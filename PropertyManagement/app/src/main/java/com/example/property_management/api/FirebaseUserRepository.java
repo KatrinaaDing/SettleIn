@@ -115,7 +115,6 @@ public class FirebaseUserRepository {
                         if (task.isSuccessful()) {
                             ArrayList<User> users = new ArrayList<>();
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d("get-all-users-success", document.getId() + " => " + document.getData());
                                 User user = document.toObject(User.class);
                                 users.add(user);
                             }

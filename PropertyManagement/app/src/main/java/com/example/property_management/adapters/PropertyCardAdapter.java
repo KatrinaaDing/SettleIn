@@ -32,6 +32,7 @@ import com.example.property_management.data.Property;
 import com.example.property_management.ui.activities.PropertyDetailActivity;
 import com.example.property_management.ui.fragments.base.BasicDialog;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
+import com.example.property_management.ui.fragments.base.PropertyCard;
 import com.example.property_management.ui.fragments.property.AmenitiesGroup;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
@@ -54,7 +55,7 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
         // inflate the view and get the context
         View inflate = LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_property_card, parent, false);
         context = parent.getContext();
-        return new ViewHolder (inflate);
+        return new ViewHolder(inflate);
     }
 
     @Override
@@ -62,6 +63,7 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
         // set values to the view
         Property property = properties.get(position);
         holder.addressView.setText(property.getAddress());
+
         if (property.getPrice() == 0) {
             holder.priceView.setText("Price not available");
         } else {
@@ -87,6 +89,10 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
             intent.putExtra ("property_id", properties.get (position).getPropertyId());
             context.startActivity(intent);
         });
+
+        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) holder.propertyCard.getLayoutParams();
+        layoutParams.setMargins(0, 10, 0, 10);
+        holder.propertyCard.setLayoutParams(layoutParams);
 
         // set on click listener for menu button
         // item 1: view property on map. item 2: delete property
@@ -122,7 +128,7 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
 //                    } else
                     if (id == R.id.property_option_delete) {
                         // handle delete property
-                        confirmDeleteProperty(property);
+                        PropertyCard.confirmDeleteProperty(property.getPropertyId(), context);
                         return true;
                     } else {
                         return false;
@@ -160,48 +166,5 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
         }
     }
 
-    /**
-     * Show a dialog to confirm delete property
-     *
-     * @param property the property to be deleted
-     */
-    private void confirmDeleteProperty(Property property) {
-        BasicDialog dialog = new BasicDialog(true,
-                "Are you sure you want to delete this property?",
-                "This action cannot be undone.",
-                "Cancel", "Delete");
-        dialog.setCallback(new BasicDialogCallback() {
-            @Override
-            public void onLeftBtnClick() {
-                dialog.dismiss();
-            }
-            @Override
-            public void onRightBtnClick() {
-                FirebaseUserRepository firebaseUserRepository = new FirebaseUserRepository();
-                firebaseUserRepository.deleteUserProperty(property.getPropertyId(), new DeletePropertyByIdCallback() {
-                    @Override
-                    public void onSuccess(String msg) {
-                        Activity activity = (Activity) context;
-                        new BasicSnackbar(activity.findViewById(android.R.id.content), msg, "success");
-                        Log.d("property-card-adapter", "delete property success");
-                        // refresh the activity after showing the snackbar
-                        new Handler().postDelayed(() -> {
-                            activity.recreate();
-                        }, 1000);
-                    }
-                    @Override
-                    public void onError(String msg) {
-                        Activity activity = (Activity) context;
-                        new BasicSnackbar(activity.findViewById(android.R.id.content),
-                                msg + ". Please try again later.", "error");
-                        Log.e("property-card-adapter", "delete property failure: " + msg);
 
-                    }
-
-                });
-            }
-        });
-        AppCompatActivity activity = (AppCompatActivity) context;
-        dialog.show(activity.getSupportFragmentManager(), "confirm-delete-property-dialog");
-    }
 }
