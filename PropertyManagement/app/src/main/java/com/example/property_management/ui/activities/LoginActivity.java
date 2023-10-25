@@ -3,7 +3,9 @@ package com.example.property_management.ui.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.View;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,6 +18,7 @@ import com.example.property_management.utils.EmailValidator;
 import com.example.property_management.utils.DateTimeFormatter;
 import com.example.property_management.utils.Helpers;
 import com.example.property_management.utils.PasswordValidator;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -35,6 +38,10 @@ public class LoginActivity extends AppCompatActivity {
         Button goToRegisterBtn = findViewById(R.id.goToRegisterBtn);
         TextInputLayout emailLayout = findViewById(R.id.editTextLoginEmail);
         TextInputLayout passwordLayout = findViewById(R.id.editTextLoginPassword);
+        Button resetPasswordBtn = findViewById(R.id.resetPasswordBtn);
+        TextInputLayout resetPasswordEmailLayout = findViewById(R.id.editTextResetPasswordEmail);
+        Button sendResetEmailBtn = findViewById(R.id.sendResetEmailBtn);
+        //
 
         // ========================== Listeners ==========================
         submitLoginBtn.setOnClickListener(view -> {
@@ -71,6 +78,27 @@ public class LoginActivity extends AppCompatActivity {
         goToRegisterBtn.setOnClickListener(view -> {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             startActivity(intent);
+        });
+        resetPasswordBtn.setOnClickListener(v -> {
+            if (resetPasswordEmailLayout.getVisibility() == View.GONE) {
+                // Show the email input with an animation
+                resetPasswordEmailLayout.setVisibility(View.VISIBLE);
+                resetPasswordEmailLayout.setAlpha(0.0f);
+                resetPasswordEmailLayout.animate().alpha(1.0f).setDuration(300).setListener(null);
+                sendResetEmailBtn.setVisibility(View.VISIBLE);
+                sendResetEmailBtn.setAlpha(0.0f);
+                sendResetEmailBtn.animate().alpha(1.0f).setDuration(300).setListener(null);
+            } else {
+                resetPasswordEmailLayout.setVisibility(View.GONE);
+                sendResetEmailBtn.setVisibility(View.GONE);
+                // Process the email input
+//                String email = resetPasswordEmailLayout.getEditText().getText().toString().trim();
+//                if (TextUtils.isEmpty(email)) {
+//                    resetPasswordEmailLayout.setError("Please enter an email");
+//                    return;
+//                }
+//                sendPasswordResetLink(email);
+            }
         });
     }
 
