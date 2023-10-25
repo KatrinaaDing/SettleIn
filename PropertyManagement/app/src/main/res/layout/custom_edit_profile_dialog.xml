@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="10dp"
-            android:text="Update Username:"
+            android:text="Username:"
             android:textSize="20sp" />
 
         <com.google.android.material.textfield.TextInputLayout
@@ -36,7 +36,23 @@
                 android:id="@+id/editUsername"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
+
+            <Button
+                android:id="@+id/btnUpdateUsername"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Update Username" />
         </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="10dp"
+            android:text="Email:"
+            android:textSize="20sp" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/editEmailLayout"
@@ -49,6 +65,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textEmailAddress"/>
+
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -63,6 +80,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"/>
+
+            <Button
+                android:id="@+id/btnUpdateEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Update Email" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
