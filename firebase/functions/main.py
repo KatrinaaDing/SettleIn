@@ -638,7 +638,6 @@ def keep_letter_number(key):
     return alphanumeric_string
 
 
-
 """
     multiple properties, one interested location addresses
     input: 
@@ -919,6 +918,108 @@ def add_interested_location(req: https_fn.Request) -> Any:
     update_distance2(property_addresses, propertyIds, location, user_ref)
     return "success"
 
+
+# add interested facilities and locations to a new property
+@https_fn.on_call(secrets=["MAPS_API_KEY"])
+def add_interests_to_new_property(req: https_fn.Request) -> Any:
+    # parameters passed from the client.
+    user_id = req.data["userId"]
+    property_id = req.data["propertyId"]
+    if user_id is None or property_id is None:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+            message=(
+                "The function must be called with a parameter, 'userId', 'propertyId' , which must be string."
+            ),
+        )
+    
+    # get user document
+    user_ref = firestore.client().collection(u'users').document(user_id)
+    user = user_ref.get().to_dict()
+
+    # no interested facilities and locations, return directly
+    if "interestedLocations" not in user and "interestedFacilities" not in user:
+        return "success"
+
+    # get property document
+    property_ref = firestore.client().collection(u'properties').document(property_id)
+    property = property_ref.get().to_dict()
+    property_address = property["address"]
+    lat = property["lat"]
+    lng = property["lng"]
+
+    interest_addresses = []
+    interests = []
+    if "interestedFacilities" in user:
+        interests = user["interestedFacilities"]
+        # get address of each nearest interested facility for the property
+        for facility in interests:
+            facility_address = get_nearby(facility, lat, lng)
+            interest_addresses.append(facility_address)
+
+    if "interestedLocations" in user:
+        current_interested_locations = user["interestedLocations"]
+        # combine the key list for interested facilities and locations
+        interests.extend(current_interested_locations)
+        # combine the addresses list for interested facilities and locations
+        interest_addresses.extend(current_interested_locations)
+    
+    path = f'properties.{property_id}.distances'
+
+    # update distance info from property to all the interested facilities/locations
+    update_distance1(property_address, interest_addresses, interests, user_ref, path)
+        
+    return "success"
+
+# # add interested facilities and locations to a new property
+# @https_fn.on_request(secrets=["MAPS_API_KEY"])
+# def add_interests_to_new_property_restful(req: https_fn.Request) -> https_fn.Response:
+#     # parameters passed from the client.
+#     user_id = req.args.get("userId")
+#     property_id = req.args.get("propertyId")
+#     if user_id is None or property_id is None:
+#         return create_error_response(
+#             400,
+#             "The function must be called with a parameter, 'userId', 'propertyId' , which must be string.",
+#         )
+    
+#     # get user document
+#     user_ref = firestore.client().collection(u'users').document(user_id)
+#     user = user_ref.get().to_dict()
+
+#     # no interested facilities and locations, return directly
+#     if "interestedLocations" not in user and "interestedFacilities" not in user:
+#         return "success"
+
+#     # get property document
+#     property_ref = firestore.client().collection(u'properties').document(property_id)
+#     property = property_ref.get().to_dict()
+#     property_address = property["address"]
+#     lat = property["lat"]
+#     lng = property["lng"]
+
+#     interest_addresses = []
+#     interests = []
+#     if "interestedFacilities" in user:
+#         interests = user["interestedFacilities"]
+#         # get address of each nearest interested facility for the property
+#         for facility in interests:
+#             facility_address = get_nearby(facility, lat, lng)
+#             interest_addresses.append(facility_address)
+
+#     if "interestedLocations" in user:
+#         current_interested_locations = user["interestedLocations"]
+#         # combine the key list for interested facilities and locations
+#         interests.extend(current_interested_locations)
+#         # combine the addresses list for interested facilities and locations
+#         interest_addresses.extend(current_interested_locations)
+    
+#     path = f'properties.{property_id}.distances'
+
+#     # update distance info from property to all the interested facilities/locations
+#     update_distance1(property_address, interest_addresses, interests, user_ref, path)
+        
+#     return "success"
 
 # # add a new interested location
 # @https_fn.on_request(secrets=["MAPS_API_KEY"])

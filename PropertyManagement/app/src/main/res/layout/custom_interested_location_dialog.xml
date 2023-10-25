@@ -16,7 +16,11 @@
         android:textColor="@color/grey"
         />
 ]
-
+<!--    <FrameLayout-->
+<!--        android:id="@+id/autocompleteContainer"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent">-->
+<!--    </FrameLayout>-->
    <fragment
         android:id="@+id/auto_fragment"
         android:name="com.example.property_management.ui.fragments.base.AutocompleteFragment"
