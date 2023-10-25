@@ -904,36 +904,16 @@ def add_interested_location(req: https_fn.Request) -> Any:
     properties = get_user_properties_helper(user_id)
     # if the user has no properties
     if len(properties) == 0:
-        return "success"
+        return
     
     propertyIds = [property["propertyId"] for property in properties]
     property_addresses = [property["address"] for property in properties]
     update_distance2(property_addresses, propertyIds, location, user_ref)
-    return "success"
+    return
 
 
 # add interested facilities and locations to a new property
-@https_fn.on_call(secrets=["MAPS_API_KEY"])
-def add_interests_to_new_property(req: https_fn.Request) -> Any:
-    # parameters passed from the client.
-    user_id = req.data["userId"]
-    property_id = req.data["propertyId"]
-    if user_id is None or property_id is None:
-        raise https_fn.HttpsError(
-            code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-            message=(
-                "The function must be called with a parameter, 'userId', 'propertyId' , which must be string."
-            ),
-        )
-    
-    # get user document
-    user_ref = firestore.client().collection(u'users').document(user_id)
-    user = user_ref.get().to_dict()
-
-    # no interested facilities and locations, return directly
-    if "interestedLocations" not in user and "interestedFacilities" not in user:
-        return "success"
-
+def add_interests_to_new_property(user, user_id, property_id):
     # get property document
     property_ref = firestore.client().collection(u'properties').document(property_id)
     property = property_ref.get().to_dict()
@@ -960,9 +940,9 @@ def add_interests_to_new_property(req: https_fn.Request) -> Any:
     path = f'properties.{property_id}.distances'
 
     # update distance info from property to all the interested facilities/locations
+    user_ref = firestore.client().collection(u'users').document(user_id)
     update_distance1(property_address, interest_addresses, interests, user_ref, path)
-        
-    return "success"
+    
 
 # # add interested facilities and locations to a new property
 # @https_fn.on_request(secrets=["MAPS_API_KEY"])
@@ -1073,26 +1053,27 @@ def add_interests_to_new_property(req: https_fn.Request) -> Any:
 #     update_distance2(property_addresses, propertyIds, location, user_ref)
 #     return "success"
 
-# @on_document_written(document="users/{userId}", secrets=["MAPS_API_KEY"])
-# def calculate_distance_on_add_property(event: Event[Change[DocumentSnapshot]]) -> Any:
-#     print("[calculate-distance-on-add-property]", "start")
-#     print("userId", event.params["userId"])
-#     # for an existing uesr, trigger the function
-#     if event.data.before.exists:
-#         # data before update
-#         before_data = event.data.before.to_dict()
-#         before_properties = before_data.get("properties", {})
-#         before_prop_ids = before_properties.keys()
-#         # data after update
-#         after_data = event.data.after.to_dict()
-#         after_properties = after_data.to_dict().get("properties", {})
-#         after_prop_ids = after_properties.keys()
+@on_document_written(document="users/{userId}", secrets=["MAPS_API_KEY"])
+def calculate_distance_on_add_property(event: Event[Change[DocumentSnapshot]]) -> Any:
+    user_id = event.params["userId"]
+    # for an existing uesr, trigger the function
+    if event.data.before.exists:
+        # data before update
+        before_data = event.data.before.to_dict()
+        before_properties = before_data.get("properties", {})
+        before_prop_ids = before_properties.keys()
+        # data after update
+        after_data = event.data.after.to_dict()
+        after_properties = after_data.get("properties", {})
+        after_prop_ids = after_properties.keys()
 
-#         added_prop_ids = list(set(after_prop_ids) - set(before_prop_ids))
-#         deleted_prop_ids = list(set(before_prop_ids) - set(after_prop_ids))
+        added_prop_ids = list(set(after_prop_ids) - set(before_prop_ids))
         
-#         # case 1: user newly added a property
-
-#         print("before:", before_data)
-#         print("after:", after_data)
-    
+        # case 1: user newly added a property
+        if len(added_prop_ids) > 0:
+            print("[calculate-distance-on-add-property]", "user", user_id, "calculate distance for property", added_prop_ids[0])
+            
+            # no interested facilities and locations, return directly
+            if "interestedLocations" not in after_data and "interestedFacilities" not in after_data:
+                return
+            add_interests_to_new_property(after_data, user_id, added_prop_ids[0])
