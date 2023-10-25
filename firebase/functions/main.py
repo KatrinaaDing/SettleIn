@@ -637,6 +637,13 @@ def keep_letter_number(key):
     alphanumeric_string = re.sub(r'[^a-zA-Z0-9]', '', key)
     return alphanumeric_string
 
+def get_duration_abbr(duration):
+    if 'hour' in duration:
+        duration = re.sub(r' hours?', 'h', duration)
+    if 'min' in duration:
+        duration = re.sub(r' mins?', 'm', duration)
+    return duration
+
 
 """
     multiple properties, one interested location addresses
@@ -684,6 +691,7 @@ def update_distance2(origins, propertyIds, destination, user_ref):
             
             distance = x["rows"][i]["elements"][0]["distance"]["text"]
             duration = x["rows"][i]["elements"][0]["duration"]["text"]
+            duration = get_duration_abbr(duration)
 
             # if the destination is not in re, add the distance and travel time of the mode to the destination
             if propertyIds[i] not in re:
@@ -751,6 +759,7 @@ def update_distance1(origin, destinations, interests, user_ref, path):
             # address = x["destination_addresses"][i]
             distance = x["rows"][0]["elements"][i]["distance"]["text"]
             duration = x["rows"][0]["elements"][i]["duration"]["text"]
+            duration = get_duration_abbr(duration)
 
             # if the destination is not in re, add the distance and travel time of the mode to the destination
             if interests[i] not in re:

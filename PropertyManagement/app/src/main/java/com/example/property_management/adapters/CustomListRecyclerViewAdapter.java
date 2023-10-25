@@ -150,8 +150,6 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
 
     // add new location
     public void addNewLocation(String locationToAdd) {
-        // TODO
-        System.out.println("6666666666666666"+locationToAdd);
         FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
         firebaseFunctionsHelper.addInterestedLocation(user.getUserId(), locationToAdd)
                 .addOnSuccessListener(result -> {
