@@ -142,7 +142,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         distanceRecycler = binding.distanceRecycler;
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
         distanceRecycler.setLayoutManager(layoutManager);
-        distanceAdapter = new DistanceAdapter(this, distanceInfoList);
+        distanceAdapter = new DistanceAdapter(this, distanceInfoList, property.getAddress());
         distanceRecycler.setAdapter(distanceAdapter);
 
         // dynamically set height according to the number of items (max 400dp)
@@ -598,7 +598,6 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             }
         }
     }
-
 
     private String formatDateTime(String date, String time) {
         boolean noDate = date == null || date.equals("");
