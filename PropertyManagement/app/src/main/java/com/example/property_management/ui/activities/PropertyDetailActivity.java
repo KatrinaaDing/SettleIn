@@ -31,6 +31,7 @@ import com.example.property_management.data.Property;
 import com.example.property_management.data.UserProperty;
 import com.example.property_management.sensors.Calendar;
 import com.example.property_management.sensors.LocationSensor;
+import com.example.property_management.ui.fragments.base.InfoButton;
 import com.example.property_management.utils.DateTimeFormatter;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.example.property_management.utils.Helpers;
@@ -104,6 +105,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         getPropertyById(this.propertyId);
 
         // ================================== Components =======================================
+        initInfoButtons();
 
         // ===== dataCollectionBtn =====
         Button dataCollectionBtn = findViewById(R.id.dataCollectionBtn);
@@ -124,6 +126,16 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         } else {
             Log.e("PropertyDetailActivity", "Map fragment is null.");
         }
+    }
+
+    private void initInfoButtons() {
+        InfoButton infoButton = findViewById(R.id.distanceHintBtn);
+        infoButton.setTitle("Distances from interested facilities");
+        infoButton.setContent(
+                "- Here list the distance from the property to the nearest interested facilities and locations. \n" +
+                "- You can add more interested locations in the profile page.\n" +
+                "- The facilities that are not within 5km will not be shown here.\n" +
+                "- For new added interested locations/facilities, the distance will be updated in 3 minutes.");
     }
 
     private void setDistanceRecycler(ArrayList<DistanceInfo> distanceInfoList) {

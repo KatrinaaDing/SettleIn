@@ -133,7 +133,7 @@
                         android:insetTop="5dp"
                         android:insetBottom="5dp"
                         app:icon="@drawable/baseline_edit_24"
-                        android:backgroundTint="@color/white"
+                        android:backgroundTint="@color/transparent"
                         app:iconGravity="textStart"
                         app:iconSize="20dp"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -151,7 +151,7 @@
                         android:insetTop="5dp"
                         android:insetBottom="5dp"
                         app:icon="@drawable/baseline_calendar_month_24"
-                        android:backgroundTint="@color/white"
+                        android:backgroundTint="@color/transparent"
                         app:iconGravity="textStart"
                         app:iconSize="20dp"/>
                     <CheckBox
@@ -191,7 +191,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
                     android:layout_marginVertical="10dp"
-                    app:layout_constraintTop_toBottomOf="@+id/detailMapViewTitleTxt"/>
+                    android:layout_marginTop="4dp"
+                    app:layout_constraintTop_toBottomOf="@+id/detailMapViewTitleTxt"
+                    tools:layout_editor_absoluteX="0dp" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <com.google.android.material.divider.MaterialDivider
@@ -206,7 +208,7 @@
                 android:paddingVertical="10dp">
                 <TextView
                     android:id="@+id/detailDistanceTitleTxt"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
                     android:text="Distance From Your Interested Facilities"
@@ -214,6 +216,14 @@
                     android:textSize="@dimen/medium_title"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"/>
+
+                <com.example.property_management.ui.fragments.base.InfoButton
+                    android:id="@+id/distanceHintBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toEndOf="@+id/detailDistanceTitleTxt"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/distance_recycler"
                     android:layout_width="match_parent"
