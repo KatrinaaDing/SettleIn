@@ -111,18 +111,18 @@
                 <!-- sort menu ascending/descending button -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/sort_order_button"
-                    style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+                    style="@style/Widget.Material3.Button.TextButton.Dialog"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:layout_constraintStart_toEndOf="@+id/sort_menu"
                     app:layout_constraintTop_toTopOf="parent"
+                    app:cornerRadius="5dp"
                     android:checkable="false"
                     android:padding="10dp"
                     android:insetBottom="10dp"
+                    android:text="Asc"
                     android:backgroundTint="@color/extraLightGrey"
                     android:insetTop="10dp"
-                    android:drawableTint="@color/black"
-                    app:icon="@drawable/baseline_arrow_upward_24"
                     app:iconGravity="textStart"
                     app:iconSize="20dp" />
 

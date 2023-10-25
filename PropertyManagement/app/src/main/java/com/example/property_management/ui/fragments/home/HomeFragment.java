@@ -38,6 +38,11 @@ public class HomeFragment extends Fragment {
     private ArrayList<Property> allProperties;
 
     private boolean sortAscending = true;
+    private boolean sortTypeIsTime = true;
+    private final String ASCENDING_LABEL = "Asc";
+    private final String DESCENDING_LABEL = "Desc";
+    private final String OLDEST_LABEL = "Oldest";
+    private final String NEWEST_LABEL = "Newest";
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -117,11 +122,7 @@ public class HomeFragment extends Fragment {
         sortOrderBtn.setOnClickListener(view -> {
             sortAscending = !sortAscending;
             // change icon
-            if (sortAscending) {
-                sortOrderBtn.setIconResource(R.drawable.baseline_arrow_upward_24);
-            } else {
-                sortOrderBtn.setIconResource(R.drawable.baseline_arrow_downward_24);
-            }
+            updateSortOrderBtnIcon();
             // sort and render properties
             sortProperties(autoCompleteTextView.getText().toString());
         });
@@ -132,20 +133,26 @@ public class HomeFragment extends Fragment {
      * @param sortType the sort type
      */
     private void sortProperties(String sortType) {
+        MaterialButton sortOrderBtn = binding.sortOrderButton;
+
         // create comparator
         Comparator<Property> comparator = null;
         switch (sortType) {
             case "Price":
                 comparator = Comparator.comparing(Property::getPrice);
+                sortTypeIsTime = false;
                 break;
             case "Beds":
                 comparator = Comparator.comparing(Property::getNumBedrooms);
+                sortTypeIsTime = false;
                 break;
             case "Bathrooms":
                 comparator = Comparator.comparing(Property::getNumBathrooms);
+                sortTypeIsTime = false;
                 break;
             case "Parking Spaces":
                 comparator = Comparator.comparing(Property::getNumParking);
+                sortTypeIsTime = false;
                 break;
             default:
                 // sort by create time by default
@@ -153,10 +160,13 @@ public class HomeFragment extends Fragment {
                 comparator = Comparator.comparing(Property::getCreatedAt);
                 // default "sort by create time" is new to old
                 comparator = comparator.reversed();
+                sortTypeIsTime = true;
         }
         if (comparator == null) {
             return;
         }
+        // update order label
+        updateSortOrderBtnIcon();
         // apply sort order
         if (!sortAscending) {
             comparator = comparator.reversed();
@@ -172,6 +182,14 @@ public class HomeFragment extends Fragment {
         toolbar.setVisibility(View.VISIBLE);
     }
 
+    private void updateSortOrderBtnIcon() {
+        MaterialButton sortOrderBtn = binding.sortOrderButton;
+        if (sortAscending) {
+            sortOrderBtn.setText(sortTypeIsTime ? NEWEST_LABEL : ASCENDING_LABEL);
+        } else {
+            sortOrderBtn.setText(sortTypeIsTime ? OLDEST_LABEL : DESCENDING_LABEL);
+        }
+    }
     /**
      * Wait for firebase authentication to finish
      * @return true if authentication is successful, false otherwise
