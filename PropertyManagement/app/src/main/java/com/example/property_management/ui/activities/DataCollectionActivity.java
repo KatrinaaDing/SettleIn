@@ -496,7 +496,7 @@ public class DataCollectionActivity extends AppCompatActivity {
                 Log.i("update-inspectedData-successfully", msg);
                 // Re-enable the button and reset its text after successful update
                 runOnUiThread(() -> {
-                    binding.finishButton.setEnabled(true);
+                    //binding.finishButton.setEnabled(true);
                     binding.finishButton.setText("Finish");
                 });
             }
@@ -507,7 +507,7 @@ public class DataCollectionActivity extends AppCompatActivity {
                 Log.e("update-inspected-failure", msg);
                 // Re-enable the button and reset its text after successful update
                 runOnUiThread(() -> {
-                    binding.finishButton.setEnabled(true);
+                    //binding.finishButton.setEnabled(true);
                     binding.finishButton.setText("Finish");
                 });
             }
