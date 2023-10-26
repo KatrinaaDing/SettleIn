@@ -257,7 +257,7 @@ public class DataCollectionActivity extends AppCompatActivity {
 
 
             updateInspectedData(propertyId, roomData);
-            //collectRoomPhotos();
+            collectRoomPhotos();
             Toast.makeText(this, "Upload data successfully! ", Toast.LENGTH_SHORT).show();
 
             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
@@ -267,6 +267,8 @@ public class DataCollectionActivity extends AppCompatActivity {
                     finish();
                 }
             }, 3500); // 2000 是延迟的时间（毫秒），即 2 秒
+
+            Log.d("Saved images",roomImagePathsMap.toString());
         });
 
         SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
