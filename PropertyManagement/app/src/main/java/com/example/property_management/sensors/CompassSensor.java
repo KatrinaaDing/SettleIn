@@ -97,7 +97,6 @@ public class CompassSensor implements SensorEventListener {
             }
         }).start();
 
-
     }
 
     public void stopTest() {
