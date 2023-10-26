@@ -43,6 +43,7 @@ import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -79,9 +80,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 //            startActivity(intent);
 //        });
 
-        if (waitForAuth()) {
-            getAllProperties(this.getContext());
-        }
+        waitForAuth();
 
         return root;
     }
@@ -365,52 +364,43 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
     /**
      * Wait for firebase authentication to finish
-     * @return true if authentication is successful, false otherwise
      */
-    private boolean waitForAuth() {
-        // wait until firebase authentication is done
-        binding.loadingText.setText("Signing you in...");
-        // try 5 seconds
-        int tryCount = 0;
-        while (FirebaseAuth.getInstance().getCurrentUser() == null && tryCount < 10) {
-            try {
-                Thread.sleep(500);
-                tryCount++;
-                // set text to text view 'hint'
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+    private void waitForAuth() {
+        FirebaseAuth.getInstance().addAuthStateListener(firebaseAuth -> {
+            FirebaseUser user = firebaseAuth.getCurrentUser();
+            if (user != null) {
+                // User is signed in
+                binding.loadingText.setText("Loading properties...");
+                getAllProperties();
+            } else {
+                // User is signed out
+                binding.loadingText.setText("Sign in failed. Please try again.");
             }
-        }
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            binding.loadingText.setText("Sign in failed. Please try again.");
-            return false;
-        }
-        binding.loadingText.setText("Loading properties...");
-        return true;
+        });
+
     }
 
     /**
      * Get all properties from the db and display them in the recycler view
-     * @param context the context of the fragment
      */
-    private void getAllProperties(Context context) {
+    private void getAllProperties() {
         FirebaseUserRepository db = new FirebaseUserRepository();
         db.getAllUserProperties(new GetAllUserPropertiesCallback() {
             @Override
             public void onSuccess(ArrayList<Property> properties) {
                 allProperties = properties;
-                // sort and render properties
-                sortProperties(binding.sortMenu.getEditText().getText().toString());
-                binding.loadingText.setVisibility(View.GONE);
-
-                if (properties.isEmpty()) {
-                    // show hint if no property exists
-                    binding.hint.setVisibility(View.VISIBLE);
-                } else {
-                    // otherwise initialize and display toolbar after all properties are loaded
-                    initToolbar();
-                    initMap();
-
+                // if the view is valid, sort and render properties
+                if (binding != null && binding.propertiesRecyclerView != null) {
+                    sortProperties(binding.sortMenu.getEditText().getText().toString());
+                    binding.loadingText.setVisibility(View.GONE);
+                    if (properties.isEmpty()) {
+                        // show hint if no property exists
+                        binding.hint.setVisibility(View.VISIBLE);
+                    } else {
+                        // otherwise initialize and display toolbar after all properties are loaded
+                        initToolbar();
+                        initMap();
+                    }
                 }
             }
 
