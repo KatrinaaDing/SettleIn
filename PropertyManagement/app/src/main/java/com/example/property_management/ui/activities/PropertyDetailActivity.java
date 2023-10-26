@@ -22,6 +22,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.property_management.adapters.PropertyConditionAdapter;
 import com.example.property_management.api.FirebaseAuthHelper;
 import com.example.property_management.api.FirebaseFunctionsHelper;
 import com.example.property_management.api.FirebaseUserRepository;
@@ -55,8 +56,10 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 public class PropertyDetailActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -79,6 +82,8 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     String NO_DATE_HINT = "Date not set";
     String NO_TIME_HINT = "Time not set";
     String NO_DATE_TIME_HINT = "Not set";
+    private RecyclerView recyclerView;
+    private PropertyConditionAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,6 +117,15 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             newIntent.putExtra("inspectedData", this.userProperty.getInspectedData());
             startActivity(newIntent);
         });
+
+        recyclerView = findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        // hard code
+        List<String> roomNames = Arrays.asList("Room 1", "Room 2");
+
+        adapter = new PropertyConditionAdapter(this, roomNames);
+
+        recyclerView.setAdapter(adapter);
 
     }
 

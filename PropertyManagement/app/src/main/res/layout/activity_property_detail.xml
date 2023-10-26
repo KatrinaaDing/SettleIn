@@ -243,6 +243,11 @@
                     android:textSize="@dimen/medium_title"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="20dp" />
 
             <Button
                 android:id="@+id/dataCollectionBtn"
