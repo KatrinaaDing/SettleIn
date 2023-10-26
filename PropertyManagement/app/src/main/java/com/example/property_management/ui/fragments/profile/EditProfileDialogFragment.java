@@ -4,11 +4,15 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -16,6 +20,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.property_management.R;
@@ -133,7 +138,6 @@ public class EditProfileDialogFragment extends DialogFragment {
         btnResetPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 FirebaseAuth.getInstance().sendPasswordResetEmail(email)
                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
@@ -154,9 +158,22 @@ public class EditProfileDialogFragment extends DialogFragment {
             }
         });
 
-        builder.setView(view)
-                .setPositiveButton("Save", null);
-        return builder.create();
+        Dialog dialog = builder.setView(view)
+                .setPositiveButton("Save", null)
+                .create();
+
+        // Set the dialog to be full screen
+        int width = ViewGroup.LayoutParams.MATCH_PARENT;
+        int height = ViewGroup.LayoutParams.MATCH_PARENT;
+        dialog.getWindow().setLayout(width, height);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        // set background color according to light/dark theme
+        TypedValue typedValue = new TypedValue();
+        getContext().getTheme().resolveAttribute(com.google.android.material.R.attr.colorOnPrimary, typedValue, true);
+        int color = typedValue.data;
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(color));
+
+        return dialog;
     }
 
     @Override
@@ -164,10 +181,6 @@ public class EditProfileDialogFragment extends DialogFragment {
         super.onStart();
         Dialog dialog = getDialog();
         if (dialog != null) {
-            int width = ViewGroup.LayoutParams.MATCH_PARENT;
-            int height = ViewGroup.LayoutParams.MATCH_PARENT;
-            dialog.getWindow().setLayout(width, height);
-
             Button positiveButton = ((androidx.appcompat.app.AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
 
             positiveButton.setOnClickListener(new View.OnClickListener() {
