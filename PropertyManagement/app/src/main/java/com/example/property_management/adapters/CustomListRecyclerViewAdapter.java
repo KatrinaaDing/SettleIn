@@ -129,7 +129,7 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
         firebaseFunctionsHelper.addInterestedFacility(user.getUserId(), facilityToAdd)
                 .addOnSuccessListener(result -> {
                     if (result.equals("success")) {
-                        new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Successfully add new facility", "success");
+//                        new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Successfully add new facility", "success");
                         Log.i("add-interested-facility-success", result);
 
                         // add new facility to local data
