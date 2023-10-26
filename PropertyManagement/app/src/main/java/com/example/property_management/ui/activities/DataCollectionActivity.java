@@ -88,7 +88,7 @@ public class DataCollectionActivity extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private Map<Integer, List<String>> roomImagePathsMap = new LinkedHashMap<>();
     private int room_num;
-
+    private String notes;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -134,6 +134,7 @@ public class DataCollectionActivity extends AppCompatActivity {
         initialInspectedData = (HashMap<String, RoomData>) intent.getSerializableExtra("inspectedData");
         propertyId = intent.getStringExtra("propertyId");
         room_num = intent.getIntExtra("roomNum", 0);
+        notes = intent.getStringExtra("notes") != null ? intent.getStringExtra("notes") : "";
         Log.i("get-initial-inspectedData", initialInspectedData.toString());
         Log.i("get-propertyId", propertyId);
 
@@ -177,6 +178,8 @@ public class DataCollectionActivity extends AppCompatActivity {
 
         // Initialize SharedPreferences
         sharedPreferences = getSharedPreferences("notes", MODE_PRIVATE);
+        Log.d("loading note in datacollection",notes);
+        saveNote(notes);
 
         Button buttonNote = findViewById(R.id.buttonNote);
 
@@ -205,10 +208,10 @@ public class DataCollectionActivity extends AppCompatActivity {
                 String roomName = viewHolder.roomName.getText().toString();
 
                 // 以下方法将尝试从字符串中提取数字
-                String photoCount = extractNumber(viewHolder.photoCount.getText().toString(), pattern);
+                String photoCount = viewHolder.photoCount.getText().toString();
                 String noiseValue = extractNumber(viewHolder.noiseValueTextView.getText().toString(), pattern);
                 String lightValue = extractNumber(viewHolder.lightValueTextView.getText().toString(), pattern);
-                String compassValue = extractNumber(viewHolder.compassValueTextView.getText().toString(), pattern);
+                String compassValue = viewHolder.compassValueTextView.getText().toString();
 
                 HashMap<String, String> roomInfo = new HashMap<>();
                 roomInfo.put("images", photoCount);
