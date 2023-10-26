@@ -36,13 +36,6 @@
                 android:id="@+id/editUsername"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
-
-            <Button
-                android:id="@+id/btnUpdateUsername"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Update Username" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
@@ -80,13 +73,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword" />
-
-            <Button
-                android:id="@+id/btnUpdateEmail"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Update Email" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView

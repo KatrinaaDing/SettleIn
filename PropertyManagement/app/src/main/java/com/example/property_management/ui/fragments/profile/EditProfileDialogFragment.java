@@ -55,6 +55,7 @@ public class EditProfileDialogFragment extends DialogFragment {
     private Button btnUpdateUsername;
     private Button btnUpdateEmail;
     private Button btnResetPassword;
+    private View view;
 
 
     public interface OnProfileUpdatedListener {
@@ -84,105 +85,51 @@ public class EditProfileDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
         LayoutInflater inflater = requireActivity().getLayoutInflater();
-        final View view = inflater.inflate(R.layout.custom_edit_profile_dialog, null);
+        view = inflater.inflate(R.layout.custom_edit_profile_dialog, null);
 
         editUsername = view.findViewById(R.id.editUsername);
         editUsername.setText(username);
         Log.d("update-name", "onCreateDialog: " + user.getDisplayName());
         editEmail = view.findViewById(R.id.editEmail);
         editEmail.setText(email);
-        btnUpdateUsername = view.findViewById(R.id.btnUpdateUsername);
-        btnUpdateEmail = view.findViewById(R.id.btnUpdateEmail);
         btnResetPassword = view.findViewById(R.id.btnResetPassword);
 
-        btnUpdateUsername.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String userInputUsername = editUsername.getText().toString();
-                View rootView = getActivity().findViewById(android.R.id.content);
-                TextInputLayout editUsernameLayout = view.findViewById(R.id.editUsernameLayout);
-                if (userInputUsername.isEmpty()) {
-                    editUsernameLayout.setError("Username Cannot be Empty.");
-                    Toast.makeText(getActivity(), "Username Cannot be Empty.", Toast.LENGTH_SHORT).show();
-                } else {
-                    UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                            .setDisplayName(userInputUsername)
-                            .build();
-
-                    user.updateProfile(profileUpdates)
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        Log.d("update-username", "Username updated.");
-                                        notifyProfileUpdated(userInputUsername, "");
-                                        dismiss();
-                                        new BasicSnackbar(rootView, "Username updated.", "success");
-                                    } else {
-                                        dismiss();
-                                        Log.d("update-username", "Failed to update username");
-                                        new BasicSnackbar(rootView, "Failed to update username", "error");
-                                    }
-                                }
-                            });
-                }
-
-            }
-        });
-
-        btnUpdateEmail.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String userInputEmail = editEmail.getText().toString();
-                TextInputEditText providePassword = view.findViewById(R.id.providePassword);
-                String userInputProvidePassword = providePassword.getText().toString();
-                TextInputLayout editEmailLayout = view.findViewById(R.id.editEmailLayout);
-                View rootView = getActivity().findViewById(android.R.id.content);
-                if (userInputEmail.isEmpty()) {
-                    editEmailLayout.setError("Email Cannot be Empty.");
-                    Toast.makeText(getActivity(), "Email Cannot be Empty.", Toast.LENGTH_SHORT).show();
-                } else if (userInputProvidePassword.isEmpty()) {
-                    Toast.makeText(getActivity(), "Must provide password to update email", Toast.LENGTH_SHORT).show();
-                } else {
-                    // re-authenticate user
-                    AuthCredential credential = EmailAuthProvider
-                            .getCredential(email, providePassword.getText().toString());
-
-                    user.reauthenticate(credential)
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        Log.d("user-auth", "User re-authenticated.");
-
-                                        user.updateEmail(userInputEmail)
-                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                        if (task.isSuccessful()) {
-                                                            dismiss();
-                                                            Log.d("update-email", "User email address updated.");
-                                                            notifyProfileUpdated("", userInputEmail);
-                                                            new BasicSnackbar(rootView, "Profile Updated Successfully.", "success");
-                                                        } else {
-                                                            Toast.makeText(getActivity(), "Update email failed.", Toast.LENGTH_SHORT).show();
-                                                            dismiss();
-                                                            Log.d("update-email", "Update email failed.", task.getException());
-//                                                            new BasicSnackbar(rootView, "Update email failed.", "error");
-                                                        }
-                                                    }
-                                                });
-                                    } else {
-                                        Log.d("user-auth", "User re-authentication failed.", task.getException());
-                                        Toast.makeText(getActivity(), "User re-authentication failed.", Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            });
-                }
+//        btnUpdateUsername.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                String userInputUsername = editUsername.getText().toString();
+//                View rootView = getActivity().findViewById(android.R.id.content);
+//                TextInputLayout editUsernameLayout = view.findViewById(R.id.editUsernameLayout);
+//                if (userInputUsername.isEmpty()) {
+//                    editUsernameLayout.setError("Username Cannot be Empty.");
+//                    Toast.makeText(getActivity(), "Username Cannot be Empty.", Toast.LENGTH_SHORT).show();
+//                } else {
+//                    UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+//                            .setDisplayName(userInputUsername)
+//                            .build();
+//
+//                    user.updateProfile(profileUpdates)
+//                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+//                                @Override
+//                                public void onComplete(@NonNull Task<Void> task) {
+//                                    if (task.isSuccessful()) {
+//                                        Log.d("update-username", "Username updated.");
+//                                        notifyProfileUpdated(userInputUsername, "");
+//                                        dismiss();
+//                                        new BasicSnackbar(rootView, "Username updated.", "success");
+//                                    } else {
+//                                        dismiss();
+//                                        Log.d("update-username", "Failed to update username");
+//                                        new BasicSnackbar(rootView, "Failed to update username", "error");
+//                                    }
+//                                }
+//                            });
+//                }
+//
+//            }
+//        });
 
 
-            }
-        });
         btnResetPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -207,13 +154,8 @@ public class EditProfileDialogFragment extends DialogFragment {
             }
         });
 
-
         builder.setView(view)
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        EditProfileDialogFragment.this.getDialog().cancel();
-                    }
-                });
+                .setPositiveButton("Save", null);
         return builder.create();
     }
 
@@ -221,11 +163,103 @@ public class EditProfileDialogFragment extends DialogFragment {
     public void onStart() {
         super.onStart();
         Dialog dialog = getDialog();
-        dialog.setCanceledOnTouchOutside(false);
         if (dialog != null) {
             int width = ViewGroup.LayoutParams.MATCH_PARENT;
             int height = ViewGroup.LayoutParams.MATCH_PARENT;
             dialog.getWindow().setLayout(width, height);
+
+            Button positiveButton = ((androidx.appcompat.app.AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
+
+            positiveButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                        String userInputUsername = editUsername.getText().toString();
+                        String userInputEmail = editEmail.getText().toString();
+                        TextInputEditText providePassword = view.findViewById(R.id.providePassword);
+                        String userInputProvidePassword = providePassword.getText().toString();
+                        TextInputLayout editUsernameLayout = view.findViewById(R.id.editUsernameLayout);
+                        TextInputLayout editEmailLayout = view.findViewById(R.id.editEmailLayout);
+                        TextInputLayout providedPasswordLayout = view.findViewById(R.id.providePasswordLayout);
+
+                        View rootView = getActivity().findViewById(android.R.id.content);
+                        if (userInputUsername.isEmpty()) {
+                            Log.d("checkcheck", "onClick: " + editUsernameLayout);
+                            editUsernameLayout.setError("Username Cannot be Empty.");
+                        } else if (userInputEmail.isEmpty()) {
+                            editEmailLayout.setError("Email Cannot be Empty.");
+                        } else if (!userInputEmail.isEmpty() && !userInputEmail.equals(email) && userInputProvidePassword.isEmpty()) {
+                            providedPasswordLayout.setError("Must provide password to update email");
+                        } else {
+                            editUsernameLayout.setError(null);
+                            editEmailLayout.setError(null);
+                            providedPasswordLayout.setError(null);
+
+                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                    .setDisplayName(userInputUsername)
+                                    .build();
+
+                            if (!userInputUsername.equals(username)) {
+                                user.updateProfile(profileUpdates)
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    Log.d("update-username", "Username updated.");
+                                                    notifyProfileUpdated(userInputUsername, "");
+                                                    if (userInputEmail.equals(email)) {
+                                                        dialog.dismiss();
+                                                        new BasicSnackbar(rootView, "Username Updated Successfully.", "success");
+                                                        dismiss();
+                                                    }
+                                                } else {
+                                                    dismiss();
+                                                    Log.d("update-username", "Failed to update username");
+                                                    new BasicSnackbar(rootView, "Failed to update username", "error");
+                                                }
+                                            }
+                                        });
+                            }
+
+                            if (!userInputEmail.equals(email)) {
+                                // re-authenticate user
+                                AuthCredential credential = EmailAuthProvider
+                                        .getCredential(email, providePassword.getText().toString());
+
+                                user.reauthenticate(credential)
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    Log.d("user-auth", "User re-authenticated.");
+                                                    providedPasswordLayout.setError(null);
+                                                    user.updateEmail(userInputEmail)
+                                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                    if (task.isSuccessful()) {
+                                                                        dismiss();
+                                                                        Log.d("update-email", "User email address updated.");
+                                                                        notifyProfileUpdated("", userInputEmail);
+                                                                        new BasicSnackbar(rootView, "Profile Updated Successfully.", "success");
+                                                                    } else {
+                                                                        Toast.makeText(getActivity(), "Update email failed.", Toast.LENGTH_SHORT).show();
+                                                                        dismiss();
+                                                                        Log.d("update-email", "Update email failed.", task.getException());
+//                                                            new BasicSnackbar(rootView, "Update email failed.", "error");
+                                                                    }
+                                                                }
+                                                            });
+                                                } else {
+                                                    Log.d("user-auth", "User re-authentication failed.", task.getException());
+                                                    providedPasswordLayout.setError("Wrong Password.");
+                                                    Toast.makeText(getActivity(), "User re-authentication failed.", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
+                            }
+                        }
+                }
+            });
         }
     }
 

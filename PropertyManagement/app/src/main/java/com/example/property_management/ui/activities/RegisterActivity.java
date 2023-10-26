@@ -202,7 +202,7 @@ public class RegisterActivity extends AppCompatActivity {
                         System.out.println("Error: " + msg);
                     }
                 });
-                firebaseAuthHelper.addUsernameToFirestore(user.getUid(), "New User");
+                firebaseAuthHelper.addUsernameToFirestore(user.getUid(), username);
             }
             @Override
             public void onFailure(Exception e) {}
