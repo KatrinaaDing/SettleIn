@@ -85,6 +85,7 @@ public class DataCollectionActivity extends AppCompatActivity {
     private Dialog noteDialog;
     private SharedPreferences sharedPreferences;
     private Map<Integer, List<String>> roomImagePathsMap = new LinkedHashMap<>();
+    private int room_num;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -130,6 +131,7 @@ public class DataCollectionActivity extends AppCompatActivity {
         Intent intent = getIntent();
         initialInspectedData = (HashMap<String, RoomData>) intent.getSerializableExtra("inspectedData");
         propertyId = intent.getStringExtra("propertyId");
+        room_num = intent.getIntExtra("roomNum", 0);
         Log.i("get-initial-inspectedData", initialInspectedData.toString());
         Log.i("get-propertyId", propertyId);
 
@@ -139,7 +141,7 @@ public class DataCollectionActivity extends AppCompatActivity {
         }
 
         //查看得到的房间数量数据
-        Log.i("get-room num", String.valueOf(initialInspectedData.keySet().size()));
+        Log.i("get-room num", String.valueOf(room_num));
 
 
 
@@ -150,10 +152,10 @@ public class DataCollectionActivity extends AppCompatActivity {
         // Define the list of room names
         List<String> roomNames = new ArrayList<>();
         // assuming  3 rooms
-        for (int i = 0; i <= 3; i++) {
+        for (int i = 0; i <= room_num; i++) {
             if (i == 0) {
                 roomNames.add("Lounge Room");
-            } else if (i == 3) {
+            } else if (i == room_num) {
                 roomNames.add("Others");
             } else {
                 roomNames.add("Room " + i);
