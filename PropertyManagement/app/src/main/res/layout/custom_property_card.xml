@@ -12,7 +12,6 @@
         android:clickable="true"
         android:focusable="true"
         app:layout_constraintHeight="120dp"
-        android:layout_marginVertical="5dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
         <LinearLayout
