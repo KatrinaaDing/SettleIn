@@ -32,7 +32,7 @@ public class PropertyCard extends MaterialCardView {
     private String propertyId = null;
     private int price;
     private String thumbnail;
-    private int default_thumbnail = R.drawable.property_image_placeholder;
+    private int DEFAULT_THUMBNAIL = R.drawable.property_image_placeholder;
     private boolean isInspected;
     Context context;
 
@@ -161,7 +161,7 @@ public class PropertyCard extends MaterialCardView {
         ImageView thumbnailView = findViewById(R.id.thumbnailImageView);
         // set values
         if (this.thumbnail == null) {
-            this.thumbnail = String.valueOf(default_thumbnail);
+            thumbnailView.setImageResource(DEFAULT_THUMBNAIL);
         } else {
             Glide.with(thumbnailView.getContext())
                     .load(this.thumbnail)

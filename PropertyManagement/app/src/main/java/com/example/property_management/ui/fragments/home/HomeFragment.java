@@ -47,6 +47,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 public class HomeFragment extends Fragment implements OnMapReadyCallback {
@@ -319,10 +320,23 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void addMarkersToMap(GoogleMap googleMap, ArrayList<Property> properties) {
-        // add markers to map
-        // add markers
+        // a set for tracking duplicate locations
+        HashSet<LatLng> addedMarkers = new HashSet<>();
+        float displacement = 0.00001f;
+
         for (Property property : properties) {
-            LatLng propertyLatLng = new LatLng(property.getLat(), property.getLng());
+            // get coordinate of property
+            double latitude = property.getLat();
+            double longitude = property.getLng();
+            LatLng propertyLatLng = new LatLng(latitude, longitude);
+
+            // slightly shift the marker location if a marker with the same location already beed added
+            if (addedMarkers.contains(propertyLatLng)) {
+                double newLat = latitude + (Math.random() - 0.5) * displacement;
+                double newLng = longitude + (Math.random() - 0.5) * displacement;
+                propertyLatLng = new LatLng(newLat, newLng);
+            }
+
             // add property marker
             // reference: https://developers.google.com/maps/documentation/android-sdk/marker#maps_android_markers_tag_sample-java
             MarkerOptions markerOptions = new MarkerOptions();
@@ -333,9 +347,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             if (property.getInspected()) {
                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
             }
-
+            // add marker to map
             Marker marker = googleMap.addMarker(markerOptions);
             marker.setTag(property);
+            // add marker to addedMarkers set
+            addedMarkers.add(propertyLatLng);
         }
     }
 
