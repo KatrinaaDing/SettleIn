@@ -18,6 +18,8 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -258,7 +260,13 @@ public class DataCollectionActivity extends AppCompatActivity {
             //collectRoomPhotos();
             Toast.makeText(this, "Upload data successfully! ", Toast.LENGTH_SHORT).show();
 
-            finish();
+            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    // 这里调用 finish() 方法
+                    finish();
+                }
+            }, 3500); // 2000 是延迟的时间（毫秒），即 2 秒
         });
 
         SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
