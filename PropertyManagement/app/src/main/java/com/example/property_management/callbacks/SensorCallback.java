@@ -8,7 +8,4 @@ public interface SensorCallback {
     void onLightTestCompleted ();
     void onCompassTestCompleted ();
 
-
-
-
 }

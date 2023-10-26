@@ -655,7 +655,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
     private void updateLightData(ViewHolder holder, float lightValue) {
         ((Activity) context).runOnUiThread(() -> {
-            holder.lightValueTextView.setText(String.valueOf(lightValue));
+            holder.lightValueTextView.setText(lightValue + " X");
         });
     }
 

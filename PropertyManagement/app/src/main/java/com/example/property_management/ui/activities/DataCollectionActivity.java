@@ -14,12 +14,20 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,6 +71,9 @@ import java.util.Locale;
 import java.util.Map;
 
 import androidx.annotation.Nullable;
+import com.example.property_management.R;
+import android.app.AlertDialog;
+
 
 public class DataCollectionActivity extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_CAMERA = 1;
@@ -239,9 +250,17 @@ public class DataCollectionActivity extends AppCompatActivity {
 
             updateInspectedData(roomData);
             //collectRoomPhotos();
+            Toast.makeText(this, "Upload data successfully! ", Toast.LENGTH_SHORT).show();
 
             finish();
         });
+
+        SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+        boolean hasShownInfo = prefs.getBoolean("has_shown_info", false);
+
+        if (!hasShownInfo) {
+            showInfoDialog();
+        }
     }
 
     public void collectRoomPhotos() {
@@ -301,18 +320,7 @@ public class DataCollectionActivity extends AppCompatActivity {
     }
 
     private void logRoomImagePaths() {
-        StringBuilder logOutput = new StringBuilder("{\n");
-        for (Map.Entry<Integer, List<String>> entry : roomImagePathsMap.entrySet()) {
-            int roomPosition = entry.getKey();
-            List<String> imagePathList = entry.getValue();
-            logOutput.append("Room ").append(roomPosition).append(": ");
-            for (String path : imagePathList) {
-                logOutput.append(path).append(", ");
-            }
-            logOutput.append("\n");
-        }
-        logOutput.append("}");
-        Log.d("RoomImagePaths", logOutput.toString());
+        Log.d("RoomImagePaths", roomImagePathsMap.toString());
     }
 
     private String getRealPathFromURI(Uri uri) {
@@ -327,16 +335,89 @@ public class DataCollectionActivity extends AppCompatActivity {
         return path;
     }
 
+    /**
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 finish();
                 return true;
+            case R.id.action_info:
+                showInfoDialog();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        } else if (item.getItemId() == R.id.action_info) {
+            showInfoDialog();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_info_data_collection, menu);
+        return true;
+    }
+
+    private void showInfoDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Tutorial");
+
+        SpannableStringBuilder ssb = new SpannableStringBuilder();
+
+        // format all text
+        String[] titles = {
+                "Taking photos",
+                "Collecting brightness data",
+                "Collecting noise data",
+                "Collecting orientation data",
+                "Note",
+                "Changing room name"
+        };
+        String[] descriptions = {
+                "You can take photo or upload photos from library for each room by pressing the button of \"Add\" in the line of \"Photos\". And then you can show or delete photo in the bottom of \"X added\", where X is the number of collected photos.",
+                "You can collect brightness data for each room by pressing the button of \"Add\" in the line of \"Light Level\".",
+                "You can collect noise data for each room by pressing the button of \"Add\" in the line of \"Noise Level\".",
+                "You can collect orientation data for each room by pressing the button of \"Add\" in the line of \"Window Orientation\".",
+                "You can write your note for property in the note area.",
+                "You can change names of rooms by pressing the edit icon."
+        };
+
+        for (int i = 0; i < titles.length; i++) {
+            SpannableString title = new SpannableString(titles[i]);
+            title.setSpan(new StyleSpan(Typeface.BOLD), 0, title.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.append(title);
+            ssb.append("\n");
+
+            SpannableString description = new SpannableString(descriptions[i]);
+            ssb.append(description);
+            if (i < titles.length - 1) {
+                ssb.append("\n\n");
+            }
+        }
+
+        builder.setMessage(ssb);
+        builder.setPositiveButton("OK", (dialog, id) -> {
+            dialog.dismiss();
+
+            //  Saved to SharedPreferences
+            SharedPreferences.Editor editor = getSharedPreferences("app_prefs", MODE_PRIVATE).edit();
+            editor.putBoolean("has_shown_info", true);
+            editor.apply();
+        });
+        builder.show();
+    }
+
 
     private String getDirectionFromDecimal(float directionDecimal) {
         int directionCode = (int)(directionDecimal * 100);
