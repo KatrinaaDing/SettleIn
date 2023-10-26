@@ -11,6 +11,7 @@ import com.example.property_management.data.RoomData;
 import com.example.property_management.data.UserProperty;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
+import com.google.api.LogDescriptor;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.HttpsCallableResult;
@@ -338,8 +339,10 @@ public class FirebaseFunctionsHelper {
     private HashMap<String, RoomData> getRoomsData(Map<String, Object> result, String key) {
         // convert propertyData for each room to HashMap<String, RoomData>
         HashMap<String, RoomData> propertyRoomsData = new HashMap<>();
+        Log.d("whether getRoomdata excuted",String.valueOf(result.get(key) != null));
         if (result.get(key) != null) {
             Map<String, Object> roomsData = (Map<String, Object>) result.get(key);
+            Log.d("roomData in getRoomsData function",roomsData.toString());
             // for each room, create RoomData object
             for (String roomName : roomsData.keySet()) {
                 Map<String, Object> entry = (Map<String, Object>) roomsData.get(roomName);
