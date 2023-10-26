@@ -285,7 +285,7 @@ public class FirebaseFunctionsHelper {
                 }
 
                 Log.d("result set get by getPropertyById function",result.toString());
-                Log.d("InspectedData get by getPropertyById function",result.get("inspectedData").toString());
+                Log.d("InspectedData get by getPropertyById function",result.keySet().toString());
                 // get result and create Property object
                 Property propertyData = new Property(
                         (String) result.get("propertyId"),
