@@ -51,6 +51,7 @@ import com.example.property_management.sensors.AudioSensor;
 import com.example.property_management.sensors.CompassSensor;
 import com.example.property_management.sensors.LightSensor;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -130,26 +131,18 @@ public class DataCollectionActivity extends AppCompatActivity {
         initialInspectedData = (HashMap<String, RoomData>) intent.getSerializableExtra("inspectedData");
         propertyId = intent.getStringExtra("propertyId");
         Log.i("get-initial-inspectedData", initialInspectedData.toString());
+        Log.i("get-propertyId", propertyId);
 
-        //测试，尝试得到指定property的数据，根据默认的id
-        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
-        firebaseFunctionsHelper.getPropertyById("Y1HlGIGz52If4Gu6S2dL")
-                .addOnSuccessListener(result -> {
-                    Map<String, Object> resultObj = (Map<String, Object>) result;
-                    // if success, set property data to UI
-                    Log.i("get-property-by-id-success",
-                            "successfully get property data " +
-                                    "and user collected property data");
-                    Property property = (Property) resultObj.get("propertyData");
-                    UserProperty userProperty = (UserProperty) resultObj.get("userPropertyData");
+        //查看得到的房间数据具体值
+        for (String roomname: initialInspectedData.keySet()){
+            Log.i("get-" + roomname + " data", initialInspectedData.get(roomname).toString());
+        }
 
-                    Log.d("room num",String.valueOf(property.getNumBedrooms()));
-                    Log.d("room Data", userProperty.getInspectedData().toString());
-                })
-                .addOnFailureListener(e -> {
-                    // if error happens, show error message and hide detail content
-                    Log.e("get-property-by-id-fail", e.getMessage());
-                });
+        //查看得到的房间数量数据
+        Log.i("get-room num", String.valueOf(initialInspectedData.keySet().size()));
+
+
+
 
         // Initialize rooms RecyclerView
         roomsRecyclerView = findViewById(R.id.recycler_view);
@@ -237,7 +230,7 @@ public class DataCollectionActivity extends AppCompatActivity {
             }
 
 
-            updateInspectedData(roomData);
+            updateInspectedData(propertyId, roomData);
             //collectRoomPhotos();
 
             finish();
@@ -388,12 +381,13 @@ public class DataCollectionActivity extends AppCompatActivity {
         sharedPreferences.edit().putString("note", note).apply();
     }
 
-    private void updateInspectedData(HashMap<String, RoomData> inspectedData) {
+    private void updateInspectedData(String propertyId, HashMap<String, RoomData> inspectedData) {
         // update ispected status to firebase
         HashMap<String, Object> payload = new HashMap<>();
-        payload.put("properties." + "Y1HlGIGz52If4Gu6S2dL" + ".inspectedData: ", inspectedData);
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        payload.put("properties." + propertyId + ".inspectedData", inspectedData);
         FirebaseUserRepository userRepository = new FirebaseUserRepository();
-        userRepository.updateUserFields("cvOi8Z768aOvqWZxuCt0nifpsMy1", payload, new UpdateUserCallback() {
+        userRepository.updateUserFields(userId, payload, new UpdateUserCallback() {
             @Override
             public void onSuccess(String msg) {
                 Log.i("update-inspectedData-successfully", msg);

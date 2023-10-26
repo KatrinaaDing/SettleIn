@@ -1,5 +1,7 @@
 package com.example.property_management.data;
 
+import androidx.annotation.NonNull;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -33,4 +35,10 @@ public class RoomData implements Serializable {
     public ArrayList<String> getImages() { return images; }
 
     public void setImage(ArrayList<String> images) { this.images = images; }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "\n{brightness: " + this.brightness + "\nnoise: " + this.noise + "\nwindowOrientation: " + this.windowOrientation + "\nimages: " + this.images.toString() + "}";
+    }
 }
