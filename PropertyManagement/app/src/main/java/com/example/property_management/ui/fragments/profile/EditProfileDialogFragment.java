@@ -172,6 +172,9 @@ public class EditProfileDialogFragment extends DialogFragment {
                         } else if (userInputUsername.equals(username) && userInputEmail.equals(email)) {
                             dismiss();
                         }else {
+                            positiveButton.setText("Saving");
+                            positiveButton.setEnabled(false);
+
                             editUsernameLayout.setError(null);
                             editEmailLayout.setError(null);
                             providedPasswordLayout.setError(null);
@@ -186,6 +189,9 @@ public class EditProfileDialogFragment extends DialogFragment {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
+                                                    positiveButton.setText("Save");
+                                                    positiveButton.setEnabled(true);
+
                                                     Log.d("update-username", "Username updated.");
                                                     notifyProfileUpdated(userInputUsername, "");
                                                     if (userInputEmail.equals(email)) {
@@ -194,6 +200,9 @@ public class EditProfileDialogFragment extends DialogFragment {
                                                         dismiss();
                                                     }
                                                 } else {
+                                                    positiveButton.setText("Save");
+                                                    positiveButton.setEnabled(true);
+
                                                     dismiss();
                                                     Log.d("update-username", "Failed to update username");
                                                     new BasicSnackbar(rootView, "Failed to update username", "error");
@@ -219,11 +228,17 @@ public class EditProfileDialogFragment extends DialogFragment {
                                                                 @Override
                                                                 public void onComplete(@NonNull Task<Void> task) {
                                                                     if (task.isSuccessful()) {
+                                                                        positiveButton.setText("Save");
+                                                                        positiveButton.setEnabled(true);
+
                                                                         dismiss();
                                                                         Log.d("update-email", "User email address updated.");
                                                                         notifyProfileUpdated("", userInputEmail);
                                                                         new BasicSnackbar(rootView, "Profile Updated Successfully.", "success");
                                                                     } else {
+                                                                        positiveButton.setText("Save");
+                                                                        positiveButton.setEnabled(true);
+
                                                                         dismiss();
                                                                         Log.d("update-email", "Update email failed.", task.getException());
                                                                         new BasicSnackbar(rootView, "Update email failed.", "error");
