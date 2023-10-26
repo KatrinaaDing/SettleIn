@@ -7,7 +7,7 @@
     android:paddingVertical="10dp">
 
     <!-- recycler view for rooms-->
-  
+
     <!-- Room name -->
     <LinearLayout
         android:layout_width="match_parent"
