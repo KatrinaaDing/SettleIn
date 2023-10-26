@@ -283,6 +283,7 @@ public class DataCollectionActivity extends AppCompatActivity {
         // get image from adapter
         List<List<Bitmap>> allRoomImages = roomAdapter.getAllRoomImages();
 
+        Log.d("allRoomImages key",allRoomImages.toString());
         // get and save image from each room
         for (int roomPosition = 0; roomPosition < allRoomImages.size(); roomPosition++) {
             List<Bitmap> images = allRoomImages.get(roomPosition);
@@ -324,7 +325,7 @@ public class DataCollectionActivity extends AppCompatActivity {
 
             String realPath = getRealPathFromURI(uri);
 
-            Toast.makeText(this, "Image saved as: " + realPath, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Image saved as: " + realPath, Toast.LENGTH_SHORT).show();
 
             if (!roomImagePathsMap.containsKey(roomPosition)) {
                 roomImagePathsMap.put(roomPosition, new ArrayList<>());
