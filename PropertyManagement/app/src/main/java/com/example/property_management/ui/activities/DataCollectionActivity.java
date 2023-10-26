@@ -396,6 +396,7 @@ public class DataCollectionActivity extends AppCompatActivity {
         HashMap<String, Object> payload = new HashMap<>();
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         payload.put("properties." + propertyId + ".inspectedData", inspectedData);
+        payload.put("properties." + propertyId + ".notes", sharedPreferences.getString("note", ""));
         FirebaseUserRepository userRepository = new FirebaseUserRepository();
         userRepository.updateUserFields(userId, payload, new UpdateUserCallback() {
             @Override
