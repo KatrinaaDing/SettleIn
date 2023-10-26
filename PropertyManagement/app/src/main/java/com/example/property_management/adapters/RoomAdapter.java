@@ -22,6 +22,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import com.example.property_management.R;
 import com.example.property_management.callbacks.SensorCallback;
+import com.example.property_management.data.RoomData;
 import com.example.property_management.sensors.AudioSensor;
 import com.example.property_management.sensors.CompassSensor;
 import com.example.property_management.sensors.LightSensor;
@@ -52,6 +53,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -80,7 +82,9 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     private List<Preview> cameraPreviews = new ArrayList<>();
     private List<ImageCapture> imageCaptures = new ArrayList<>();
 
-    public RoomAdapter(Context context, List<String> roomNames) {
+    private HashMap<String, RoomData> roomData = new HashMap<>();
+
+    public RoomAdapter(Context context, List<String> roomNames, HashMap<String, RoomData> roomData) {
         this.context = context;
         this.roomNames = roomNames;
         for (int i = 0; i < roomNames.size(); i++) {
@@ -93,6 +97,13 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             cameraPreviews.add(new Preview.Builder().build());
             imageCaptures.add(new ImageCapture.Builder().build());
         }
+        this.roomData = roomData;
+        Log.d("new RoomAdapter created","new RoomAdapter created");
+        for (String key: roomData.keySet()){
+            Log.d("new RoomAdapter data for " + key,roomData.toString());
+        }
+
+
     }
 
     @NonNull
@@ -176,9 +187,9 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             }
 
             //测试
-                holder.lightValueTextView.setText("11");
-                holder.noiseValueTextView.setText("11");
-                holder.compassValueTextView.setText("11");
+                holder.lightValueTextView.setText(roomData.get(currentRoomName).getBrightness() + " X");
+                holder.noiseValueTextView.setText(roomData.get(currentRoomName).getNoise() + " dB");
+                holder.compassValueTextView.setText(roomData.get(currentRoomName).getWindowOrientation());
 
 
 
@@ -280,8 +291,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     holder.testAudioThread = null;
 
                     // 清除TextView
-                    holder.noiseValueTextView.setText("--");
-                    Log.d("noiseValue set to --","noiseValue set to -- ");
+                    holder.noiseValueTextView.setText(roomData.get(currentRoomName).getNoise() + " dB");
                 }
             }
 
@@ -314,8 +324,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     holder.testLightThread = null;
 
                     // 清除TextView
-                    holder.lightValueTextView.setText("--");
-                    Log.d("lightValue set to --","lightValue set to -- ");
+                    holder.lightValueTextView.setText(roomData.get(currentRoomName).getBrightness() + " X");
                 }
             }
 
@@ -351,8 +360,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     holder.testCompassThread = null;
 
                     // 清除TextView
-                    holder.compassValueTextView.setText("--");
-                    Log.d("comapssValue set to --","compassValue set to -- ");
+                    holder.compassValueTextView.setText(roomData.get(currentRoomName).getWindowOrientation());
                 }
             }
 

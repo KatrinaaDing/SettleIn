@@ -62,6 +62,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import androidx.annotation.Nullable;
 
@@ -163,7 +165,7 @@ public class DataCollectionActivity extends AppCompatActivity {
         }
 
         // Setup the adapter for rooms
-        roomAdapter = new RoomAdapter(this, roomNames);
+        roomAdapter = new RoomAdapter(this, roomNames, initialInspectedData);
         roomsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         roomsRecyclerView.setAdapter(roomAdapter);
 
@@ -186,21 +188,27 @@ public class DataCollectionActivity extends AppCompatActivity {
         });
 
         binding.finishButton.setOnClickListener(view -> {
-            //Need to define the logic of return tested data
-            //onFinishButtonClicked();
+            //更新成功前禁用按钮
+            binding.finishButton.setEnabled(false);
+            binding.finishButton.setText("Updating...");
 
             // 创建一个映射来保存所有房间的数据
             HashMap<String, Object> roomDataMap = new HashMap<>();
+
+            // 正则表达式用于找到数字（包括小数点）
+            Pattern pattern = Pattern.compile("[+-]?([0-9]*[.])?[0-9]+");
 
             for (int i = 0; i < roomsRecyclerView.getChildCount(); i++) {
                 View itemView = roomsRecyclerView.getChildAt(i);
                 RoomAdapter.ViewHolder viewHolder = (RoomAdapter.ViewHolder) roomsRecyclerView.getChildViewHolder(itemView);
 
                 String roomName = viewHolder.roomName.getText().toString();
-                String photoCount = viewHolder.photoCount.getText().toString();
-                String noiseValue = viewHolder.noiseValueTextView.getText().toString();
-                String lightValue = viewHolder.lightValueTextView.getText().toString();
-                String compassValue = viewHolder.compassValueTextView.getText().toString();
+
+                // 以下方法将尝试从字符串中提取数字
+                String photoCount = extractNumber(viewHolder.photoCount.getText().toString(), pattern);
+                String noiseValue = extractNumber(viewHolder.noiseValueTextView.getText().toString(), pattern);
+                String lightValue = extractNumber(viewHolder.lightValueTextView.getText().toString(), pattern);
+                String compassValue = extractNumber(viewHolder.compassValueTextView.getText().toString(), pattern);
 
                 HashMap<String, String> roomInfo = new HashMap<>();
                 roomInfo.put("images", photoCount);
@@ -393,18 +401,36 @@ public class DataCollectionActivity extends AppCompatActivity {
             @Override
             public void onSuccess(String msg) {
                 Log.i("update-inspectedData-successfully", msg);
+                // Re-enable the button and reset its text after successful update
+                runOnUiThread(() -> {
+                    binding.finishButton.setEnabled(true);
+                    binding.finishButton.setText("Finish");
+                });
             }
             @Override
             public void onError(String msg) {
                 String errorMsg = "Error: " + msg;
                 new BasicSnackbar(findViewById(android.R.id.content), errorMsg, "error");
                 Log.e("update-inspected-failure", msg);
+                // Re-enable the button and reset its text after successful update
+                runOnUiThread(() -> {
+                    binding.finishButton.setEnabled(true);
+                    binding.finishButton.setText("Finish");
+                });
             }
         });
 
     }
 
 
-
+    //从得到的字符inspected结果中提取数字。
+    private String extractNumber(String input, Pattern pattern) {
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            return matcher.group(0);  // 返回找到的第一个数字
+        } else {
+            return "0";  // 如果没有找到数字，返回0
+        }
+    }
 
 }
