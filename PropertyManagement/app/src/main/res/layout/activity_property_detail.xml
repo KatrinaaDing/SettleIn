@@ -54,45 +54,55 @@
                 android:paddingVertical="10dp"
                 android:text="Property Address"
                 />
-            <!-- amenities group -->
-            <com.example.property_management.ui.fragments.property.AmenitiesGroup
-                android:id="@+id/amenitiesGroup"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
 
-            <!-- price and view site -->
+            <!-- amenities group and price -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp">
+
+                <com.example.property_management.ui.fragments.property.AmenitiesGroup
+                    android:id="@+id/amenitiesGroup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+                <TextView
+                    android:id="@+id/detailPriceTxt"
+                    style="?textAppearanceBodyLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Price not available"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- created time and view site -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
                 <TextView
-                    android:id="@+id/detailPriceTxt"
-                    style="?textAppearanceBodyLarge"
+                    android:id="@+id/createdAtText"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginBottom="5dp"
-                    android:text="$000 per week"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/lightGrey"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"/>
+
                 <Button
                     android:id="@+id/linkButton"
-                    style="@style/Widget.Material3.Button.TextButton"
+                    style="@style/Widget.Material3.Button.TonalButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="30dp"
+                    android:layout_height="20dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
                     android:paddingHorizontal="0dp"
                     android:paddingVertical="0dp"
                     android:text="View Site"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <!-- create time -->
-            <TextView
-                android:id="@+id/createdAtText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/lightGrey"/>
 
             <!--  Inspection Time -->
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -133,7 +143,7 @@
                         android:insetTop="5dp"
                         android:insetBottom="5dp"
                         app:icon="@drawable/baseline_edit_24"
-                        android:backgroundTint="@color/white"
+                        android:backgroundTint="@color/transparent"
                         app:iconGravity="textStart"
                         app:iconSize="20dp"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -151,7 +161,7 @@
                         android:insetTop="5dp"
                         android:insetBottom="5dp"
                         app:icon="@drawable/baseline_calendar_month_24"
-                        android:backgroundTint="@color/white"
+                        android:backgroundTint="@color/transparent"
                         app:iconGravity="textStart"
                         app:iconSize="20dp"/>
                     <CheckBox
@@ -191,7 +201,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
                     android:layout_marginVertical="10dp"
-                    app:layout_constraintTop_toBottomOf="@+id/detailMapViewTitleTxt"/>
+                    android:layout_marginTop="4dp"
+                    app:layout_constraintTop_toBottomOf="@+id/detailMapViewTitleTxt"
+                    tools:layout_editor_absoluteX="0dp" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <com.google.android.material.divider.MaterialDivider
@@ -206,7 +218,7 @@
                 android:paddingVertical="10dp">
                 <TextView
                     android:id="@+id/detailDistanceTitleTxt"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
                     android:text="Distance From Your Interested Facilities"
@@ -214,10 +226,18 @@
                     android:textSize="@dimen/medium_title"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"/>
+
+                <com.example.property_management.ui.fragments.base.InfoButton
+                    android:id="@+id/distanceHintBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toEndOf="@+id/detailDistanceTitleTxt"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/distance_recycler"
                     android:layout_width="match_parent"
-                    android:layout_height="100dp"
+                    android:layout_height="wrap_content"
                     app:layout_constraintTop_toBottomOf="@+id/detailDistanceTitleTxt"
                     android:paddingVertical="10dp"
                     android:scrollbars="vertical" />

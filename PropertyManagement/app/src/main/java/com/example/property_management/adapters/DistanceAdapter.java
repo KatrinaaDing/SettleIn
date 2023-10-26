@@ -1,6 +1,10 @@
 package com.example.property_management.adapters;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,10 +21,12 @@ public class DistanceAdapter extends RecyclerView.Adapter<DistanceAdapter.Distan
 
     Context context;
     ArrayList<DistanceInfo> distanceInfoList;
+    String propertyLocation;
 
-    public DistanceAdapter(Context context, ArrayList<DistanceInfo> distanceInfoList) {
+    public DistanceAdapter(Context context, ArrayList<DistanceInfo> distanceInfoList, String propertyLocation) {
         this.context = context;
         this.distanceInfoList = distanceInfoList;
+        this.propertyLocation = propertyLocation;
     }
 
     @NonNull
@@ -45,7 +51,13 @@ public class DistanceAdapter extends RecyclerView.Adapter<DistanceAdapter.Distan
 
         // open in google map when click on business name
         holder.businessName.setOnClickListener(view -> {
-            Helpers.openInGoogleMap(address, context);
+            // if address is null or empty, only open the destination location in google map
+            // else, open the direction from the property to the interested facility
+            if (address == null || address.isEmpty()) {
+                Helpers.openInGoogleMap(address, context);
+            } else {
+                Helpers.openDirectionInGoogleMap(propertyLocation, address, context);
+            }
         });
     }
 

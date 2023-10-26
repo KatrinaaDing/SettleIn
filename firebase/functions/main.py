@@ -1,5 +1,11 @@
 # The Cloud Functions for Firebase SDK to create Cloud Functions and set up triggers.
 from firebase_functions import firestore_fn, https_fn
+from firebase_functions.firestore_fn import (
+  on_document_written,
+  Event,
+  Change,
+  DocumentSnapshot,
+)
 # The Firebase Admin SDK to access Cloud Firestore.
 from firebase_admin import initialize_app, firestore
 from typing import Any
@@ -85,7 +91,6 @@ def scrape_domain(url):
 
     return url, price, bed_num, bath_num, parking_num, address, [imgs_url]
 
-
 #Scrape the property information on the raywhite website based on the URL.
 #Input: URL(str)
 #Output: URL (str), price (int), bed_num (int), parking_num (int), address (str),imgs_url (list of str)
@@ -121,9 +126,7 @@ def scrape_raywhite(url):
     except:
         raise Exception("Failed to scrape url. Please insert data manually.")
 
-
     return url, price, beds_baths_parkings_count['bed_num'], beds_baths_parkings_count['bath_num'], beds_baths_parkings_count['car_num'],address,imgs_url
-
 
 def create_error_response(error_code:int, message: str) -> https_fn.Response:
     """Create an error response with the given error code and message."""
@@ -282,7 +285,6 @@ def get_lnglat_by_address(req: https_fn.Request) -> Any:
             message=(r["google map server error, please try again later."]),
         )
     
-
 # a restful api version of scrape_property_v2
 # @https_fn.on_request(secrets=["MAPS_API_KEY"])
 # def get_lnglat_by_address_restful(req: https_fn.Request) -> https_fn.Response:
@@ -386,8 +388,6 @@ def get_user_properties_helper(user_id):
             message=(str(e)),
         )
 
-
-        
 # get all properties of a user from firestore
 @https_fn.on_call()
 def get_user_properties(req:  https_fn.Request) -> Any:
@@ -606,7 +606,6 @@ def check_property_exist(req: https_fn.Request) -> Any:
             message=(str(e)),
         )
 
-
 # get the closest facility address of a property winthin 5km
 def get_nearby(facility, lat, lng):
     r = requests.get(NEARBY_URL + 'keyword=' + facility +
@@ -631,13 +630,10 @@ def get_nearby(facility, lat, lng):
             message=(r["error_message"]),
         )
 
-
 def keep_letter_number(key):
     # Use a regular expression to keep only letters and numbers
     alphanumeric_string = re.sub(r'[^a-zA-Z0-9]', '', key)
     return alphanumeric_string
-
-
 
 """
     multiple properties, one interested location addresses
@@ -712,7 +708,6 @@ def update_distance2(origins, propertyIds, destination, user_ref):
                         message=("Internal error"),
                     )
 
-
 """
     one property, one or multiple interested facilities/location addresses
     input: 
@@ -748,7 +743,6 @@ def update_distance1(origin, destinations, interests, user_ref, path):
                 print(f"No {x['destination_addresses'][i]} within 5km from {origin}")
                 return
 
-
             # address = x["destination_addresses"][i]
             distance = x["rows"][0]["elements"][i]["distance"]["text"]
             duration = x["rows"][0]["elements"][i]["duration"]["text"]
@@ -770,7 +764,6 @@ def update_distance1(origin, destinations, interests, user_ref, path):
                 for key, value in re[interests[i]].items():
                     update_data[f"{path}.{interests[i]}.{key}"] = value
                 user_ref.update(update_data)
-
 
 # add a new interested facility
 @https_fn.on_call(secrets=["MAPS_API_KEY"])
@@ -853,7 +846,6 @@ def add_interested_facility(req: https_fn.Request) -> Any:
         
     return "success"
 
-
 # add a new interested location
 @https_fn.on_call(secrets=["MAPS_API_KEY"])
 def add_interested_location(req: https_fn.Request) -> Any:
@@ -912,13 +904,95 @@ def add_interested_location(req: https_fn.Request) -> Any:
     properties = get_user_properties_helper(user_id)
     # if the user has no properties
     if len(properties) == 0:
-        return "success"
+        return
     
     propertyIds = [property["propertyId"] for property in properties]
     property_addresses = [property["address"] for property in properties]
     update_distance2(property_addresses, propertyIds, location, user_ref)
-    return "success"
+    return
 
+
+# add interested facilities and locations to a new property
+def add_interests_to_new_property(user, user_id, property_id):
+    # get property document
+    property_ref = firestore.client().collection(u'properties').document(property_id)
+    property = property_ref.get().to_dict()
+    property_address = property["address"]
+    lat = property["lat"]
+    lng = property["lng"]
+
+    interest_addresses = []
+    interests = []
+    if "interestedFacilities" in user:
+        interests = user["interestedFacilities"]
+        # get address of each nearest interested facility for the property
+        for facility in interests:
+            facility_address = get_nearby(facility, lat, lng)
+            interest_addresses.append(facility_address)
+
+    if "interestedLocations" in user:
+        current_interested_locations = user["interestedLocations"]
+        # combine the key list for interested facilities and locations
+        interests.extend(current_interested_locations)
+        # combine the addresses list for interested facilities and locations
+        interest_addresses.extend(current_interested_locations)
+    
+    path = f'properties.{property_id}.distances'
+
+    # update distance info from property to all the interested facilities/locations
+    user_ref = firestore.client().collection(u'users').document(user_id)
+    update_distance1(property_address, interest_addresses, interests, user_ref, path)
+    
+
+# # add interested facilities and locations to a new property
+# @https_fn.on_request(secrets=["MAPS_API_KEY"])
+# def add_interests_to_new_property_restful(req: https_fn.Request) -> https_fn.Response:
+#     # parameters passed from the client.
+#     user_id = req.args.get("userId")
+#     property_id = req.args.get("propertyId")
+#     if user_id is None or property_id is None:
+#         return create_error_response(
+#             400,
+#             "The function must be called with a parameter, 'userId', 'propertyId' , which must be string.",
+#         )
+    
+#     # get user document
+#     user_ref = firestore.client().collection(u'users').document(user_id)
+#     user = user_ref.get().to_dict()
+
+#     # no interested facilities and locations, return directly
+#     if "interestedLocations" not in user and "interestedFacilities" not in user:
+#         return "success"
+
+#     # get property document
+#     property_ref = firestore.client().collection(u'properties').document(property_id)
+#     property = property_ref.get().to_dict()
+#     property_address = property["address"]
+#     lat = property["lat"]
+#     lng = property["lng"]
+
+#     interest_addresses = []
+#     interests = []
+#     if "interestedFacilities" in user:
+#         interests = user["interestedFacilities"]
+#         # get address of each nearest interested facility for the property
+#         for facility in interests:
+#             facility_address = get_nearby(facility, lat, lng)
+#             interest_addresses.append(facility_address)
+
+#     if "interestedLocations" in user:
+#         current_interested_locations = user["interestedLocations"]
+#         # combine the key list for interested facilities and locations
+#         interests.extend(current_interested_locations)
+#         # combine the addresses list for interested facilities and locations
+#         interest_addresses.extend(current_interested_locations)
+    
+#     path = f'properties.{property_id}.distances'
+
+#     # update distance info from property to all the interested facilities/locations
+#     update_distance1(property_address, interest_addresses, interests, user_ref, path)
+        
+#     return "success"
 
 # # add a new interested location
 # @https_fn.on_request(secrets=["MAPS_API_KEY"])
@@ -978,3 +1052,28 @@ def add_interested_location(req: https_fn.Request) -> Any:
 #     property_addresses = [property["address"] for property in properties]
 #     update_distance2(property_addresses, propertyIds, location, user_ref)
 #     return "success"
+
+@on_document_written(document="users/{userId}", secrets=["MAPS_API_KEY"])
+def calculate_distance_on_add_property(event: Event[Change[DocumentSnapshot]]) -> Any:
+    user_id = event.params["userId"]
+    # for an existing uesr, trigger the function
+    if event.data.before.exists:
+        # data before update
+        before_data = event.data.before.to_dict()
+        before_properties = before_data.get("properties", {})
+        before_prop_ids = before_properties.keys()
+        # data after update
+        after_data = event.data.after.to_dict()
+        after_properties = after_data.get("properties", {})
+        after_prop_ids = after_properties.keys()
+
+        added_prop_ids = list(set(after_prop_ids) - set(before_prop_ids))
+        
+        # case 1: user newly added a property
+        if len(added_prop_ids) > 0:
+            print("[calculate-distance-on-add-property]", "user", user_id, "calculate distance for property", added_prop_ids[0])
+            
+            # no interested facilities and locations, return directly
+            if "interestedLocations" not in after_data and "interestedFacilities" not in after_data:
+                return
+            add_interests_to_new_property(after_data, user_id, added_prop_ids[0])

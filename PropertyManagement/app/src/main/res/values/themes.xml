@@ -17,6 +17,7 @@
     <style name="textAppearanceTitleLarge" parent="TextAppearance.Material3.TitleLarge">
         <item name="fontWeight">100</item>
     </style>
+
 <!--    <style name="MyActionBar" parent="Theme.Material3.DayNight">-->
 <!--        <item name="background">@color/white</item>-->
 <!--        <item name="title">@color/black</item>-->

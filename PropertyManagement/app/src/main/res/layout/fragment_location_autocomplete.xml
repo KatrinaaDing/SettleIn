@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
+
+       <fragment
+            android:id="@+id/auto_fragment"
+            android:name="com.example.property_management.ui.fragments.base.AutocompleteFragment"
+            tools:layout="@layout/fragment_autocomplete"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+           tools:ignore="MissingConstraints" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

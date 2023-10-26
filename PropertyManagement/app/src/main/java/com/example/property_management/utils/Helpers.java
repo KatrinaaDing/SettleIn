@@ -48,4 +48,35 @@ public class Helpers {
             context.startActivity(webIntent);
         }
     }
+
+    /**
+     * Open the direction in Google Map
+     * @param source the source address
+     * @param destination the destination address
+     * @param context the context of the activity
+     */
+    public static void openDirectionInGoogleMap(String source, String destination, Context context) {
+        // reference: https://developers.google.com/maps/documentation/urls/android-intents
+        String uriString = "http://maps.google.com/maps?saddr=" + Uri.encode(source) +
+                "&daddr=" + Uri.encode(destination);
+
+        Uri uri = Uri.parse(uriString);
+        Intent mapIntent = new Intent(android.content.Intent.ACTION_VIEW, uri);
+        // If Google Maps app is installed, open it. Else, redirect to web version.
+        try {
+            Log.d("property-view-on-map", "URI: " + uriString);
+            context.startActivity(mapIntent);
+        } catch (ActivityNotFoundException e) {
+            // Google Maps app is not installed, redirect to web version
+            Uri webUri = Uri.parse("https://www.google.com/maps/dir/?api=1&destination=" +
+                    Uri.encode(destination));
+            Intent webIntent = new Intent(Intent.ACTION_VIEW, webUri);
+            context.startActivity(webIntent);
+        }
+    }
+
+    public static int dpToPx(Context context, int dp) {
+        float density = context.getResources().getDisplayMetrics().density;
+        return Math.round((float) dp * density);
+    }
 }
