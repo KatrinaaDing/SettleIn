@@ -394,46 +394,6 @@ def get_user_properties(req:  https_fn.Request) -> Any:
     user_id = req.data["userId"]
     print("[get-all-properties]", " getting all properties for user", user_id)
     return get_user_properties_helper(user_id)
-    # if user_id is None:
-    #     raise https_fn.HttpsError(
-    #         code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-    #         message=(
-    #             "The function must be called with an parameter, 'userId', which must be string."
-    #         ),
-    #     )
-    # try:
-    #     # get user document
-    #     coll_user = firestore.client().collection(u'users').document(user_id)
-    #     user = coll_user.get().to_dict()
-    #     if user is None:
-    #         raise https_fn.HttpsError(
-    #             code=https_fn.FunctionsErrorCode.NOT_FOUND,
-    #             message=("User not found."),
-    #         )
-    #     # for each propertyId in user document, get the property document
-    #     if 'properties' not in user:
-    #         print("[get-all-properties]", " user ", user_id, " has no properties")
-    #         return []
-    #     properties = []
-    #     for property_id in user['properties']:
-    #         property = firestore.client().collection(u'properties').document(property_id).get().to_dict()
-    #         # add user-side data to property document
-    #         property['propertyId'] = property_id
-    #         property['price'] = user['properties'][property_id]['price']
-    #         if ('inspected' in user['properties'][property_id]):
-    #             property['inspected'] = user['properties'][property_id]['inspected'] 
-    #         else:
-    #             property['inspected'] = False
-    #         properties.append(property)
-    #     print("[get-all-properties]", properties)
-    #     print("[get-all-properties]", " user ", user_id, " has properties")
-    #     return properties
-    
-    # except Exception as e:
-    #     raise https_fn.HttpsError(
-    #         code=https_fn.FunctionsErrorCode.INTERNAL,
-    #         message=(str(e)),
-    #     )
 
 # # get a property from firestore combined with user's collected data from that property
 # @https_fn.on_request()
@@ -773,154 +733,8 @@ def update_distance1(origin, destinations, interests, user_ref, path):
                 update_data = {}
                 for key, value in re[interests[i]].items():
                     update_data[f"{path}.{interests[i]}.{key}"] = value
+                print("updat_data", update_data)
                 user_ref.update(update_data)
-
-# add a new interested facility
-@https_fn.on_call(secrets=["MAPS_API_KEY"])
-def add_interested_facility(req: https_fn.Request) -> Any:
-    # parameters passed from the client.
-    user_id = req.data["userId"]
-    facility = req.data["facility"]
-    if user_id is None or facility is None:
-        raise https_fn.HttpsError(
-            code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-            message=(
-                "The function must be called with a parameter, 'userId', 'facility , which must be string."
-            ),
-        )
-    
-    # convert facility to lower case
-    lower_facility = keep_letter_number(facility.lower())
-    
-    # get user document
-    user_ref = firestore.client().collection(u'users').document(user_id)
-    user = user_ref.get().to_dict()
-    # check duplicate
-    if "interestedLocations" in user:
-        current_interested_locations = user["interestedLocations"]
-        lower_current_interested_locations = [keep_letter_number(location.lower()) for location in current_interested_locations]
-        # if the facility is already in the user's interested locations, return error
-        if lower_facility in lower_current_interested_locations:
-            raise https_fn.HttpsError(
-                code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-                message=(
-                    "Duplicate interested facility."
-                ),
-            )
-            
-    if "interestedFacilities" in user:
-        current_interested_facilities = user["interestedFacilities"]
-        lower_current_interested_facilities = [keep_letter_number(facility_.lower()) for facility_ in current_interested_facilities]
-        # if the facility is already in the user's interested facilities, return error
-        if lower_facility in lower_current_interested_facilities:
-            raise https_fn.HttpsError(
-                code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-                message=(
-                    "Duplicate interested facility."
-                ),
-            )
-        # add the facility to the user's interested facilities
-        else:
-            current_interested_facilities.append(facility)
-            user_ref.update({"interestedFacilities": current_interested_facilities})
-
-    if "interestedFacilities" not in user:
-        # add the facility to the user's interested facilities
-        user_ref.update({"interestedFacilities": [facility]})
-    
-    # get distance info from all properties to the facility
-    # get all properties of the user
-    properties = get_user_properties_helper(user_id)
-    # if the user has no properties
-    if len(properties) == 0:
-        return "success"
-     
-    for property in properties:
-        propertyId = property["propertyId"]
-        property_address = property["address"]
-        lat = property["lat"]
-        lng = property["lng"]
-        facility_address = get_nearby(facility, lat, lng)
-    
-        # no interested facility within 5km from the property
-        if facility_address is None:
-            print(f"No {facility} within 5km from {property_address}")
-            continue
-
-        
-        # Create the path using dot notation
-        path = f'properties.{propertyId}.distances'
-
-        # update distance info from property to the facility
-        update_distance1(property_address, [facility_address], [facility], user_ref, path)
-        
-    return "success"
-
-# add a new interested location
-@https_fn.on_call(secrets=["MAPS_API_KEY"])
-def add_interested_location(req: https_fn.Request) -> Any:
-     # parameters passed from the client.
-    user_id = req.data["userId"]
-    location = req.data["location"]
-    if user_id is None or location is None:
-        raise https_fn.HttpsError(
-            code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-            message=(
-                "The function must be called with a parameter, 'userId', 'location' , which must be string."
-            ),
-        )
-    
-    # convert facility to lower case
-    lower_location = keep_letter_number(location.lower())
-    
-    # get user document
-    user_ref = firestore.client().collection(u'users').document(user_id)
-    user = user_ref.get().to_dict()
-    # check duplicate
-    if "interestedFacilities" in user:
-        current_interested_facilities = user["interestedFacilities"]
-        lower_current_interested_facilities = [keep_letter_number(facility_.lower()) for facility_ in current_interested_facilities]
-        # if the location is already in the user's interested facilities, return error
-        if lower_location in lower_current_interested_facilities:
-            raise https_fn.HttpsError(
-                code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-                message=(
-                    "Duplicate interested location."
-                ),
-            )
-
-    if "interestedLocations" in user:
-        current_interested_locations = user["interestedLocations"]
-        lower_current_interested_locations = [keep_letter_number(location.lower()) for location in current_interested_locations]
-        # if the location is already in the user's interested locations, return error
-        if lower_location in lower_current_interested_locations:
-            raise https_fn.HttpsError(
-                code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-                message=(
-                    "Duplicate interested location."
-                ),
-            )
-        # add the location to the user's interested locations
-        else:
-            current_interested_locations.append(location)
-            user_ref.update({"interestedLocations": current_interested_locations})
-
-    if "interestedLocations" not in user:
-        # add the location to the user's interested locations
-        user_ref.update({"interestedLocations": [location]})
-    
-    # get distance info from all properties to the location
-    # get all properties of the user
-    properties = get_user_properties_helper(user_id)
-    # if the user has no properties
-    if len(properties) == 0:
-        return
-    
-    propertyIds = [property["propertyId"] for property in properties]
-    property_addresses = [property["address"] for property in properties]
-    update_distance2(property_addresses, propertyIds, location, user_ref)
-    return
-
 
 # add interested facilities and locations to a new property
 def add_interests_to_new_property(user, user_id, property_id):
@@ -952,119 +766,14 @@ def add_interests_to_new_property(user, user_id, property_id):
     # update distance info from property to all the interested facilities/locations
     user_ref = firestore.client().collection(u'users').document(user_id)
     update_distance1(property_address, interest_addresses, interests, user_ref, path)
-    
 
-# # add interested facilities and locations to a new property
-# @https_fn.on_request(secrets=["MAPS_API_KEY"])
-# def add_interests_to_new_property_restful(req: https_fn.Request) -> https_fn.Response:
-#     # parameters passed from the client.
-#     user_id = req.args.get("userId")
-#     property_id = req.args.get("propertyId")
-#     if user_id is None or property_id is None:
-#         return create_error_response(
-#             400,
-#             "The function must be called with a parameter, 'userId', 'propertyId' , which must be string.",
-#         )
-    
-#     # get user document
-#     user_ref = firestore.client().collection(u'users').document(user_id)
-#     user = user_ref.get().to_dict()
-
-#     # no interested facilities and locations, return directly
-#     if "interestedLocations" not in user and "interestedFacilities" not in user:
-#         return "success"
-
-#     # get property document
-#     property_ref = firestore.client().collection(u'properties').document(property_id)
-#     property = property_ref.get().to_dict()
-#     property_address = property["address"]
-#     lat = property["lat"]
-#     lng = property["lng"]
-
-#     interest_addresses = []
-#     interests = []
-#     if "interestedFacilities" in user:
-#         interests = user["interestedFacilities"]
-#         # get address of each nearest interested facility for the property
-#         for facility in interests:
-#             facility_address = get_nearby(facility, lat, lng)
-#             interest_addresses.append(facility_address)
-
-#     if "interestedLocations" in user:
-#         current_interested_locations = user["interestedLocations"]
-#         # combine the key list for interested facilities and locations
-#         interests.extend(current_interested_locations)
-#         # combine the addresses list for interested facilities and locations
-#         interest_addresses.extend(current_interested_locations)
-    
-#     path = f'properties.{property_id}.distances'
-
-#     # update distance info from property to all the interested facilities/locations
-#     update_distance1(property_address, interest_addresses, interests, user_ref, path)
-        
-#     return "success"
-
-# # add a new interested location
-# @https_fn.on_request(secrets=["MAPS_API_KEY"])
-# def add_interested_location_restful(req: https_fn.Request) -> https_fn.Response:
-#      # parameters passed from the client.
-#     user_id = req.args.get("userId")
-#     location = req.args.get("location")
-#     if user_id is None or location is None:
-#         return create_error_response(
-#             400,
-#             "The function must be called with a parameter, 'userId', 'location' , which must be string.",
-#         )
-    
-#     # convert facility to lower case
-#     lower_location = location.lower()
-    
-#     # get user document
-#     user_ref = firestore.client().collection(u'users').document(user_id)
-#     user = user_ref.get().to_dict()
-#     # check duplicate
-#     if "interestedFacilities" in user:
-#         current_interested_facilities = user["interestedFacilities"]
-#         lower_current_interested_facilities = [facility_.lower() for facility_ in current_interested_facilities]
-#         # if the location is already in the user's interested facilities, return error
-#         if lower_location in lower_current_interested_facilities:
-#             return create_error_response(
-#                 400,
-#                 "The location is already in the user's interested facilities.",
-#             )
-
-#     if "interestedLocations" in user:
-#         current_interested_locations = user["interestedLocations"]
-#         lower_current_interested_locations = [location.lower() for location in current_interested_locations]
-#         # if the location is already in the user's interested locations, return error
-#         if lower_location in lower_current_interested_locations:
-#             return create_error_response(
-#                 400,
-#                 "The location is already in the user's interested locations.",
-#             )
-#         # add the location to the user's interested locations
-#         else:
-#             current_interested_locations.append(location)
-#             user_ref.update({"interestedLocations": current_interested_locations})
-
-#     if "interestedLocations" not in user:
-#         # add the location to the user's interested locations
-#         user_ref.update({"interestedLocations": [location]})
-    
-#     # get distance info from all properties to the location
-#     # get all properties of the user
-#     properties = get_user_properties_helper(user_id)
-#     # if the user has no properties
-#     if len(properties) == 0:
-#         return "success"
-    
-#     propertyIds = [property["propertyId"] for property in properties]
-#     property_addresses = [property["address"] for property in properties]
-#     update_distance2(property_addresses, propertyIds, location, user_ref)
-#     return "success"
-
+"""
+    case 1: When user newly added a property, calculate distance from all interested facilities/locations to the property
+    case 2: When user newly added a interested location, calculate distance from all properties to the location
+    case 3: When user newly added a interested facility, calculate distance from all properties to the facility
+"""
 @on_document_written(document="users/{userId}", secrets=["MAPS_API_KEY"])
-def calculate_distance_on_add_property(event: Event[Change[DocumentSnapshot]]) -> Any:
+def calculate_distance(event: Event[Change[DocumentSnapshot]]) -> Any:
     user_id = event.params["userId"]
     # for an existing uesr, trigger the function
     if event.data.before.exists:
@@ -1072,12 +781,19 @@ def calculate_distance_on_add_property(event: Event[Change[DocumentSnapshot]]) -
         before_data = event.data.before.to_dict()
         before_properties = before_data.get("properties", {})
         before_prop_ids = before_properties.keys()
+        before_locations = before_data.get("interestedLocations", [])
+        before_facilities = before_data.get("interestedFacilities", [])
+
         # data after update
         after_data = event.data.after.to_dict()
         after_properties = after_data.get("properties", {})
         after_prop_ids = after_properties.keys()
+        after_locations = after_data.get("interestedLocations", [])
+        after_facilities = after_data.get("interestedFacilities", [])
 
         added_prop_ids = list(set(after_prop_ids) - set(before_prop_ids))
+        added_location = list(set(after_locations) - set(before_locations))
+        added_facility = list(set(after_facilities) - set(before_facilities))
         
         # case 1: user newly added a property
         if len(added_prop_ids) > 0:
@@ -1087,3 +803,53 @@ def calculate_distance_on_add_property(event: Event[Change[DocumentSnapshot]]) -
             if "interestedLocations" not in after_data and "interestedFacilities" not in after_data:
                 return
             add_interests_to_new_property(after_data, user_id, added_prop_ids[0])
+
+        # case 2: user newly added a interested location
+        if len(added_location) > 0:
+            location = added_location[0]
+    
+            # get user document
+            user_ref = firestore.client().collection(u'users').document(user_id)
+            
+            # get distance info from all properties to the location
+            # get all properties of the user
+            properties = get_user_properties_helper(user_id)
+            # if the user has no properties
+            if len(properties) == 0:
+                return
+            
+            property_addresses = [property["address"] for property in properties]
+            update_distance2(property_addresses, list(after_prop_ids), location, user_ref)
+
+        # case 3: user newly added a interested facility
+        if len(added_facility) > 0:
+            facility = added_facility[0]
+
+            # get user document
+            user_ref = firestore.client().collection(u'users').document(user_id) 
+            
+            # get distance info from all properties to the facility
+            # get all properties of the user
+            properties = get_user_properties_helper(user_id)
+            # if the user has no properties
+            if len(properties) == 0:
+                return
+            
+            for property in properties:
+                propertyId = property["propertyId"]
+                property_address = property["address"]
+                lat = property["lat"]
+                lng = property["lng"]
+                facility_address = get_nearby(facility, lat, lng)
+            
+                # no interested facility within 5km from the property
+                if facility_address is None:
+                    print(f"No {facility} within 5km from {property_address}")
+                    continue
+
+                
+                # Create the path using dot notation
+                path = f'properties.{propertyId}.distances'
+
+                # update distance info from property to the facility
+                update_distance1(property_address, [facility_address], [facility], user_ref, path)
