@@ -135,7 +135,9 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 "- Here list the distance from the property to the nearest interested facilities and locations. \n" +
                 "- You can add more interested locations in the profile page.\n" +
                 "- The facilities that are not within 5km will not be shown here.\n" +
+                "- The locations that are too far from the property will not be shown here.\n" +
                 "- For new added interested locations/facilities, the distance will be updated in 3 minutes.");
+
     }
 
     private void setDistanceRecycler(ArrayList<DistanceInfo> distanceInfoList) {

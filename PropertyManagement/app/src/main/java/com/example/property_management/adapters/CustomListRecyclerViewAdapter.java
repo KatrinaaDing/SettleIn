@@ -17,11 +17,13 @@ import com.example.property_management.R;
 import com.example.property_management.api.FirebaseFunctionsHelper;
 import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.DeleteInterestedFacilityCallback;
+import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.User;
 import com.example.property_management.ui.activities.MainActivity;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomListRecyclerViewAdapter.ViewHolder> {
@@ -122,56 +124,82 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
     }
 
     // add new facility
-    public void addNewFacility(String facilityToAdd) {
-        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+    public void addNewInterest(String interestToAdd) {
+        ArrayList<String> newInterests = new ArrayList<>(getInterests());
+        newInterests.add(interestToAdd);
+        HashMap<String, Object> updateDatePayload = new HashMap<>();
+        if (isFacility) {
+            updateDatePayload.put("interestedFacilities", newInterests);
+        } else {
+            updateDatePayload.put("interestedLocations", newInterests);
+        }
 
-        // add new facility to firebase
-        firebaseFunctionsHelper.addInterestedFacility(user.getUserId(), facilityToAdd)
-                .addOnSuccessListener(result -> {
-                    if (result.equals("success")) {
-//                        new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Successfully add new facility", "success");
-                        Log.i("add-interested-facility-success", result);
+        // add new interest to firebase
+        userRepository.updateUserFields(user.getUserId(), updateDatePayload, new UpdateUserCallback() {
+            @Override
+            public void onSuccess(String msg) {
+                // add new facility to local data
+                getInterests().add(interestToAdd);
+                notifyItemInserted(getInterests().size() - 1);
+            }
 
-                        // add new facility to local data
-                        ArrayList<String> interestedFacilities = getInterests();
-                        interestedFacilities.add(facilityToAdd);
-                        notifyItemInserted(interestedFacilities.size() - 1);
-                    } else {
-                        new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Error: " + result + " Please try again.", "error");
-                        Log.e("add-interested-facility-fail", result);
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    // pop error at input box
-                    Log.e("add-interested-facility-fail", e.getMessage());
-                    new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Error: " + e.getMessage() + " Please try again.", "error");
-                });
+            @Override
+            public void onError(String msg) {
+                String errorMsg = "Error: " + msg + ". Please try again.";
+                new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), errorMsg, "error");
+                Log.e("add-interest-failure", msg);
+            }
+        });
+
+//        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+//
+//        // add new facility to firebase
+//        firebaseFunctionsHelper.addInterestedFacility(user.getUserId(), facilityToAdd)
+//                .addOnSuccessListener(result -> {
+//                    if (result.equals("success")) {
+////                        new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Successfully add new facility", "success");
+//                        Log.i("add-interested-facility-success", result);
+//
+//                        // add new facility to local data
+//                        ArrayList<String> interestedFacilities = getInterests();
+//                        interestedFacilities.add(facilityToAdd);
+//                        notifyItemInserted(interestedFacilities.size() - 1);
+//                    } else {
+//                        new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Error: " + result + " Please try again.", "error");
+//                        Log.e("add-interested-facility-fail", result);
+//                    }
+//                })
+//                .addOnFailureListener(e -> {
+//                    // pop error at input box
+//                    Log.e("add-interested-facility-fail", e.getMessage());
+//                    new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Error: " + e.getMessage() + " Please try again.", "error");
+//                });
     }
 
     // add new location
-    public void addNewLocation(String locationToAdd) {
-        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
-        firebaseFunctionsHelper.addInterestedLocation(user.getUserId(), locationToAdd)
-                .addOnSuccessListener(result -> {
-                    if (result.equals("success")) {
-//                        new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Successfully add new facility", "success");
-                        Log.i("add-interested-facility-success", result);
-
-                        // add new facility to local data
-                        ArrayList<String> interestedLocations = getInterests();
-                        interestedLocations.add(locationToAdd);
-                        notifyItemInserted(interestedLocations.size() - 1);
-                    } else {
-                        new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Error: " + result + " Please try again.", "error");
-                        Log.e("add-interested-location-fail", result);
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    // pop error at input box
-                    Log.e("add-interested-location-fail", e.getMessage());
-                    new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Error: " + e.getMessage() + " Please try again.", "error");
-                });
-
-    }
+//    public void addNewLocation(String locationToAdd) {
+//        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
+//        firebaseFunctionsHelper.addInterestedLocation(user.getUserId(), locationToAdd)
+//                .addOnSuccessListener(result -> {
+//                    if (result.equals("success")) {
+////                        new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Successfully add new facility", "success");
+//                        Log.i("add-interested-facility-success", result);
+//
+//                        // add new facility to local data
+//                        ArrayList<String> interestedLocations = getInterests();
+//                        interestedLocations.add(locationToAdd);
+//                        notifyItemInserted(interestedLocations.size() - 1);
+//                    } else {
+//                        new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Error: " + result + " Please try again.", "error");
+//                        Log.e("add-interested-location-fail", result);
+//                    }
+//                })
+//                .addOnFailureListener(e -> {
+//                    // pop error at input box
+//                    Log.e("add-interested-location-fail", e.getMessage());
+//                    new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Error: " + e.getMessage() + " Please try again.", "error");
+//                });
+//
+//    }
 }
 

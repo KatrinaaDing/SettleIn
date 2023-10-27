@@ -356,10 +356,10 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
     }
 
     public void addNewFacility(String facilityToAdd) {
-        interestedFacilitiesAdapter.addNewFacility(facilityToAdd);
+        interestedFacilitiesAdapter.addNewInterest(facilityToAdd);
     }
 
     public void addNewLocation(String locationToAdd) {
-        interestedLocationsAdapter.addNewLocation(locationToAdd);
+        interestedLocationsAdapter.addNewInterest(locationToAdd);
     }
 }
