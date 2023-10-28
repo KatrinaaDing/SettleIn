@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements PropertyCardAdapter.EventListener{
 
     private FragmentHomeBinding binding;
 
@@ -47,17 +47,19 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-//        Button testBtn = binding.testBtn;
-//        testBtn.setOnClickListener(view -> {
-//            Intent intent = new Intent(getActivity(), TestActivity.class);
-//            startActivity(intent);
-//        });
-
         if (waitForAuth()) {
             getAllProperties(this.getContext());
         }
 
         return root;
+    }
+
+    public void onEvent(boolean hasProperty) {
+        if (hasProperty) {
+            binding.hint.setVisibility(View.GONE);
+        } else {
+            binding.hint.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -253,7 +255,7 @@ public class HomeFragment extends Fragment {
     private void renderProperties(ArrayList<Property> properties) {
         RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
         propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.VERTICAL, false));
-        RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties);
+        RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties, this);
         propertiesRecyclerView.setAdapter(propertyCardAdapter);
     }
 

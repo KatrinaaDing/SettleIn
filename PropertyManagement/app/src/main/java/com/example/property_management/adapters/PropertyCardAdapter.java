@@ -39,6 +39,7 @@ import com.google.android.material.card.MaterialCardView;
 
 import org.w3c.dom.Text;
 
+import java.util.EventListener;
 import java.util.List;
 
 public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapter.ViewHolder>{
@@ -46,8 +47,15 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
     private List<Property> properties;
     Context context;
 
-    public PropertyCardAdapter(List<Property> properties) {
+    EventListener listener;
+
+    public interface EventListener {
+        void onEvent(boolean hasProperty);
+    }
+
+    public PropertyCardAdapter(List<Property> properties, EventListener listener) {
         this.properties = properties;
+        this.listener = listener;
     }
     @NonNull
     @Override
@@ -162,13 +170,14 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
                         Activity activity = (Activity) context;
                         new BasicSnackbar(activity.findViewById(android.R.id.content), msg, "success");
                         Log.d("property-card-adapter", "delete property success");
-//                        // refresh the activity after showing the snackbar
-//                        new Handler().postDelayed(() -> {
-//                            activity.recreate();
-//                        }, 1000);
                         properties.remove(position);
                         notifyItemRemoved(position);
                         notifyItemRangeChanged(position, properties.size());
+
+                        // show hint if property list is empty
+                        if (properties.size() == 0) {
+                            listener.onEvent(false);
+                        }
                     }
                     @Override
                     public void onError(String msg) {
