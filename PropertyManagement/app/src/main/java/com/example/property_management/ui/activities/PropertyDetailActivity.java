@@ -142,6 +142,17 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
 
     private void setDistanceRecycler(ArrayList<DistanceInfo> distanceInfoList) {
         distanceRecycler = binding.distanceRecycler;
+        // if no distance info, hide distance recycler
+        TextView noInterestTxt = findViewById(R.id.noInterestTxt);
+        if (distanceInfoList.isEmpty()) {
+            distanceRecycler.setVisibility(View.GONE);
+            noInterestTxt.setVisibility(View.VISIBLE);
+            return;
+        } else {
+            distanceRecycler.setVisibility(View.VISIBLE);
+            noInterestTxt.setVisibility(View.GONE);
+        }
+
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
         distanceRecycler.setLayoutManager(layoutManager);
         distanceAdapter = new DistanceAdapter(this, distanceInfoList);

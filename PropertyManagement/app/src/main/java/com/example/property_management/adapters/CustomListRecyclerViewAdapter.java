@@ -112,6 +112,7 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
                 // do more actions
                 getInterests().remove(position);
                 notifyItemRemoved(position);
+                notifyItemRangeChanged(position, getInterests().size());
             }
 
             @Override
