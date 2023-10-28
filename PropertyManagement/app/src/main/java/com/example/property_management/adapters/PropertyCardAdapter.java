@@ -2,6 +2,7 @@ package com.example.property_management.adapters;
 
 import static androidx.core.content.ContextCompat.startActivity;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -58,7 +59,7 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         // set values to the view
         Property property = properties.get(position);
         holder.addressView.setText(property.getAddress());
@@ -97,32 +98,9 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     int id = item.getItemId();
-//                    if (id == R.id.property_option_get_direction) {
-//                        // reference: https://developers.google.com/maps/documentation/urls/android-intents
-//                        // view property location on map
-//                        String address = property.getAddress();
-//                         String uriString = "geo:0,0?q=" + Uri.encode(address);
-////                        String uriString = "google.navigation:?q=" + Uri.encode(address);
-//                        Uri uri = Uri.parse(uriString);
-//                        Intent mapIntent = new Intent(android.content.Intent.ACTION_VIEW, uri);
-//                        // If Google Maps app is installed, open it. Else, redirect to web version.
-//                        try {
-//                            Log.d("property-view-on-map", "URI: " + uriString);
-//                            context.startActivity(mapIntent);
-//                        } catch (ActivityNotFoundException e) {
-//                            // Google Maps app is not installed, redirect to web version
-//                            Uri webUri = Uri.parse(
-//                                    "https://www.google.com/maps/search/?api=1&query=" +
-//                                    Uri.encode(address));
-//                            Intent webIntent = new Intent(Intent.ACTION_VIEW, webUri);
-//                            context.startActivity(webIntent);
-//                        }
-//                        return true;
-
-//                    } else
                     if (id == R.id.property_option_delete) {
                         // handle delete property
-                        confirmDeleteProperty(property);
+                        confirmDeleteProperty(property, position);
                         return true;
                     } else {
                         return false;
@@ -165,7 +143,7 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
      *
      * @param property the property to be deleted
      */
-    private void confirmDeleteProperty(Property property) {
+    private void confirmDeleteProperty(Property property, int position) {
         BasicDialog dialog = new BasicDialog(true,
                 "Are you sure you want to delete this property?",
                 "This action cannot be undone.",
@@ -184,10 +162,13 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
                         Activity activity = (Activity) context;
                         new BasicSnackbar(activity.findViewById(android.R.id.content), msg, "success");
                         Log.d("property-card-adapter", "delete property success");
-                        // refresh the activity after showing the snackbar
-                        new Handler().postDelayed(() -> {
-                            activity.recreate();
-                        }, 1000);
+//                        // refresh the activity after showing the snackbar
+//                        new Handler().postDelayed(() -> {
+//                            activity.recreate();
+//                        }, 1000);
+                        properties.remove(position);
+                        notifyItemRemoved(position);
+                        notifyItemRangeChanged(position, properties.size());
                     }
                     @Override
                     public void onError(String msg) {
