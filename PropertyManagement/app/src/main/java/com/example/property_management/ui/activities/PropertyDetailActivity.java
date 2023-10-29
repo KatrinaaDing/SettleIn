@@ -98,7 +98,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         // get property id
         Intent intent = getIntent();
         this.propertyId = intent.getStringExtra("property_id"); // -1 is default value
-        setTitle("Property Detail (" + this.propertyId + ")");
+        setTitle("Property Detail");
 
         // fetch property data from firebase
         getPropertyById(this.propertyId);
@@ -134,11 +134,24 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 "- Here list the distance from the property to the nearest interested facilities and locations. \n" +
                 "- You can add more interested locations in the profile page.\n" +
                 "- The facilities that are not within 5km will not be shown here.\n" +
+                "- The locations that are too far from the property will not be shown here.\n" +
                 "- For new added interested locations/facilities, the distance will be updated in 3 minutes.");
+
     }
 
     private void setDistanceRecycler(ArrayList<DistanceInfo> distanceInfoList) {
         distanceRecycler = binding.distanceRecycler;
+        // if no distance info, hide distance recycler
+        TextView noInterestTxt = findViewById(R.id.noInterestTxt);
+        if (distanceInfoList.isEmpty()) {
+            distanceRecycler.setVisibility(View.GONE);
+            noInterestTxt.setVisibility(View.VISIBLE);
+            return;
+        } else {
+            distanceRecycler.setVisibility(View.VISIBLE);
+            noInterestTxt.setVisibility(View.GONE);
+        }
+
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
         distanceRecycler.setLayoutManager(layoutManager);
         distanceAdapter = new DistanceAdapter(this, distanceInfoList, property.getAddress());

@@ -2,6 +2,7 @@ package com.example.property_management.adapters;
 
 import static androidx.core.content.ContextCompat.startActivity;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -39,6 +40,7 @@ import com.google.android.material.card.MaterialCardView;
 
 import org.w3c.dom.Text;
 
+import java.util.EventListener;
 import java.util.List;
 
 public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapter.ViewHolder>{
@@ -46,8 +48,15 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
     private List<Property> properties;
     Context context;
 
-    public PropertyCardAdapter(List<Property> properties) {
+    EventListener listener;
+
+    public interface EventListener {
+        void onEvent(boolean hasProperty);
+    }
+
+    public PropertyCardAdapter(List<Property> properties, EventListener listener) {
         this.properties = properties;
+        this.listener = listener;
     }
     @NonNull
     @Override
@@ -59,7 +68,7 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         // set values to the view
         Property property = properties.get(position);
         holder.addressView.setText(property.getAddress());
@@ -105,7 +114,7 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
                     int id = item.getItemId();
                     if (id == R.id.property_option_delete) {
                         // handle delete property
-                        PropertyCard.confirmDeleteProperty(property.getPropertyId(), context);
+                        confirmDeleteProperty(property, position);
                         return true;
                     } else {
                         return false;
@@ -143,5 +152,51 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
         }
     }
 
+    /**
+     * Show a dialog to confirm delete property
+     *
+     * @param property the property to be deleted
+     */
+    private void confirmDeleteProperty(Property property, int position) {
+        BasicDialog dialog = new BasicDialog(true,
+                "Are you sure you want to delete this property?",
+                "This action cannot be undone.",
+                "Cancel", "Delete");
+        dialog.setCallback(new BasicDialogCallback() {
+            @Override
+            public void onLeftBtnClick() {
+                dialog.dismiss();
+            }
+            @Override
+            public void onRightBtnClick() {
+                FirebaseUserRepository firebaseUserRepository = new FirebaseUserRepository();
+                firebaseUserRepository.deleteUserProperty(property.getPropertyId(), new DeletePropertyByIdCallback() {
+                    @Override
+                    public void onSuccess(String msg) {
+                        Activity activity = (Activity) context;
+                        new BasicSnackbar(activity.findViewById(android.R.id.content), msg, "success");
+                        Log.d("property-card-adapter", "delete property success");
+                        properties.remove(position);
+                        notifyItemRemoved(position);
+                        notifyItemRangeChanged(position, properties.size());
 
+                        // show hint if property list is empty
+                        if (properties.size() == 0) {
+                            listener.onEvent(false);
+                        }
+                    }
+                    @Override
+                    public void onError(String msg) {
+                        Activity activity = (Activity) context;
+                        new BasicSnackbar(activity.findViewById(android.R.id.content),
+                                msg + ". Please try again later.", "error");
+                        Log.e("property-card-adapter", "delete property failure: " + msg);
+
+                    }
+                });
+            }
+        });
+        AppCompatActivity activity = (AppCompatActivity) context;
+        dialog.show(activity.getSupportFragmentManager(), "confirm-delete-property-dialog");
+    }
 }

@@ -24,8 +24,9 @@
         android:orientation="horizontal">
         <TextView
             android:id="@+id/detail_distance"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_width="60dp"
+            android:maxWidth="60dp"
+            android:layout_height="wrap_content"
             android:text="0 km"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -48,13 +49,13 @@
 
             <TextView
                 android:id="@+id/driveTime"
-                android:layout_width="wrap_content"
+                android:layout_width="60dp"
+                android:maxWidth="60dp"
                 android:layout_height="wrap_content"
                 android:text="0 min"
                 android:layout_marginStart="3dp"
                 app:layout_constraintStart_toEndOf="@id/driveImage"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -74,13 +75,13 @@
 
             <TextView
                 android:id="@+id/transitTime"
-                android:layout_width="wrap_content"
+                android:layout_width="60dp"
+                android:maxWidth="60dp"
                 android:layout_height="wrap_content"
                 android:text="0 min"
                 android:layout_marginStart="3dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@id/transitImage"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -100,13 +101,13 @@
 
             <TextView
                 android:id="@+id/walkTime"
-                android:layout_width="wrap_content"
+                android:layout_width="60dp"
+                android:maxWidth="60dp"
                 android:layout_height="wrap_content"
                 android:text="0 min"
                 android:layout_marginStart="3dp"
                 app:layout_constraintStart_toEndOf="@id/walkImage"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 

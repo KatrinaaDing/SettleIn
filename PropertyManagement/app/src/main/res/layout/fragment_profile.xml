@@ -145,41 +145,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="1.0" />
-
-            <Button
-                android:id="@+id/addFacilityTest"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="add facility test"
-                app:layout_constraintTop_toBottomOf="@+id/logoutBtn"
-                tools:ignore="MissingConstraints" />
-
-            <Button
-                android:id="@+id/deleteFacilityTest"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="delete facility test"
-                app:layout_constraintTop_toBottomOf="@+id/logoutBtn"
-                app:layout_constraintStart_toEndOf="@+id/addFacilityTest"
-                tools:ignore="MissingConstraints" />
-
-            <Button
-                android:id="@+id/addLocationTest"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="add location test"
-                app:layout_constraintTop_toBottomOf="@+id/logoutBtn"
-                app:layout_constraintStart_toEndOf="@+id/deleteFacilityTest"
-                tools:ignore="MissingConstraints" />
-
-            <Button
-                android:id="@+id/deleteLocationTest"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="delete facility test"
-                app:layout_constraintTop_toBottomOf="@+id/logoutBtn"
-                app:layout_constraintStart_toEndOf="@+id/addLocationTest"
-                tools:ignore="MissingConstraints" />
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>

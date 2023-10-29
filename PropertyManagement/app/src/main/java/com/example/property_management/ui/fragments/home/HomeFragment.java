@@ -51,7 +51,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
-public class HomeFragment extends Fragment implements OnMapReadyCallback {
+public class HomeFragment extends Fragment implements OnMapReadyCallback, PropertyCardAdapter.EventListener {
 
     private FragmentHomeBinding binding;
 
@@ -83,6 +83,14 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         waitForAuth();
 
         return root;
+    }
+
+    public void onEvent(boolean hasProperty) {
+        if (hasProperty) {
+            binding.hint.setVisibility(View.GONE);
+        } else {
+            binding.hint.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -436,7 +444,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private void renderProperties(ArrayList<Property> properties) {
         RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
         propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.VERTICAL, false));
-        RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties);
+        RecyclerView.Adapter propertyCardAdapter = new PropertyCardAdapter(properties, this);
         propertiesRecyclerView.setAdapter(propertyCardAdapter);
 
     }
