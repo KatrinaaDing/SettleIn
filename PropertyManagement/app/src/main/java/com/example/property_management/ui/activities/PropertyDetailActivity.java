@@ -98,7 +98,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         // get property id
         Intent intent = getIntent();
         this.propertyId = intent.getStringExtra("property_id"); // -1 is default value
-        setTitle("Property Detail (" + this.propertyId + ")");
+        setTitle("Property Detail");
 
         // fetch property data from firebase
         getPropertyById(this.propertyId);
