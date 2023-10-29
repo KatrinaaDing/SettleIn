@@ -2,7 +2,6 @@ package com.example.property_management.ui.activities;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -105,7 +104,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         getPropertyById(this.propertyId);
 
         // ================================== Components =======================================
-        initInfoButtons();
+        initInfoButton();
 
         // ===== dataCollectionBtn =====
         Button dataCollectionBtn = findViewById(R.id.dataCollectionBtn);
@@ -128,7 +127,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         }
     }
 
-    private void initInfoButtons() {
+    private void initInfoButton() {
         InfoButton infoButton = findViewById(R.id.distanceHintBtn);
         infoButton.setTitle("Distances from interested facilities");
         infoButton.setContent(
@@ -155,7 +154,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
         distanceRecycler.setLayoutManager(layoutManager);
-        distanceAdapter = new DistanceAdapter(this, distanceInfoList);
+        distanceAdapter = new DistanceAdapter(this, distanceInfoList, property.getAddress());
         distanceRecycler.setAdapter(distanceAdapter);
 
         // dynamically set height according to the number of items (max 400dp)
@@ -368,10 +367,16 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     }
 
     /**
-     * Set amenities group data to UI
+     * Set price and amenities group data to UI
      */
     private void setAmenitiesGroup(Property property) {
-        binding.detailPriceTxt.setText("$" + property.getPrice() + " per week");
+        // set price
+        if (property.getPrice() == 0) {
+            binding.detailPriceTxt.setText("Price not available");
+        } else {
+            binding.detailPriceTxt.setText("$" + property.getPrice() + " per week");
+        }
+        // set amenities
         binding.amenitiesGroup.setValues(
                 property.getNumBedrooms(),
                 property.getNumBathrooms(),
@@ -611,7 +616,6 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             }
         }
     }
-
 
     private String formatDateTime(String date, String time) {
         boolean noDate = date == null || date.equals("");

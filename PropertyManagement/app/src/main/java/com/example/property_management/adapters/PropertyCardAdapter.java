@@ -33,6 +33,7 @@ import com.example.property_management.data.Property;
 import com.example.property_management.ui.activities.PropertyDetailActivity;
 import com.example.property_management.ui.fragments.base.BasicDialog;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
+import com.example.property_management.ui.fragments.base.PropertyCard;
 import com.example.property_management.ui.fragments.property.AmenitiesGroup;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
@@ -63,7 +64,7 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
         // inflate the view and get the context
         View inflate = LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_property_card, parent, false);
         context = parent.getContext();
-        return new ViewHolder (inflate);
+        return new ViewHolder(inflate);
     }
 
     @Override
@@ -71,6 +72,7 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
         // set values to the view
         Property property = properties.get(position);
         holder.addressView.setText(property.getAddress());
+
         if (property.getPrice() == 0) {
             holder.priceView.setText("Price not available");
         } else {
@@ -96,6 +98,10 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
             intent.putExtra ("property_id", properties.get (position).getPropertyId());
             context.startActivity(intent);
         });
+
+        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) holder.propertyCard.getLayoutParams();
+        layoutParams.setMargins(0, 10, 0, 10);
+        holder.propertyCard.setLayoutParams(layoutParams);
 
         // set on click listener for menu button
         // item 1: view property on map. item 2: delete property
@@ -187,7 +193,6 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
                         Log.e("property-card-adapter", "delete property failure: " + msg);
 
                     }
-
                 });
             }
         });

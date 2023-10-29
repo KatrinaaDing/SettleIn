@@ -1,16 +1,21 @@
 package com.example.property_management.sensors;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
+import android.location.Location;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.property_management.callbacks.SensorCallback;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.Task;
 
 import java.util.List;
 
@@ -19,10 +24,12 @@ public class LocationSensor {
     private Activity activity;
     private SensorCallback callback;
     private boolean hasPermission = false;
+    private FusedLocationProviderClient fusedLocationClient;
 
     public LocationSensor(Activity activity, SensorCallback callback) {
         this.activity = activity;
         this.callback = callback;
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity);
     }
 
     public boolean hasPermission(Context context) {
@@ -38,6 +45,14 @@ public class LocationSensor {
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     MY_LOCATION_REQUEST_CODE);
         }
+    }
+
+    @SuppressLint("MissingPermission")
+    public Task<Location> getCurrentLocation() {
+        if (hasPermission(activity)) {
+            return fusedLocationClient.getLastLocation();
+        }
+        return null;
     }
 
 }
