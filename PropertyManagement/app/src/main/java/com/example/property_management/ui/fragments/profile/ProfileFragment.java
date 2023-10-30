@@ -217,12 +217,8 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
                             return;
                         }
                         // check duplication
-                        for (String location : currentUser.getInterestedLocations()) {
-                            String location_lower = location.toLowerCase();
-                            if (location_lower.equals(selectedAddress.toLowerCase())) {
-                                new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Error: Location already exists", "error");
-                                return;
-                            }
+                        if (ifDuplicate(selectedAddress)) {
+                            return;
                         }
                         addNewLocation(selectedAddress);
                     }
@@ -277,5 +273,22 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
 
     public void addNewLocation(String locationToAdd) {
         interestedLocationsAdapter.addNewInterest(locationToAdd);
+    }
+
+    public boolean ifDuplicate(String toAdd) {
+        for (String location : currentUser.getInterestedLocations()) {
+            String location_lower = location.toLowerCase();
+            if (location_lower.equals(toAdd.toLowerCase())) {
+                return true;
+            }
+        }
+
+        for (String facility : currentUser.getInterestedFacilities()) {
+            String facility_lower = facility.toLowerCase();
+            if (facility_lower.equals(toAdd.toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

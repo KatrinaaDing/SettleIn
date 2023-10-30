@@ -1,5 +1,6 @@
 package com.example.property_management.ui.fragments.profile;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -21,6 +22,7 @@ import com.example.property_management.api.FirebaseFunctionsHelper;
 import com.example.property_management.data.User;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
 
@@ -34,55 +36,57 @@ public class AddNewFacilityDialogFragment extends DialogFragment {
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View rootView = inflater.inflate(R.layout.custom_add_new_facility_dialog, null);
         builder.setView(rootView);
+        builder.setCancelable(false);
 
-        builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        // get profile fragment
-                        ProfileFragment profileFragment = (ProfileFragment) AddNewFacilityDialogFragment.this.getParentFragment();
-
-                        if (profileFragment != null) {
-                            // add new facility
-                            if (rootView == null) {
-                                System.out.println("getView() is null");
-                                return;
-                            }
-
-                            ArrayList<String> interestedFacilities = profileFragment.getProfileUser().getInterestedFacilities();
-                            EditText facilityEditText = rootView.findViewById(R.id.facilityEditText);
-                            String facilityToAdd = facilityEditText.getText().toString();
-
-                            // check if facilityToAdd is empty
-                            if (TextUtils.isEmpty(facilityToAdd)) {
-                                new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Error: Facility cannot be empty", "error");
-                                return;
-                            }
-
-                            // check duplication
-                            for (String facility : interestedFacilities) {
-                                String facility_lower = facility.toLowerCase();
-                                if (facility_lower.equals(facilityToAdd.toLowerCase())) {
-                                    new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Error: Facility already exists", "error");
-                                    return;
-                                }
-                            }
-
-                            // add new facility
-                            profileFragment.addNewFacility(facilityToAdd);
-
-                        } else {
-                            Log.d("AddNewFacilityDialogFragmentError", "ProfileFragment is null");
-                            new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Error: ProfileFragment is null", "error");
-                        }
-
-                    }
-                })
+        Dialog dialog = builder.setPositiveButton("Add", null)
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         AddNewFacilityDialogFragment.this.getDialog().cancel();
+                        dismiss();
                     }
-                });
-        return builder.create();
+                })
+                .create();
+        dialog.show();
+        ((androidx.appcompat.app.AlertDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
+            // get profile fragment
+            ProfileFragment profileFragment = (ProfileFragment) AddNewFacilityDialogFragment.this.getParentFragment();
+
+            if (profileFragment != null) {
+                // add new facility
+                if (rootView == null) {
+                    System.out.println("getView() is null");
+                    return;
+                }
+
+                ArrayList<String> interestedFacilities = profileFragment.getProfileUser().getInterestedFacilities();
+                EditText facilityEditText = rootView.findViewById(R.id.facilityEditText);
+                TextInputLayout facilityEditTextLayout = rootView.findViewById(R.id.facilityEditTextLayout);
+                String facilityToAdd = facilityEditText.getText().toString();
+
+                // check if facilityToAdd is empty
+                if (TextUtils.isEmpty(facilityToAdd)) {
+                    facilityEditTextLayout.setError("Error: Facility cannot be empty");
+                    return;
+
+                }
+
+                // check duplication
+                if (profileFragment.ifDuplicate(facilityToAdd)) {
+                    facilityEditTextLayout.setError("Error: Facility already exists");
+                    return;
+                }
+
+                // add new facility
+                profileFragment.addNewFacility(facilityToAdd);
+                dialog.dismiss();
+
+            } else {
+                Log.d("AddNewFacilityDialogFragmentError", "ProfileFragment is null");
+                new BasicSnackbar(rootView.findViewById(android.R.id.content), "Error: ProfileFragment is null", "error");
+            }
+        });
+
+        return dialog;
     }
 
     @Override
