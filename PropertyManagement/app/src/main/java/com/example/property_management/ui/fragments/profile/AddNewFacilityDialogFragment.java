@@ -54,11 +54,11 @@ public class AddNewFacilityDialogFragment extends DialogFragment {
             if (profileFragment != null) {
                 // add new facility
                 if (rootView == null) {
-                    System.out.println("getView() is null");
+                    new BasicSnackbar(rootView.findViewById(android.R.id.content), "Error: rootView is null", "error");
+                    dialog.dismiss();
                     return;
                 }
 
-                ArrayList<String> interestedFacilities = profileFragment.getProfileUser().getInterestedFacilities();
                 EditText facilityEditText = rootView.findViewById(R.id.facilityEditText);
                 TextInputLayout facilityEditTextLayout = rootView.findViewById(R.id.facilityEditTextLayout);
                 String facilityToAdd = facilityEditText.getText().toString();
@@ -83,6 +83,7 @@ public class AddNewFacilityDialogFragment extends DialogFragment {
             } else {
                 Log.d("AddNewFacilityDialogFragmentError", "ProfileFragment is null");
                 new BasicSnackbar(rootView.findViewById(android.R.id.content), "Error: ProfileFragment is null", "error");
+                dialog.dismiss();
             }
         });
 

@@ -24,8 +24,8 @@
         android:id="@+id/facilityEditTextLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter your email"
-        android:paddingVertical="20dp">
+        android:hint="Enter your interested facility"
+        android:paddingVertical="10dp">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/facilityEditText"
             android:layout_width="match_parent"
