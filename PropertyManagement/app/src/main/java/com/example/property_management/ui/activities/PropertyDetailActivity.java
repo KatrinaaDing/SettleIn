@@ -158,8 +158,8 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         distanceRecycler.setAdapter(distanceAdapter);
 
         // dynamically set height according to the number of items (max 400dp)
-        int itemHeight = Helpers.dpToPx(this, 80);
-        int totalHeight = distanceInfoList.size() * itemHeight + Helpers.dpToPx(this, 10);
+        int itemHeight = Helpers.dpToPx(this, 50);
+        int totalHeight = distanceInfoList.size() * itemHeight + Helpers.dpToPx(this, 40);
         int maxHeight = Helpers.dpToPx(this, 400);
         totalHeight = Math.min(totalHeight, maxHeight);
 
