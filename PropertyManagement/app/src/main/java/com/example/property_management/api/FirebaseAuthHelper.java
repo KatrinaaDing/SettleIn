@@ -2,6 +2,7 @@ package com.example.property_management.api;
 
 import static android.content.ContentValues.TAG;
 
+import android.os.Handler;
 import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -58,7 +59,6 @@ public class FirebaseAuthHelper {
                     Log.d(TAG, "createUserWithEmail:success");
                     FirebaseUser user = mAuth.getCurrentUser();
                     showSuccess("User created successfully.");
-                    System.out.println(user);
                     callback.onSuccess(user);
 
                 } else {
@@ -78,7 +78,6 @@ public class FirebaseAuthHelper {
                     // Sign in success, update UI with the signed-in user's information
                     Log.d(TAG, "signInWithEmail:success");
                     FirebaseUser user = mAuth.getCurrentUser();
-                    showSuccess("Login successfully.");
                     callback.onSuccess(user);
                 } else {
                     // If sign in fails, display a message to the user.

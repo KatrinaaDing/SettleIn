@@ -486,7 +486,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Proper
     private void waitForAuth() {
         FirebaseAuth.getInstance().addAuthStateListener(firebaseAuth -> {
             FirebaseUser user = firebaseAuth.getCurrentUser();
-            if (user != null) {
+            if (binding != null && user != null) {
                 // User is signed in
                 binding.loadingText.setText("Loading properties...");
                 getAllProperties();
