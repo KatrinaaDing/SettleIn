@@ -74,12 +74,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Proper
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-//        Button testBtn = binding.testBtn;
-//        testBtn.setOnClickListener(view -> {
-//            Intent intent = new Intent(getActivity(), TestActivity.class);
-//            startActivity(intent);
-//        });
-
         waitForAuth();
 
         return root;
@@ -284,7 +278,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Proper
                     googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLatLng, 12));
                 }
             });
-
+        } else {
+            // if not location, set view to Australia by default
+            LatLng australia = new LatLng(-25.2744, 133.7751);
+            googleMap.moveCamera(CameraUpdateFactory.newLatLng(australia));
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(australia, 4));
         }
         addMarkersToMap(googleMap, allProperties);
 
