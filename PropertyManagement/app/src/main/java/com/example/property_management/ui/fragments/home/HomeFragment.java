@@ -127,17 +127,17 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Proper
                 continue;
             }
 
-            // get inspection date and time and check if it's within 15min to now. skip if none.
+            // get inspection date and time. skip if none.
             LocalDate inspectionDate = property.getInspectionDate();
             LocalTime inspectionTime = property.getInspectionTime();
             if (inspectionDate == null || inspectionTime == null) {
                 continue;
             }
 
-            // if the difference is less than 15min
+            // if the difference is less than 10min, show dialog
             long inspectionDateTimeMillis = DateTimeFormatter.localDateToMillis(LocalDateTime.of(inspectionDate, inspectionTime));
             long nowMillis = now.getTime();
-            if (Math.abs(inspectionDateTimeMillis - nowMillis) < 15 * 60 * 1000) {
+            if (Math.abs(inspectionDateTimeMillis - nowMillis) < 10 * 60 * 1000) {
                 // get current location
                 LocationSensor locationSensor = new LocationSensor(getActivity(), null);
                 locationSensor.requiresPermissions(getActivity());
@@ -153,43 +153,64 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Proper
                             // if distance is less than 500 meters, show dialog
                             float distance = myLocation.distanceTo(propertyLocation);
                             if (distance < 500) {
-                                Log.d("nearby-inspection", "show dialog");
-                                BasicDialog dialog = new BasicDialog(true,
-                                    "Ready for inspection?",
-                                    "Looks like you are near " + property.getAddress() +
-                                            ". Would you like to view the property detail?\n\n" +
-                                        "Close the dialog by pressing outside.",
-                                    "Do not show again for this property",
-                                        "Yes, let's go!");
-                                dialog.setCallback(new BasicDialogCallback() {
-                                    @Override
-                                    public void onLeftBtnClick() {
-                                        // set preference to not show this dialog again
-                                        SharedPreferences sharedPreferences = getContext()
-                                                .getSharedPreferences("showInspectAlertPref", Context.MODE_PRIVATE);
-                                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                                        editor.putBoolean(property.getPropertyId(), false);
-                                        editor.apply();
-                                    }
-                                    @Override
-                                    public void onRightBtnClick() {
-                                        Intent intent = new Intent(getActivity(), PropertyDetailActivity.class);
-                                        intent.putExtra("property_id", property.getPropertyId());
-                                        startActivity(intent);
-                                    }
-                                });
-                                dialog.show(getChildFragmentManager(), "Test dialog");
-                                showInspectionAlert.set(true);
+                                showInspectionDialog(
+                                        property.getPropertyId(),
+                                        "You are near " + property.getAddress() +
+                                                ". Would you like to start the inspection now?"
+                                );
+
                             }
                         }
                     });
+                } else {
+                    // if no location permission, show dialog
+                    showInspectionDialog(
+                            property.getPropertyId(),
+                            "Almost there! You're within 10 minutes of the scheduled inspection for " +
+                                    property.getAddress() +
+                                    ". Would you like to start the inspection now?"
+                    );
+                    showInspectionAlert.set(true);
                 }
+                showInspectionAlert.set(true);
             }
             // only show one dialog
             if (showInspectionAlert.get()) {
                 break;
             }
         }
+    }
+
+    /**
+     * show inspection dialog and take user to property detail page if user clicks "Yes".
+     * If user clicks "Do not show again", set preference to not show this dialog again.
+     * @param propertyId the property id of the property to be inspected
+     * @param message the message to be displayed in the dialog
+     */
+    private void showInspectionDialog(String propertyId, String message) {
+        BasicDialog dialog = new BasicDialog(true,
+                "Ready for inspection?",
+                message + "\n\nClose this alert by clicking outside of it.",
+                "Do not show again for this property",
+                "Yes, let's go!");
+        dialog.setCallback(new BasicDialogCallback() {
+            @Override
+            public void onLeftBtnClick() {
+                // set preference to not show this dialog again
+                SharedPreferences sharedPreferences = getContext()
+                        .getSharedPreferences("showInspectAlertPref", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(propertyId, false);
+                editor.apply();
+            }
+            @Override
+            public void onRightBtnClick() {
+                Intent intent = new Intent(getActivity(), PropertyDetailActivity.class);
+                intent.putExtra("property_id", propertyId);
+                startActivity(intent);
+            }
+        });
+        dialog.show(getChildFragmentManager(), "inspection alert dialog");
     }
     /**
      * Initialize the filter menu

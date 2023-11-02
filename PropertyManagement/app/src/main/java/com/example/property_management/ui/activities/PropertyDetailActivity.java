@@ -132,11 +132,11 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         InfoButton infoButton = findViewById(R.id.distanceHintBtn);
         infoButton.setTitle("Distances from interested facilities");
         infoButton.setContent(
-                "- Here list the distance from the property to the nearest interested facilities and locations. \n" +
-                "- You can add more interested locations in the profile page.\n" +
-                "- The facilities that are not within 5km will not be shown here.\n" +
-                "- The locations that are too far from the property will not be shown here.\n" +
-                "- For new added interested locations/facilities, the distance will be updated in 3 minutes.");
+            "- Here list the distance from the property to the nearest interested facilities and locations. \n" +
+            "- You can add more interested locations in the profile page.\n" +
+            "- The facilities that are not within 5km will not be shown here.\n" +
+            "- The locations that are too far from the property will not be shown here.\n" +
+            "- For new added interested locations/facilities, the distance will be updated in 3 minutes.");
 
     }
 
@@ -479,7 +479,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
      * @param onSuccess callback on success
      */
     private void updateIsInspectedStatus(boolean isChecked, Runnable onSuccess) {
-        // update ispected status to firebase
+        // update inspected status to firebase
         HashMap<String, Object> updateDatePayload = new HashMap<>();
         updateDatePayload.put("properties." + this.propertyId + ".inspected", isChecked);
         FirebaseUserRepository userRepository = new FirebaseUserRepository();
@@ -602,18 +602,19 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         CalendarSensor calendarSensor = new CalendarSensor(this, null);
         // calendar permission granted asynchroneously, need to check before adding event
         if (calendarSensor.getMyCalendarRequestCode() == requestCode) {
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted
-                if (firstTimeAddingCalendarEvent) {
-                    // if first time permission granted, need to add event here
-                    addInspectionToCalendar();
+
+            // if it's first time permission granted, need to explicitly add event here
+            if (firstTimeAddingCalendarEvent) {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        // Permission granted
+                        addInspectionToCalendar();
+                } else {
+                    // Permission denied
+                    new BasicSnackbar(findViewById(android.R.id.content),
+                            "Permission denied. Please go to settings and enable calendar permission.",
+                            "error");
                 }
-            } else {
-                // Permission denied
-                new BasicSnackbar(findViewById(android.R.id.content),
-                        "Permission denied. Please go to settings and enable calendar permission.",
-                        "error");
             }
         }
     }

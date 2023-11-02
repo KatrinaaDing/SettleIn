@@ -16,8 +16,6 @@ import com.example.property_management.utils.DateTimeFormatter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Date;
-import java.util.TimeZone;
 
 public class CalendarSensor {
     private Activity activity;
