@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.provider.CalendarContract;
+import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -41,6 +42,7 @@ public class Calendar {
                             String description, String address) throws Exception {
         LocalDate localDate = DateTimeFormatter.stringToDate(date);
         LocalTime localTime = DateTimeFormatter.stringToTime(time);
+
         boolean allDay = false;
         if (localDate == null) {
             throw new Exception("Invalid date format");

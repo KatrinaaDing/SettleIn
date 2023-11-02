@@ -209,7 +209,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                     // update to firebase
                     updateInspectionDateTime(() -> {
                         // on success
-                        inspectionTimeTxt.setText((date != "" || time != "")
+                        inspectionTimeTxt.setText((!"".equals(date) || !"".equals(time))
                                 ? formatDateTime(date, time)
                                 : NO_DATE_TIME_HINT
                         );
@@ -232,7 +232,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         alertDialog.show();
 
         // ===== datePicker =====
-        Long currentDate = date == ""
+        Long currentDate = "".equals(date)
                 ? MaterialDatePicker.todayInUtcMilliseconds()
                 : DateTimeFormatter.localDateToMillis(DateTimeFormatter.stringToDate(date));
         CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints
@@ -257,10 +257,10 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         });
         Log.i("date-time", "reseting date time to" + this.date + "," + this.time);
         // ===== timePicker =====
-        int currentHour = time == ""
+        int currentHour = "".equals(time)
                 ? LocalTime.now().getHour()
                 : DateTimeFormatter.stringToTime(time).getHour();
-        int currentMinute = time == ""
+        int currentMinute = "".equals(time)
                 ? LocalTime.now().getMinute()
                 : DateTimeFormatter.stringToTime(time).getMinute();
         MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
