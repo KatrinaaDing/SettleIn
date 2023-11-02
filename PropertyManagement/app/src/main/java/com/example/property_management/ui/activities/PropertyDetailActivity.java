@@ -28,7 +28,7 @@ import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.Property;
 import com.example.property_management.data.UserProperty;
-import com.example.property_management.sensors.Calendar;
+import com.example.property_management.sensors.CalendarSensor;
 import com.example.property_management.sensors.LocationSensor;
 import com.example.property_management.ui.fragments.base.InfoButton;
 import com.example.property_management.utils.DateTimeFormatter;
@@ -98,6 +98,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         // get property id
         Intent intent = getIntent();
         this.propertyId = intent.getStringExtra("property_id"); // -1 is default value
+        assert this.propertyId != null;
         setTitle("Property Detail");
 
         // fetch property data from firebase
@@ -440,16 +441,16 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
      */
     private void setAddToCalendarButton() {
         MaterialButton addToCalendarBtn = findViewById(R.id.addToCalendarBtn);
-        Calendar calendar = new Calendar(this, null);
+        CalendarSensor calendarSensor = new CalendarSensor(this, null);
         // show add to calendar button if date is set
         if (date != null && !date.equals("")) {
             addToCalendarBtn.setVisibility(View.VISIBLE);
         }
         addToCalendarBtn.setOnClickListener(view -> {
             // if first time adding calendar event, check calendar permission
-            if (!calendar.getHasPermission(this)) {
+            if (!calendarSensor.getHasPermission(this)) {
                 firstTimeAddingCalendarEvent = true;
-                calendar.requiresPermissions();
+                calendarSensor.requiresPermissions();
             } else {
                 firstTimeAddingCalendarEvent = false;
                 addInspectionToCalendar();
@@ -462,12 +463,12 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
      * add inspection event to calendar
      */
     private void addInspectionToCalendar() {
-        Calendar calendar = new Calendar(this, null);
+        CalendarSensor calendarSensor = new CalendarSensor(this, null);
         String address = property.getAddress();
         String title = "Inspection at " + address;
         String description = "Inspection at " + address + " on " + date + " " + time;
         try {
-            calendar.createEvent(date, time, 30, title, description, address);
+            calendarSensor.createEvent(date, time, 30, title, description, address);
         } catch (Exception e) {
             new BasicSnackbar(findViewById(android.R.id.content), e.getMessage(), "error");
         }
@@ -598,9 +599,9 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        Calendar calendar = new Calendar(this, null);
+        CalendarSensor calendarSensor = new CalendarSensor(this, null);
         // calendar permission granted asynchroneously, need to check before adding event
-        if (calendar.getMyCalendarRequestCode() == requestCode) {
+        if (calendarSensor.getMyCalendarRequestCode() == requestCode) {
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission granted

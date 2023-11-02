@@ -13,6 +13,7 @@ import com.example.property_management.callbacks.DeleteInterestedFacilityCallbac
 import com.example.property_management.data.Property;
 import com.example.property_management.data.User;
 import com.example.property_management.data.UserProperty;
+import com.example.property_management.utils.DateTimeFormatter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -257,6 +258,13 @@ public class FirebaseUserRepository {
                                                     property.setPropertyId(document.getId());
                                                     property.setInspected(userProperties.get(document.getId()).getInspected());
                                                     property.setCreatedAt(userProperties.get(document.getId()).getCreatedAt());
+                                                    property.setInspectionDate(
+                                                            DateTimeFormatter.stringToDate(userProperties.get(document.getId()).getInspectionDate())
+                                                    );
+                                                    property.setInspectionTime(
+                                                            DateTimeFormatter.stringToTime(userProperties.get(document.getId()).getInspectionTime())
+                                                    );
+
                                                     properties.add(property);
                                                 }
                                                 callback.onSuccess(properties);

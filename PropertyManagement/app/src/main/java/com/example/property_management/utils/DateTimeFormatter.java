@@ -102,6 +102,4 @@ public class DateTimeFormatter {
         return zonedDateTime.withZoneSameLocal(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
-
-
 }
