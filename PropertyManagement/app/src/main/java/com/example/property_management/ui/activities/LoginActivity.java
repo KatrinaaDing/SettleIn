@@ -87,6 +87,7 @@ public class LoginActivity extends AppCompatActivity {
 
     // ========================== Helpers ==========================
     private void login(String email, String password) {
+        setLoginLoading(true);
         FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(this);
         firebaseAuthHelper.signinWithEmail(email, password, new AuthCallback() {
             @Override
@@ -96,7 +97,9 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Exception e) {}
+            public void onFailure(Exception e) {
+                setLoginLoading(false);
+            }
         });
     }
     private void clearEmailError() {
@@ -133,5 +136,17 @@ public class LoginActivity extends AppCompatActivity {
             isValid = false;
         }
         return isValid;
+    }
+
+    private void setLoginLoading(boolean isLoading) {
+        Button submitLoginBtn = findViewById(R.id.submitLoginBtn);
+        if (isLoading) {
+            submitLoginBtn.setText("Logging you in...");
+            submitLoginBtn.setEnabled(false);
+        } else {
+            submitLoginBtn.setText("Login");
+            submitLoginBtn.setEnabled(true);
+        }
+
     }
 }
