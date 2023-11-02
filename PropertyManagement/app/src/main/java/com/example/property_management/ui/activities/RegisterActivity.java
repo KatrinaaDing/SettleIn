@@ -167,19 +167,34 @@ public class RegisterActivity extends AppCompatActivity {
         }
         return isValid;
     }
+
     private void clearEmailError() {
         TextInputLayout emailLayout = findViewById(R.id.editTextRegisterEmail);
         emailLayout.setError(null);
     }
+
     private void clearPasswordError() {
         TextInputLayout passwordLayout = findViewById(R.id.editTextRegisterPassword);
         passwordLayout.setError(null);
     }
+
     private void clearConfirmPasswordError() {
         TextInputLayout confirmPasswordLayout = findViewById(R.id.editTextConfirmPassword);
         confirmPasswordLayout.setError(null);
     }
+
+    private void setLoadingRegister(boolean isRegistering) {
+        Button submitRegisterBtn = findViewById(R.id.submitRegisterBtn);
+        if (isRegistering) {
+            submitRegisterBtn.setText("Registering...");
+        } else {
+            submitRegisterBtn.setText("Register");
+        }
+        binding.submitRegisterBtn.setEnabled(!isRegistering);
+    }
+
     private void registerUser(String email, String username, String password) {
+        setLoadingRegister(true);
         // create user in firebase auth
         FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(this);
         firebaseAuthHelper.createUser(email, username, password, new AuthCallback() {
@@ -199,13 +214,17 @@ public class RegisterActivity extends AppCompatActivity {
                     }
                     @Override
                     public void onError(String msg) {
-                        System.out.println("Error: " + msg);
+                        setLoadingRegister(false);
+                        Log.e("register-user", "Error adding user to firestore: " + msg);
                     }
                 });
                 firebaseAuthHelper.addUsernameToFirestore(user.getUid(), username);
             }
             @Override
-            public void onFailure(Exception e) {}
+            public void onFailure(Exception e) {
+                setLoadingRegister(false);
+                Log.e("register-user", "Error creating user: " + e.getMessage());
+            }
         });
 
     }

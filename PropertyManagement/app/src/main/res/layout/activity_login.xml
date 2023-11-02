@@ -46,7 +46,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Login"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="40dp"
             />
 
         <Button
@@ -54,11 +54,11 @@
             style="@style/Widget.Material3.Button.ElevatedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
             android:text="Go to Register" />
 
         <Button
             android:id="@+id/resetPasswordBtn"
+            style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Reset Password"
