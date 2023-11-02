@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,6 +42,7 @@ public class RegisterActivity extends AppCompatActivity {
         Button submitRegisterBtn = findViewById(R.id.submitRegisterBtn);
         Button goToLoginBtn = findViewById(R.id.goToLoginBtn);
         TextInputLayout emailLayout = findViewById(R.id.editTextRegisterEmail);
+        TextInputLayout usernameLayout = findViewById(R.id.editTextRegisterUsername);
         TextInputLayout passwordLayout = findViewById(R.id.editTextRegisterPassword);
         TextInputLayout confirmPasswordLayout = findViewById(R.id.editTextConfirmPassword);
 
@@ -48,12 +50,13 @@ public class RegisterActivity extends AppCompatActivity {
         submitRegisterBtn.setOnClickListener(view -> {
             // close keyboard
             Helpers.closeKeyboard(this);
-            if (validateEmail() && validatePassword()) {
+            if (validateEmail() && validateUsername() && validatePassword()) {
 //                Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
 //                startActivity(intent);
                 String email = emailLayout.getEditText().getText().toString();
+                String username = usernameLayout.getEditText().getText().toString();
                 String password = passwordLayout.getEditText().getText().toString();
-                registerUser(email, password);
+                registerUser(email, username, password);
             }
         });
         goToLoginBtn.setOnClickListener(view -> {
@@ -127,6 +130,18 @@ public class RegisterActivity extends AppCompatActivity {
         }
         return true;
     }
+
+    private boolean validateUsername() {
+        TextInputLayout usernameLayout = findViewById(R.id.editTextRegisterUsername);
+        String username = usernameLayout.getEditText().getText().toString();
+        if (username.isEmpty()) {
+            usernameLayout.setError("Username cannot be empty");
+            return false;
+        }
+        Log.d("check-usernmae", "validateUsername: " + username);
+        return true;
+    }
+
     private boolean validatePassword() {
         TextInputLayout passwordLayout = findViewById(R.id.editTextRegisterPassword);
         TextInputLayout confirmPasswordLayout = findViewById(R.id.editTextConfirmPassword);
@@ -164,10 +179,10 @@ public class RegisterActivity extends AppCompatActivity {
         TextInputLayout confirmPasswordLayout = findViewById(R.id.editTextConfirmPassword);
         confirmPasswordLayout.setError(null);
     }
-    private void registerUser(String email, String password) {
+    private void registerUser(String email, String username, String password) {
         // create user in firebase auth
         FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(this);
-        firebaseAuthHelper.createUser(email, password, new AuthCallback() {
+        firebaseAuthHelper.createUser(email, username, password, new AuthCallback() {
             @Override
             public void onSuccess(FirebaseUser user) {
                 // add created user to firestore
@@ -187,7 +202,7 @@ public class RegisterActivity extends AppCompatActivity {
                         System.out.println("Error: " + msg);
                     }
                 });
-                firebaseAuthHelper.addUsernameToFirestore(user.getUid(), "New User");
+                firebaseAuthHelper.addUsernameToFirestore(user.getUid(), username);
             }
             @Override
             public void onFailure(Exception e) {}

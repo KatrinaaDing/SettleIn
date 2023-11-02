@@ -233,17 +233,19 @@ public class FirebaseUserRepository {
             @Override
             public void onComplete(Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
+                    DocumentSnapshot snapshot = task.getResult();
+                    User user = snapshot.toObject(User.class);
                     List<String> docIds = new ArrayList<>();
-                    HashMap<String, UserProperty> userProperties = task.getResult().toObject(User.class).getProperties();
-                    if (userProperties != null && !userProperties.isEmpty()) {
-                        for (String docId : userProperties.keySet()) {
-                            docIds.add(docId);
+                    if (user != null) {
+                        HashMap<String, UserProperty> userProperties = task.getResult().toObject(User.class).getProperties();
+                        if (userProperties != null && !userProperties.isEmpty()) {
+                            for (String docId : userProperties.keySet()) {
+                                docIds.add(docId);
+                            }
                         }
-                    }
 
-                    Log.d("get-all-user-properties-success", docIds.toString());
-                    if (docIds != null) {
-                        if (!docIds.isEmpty()) {
+                        Log.d("get-all-user-properties-success", docIds.toString());
+                        if (docIds != null && !docIds.isEmpty()) {
                             collecRef.whereIn(FieldPath.documentId(), docIds)
                                     .get()
                                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
