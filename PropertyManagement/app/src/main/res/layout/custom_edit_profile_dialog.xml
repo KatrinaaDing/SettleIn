@@ -90,12 +90,20 @@
             android:layout_height="wrap_content"
             android:text="We will send you a link to your email to reset your password." />
 
+        <TextView
+            android:id="@+id/sendEmailErrorTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Failed to send email. Please try again later."
+            android:visibility="invisible"
+            android:textColor="@color/error"
+            android:layout_marginTop="15dp"/>
         <Button
             android:id="@+id/btnResetPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Send Reset Email"
-            android:layout_marginTop="16dp"/>
+            android:text="Send Password Reset Email"
+            android:layout_marginTop="5dp"/>
 
     </LinearLayout>
 </ScrollView>

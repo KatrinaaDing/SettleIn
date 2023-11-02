@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -60,6 +61,7 @@ public class EditProfileDialogFragment extends DialogFragment {
     private Button btnUpdateUsername;
     private Button btnUpdateEmail;
     private Button btnResetPassword;
+    private TextView errorResetPassword;
     private View view;
 
 
@@ -97,23 +99,33 @@ public class EditProfileDialogFragment extends DialogFragment {
         editEmail = view.findViewById(R.id.editEmail);
         editEmail.setText(email);
         btnResetPassword = view.findViewById(R.id.btnResetPassword);
+        errorResetPassword = view.findViewById(R.id.sendEmailErrorTextView);
 
         btnResetPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                errorResetPassword.setVisibility(View.INVISIBLE);
+                btnResetPassword.setEnabled(false);
+                btnResetPassword.setText("Sending Email...");
                 FirebaseAuth.getInstance().sendPasswordResetEmail(email)
                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
-                                    new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Check email to reset your password!", "success");
-                                    FirebaseAuth.getInstance().signOut();
-                                    Intent intent = new Intent(getActivity(), LoginActivity.class);
-                                    startActivity(intent);
-                                    getActivity().finish();
-                                    dismiss();
+                                    btnResetPassword.setText("Email Sent! Logging out...");
+                                    new Handler().postDelayed(() -> {
+                                        FirebaseAuth.getInstance().signOut();
+                                        Intent intent = new Intent(getActivity(), LoginActivity.class);
+                                        startActivity(intent);
+                                        getActivity().finish();
+                                        dismiss();
+                                    }, 1000);
+
                                 } else {
-                                    new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Fail to send reset password email!", "error");
+                                    btnResetPassword.setEnabled(true);
+                                    btnResetPassword.setText("Send Password Reset Email");
+                                    errorResetPassword.setVisibility(View.VISIBLE);
+                                    Log.e("reset-password", "Fail to send reset password email!", task.getException());
                                 }
                             }
                         });
