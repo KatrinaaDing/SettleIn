@@ -51,7 +51,7 @@
             android:id="@+id/editEmailLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="User Email">
+            android:hint="New Email">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editEmail"

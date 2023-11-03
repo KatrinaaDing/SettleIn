@@ -166,107 +166,108 @@ public class EditProfileDialogFragment extends DialogFragment {
             positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                        String userInputUsername = editUsername.getText().toString();
-                        String userInputEmail = editEmail.getText().toString();
-                        TextInputEditText providePassword = view.findViewById(R.id.providePassword);
-                        String userInputProvidePassword = providePassword.getText().toString();
-                        TextInputLayout editUsernameLayout = view.findViewById(R.id.editUsernameLayout);
-                        TextInputLayout editEmailLayout = view.findViewById(R.id.editEmailLayout);
-                        TextInputLayout providedPasswordLayout = view.findViewById(R.id.providePasswordLayout);
+                    String userInputUsername = editUsername.getText().toString();
+                    String userInputEmail = editEmail.getText().toString();
+                    TextInputEditText providePassword = view.findViewById(R.id.providePassword);
+                    String userInputProvidePassword = providePassword.getText().toString();
 
-                        View rootView = getActivity().findViewById(android.R.id.content);
-                        if (userInputUsername.isEmpty()) {
-                            editUsernameLayout.setError("Username Cannot be Empty.");
-                        } else if (userInputEmail.isEmpty()) {
-                            editEmailLayout.setError("Email Cannot be Empty.");
-                        } else if (!userInputEmail.isEmpty() && !userInputEmail.equals(email) && userInputProvidePassword.isEmpty()) {
-                            providedPasswordLayout.setError("Must provide password to update email");
-                        } else if (userInputUsername.equals(username) && userInputEmail.equals(email)) {
-                            dismiss();
-                        }else {
-                            positiveButton.setText("Saving");
-                            positiveButton.setEnabled(false);
+                    // Get references to the error-display layouts
+                    TextInputLayout editUsernameLayout = view.findViewById(R.id.editUsernameLayout);
+                    TextInputLayout editEmailLayout = view.findViewById(R.id.editEmailLayout);
+                    TextInputLayout providedPasswordLayout = view.findViewById(R.id.providePasswordLayout);
 
-                            editUsernameLayout.setError(null);
-                            editEmailLayout.setError(null);
-                            providedPasswordLayout.setError(null);
+                    View rootView = getActivity().findViewById(android.R.id.content);
 
-                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                    .setDisplayName(userInputUsername)
-                                    .build();
+                    // Check for any validation errors
+                    if (userInputUsername.isEmpty()) {
+                        editUsernameLayout.setError("Username Cannot be Empty.");
+                    } else if (userInputEmail.isEmpty()) {
+                        editEmailLayout.setError("Email Cannot be Empty.");
+                    } else if (!userInputEmail.isEmpty() && !userInputEmail.equals(email) && userInputProvidePassword.isEmpty()) {
+                        providedPasswordLayout.setError("Must provide password to update email");
+                    } else if (userInputUsername.equals(username) && userInputEmail.equals(email)) {
+                        // If no changes are made, just dismiss the dialog
+                        dismiss();
+                    } else {
+                        // Saving status
+                        positiveButton.setText("Saving");
+                        positiveButton.setEnabled(false);
 
-                            if (!userInputUsername.equals(username)) {
-                                user.updateProfile(profileUpdates)
-                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    positiveButton.setText("Save");
-                                                    positiveButton.setEnabled(true);
+                        // Clear all the error prompts set earlier
+                        editUsernameLayout.setError(null);
+                        editEmailLayout.setError(null);
+                        providedPasswordLayout.setError(null);
 
-                                                    Log.d("update-username", "Username updated.");
-                                                    notifyProfileUpdated(userInputUsername, "");
-                                                    if (userInputEmail.equals(email)) {
-                                                        dialog.dismiss();
-                                                        new BasicSnackbar(rootView, "Username Updated Successfully.", "success");
-                                                        dismiss();
-                                                    }
-                                                } else {
-                                                    positiveButton.setText("Save");
-                                                    positiveButton.setEnabled(true);
+                        // Create the request to change username
+                        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                .setDisplayName(userInputUsername)
+                                .build();
 
-                                                    dismiss();
-                                                    Log.d("update-username", "Failed to update username");
-                                                    new BasicSnackbar(rootView, "Failed to update username", "error");
-                                                }
+                        // If username is changed, update the profile
+                        if (!userInputUsername.equals(username)) {
+                            user.updateProfile(profileUpdates)
+                                    .addOnCompleteListener(task -> {
+                                        if (task.isSuccessful()) {
+                                            positiveButton.setText("Save");
+                                            positiveButton.setEnabled(true);
+
+                                            Log.d("update-username", "Username updated.");
+                                            notifyProfileUpdated(userInputUsername, "");
+
+                                            // If only the username was changed, display a message and dismiss the dialog
+                                            if (userInputEmail.equals(email)) {
+                                                dialog.dismiss();
+                                                new BasicSnackbar(rootView, "Username Updated Successfully.", "success");
+                                                dismiss();
                                             }
-                                        });
-                            }
-
-                            if (!userInputEmail.equals(email)) {
-                                // re-authenticate user
-                                AuthCredential credential = EmailAuthProvider
-                                        .getCredential(email, providePassword.getText().toString());
-
-                                user.reauthenticate(credential)
-                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    Log.d("user-auth", "User re-authenticated.");
-                                                    providedPasswordLayout.setError(null);
-                                                    user.updateEmail(userInputEmail)
-                                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                @Override
-                                                                public void onComplete(@NonNull Task<Void> task) {
-                                                                    if (task.isSuccessful()) {
-                                                                        positiveButton.setText("Save");
-                                                                        positiveButton.setEnabled(true);
-
-                                                                        dismiss();
-                                                                        Log.d("update-email", "User email address updated.");
-                                                                        notifyProfileUpdated("", userInputEmail);
-                                                                        new BasicSnackbar(rootView, "Profile Updated Successfully.", "success");
-                                                                    } else {
-                                                                        positiveButton.setText("Save");
-                                                                        positiveButton.setEnabled(true);
-
-                                                                        dismiss();
-                                                                        Log.d("update-email", "Update email failed.", task.getException());
-                                                                        new BasicSnackbar(rootView, "Update email failed.", "error");
-                                                                    }
-                                                                }
-                                                            });
-                                                } else {
-                                                    Log.d("user-auth", "User re-authentication failed.", task.getException());
-                                                    providedPasswordLayout.setError("Wrong Password.");
-                                                }
-                                            }
-                                        });
-                            }
+                                        } else {
+                                            positiveButton.setText("Save");
+                                            positiveButton.setEnabled(true);
+                                            dismiss();
+                                            Log.d("update-username", "Failed to update username");
+                                            new BasicSnackbar(rootView, "Failed to update username", "error");
+                                        }
+                                    });
                         }
+
+                        // If email is changed, re-authenticate the user before updating
+                        if (!userInputEmail.equals(email)) {
+                            AuthCredential credential = EmailAuthProvider
+                                    .getCredential(email, providePassword.getText().toString());
+
+                            user.reauthenticate(credential)
+                                    .addOnCompleteListener(task -> {
+                                        if (task.isSuccessful()) {
+                                            Log.d("user-auth", "User re-authenticated.");
+                                            user.updateEmail(userInputEmail)
+                                                    .addOnCompleteListener(emailTask -> {
+                                                        if (emailTask.isSuccessful()) {
+                                                            positiveButton.setText("Save");
+                                                            positiveButton.setEnabled(true);
+                                                            dismiss();
+                                                            Log.d("update-email", "User email address updated.");
+                                                            notifyProfileUpdated("", userInputEmail);
+                                                            new BasicSnackbar(rootView, "Profile Updated Successfully.", "success");
+                                                        } else {
+                                                            positiveButton.setText("Save");
+                                                            positiveButton.setEnabled(true);
+                                                            dismiss();
+                                                            Log.d("update-email", "Update email failed.", emailTask.getException());
+                                                            new BasicSnackbar(rootView, "Update email failed.", "error");
+                                                        }
+                                                    });
+                                        } else {
+                                            Log.d("user-auth", "User re-authentication failed.", task.getException());
+                                            providedPasswordLayout.setError("Wrong Password.");
+                                            positiveButton.setText("Save");
+                                            positiveButton.setEnabled(true);
+                                        }
+                                    });
+                        }
+                    }
                 }
             });
+
         }
     }
 
