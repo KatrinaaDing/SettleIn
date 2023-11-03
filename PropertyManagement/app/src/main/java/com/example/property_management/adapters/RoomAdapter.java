@@ -102,8 +102,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         for (String key: roomData.keySet()){
             Log.d("new RoomAdapter data for " + key,roomData.toString());
         }
-
-
     }
 
     @NonNull
@@ -450,7 +448,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                         }
                     });
                 });
-
             } catch (ExecutionException | InterruptedException e) {
                 Log.e("RoomAdapter", "Use case binding failed", e);
             }
@@ -514,7 +511,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
             roomImagePaths.add(new ArrayList<>());
         }
-
         roomImagePaths.get(roomPosition).add(imagePath);
     }
 

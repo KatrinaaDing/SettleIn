@@ -144,10 +144,26 @@ public class DataCollectionActivity extends AppCompatActivity {
         // retrieve user's collected data from previous intent
         // if no inspected data, initialInspectedDat will be empty HashMap {}
         Intent intent = getIntent();
-        initialInspectedData = (HashMap<String, RoomData>) intent.getSerializableExtra("inspectedData");
         propertyId = intent.getStringExtra("propertyId");
         room_num = intent.getIntExtra("roomNum", 0);
         notes = intent.getStringExtra("notes") != null ? intent.getStringExtra("notes") : "";
+        initialInspectedData = (HashMap<String, RoomData>) intent.getSerializableExtra("inspectedData");
+        //处理property第一次收集数据时，firebase相关字段为空的问题。此时根据房间数量设置房间名字，再设置初始值。
+        if (initialInspectedData.size() == 0){
+            List<String> roomNames = new ArrayList<>();
+            for (int i = 0; i <= room_num; i++) {
+                if (i == 0) {
+                    roomNames.add("Lounge Room");
+                } else if (i == room_num) {
+                    roomNames.add("Others");
+                } else {
+                    roomNames.add("Room " + i);
+                }
+            }
+            for (String roomname: roomNames){
+                initialInspectedData.put(roomname, new RoomData(0,0,"--",new ArrayList<String>()));
+            }
+        }
         Log.i("get-initial-inspectedData", initialInspectedData.toString());
         Log.i("get-propertyId", propertyId);
 
