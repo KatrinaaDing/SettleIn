@@ -610,7 +610,7 @@ def get_duration_abbr(duration):
     destinations: a list of interested facilities/location specific addresses, 
     interests: a list of interested facilities general keyword (e.g. coles, kfc)
 """
-def update_distance2(origins, propertyIds, destination, user_ref):
+def update_distance2(origins, propertyIds, destination, destination_name, user_ref):
     # get distance info from google distance matrix api
     re= {}
     # encode destination address
@@ -655,6 +655,7 @@ def update_distance2(origins, propertyIds, destination, user_ref):
             if propertyIds[i] not in re:
                 re[propertyIds[i]] = {
                     "address": destination,
+                    "name": destination_name,
                     "distance": distance, 
                     mode: duration
                 }
@@ -783,16 +784,19 @@ def calculate_distance(event: Event[Change[DocumentSnapshot]]) -> Any:
         before_prop_ids = before_properties.keys()
         before_locations = before_data.get("interestedLocations", [])
         before_facilities = before_data.get("interestedFacilities", [])
+        before_location_names = before_data.get("locationNames", [])
 
         # data after update
         after_data = event.data.after.to_dict()
         after_properties = after_data.get("properties", {})
         after_prop_ids = after_properties.keys()
         after_locations = after_data.get("interestedLocations", [])
+        after_location_names = after_data.get("locationNames", [])
         after_facilities = after_data.get("interestedFacilities", [])
 
         added_prop_ids = list(set(after_prop_ids) - set(before_prop_ids))
         added_location = list(set(after_locations) - set(before_locations))
+        added_location_names = list(set(after_location_names) - set(before_location_names))
         added_facility = list(set(after_facilities) - set(before_facilities))
         
         # case 1: user newly added a property
@@ -804,9 +808,10 @@ def calculate_distance(event: Event[Change[DocumentSnapshot]]) -> Any:
                 return
             add_interests_to_new_property(after_data, user_id, added_prop_ids[0])
 
-        # case 2: user newly added a interested location
+        # case 2: user newly added an interested location
         if len(added_location) > 0:
             location = added_location[0]
+            location_name = added_location_names[0]
     
             # get user document
             user_ref = firestore.client().collection(u'users').document(user_id)
@@ -819,9 +824,9 @@ def calculate_distance(event: Event[Change[DocumentSnapshot]]) -> Any:
                 return
             
             property_addresses = [property["address"] for property in properties]
-            update_distance2(property_addresses, list(after_prop_ids), location, user_ref)
+            update_distance2(property_addresses, list(after_prop_ids), location, location_name, user_ref)
 
-        # case 3: user newly added a interested facility
+        # case 3: user newly added an interested facility
         if len(added_facility) > 0:
             facility = added_facility[0]
 

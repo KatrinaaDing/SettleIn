@@ -15,6 +15,11 @@
         android:text="Enter an exact location that you want to know how far from a property. e.g. Melbourne Central Station, Southern Cross Station, The University of Melbourne, etc."
         android:textColor="@color/grey"
         />
+    <TextView
+        android:id="@+id/locationNameTxt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/locationEditTextLayout"
         android:layout_width="match_parent"

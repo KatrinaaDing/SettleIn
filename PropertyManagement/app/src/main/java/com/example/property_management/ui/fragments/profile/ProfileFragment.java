@@ -52,6 +52,8 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -61,6 +63,7 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
     private AppCompatActivity activity;
     PlacesClient placesClient;
     String selectedAddress = "";
+    String selectedName = "";
     String username;
     String email;
     String uid;
@@ -219,13 +222,15 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
             }
 
             selectedAddress = autocompleteFragment.getSelectedAddress();
-            System.out.println("Add Location: " + selectedAddress);
+            selectedName = autocompleteFragment.getSelectedName();
+            System.out.println("SelectedAddress: " + selectedAddress);
+            System.out.println("SelectedName: " + selectedName);
 
             TextInputLayout locationEditTextLayout = (TextInputLayout) alertDialog.findViewById(R.id.locationEditTextLayout);
 
             // check if selectedAddress is empty
-            if (selectedAddress == null || selectedAddress.equals("")) {
-                locationEditTextLayout.setError("Error: Location cannot be empty");
+            if (selectedAddress == null || selectedAddress.equals("") || selectedName == null || selectedName.equals("")) {
+                locationEditTextLayout.setError("Error: Location address or business name cannot be empty");
                 return;
             }
             // check duplication
@@ -233,7 +238,7 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
                 locationEditTextLayout.setError("Error: Location already exists");
                 return;
             }
-            addNewLocation(selectedAddress);
+            addNewLocation(selectedAddress, selectedName);
             alertDialog.dismiss();
         });
     }
@@ -264,11 +269,11 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
     }
 
     public void addNewFacility(String facilityToAdd) {
-        interestedFacilitiesAdapter.addNewInterest(facilityToAdd);
+        interestedFacilitiesAdapter.addNewInterestedFacility(facilityToAdd);
     }
 
-    public void addNewLocation(String locationToAdd) {
-        interestedLocationsAdapter.addNewInterest(locationToAdd);
+    public void addNewLocation(String locationAddress, String locationName) {
+        interestedLocationsAdapter.addNewInterestedLocation(locationAddress, locationName);
     }
 
     public boolean ifDuplicate(String toAdd) {

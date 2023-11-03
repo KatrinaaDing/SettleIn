@@ -91,6 +91,7 @@ public class FirebaseUserRepository {
                                 document.getId(),
                                 document.get("interestedFacilities") == null ? new ArrayList<>() : (ArrayList<String>) document.get("interestedFacilities"),
                                 document.get("interestedLocations") == null ? new ArrayList<>() : (ArrayList<String>) document.get("interestedLocations"),
+                                document.get("locationNames") == null ? new ArrayList<>() : (ArrayList<String>) document.get("locationNames"),
                                 document.get("properties") == null ? new HashMap<>() : (HashMap<String, UserProperty>) document.get("properties")
                         );
                         callback.onSuccess(user);

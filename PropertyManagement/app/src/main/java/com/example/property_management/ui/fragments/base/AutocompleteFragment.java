@@ -32,6 +32,7 @@ public class AutocompleteFragment extends Fragment {
     CustomPlaceAutoCompleteFragment autocompleteFragment;
     private PlacesClient placesClient;
     String selectedAddress = "";
+    String selectedName = "";
 
     double lng = Double.NaN;
 
@@ -63,7 +64,7 @@ public class AutocompleteFragment extends Fragment {
                 getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
             // Specify the types of place data to return.
-            autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.LAT_LNG,Place.Field.NAME, Place.Field.ADDRESS));
+            autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.LAT_LNG,Place.Field.NAME, Place.Field.ADDRESS, Place.Field.NAME));
 
             // Set up a PlaceSelectionListener to handle the response.
             autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
@@ -72,6 +73,7 @@ public class AutocompleteFragment extends Fragment {
                     System.out.println("name: " + place.getName() + ", Address: " + place.getAddress());
                     autocompleteFragment.setPlace(place);
                     selectedAddress = place.getAddress();
+                    selectedName = place.getName();
                     lat = place.getLatLng().latitude;
                     lng = place.getLatLng().longitude;
 
@@ -92,6 +94,7 @@ public class AutocompleteFragment extends Fragment {
                 @Override
                 public void onError(@NonNull Status status) {
                     selectedAddress = "";
+                    selectedName = "";
                     Log.i(TAG, "An error occurred: " + status);
                 }
 
@@ -128,6 +131,10 @@ public class AutocompleteFragment extends Fragment {
 
     public String getSelectedAddress() {
         return selectedAddress;
+    }
+
+    public String getSelectedName() {
+        return selectedName;
     }
 
     public void setAddressText(String placeNameText) {
