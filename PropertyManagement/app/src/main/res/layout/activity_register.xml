@@ -35,6 +35,7 @@
             android:hint="Enter your Username"
             android:layout_marginBottom="20dp">
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/registerUsername"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"

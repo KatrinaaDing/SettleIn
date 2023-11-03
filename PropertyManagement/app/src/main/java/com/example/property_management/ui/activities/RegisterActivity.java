@@ -1,12 +1,16 @@
 package com.example.property_management.ui.activities;
 
+import static com.example.property_management.utils.Helpers.specialCharFilter;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -46,6 +50,8 @@ public class RegisterActivity extends AppCompatActivity {
         TextInputLayout passwordLayout = findViewById(R.id.editTextRegisterPassword);
         TextInputLayout confirmPasswordLayout = findViewById(R.id.editTextConfirmPassword);
 
+        EditText registerUsername = findViewById(R.id.registerUsername);
+        registerUsername.setFilters(new InputFilter[]{specialCharFilter});
         // ========================== Listeners ==========================
         submitRegisterBtn.setOnClickListener(view -> {
             // close keyboard

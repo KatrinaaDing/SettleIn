@@ -1,5 +1,7 @@
 package com.example.property_management.ui.fragments.profile;
 
+import static com.example.property_management.utils.Helpers.specialCharFilter;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -8,6 +10,8 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -50,6 +54,7 @@ import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
 public class EditProfileDialogFragment extends DialogFragment {
     private String username;
@@ -96,6 +101,8 @@ public class EditProfileDialogFragment extends DialogFragment {
 
         editUsername = view.findViewById(R.id.editUsername);
         editUsername.setText(username);
+
+        editUsername.setFilters(new InputFilter[]{specialCharFilter});
         editEmail = view.findViewById(R.id.editEmail);
         editEmail.setText(email);
         btnResetPassword = view.findViewById(R.id.btnResetPassword);
