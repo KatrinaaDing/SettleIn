@@ -22,13 +22,21 @@
 
 
     </LinearLayout>
-
+<!--
     <ImageView
         android:id="@+id/capturedImage"
         android:layout_width="250dp"
         android:layout_height="320dp"
         android:layout_marginTop="20dp"
         android:layout_gravity="center"/>
+        -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/image_carousel"
+        android:layout_width="match_parent"
+        android:layout_height="320dp"
+        android:layout_marginTop="20dp"
+        android:scrollbars="horizontal"
+        android:orientation="horizontal"/>
 
     <!-- Row 1: Noise -->
     <LinearLayout
@@ -61,6 +69,13 @@
             android:paddingVertical="10dp"
             android:text="--" />
 
+        <Button
+            android:id="@+id/noiseLevelButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Normal"
+        android:layout_marginLeft="10dp"/>
+
 
     </LinearLayout>
 
@@ -85,7 +100,7 @@
             android:layout_marginHorizontal="10dp"
             android:layout_weight="1.7"
             android:paddingVertical="10dp"
-            android:text="Light Level" />
+            android:text="Brightness" />
 
         <TextView
             android:id="@+id/lightValue1"
@@ -95,6 +110,13 @@
             android:paddingVertical="10dp"
             android:text="--" />
 
+        <ImageButton
+            android:id="@+id/infoButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="10dp"
+            android:src="@drawable/ic_info_data_collection" />
 
     </LinearLayout>
 
@@ -128,7 +150,6 @@
             android:layout_weight="1"
             android:paddingVertical="10dp"
             android:text="--" />
-
 
     </LinearLayout>
 
