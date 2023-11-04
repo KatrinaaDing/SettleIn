@@ -259,13 +259,15 @@ public class DataCollectionActivity extends AppCompatActivity {
 
             // 转换为字符串并记录
             Log.d("AllRoomData", "Rooms Data: " + roomDataMap.toString());
-
+            collectRoomPhotos();
             HashMap<String, RoomData> roomData = new HashMap<>(); //将获取的房间数据转化为roomData类
 
             for (String roomName:roomDataMap.keySet()){
                 HashMap<String,String> singleRoomData = (HashMap<String,String>)roomDataMap.get(roomName);
                 ArrayList<String> imgs = new ArrayList<>();
-                imgs.add(singleRoomData.get("images"));
+                //Log.d("roomImagePathsMap when finish",roomImagePathsMap.toString());
+                imgs = (ArrayList<String>) roomImagePathsMap.get(roomName);
+                //imgs.add(singleRoomData.get("images"));
 
                 Log.d("brightness",String.valueOf(singleRoomData.get("brightness")) );
                 Log.d("noise",String.valueOf(singleRoomData.get("noise")) );
@@ -278,7 +280,7 @@ public class DataCollectionActivity extends AppCompatActivity {
 
 
             updateInspectedData(propertyId, roomData);
-            collectRoomPhotos();
+
             Toast.makeText(this, "Upload data successfully! ", Toast.LENGTH_SHORT).show();
 
             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
