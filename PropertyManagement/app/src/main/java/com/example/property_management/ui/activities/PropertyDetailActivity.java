@@ -117,64 +117,38 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             Intent newIntent = new Intent(this, DataCollectionActivity.class);
             newIntent.putExtra("propertyId", this.propertyId);
             newIntent.putExtra("inspectedData", this.userProperty.getInspectedData());
-            Log.d("uerproperty is null inter",String.valueOf(this.userProperty == null));
             Log.d("inspectedData in propertydetail",this.userProperty.getInspectedData().toString());
             startActivity(newIntent);
         });
 
-        Log.d("uerproperty is null outer",String.valueOf(this.userProperty == null));
-
-        //获取到的inspected Data
-        //HashMap<String, RoomData> inspectedData = new HashMap<>();
-
-        //inspectedData = this.userProperty.getInspectedData();
-
-        //log 查看获取到的数据
-        //for (String roomname: this.userProperty.getInspectedData().keySet()){
-           // Log.d("inspectedData in propertydetail",this.userProperty.getInspectedData().get(roomname).toString());
-        //}
-
-
-        // 假设这是你的 TextView ID
-        TextView savedNotesTextView = findViewById(R.id.saved_notes);
+        // 假设这是 TextView ID
+       // TextView savedNotesTextView = findViewById(R.id.saved_notes);
 
         // 模拟从 Firebase 获取的数据
-        String simulatedData = "Notes11111111111111";
+        //String simulatedData = "Notes11111111111111";
 
         // 设置 TextView 文本为模拟数据
-        savedNotesTextView.setText(simulatedData);
+        //savedNotesTextView.setText(simulatedData);
         //HashMap<String, RoomData> roomData = collectRoomData();
-
+        /**
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         // hard code
-        /**
-        List<String> roomNames = Arrays.asList("Room 1", "Room 2");
-        ArrayList<ArrayList<Integer>> imagesPerRoom = new ArrayList<>();
-        for (String roomName : roomNames) {
-            ArrayList<Integer> imagesForCurrentRoom = new ArrayList<>();
-            imagesForCurrentRoom.add(R.drawable.ic_camera);
-            imagesForCurrentRoom.add(R.drawable.ic_light);
-            imagesForCurrentRoom.add(R.drawable.ic_noise);
-            imagesPerRoom.add(imagesForCurrentRoom);
-        }
 
-        adapter = new PropertyConditionAdapter(roomNames, imagesPerRoom);
-        */
         HashMap<String, RoomData> roomDataHashMap = new HashMap<>();
 
-// 硬编码一些房间数据
+        // 硬编码一些房间数据
         roomDataHashMap.put("Living Room", new RoomData(200, 60, "East", new ArrayList<>(Arrays.asList(
-                "android.resource://your.package.name/" + R.drawable.ic_camera,
-                "android.resource://your.package.name/" + R.drawable.ic_noise))));
+                "android.resource://com.example.property_management/" + R.drawable.ic_camera,
+                "android.resource://com.example.property_management/" + R.drawable.ic_noise))));
         roomDataHashMap.put("Bedroom", new RoomData(150, 20, "West", new ArrayList<>(Arrays.asList(
-                "android.resource://your.package.name/" + R.drawable.ic_camera,
-                "android.resource://your.package.name/" + R.drawable.ic_noise))));
+                "android.resource://com.example.property_management/" + R.drawable.ic_camera,
+                "android.resource://com.example.property_management/" + R.drawable.ic_noise))));
         roomDataHashMap.put("Kitchen", new RoomData(250, 40, "South", new ArrayList<>(Arrays.asList(
-                "android.resource://your.package.name/" + R.drawable.ic_light,
-                "android.resource://your.package.name/" + R.drawable.ic_camera))));
+                "android.resource://com.example.property_management/" + R.drawable.ic_light,
+                "android.resource://com.example.property_management/" + R.drawable.ic_camera))));
 
-// 准备适配器使用的数据
+        // 准备适配器使用的数据
         List<String> roomNames = new ArrayList<>(roomDataHashMap.keySet());
         ArrayList<ArrayList<String>> imagesPerRoom = new ArrayList<>();
         ArrayList<Float> brightnessList = new ArrayList<>();
@@ -191,7 +165,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             }
         }
 
-// 创建适配器
+        // 创建适配器
         PropertyConditionAdapter adapter = new PropertyConditionAdapter(
                 roomNames,
                 imagesPerRoom,
@@ -200,10 +174,9 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 windowOrientationList
         );
 
-// 设置适配器到 RecyclerView
+        // 设置适配器到 RecyclerView
         recyclerView.setAdapter(adapter);
-
-
+         */
     }
 
     /**
@@ -369,6 +342,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                     setCarousel(property);
                     setLinkButton(property);
                     setDistances(userProperty.getDistances());
+                    setInspectedData(userProperty);
                     initMap();
                     setLoading(false);
                 })
@@ -710,32 +684,75 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         setDistanceRecycler(distanceInfoList);
     }
 
-    private HashMap<String, RoomData> collectRoomData() {
-        HashMap<String, Object> roomDataMap = new HashMap<>();
-        // 假设你已经填充了roomDataMap
-        // ...
-
-        HashMap<String, RoomData> roomData = new HashMap<>(); // 将获取的房间数据转化为RoomData类
-
-        for (String roomName : roomDataMap.keySet()) {
-            HashMap<String, String> singleRoomData = (HashMap<String, String>) roomDataMap.get(roomName);
-            ArrayList<String> imgs = new ArrayList<>();
-            // 这里需要根据你的实际情况来添加图片路径
-            imgs.add(singleRoomData.get("images")); // 注意这里假设"images"已经是图片的URI或路径
-
-            RoomData singleRoom = new RoomData(
-                    Float.valueOf(singleRoomData.get("brightness")),
-                    Float.valueOf(singleRoomData.get("noise")),
-                    singleRoomData.get("windowOrientation"),
-                    imgs
-            );
-
-            roomData.put(roomName, singleRoom);
+    private void setInspectedData(UserProperty userProperty){
+        //获取到的inspected Data
+        HashMap<String, RoomData> inspectedData = new HashMap<>();
+        inspectedData = this.userProperty.getInspectedData();
+        //log 查看获取到的数据
+        //根据房间名字获取指定数据  inspectedData.get("roomname1").get
+        //inspectedData 数据结构
+        //                                                                                                 {  Roomname1: {brightness: 11.0   -> Float
+        //                                                                                                               noise: 11.0         -> Float
+        //                                                                                                               windowOrientation: 11  -> String
+        //                                                                                                                images: [0 added] -> List of String }
+        //                                                                                                   Roomname2: {brightness: 11.0   -> Float
+            //                                                                                                           noise: 11.0         -> Float
+            //                                                                                                           windowOrientation: 11  -> String
+            //                                                                                                           images: [0 added] -> List of String }
+        //                                                                                                   Roomname3: {brightness: 11.0   -> Float
+                //                                                                                                        noise: 11.0         -> Float
+                //                                                                                                        windowOrientation: 11  -> String
+                //                                                                                                        images: [0 added] -> List of String }
+        //                                                                                                }
+        for (String roomname: inspectedData.keySet()){
+            Log.d("inspectedData in propertydetail",this.userProperty.getInspectedData().get(roomname).toString());
         }
 
-        return roomData;
-    }
+        //房间数量
+        int roomNum = inspectedData.keySet().size();
+        //note
+        String notes = userProperty.getNotes();
 
+        // 假设这是 TextView ID
+        TextView savedNotesTextView = findViewById(R.id.saved_notes);
+
+        // 设置 TextView 文本为模拟数据
+        savedNotesTextView.setText(notes);
+        //HashMap<String, RoomData> roomData = collectRoomData();
+        recyclerView = findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        // 准备适配器使用的数据
+        List<String> roomNames = new ArrayList<>(inspectedData.keySet());
+        ArrayList<ArrayList<String>> imagesPerRoom = new ArrayList<>();
+        ArrayList<Float> brightnessList = new ArrayList<>();
+        ArrayList<Float> noiseList = new ArrayList<>();
+        ArrayList<String> windowOrientationList = new ArrayList<>();
+
+        for (String roomName : roomNames) {
+            RoomData roomData = inspectedData.get(roomName);
+            if (roomData != null) {
+                imagesPerRoom.add(roomData.getImages());
+                brightnessList.add(roomData.getBrightness());
+                noiseList.add(roomData.getNoise());
+                windowOrientationList.add(roomData.getWindowOrientation());
+            }
+        }
+
+        // 创建适配器
+        PropertyConditionAdapter adapter = new PropertyConditionAdapter(
+                roomNames,
+                imagesPerRoom,
+                brightnessList,
+                noiseList,
+                windowOrientationList
+        );
+
+    // 设置适配器到 RecyclerView
+        recyclerView.setAdapter(adapter);
+        Log.d("RecyclerViewSetup", "RecyclerView should be set. Room count: " + roomNames.size());
+
+    }
 
 
 }

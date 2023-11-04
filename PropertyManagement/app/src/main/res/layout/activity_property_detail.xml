@@ -264,7 +264,7 @@
                     android:id="@+id/saved_notes"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Notes1111111" />
+                    android:text="None" />
 
             </LinearLayout>
 
