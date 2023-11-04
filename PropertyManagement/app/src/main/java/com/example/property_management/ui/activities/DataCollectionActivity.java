@@ -31,6 +31,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -446,6 +447,13 @@ public class DataCollectionActivity extends AppCompatActivity {
 
         final EditText editTextNote = noteDialog.findViewById(R.id.editTextNote);
         Button buttonSave = noteDialog.findViewById(R.id.buttonSave);
+
+        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+        layoutParams.copyFrom(noteDialog.getWindow().getAttributes());
+        int dialogWidth = (int)(getResources().getDisplayMetrics().widthPixels * 0.9);
+        layoutParams.width = dialogWidth;
+        layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        noteDialog.getWindow().setAttributes(layoutParams);
 
         // Load existing note, if any
         String existingNote = sharedPreferences.getString("note", "");

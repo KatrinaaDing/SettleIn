@@ -69,12 +69,12 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
         CarouselAdapter carouselAdapter = new CarouselAdapter(holder.itemView.getContext(), imagesPerRoom.get(position));
         holder.imageCarousel.setAdapter(carouselAdapter);
 
-        float noiseValue = noiseList.get(position); // 假设这是噪声数值
+        float noiseValue = noiseList.get(position);
         if (noiseValue >= 55) {
             holder.noiseLevelButton.setBackgroundColor(Color.RED);
             holder.noiseLevelButton.setText("High Risk");
         } else if (noiseValue >= 40) {
-            holder.noiseLevelButton.setBackgroundColor(Color.YELLOW);
+            holder.noiseLevelButton.setBackgroundColor(Color.parseColor("#FFA500"));
             holder.noiseLevelButton.setText("Risk");
         } else {
             holder.noiseLevelButton.setBackgroundColor(Color.GREEN);

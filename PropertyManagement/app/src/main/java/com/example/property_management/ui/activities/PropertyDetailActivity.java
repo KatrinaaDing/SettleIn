@@ -118,9 +118,29 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             Intent newIntent = new Intent(this, DataCollectionActivity.class);
             newIntent.putExtra("propertyId", this.propertyId);
             newIntent.putExtra("inspectedData", this.userProperty.getInspectedData());
+            Log.d("inspectedData in propertydetail",this.userProperty.getInspectedData().toString());
             startActivity(newIntent);
         });
 
+
+        //获取到的inspected Data
+        HashMap<String, RoomData> inspectedData = new HashMap<>();
+        //nspectedData = this.userProperty.getInspectedData();
+
+        //log 查看获取到的数据
+        for (String roomname: inspectedData.keySet()){
+            Log.d("inspectedData in propertydetail",this.userProperty.getInspectedData().get(roomname).toString());
+        }
+
+
+        // 假设这是你的 TextView ID
+        TextView savedNotesTextView = findViewById(R.id.saved_notes);
+
+        // 模拟从 Firebase 获取的数据
+        String simulatedData = "Notes11111111111111";
+
+        // 设置 TextView 文本为模拟数据
+        savedNotesTextView.setText(simulatedData);
         //HashMap<String, RoomData> roomData = collectRoomData();
 
         recyclerView = findViewById(R.id.recycler_view);

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -141,7 +142,7 @@
             android:layout_marginHorizontal="10dp"
             android:layout_weight="1.7"
             android:paddingVertical="10dp"
-            android:text="Window Orientation" />
+            android:text="Window\nOrientation" />
 
         <TextView
             android:id="@+id/windowValue1"
@@ -152,5 +153,9 @@
             android:text="--" />
 
     </LinearLayout>
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:dividerColor="@color/lightGrey"/>
 
 </LinearLayout>
