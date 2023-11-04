@@ -1,5 +1,6 @@
 package com.example.property_management.ui.activities;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
 import android.content.Intent;
@@ -19,6 +20,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -97,6 +100,8 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         setTitle("Property Detail");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        requestStoragePermission();
+
         // get userId
         FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(this);
         FirebaseUser user = firebaseAuthHelper.getCurrentUser();
@@ -131,62 +136,6 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             startActivity(newIntent);
         });
 
-        // 假设这是 TextView ID
-       // TextView savedNotesTextView = findViewById(R.id.saved_notes);
-
-        // 模拟从 Firebase 获取的数据
-        //String simulatedData = "Notes11111111111111";
-
-        // 设置 TextView 文本为模拟数据
-        //savedNotesTextView.setText(simulatedData);
-        //HashMap<String, RoomData> roomData = collectRoomData();
-        /**
-        recyclerView = findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        // hard code
-
-        HashMap<String, RoomData> roomDataHashMap = new HashMap<>();
-
-        // 硬编码一些房间数据
-        roomDataHashMap.put("Living Room", new RoomData(200, 60, "East", new ArrayList<>(Arrays.asList(
-                "android.resource://com.example.property_management/" + R.drawable.ic_camera,
-                "android.resource://com.example.property_management/" + R.drawable.ic_noise))));
-        roomDataHashMap.put("Bedroom", new RoomData(150, 20, "West", new ArrayList<>(Arrays.asList(
-                "android.resource://com.example.property_management/" + R.drawable.ic_camera,
-                "android.resource://com.example.property_management/" + R.drawable.ic_noise))));
-        roomDataHashMap.put("Kitchen", new RoomData(250, 40, "South", new ArrayList<>(Arrays.asList(
-                "android.resource://com.example.property_management/" + R.drawable.ic_light,
-                "android.resource://com.example.property_management/" + R.drawable.ic_camera))));
-
-        // 准备适配器使用的数据
-        List<String> roomNames = new ArrayList<>(roomDataHashMap.keySet());
-        ArrayList<ArrayList<String>> imagesPerRoom = new ArrayList<>();
-        ArrayList<Float> brightnessList = new ArrayList<>();
-        ArrayList<Float> noiseList = new ArrayList<>();
-        ArrayList<String> windowOrientationList = new ArrayList<>();
-
-        for (String roomName : roomNames) {
-            RoomData roomData = roomDataHashMap.get(roomName);
-            if (roomData != null) {
-                imagesPerRoom.add(roomData.getImages());
-                brightnessList.add(roomData.getBrightness());
-                noiseList.add(roomData.getNoise());
-                windowOrientationList.add(roomData.getWindowOrientation());
-            }
-        }
-
-        // 创建适配器
-        PropertyConditionAdapter adapter = new PropertyConditionAdapter(
-                roomNames,
-                imagesPerRoom,
-                brightnessList,
-                noiseList,
-                windowOrientationList
-        );
-
-        // 设置适配器到 RecyclerView
-        recyclerView.setAdapter(adapter);
-         */
     }
 
     /**
@@ -800,5 +749,11 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
        // RecyclerView
         recyclerView.setAdapter(adapter);
         Log.d("RecyclerViewSetup", "RecyclerView should be set. Room count: " + roomNames.size());
+    }
+
+    private void requestStoragePermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+        }
     }
 }
