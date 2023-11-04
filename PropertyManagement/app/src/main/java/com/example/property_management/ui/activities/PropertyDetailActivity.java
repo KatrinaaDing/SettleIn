@@ -748,7 +748,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 windowOrientationList
         );
 
-    // 设置适配器到 RecyclerView
+       // RecyclerView
         recyclerView.setAdapter(adapter);
         Log.d("RecyclerViewSetup", "RecyclerView should be set. Room count: " + roomNames.size());
     }
