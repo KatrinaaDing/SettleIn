@@ -105,7 +105,7 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
                 holder.noiseLevelButton.setBackgroundColor(Color.parseColor("#FFA500"));
                 holder.noiseLevelButton.setText("Risk");
             } else {
-                holder.noiseLevelButton.setBackgroundColor(Color.GREEN);
+                holder.noiseLevelButton.setBackgroundColor(Color.parseColor("#3CB371"));
                 holder.noiseLevelButton.setText("Normal");
             }
         }
