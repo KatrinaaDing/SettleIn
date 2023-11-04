@@ -99,7 +99,7 @@ public class DataCollectionActivity extends AppCompatActivity {
     private TextView photoCountTextView;
     private RecyclerView roomsRecyclerView;
     private RoomAdapter roomAdapter;
-    private List<String> roomNames = new ArrayList<>();
+    private ArrayList<String> roomNames = new ArrayList<>();
     private Dialog noteDialog;
     private SharedPreferences sharedPreferences;
     private Map<Integer, List<String>> roomImagePathsMap = new LinkedHashMap<>();
@@ -158,9 +158,15 @@ public class DataCollectionActivity extends AppCompatActivity {
         //room_num = 5;
         notes = intent.getStringExtra("notes") != null ? intent.getStringExtra("notes") : "";
         initialInspectedData = (HashMap<String, RoomData>) intent.getSerializableExtra("inspectedData");
+
+
+        // Define the list of room names
+        roomNames = (ArrayList<String>) intent.getSerializableExtra("roomNames");
+        if (roomNames == null) {
+            roomNames = new ArrayList<>(); // 初始化一个新的 ArrayList
+        }
         //处理property第一次收集数据时，firebase相关字段为空的问题。此时根据房间数量设置房间名字，再设置初始值。
         if (initialInspectedData.size() == 0){
-            List<String> roomNames = new ArrayList<>();
             for (int i = 0; i <= room_num; i++) {
                 if (i == 0) {
                     roomNames.add("Lounge Room");
@@ -176,6 +182,7 @@ public class DataCollectionActivity extends AppCompatActivity {
         }
         Log.i("get-initial-inspectedData", initialInspectedData.toString());
         Log.i("get-propertyId", propertyId);
+        Log.i("get-initial-roomNames", roomNames.toString());
 
         //查看得到的房间数据具体值
         for (String roomname: initialInspectedData.keySet()){
@@ -187,20 +194,6 @@ public class DataCollectionActivity extends AppCompatActivity {
 
         // Initialize rooms RecyclerView
         roomsRecyclerView = findViewById(R.id.recycler_view);
-
-        // Define the list of room names
-        List<String> roomNames = new ArrayList<>();
-
-        for (int i = 0; i <= room_num; i++) {
-            if (i == 0) {
-                roomNames.add("Lounge Room");
-            } else if (i == room_num) {
-                roomNames.add("Others");
-            } else {
-                roomNames.add("Room " + i);
-            }
-        }
-
         // Setup the adapter for rooms
         roomAdapter = new RoomAdapter(this, roomNames, initialInspectedData);
         roomsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -226,7 +219,7 @@ public class DataCollectionActivity extends AppCompatActivity {
             binding.finishButton.setText("Updating...");
 
             // 创建一个映射来保存所有房间的数据
-            HashMap<String, Object> roomDataMap = new HashMap<>();
+            LinkedHashMap<String, Object> roomDataMap = new LinkedHashMap<>();
 
             // 正则表达式用于找到数字（包括小数点）
             Pattern pattern = Pattern.compile("[+-]?([0-9]*[.])?[0-9]+");
@@ -254,13 +247,17 @@ public class DataCollectionActivity extends AppCompatActivity {
 
             // 转换为字符串并记录
             Log.d("AllRoomData", "Rooms Data: " + roomDataMap.toString());
+            collectRoomPhotos();
+            LinkedHashMap<String, RoomData> roomData = new LinkedHashMap<>(); //将获取的房间数据转化为roomData类
 
-            HashMap<String, RoomData> roomData = new HashMap<>(); //将获取的房间数据转化为roomData类
-
+            int count = 0;
             for (String roomName:roomDataMap.keySet()){
                 HashMap<String,String> singleRoomData = (HashMap<String,String>)roomDataMap.get(roomName);
                 ArrayList<String> imgs = new ArrayList<>();
-                imgs.add(singleRoomData.get("images"));
+                imgs = (ArrayList<String>) roomImagePathsMap.get(count) != null ?
+                        (ArrayList<String>) roomImagePathsMap.get(count) :
+                        new ArrayList<String>();
+                count++;
 
                 Log.d("brightness",String.valueOf(singleRoomData.get("brightness")) );
                 Log.d("noise",String.valueOf(singleRoomData.get("noise")) );
@@ -271,10 +268,15 @@ public class DataCollectionActivity extends AppCompatActivity {
                 roomData.put(roomName, singleRoom);
             }
 
-            updateInspectedData(propertyId, roomData);
-            collectRoomPhotos();
-            Log.d("Saved images",roomImagePathsMap.toString());
-            Snackbar.make(findViewById(android.R.id.content), "Upload data successfully!", Snackbar.LENGTH_SHORT).show();
+            //将recycler view 里的房间名有序保存
+            ArrayList<String> roomName = new ArrayList<>();
+            for (String roomName1: roomDataMap.keySet()){
+                roomName.add(roomName1);
+            }
+
+            updateInspectedData(propertyId, roomData, roomName);
+
+            Toast.makeText(this, "Upload data successfully! ", Toast.LENGTH_SHORT).show();
 
             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                 @Override
@@ -284,9 +286,9 @@ public class DataCollectionActivity extends AppCompatActivity {
                 }
             }, 3500); // 2000 是延迟的时间（毫秒），即 2 秒
 
-
+            Log.d("Saved images",roomImagePathsMap.toString());
         });
-        //roomAdapter.clearAllRoomImages();
+
         SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
         boolean hasShownInfo = prefs.getBoolean("has_shown_info", false);
 
@@ -494,12 +496,13 @@ public class DataCollectionActivity extends AppCompatActivity {
         sharedPreferences.edit().putString("note", note).apply();
     }
 
-    private void updateInspectedData(String propertyId, HashMap<String, RoomData> inspectedData) {
+    private void updateInspectedData(String propertyId, HashMap<String, RoomData> inspectedData, ArrayList<String> roomNames) {
         // update ispected status to firebase
         HashMap<String, Object> payload = new HashMap<>();
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         payload.put("properties." + propertyId + ".inspectedData", inspectedData);
         payload.put("properties." + propertyId + ".notes", sharedPreferences.getString("note", ""));
+        payload.put("properties." + propertyId + ".roomNames", roomNames);
         FirebaseUserRepository userRepository = new FirebaseUserRepository();
         userRepository.updateUserFields(userId, payload, new UpdateUserCallback() {
             @Override

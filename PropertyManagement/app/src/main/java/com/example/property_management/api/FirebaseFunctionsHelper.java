@@ -284,8 +284,10 @@ public class FirebaseFunctionsHelper {
                     throw new Exception(msg);
                 }
 
-                Log.d("result set get by getPropertyById function",result.toString());
-                Log.d("InspectedData get by getPropertyById function",result.keySet().toString());
+                //Log.d("result set get by getPropertyById function",result.toString());
+                //Log.d("InspectedData get by getPropertyById function",result.keySet().toString());
+                //Log.d("roomNames get by getPropertyById function",((ArrayList<String>)result.get("roomNames")).toString());
+                //Log.d("roomNames class get by getPropertyById function",((ArrayList<String>)result.get("roomNames")).getClass().toString());
                 // get result and create Property object
                 Property propertyData = new Property(
                         (String) result.get("propertyId"),
@@ -322,8 +324,10 @@ public class FirebaseFunctionsHelper {
                         getPropertyDistancesData(result),
                         getRoomsData(result, "inspectedData"),
                         (int) result.get("price"),
-                        new Date(((Double) result.get("createdAt")).longValue())
+                        new Date(((Double) result.get("createdAt")).longValue()),
+                        (ArrayList<String>)result.get("roomNames")
                 );
+
                 Map<String, Object> res = new HashMap<>();
                 res.put("propertyData", propertyData);
                 res.put("userPropertyData", userPropertyData);
