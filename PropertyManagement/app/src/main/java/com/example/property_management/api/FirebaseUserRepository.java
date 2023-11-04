@@ -312,7 +312,7 @@ public class FirebaseUserRepository {
 
     }
 
-    public void deleteInterestedFacilityLocation(ArrayList<String> propertyIds, Boolean isFacility, ArrayList<String> interestedList,String interest_, DeleteInterestedFacilityCallback callback) {
+    public void deleteInterestedFacilityLocation(ArrayList<String> propertyIds, Boolean isFacility, ArrayList<String> interestedList, ArrayList<String> locationNamesList, String interest_, DeleteInterestedFacilityCallback callback) {
         // retrieve current user id
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         String userId = mAuth.getCurrentUser().getUid();
@@ -328,6 +328,7 @@ public class FirebaseUserRepository {
         } else {
             // update the interestedLocations field in firebase
             payload.put("interestedLocations", interestedList);
+            payload.put("locationNames", locationNamesList);
         }
         userRef.update(payload);
 

@@ -61,13 +61,12 @@ public class AddNewFacilityDialogFragment extends DialogFragment {
 
                 EditText facilityEditText = rootView.findViewById(R.id.facilityEditText);
                 TextInputLayout facilityEditTextLayout = rootView.findViewById(R.id.facilityEditTextLayout);
-                String facilityToAdd = facilityEditText.getText().toString();
+                String facilityToAdd = facilityEditText.getText().toString().trim();
 
                 // check if facilityToAdd is empty
                 if (TextUtils.isEmpty(facilityToAdd)) {
                     facilityEditTextLayout.setError("Error: Facility cannot be empty");
                     return;
-
                 }
 
                 // check duplication

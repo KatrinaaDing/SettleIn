@@ -56,13 +56,17 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
             @Override
             public void onClick(View v) {
                 // remove interested facility/location name from data
-                String facilityToDelete = interests.get(position);
+                String interestToDelete = interests.get(position);
 
                 // remove interested facility/location for all properties in firebase
                 ArrayList<String> propertyIds = getPropertyIds();
                 if (propertyIds != null && propertyIds.size() > 0) {
                     // Create an ArrayList to store the keys
-                    deleteInterest(facilityToDelete, position);
+                    if (isFacility) {
+                        deleteInterestedFacility(interestToDelete, position);
+                    } else {
+                        deleteInterestedLocation(position);
+                    }
                 }
             }
         });
@@ -101,15 +105,43 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
     }
 
     // delete interested facility/location
-    public void deleteInterest(String interest_, int position) {
+    public void deleteInterestedFacility(String interest_, int position) {
         ArrayList<String> interestsCopy = new ArrayList<>(getInterests());
         interestsCopy.remove(position);
-        userRepository.deleteInterestedFacilityLocation(getPropertyIds(), isFacility, interestsCopy, interest_, new DeleteInterestedFacilityCallback() {
+        userRepository.deleteInterestedFacilityLocation(getPropertyIds(), isFacility, interestsCopy, null, interest_, new DeleteInterestedFacilityCallback() {
             @Override
             public void onSuccess(String msg) {
                 // redirect to main activity on success
                 // do more actions
                 getInterests().remove(position);
+                notifyItemRemoved(position);
+                notifyItemRangeChanged(position, getInterests().size());
+            }
+
+            @Override
+            public void onError(String msg) {
+                String errorMsg = "Error: " + msg + ". Please try again.";
+                new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), errorMsg, "error");
+                Log.e("add-property-failure", msg);
+            }
+        });
+    }
+
+    public void deleteInterestedLocation(int position) {
+        String interest_ = getInterestedLocations().get(position);
+        ArrayList<String> interestsCopy = new ArrayList<>(getInterests());
+        interestsCopy.remove(position);
+
+        ArrayList<String> interestAddressesCopy = new ArrayList<>(getInterestedLocations());
+        interestAddressesCopy.remove(position);
+
+        userRepository.deleteInterestedFacilityLocation(getPropertyIds(), isFacility, interestAddressesCopy, interestsCopy, interest_, new DeleteInterestedFacilityCallback() {
+            @Override
+            public void onSuccess(String msg) {
+                // redirect to main activity on success
+                // do more actions
+                getInterests().remove(position);
+                getInterestedLocations().remove(position);
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position, getInterests().size());
             }
