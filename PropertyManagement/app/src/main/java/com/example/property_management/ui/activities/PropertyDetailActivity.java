@@ -128,6 +128,8 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             newIntent.putExtra("inspectedData", this.userProperty.getInspectedData());
             newIntent.putExtra("roomNum", this.property.getNumBedrooms());
             newIntent.putExtra("notes", this.userProperty.getNotes());
+            newIntent.putExtra("roomNames", this.userProperty.getRoomNames());
+
             //Log.d("property id sent by detail page", this.propertyId);
             //Log.d("inspectedData sent by detail page", this.userProperty.getInspectedData().toString());
             //Log.d("roomNum sent by detail page", String.valueOf(this.property.getNumBedrooms() + this.property.getNumBathrooms()));
@@ -686,22 +688,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         //获取到的inspected Data
         HashMap<String, RoomData> inspectedData = new HashMap<>();
         inspectedData = this.userProperty.getInspectedData();
-        //log 查看获取到的数据
-        //根据房间名字获取指定数据  inspectedData.get("roomname1").get
-        //inspectedData 数据结构
-        // {  Roomname1: {brightness: 11.0   -> Float
-        // noise: 11.0         -> Float
-        // windowOrientation: 11  -> String
-        // images: [0 added] -> List of String }
-        // Roomname2: {brightness: 11.0   -> Float
-        //  noise: 11.0         -> Float
-        //  windowOrientation: 11  -> String
-        //  images: [0 added] -> List of String }
-        // Roomname3: {brightness: 11.0   -> Float
-        // noise: 11.0         -> Float
-        //  windowOrientation: 11  -> String
-        //   images: [0 added] -> List of String }
-        //   }
+
         for (String roomname: inspectedData.keySet()){
             Log.d("inspectedData in propertydetail",this.userProperty.getInspectedData().get(roomname).toString());
         }
