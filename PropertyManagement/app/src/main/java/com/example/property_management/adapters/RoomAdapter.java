@@ -111,6 +111,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         return new ViewHolder(view);
     }
 
+    /**
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position, @NonNull List<Object> payloads) {
         if (payloads.contains("UPDATE_ROOM_NAME")) {
@@ -122,6 +123,28 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             holder.photoCount.setText(updatedPhotoCount + " added");
         } else {
 
+            onBindViewHolder(holder, position);
+        }
+    }
+     */
+
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position, @NonNull List<Object> payloads) {
+        if (!payloads.isEmpty()) {
+            for (Object payload : payloads) {
+                if ("UPDATE_PHOTO_COUNT".equals(payload)) {
+                    // Update only photo count related views
+                    int updatedPhotoCount = roomImages.get(position).size();
+                    Log.d("RoomAdapter", "Updated photo count: " + updatedPhotoCount);
+                    holder.photoCount.setText(updatedPhotoCount + " added");
+                } else if ("UPDATE_ROOM_NAME".equals(payload)) {
+                    // Update only room name related views
+                    holder.roomName.setText(roomNames.get(position));
+                }
+                // Handle other specific updates with else-if statements
+            }
+        } else {
+            // If no payloads are available, call the full bind method
             onBindViewHolder(holder, position);
         }
     }
@@ -436,8 +459,11 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-                            roomImages.get(holder.getAdapterPosition()).add(bitmap);
-                            notifyDataSetChanged();
+                            //roomImages.get(holder.getAdapterPosition()).add(bitmap);
+                            //notifyDataSetChanged();
+                            int position = holder.getAdapterPosition();
+                            roomImages.get(position).add(bitmap);
+                            notifyItemChanged(position, "UPDATE_PHOTO_COUNT");
 
                             //close camera page
                             cameraDialog.dismiss();
