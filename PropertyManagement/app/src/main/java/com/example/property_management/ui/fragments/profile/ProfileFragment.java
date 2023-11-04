@@ -7,7 +7,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +24,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -32,10 +35,15 @@ import com.example.property_management.api.FirebaseAuthHelper;
 import com.example.property_management.api.FirebaseFunctionsHelper;
 import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.BasicDialogCallback;
+import com.example.property_management.callbacks.DeleteInterestedFacilityCallback;
 import com.example.property_management.callbacks.GetUserInfoByIdCallback;
+import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.User;
+import com.example.property_management.data.UserProperty;
 import com.example.property_management.databinding.FragmentProfileBinding;
+import com.example.property_management.ui.activities.AddPropertyActivity;
 import com.example.property_management.ui.activities.LoginActivity;
+import com.example.property_management.ui.activities.MainActivity;
 import com.example.property_management.ui.fragments.base.AutocompleteFragment;
 import com.example.property_management.ui.fragments.base.BasicDialog;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
@@ -44,6 +52,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ProfileFragment extends Fragment implements EditProfileDialogFragment.OnProfileUpdatedListener{
 
@@ -57,6 +66,7 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
     FirebaseUser user;
     CustomListRecyclerViewAdapter interestedLocationsAdapter;
     CustomListRecyclerViewAdapter interestedFacilitiesAdapter;
+    User currentUser;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -69,42 +79,13 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
 
         activity = (AppCompatActivity) getActivity();
 
-        final TextView textView = binding.textProfile;
-//        profileViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
-
         // ========================= Components ==========================
         Button editBtn = binding.editBtn;
         ImageButton addFacilityBtn = binding.addFacilityBtn;
+        ImageButton addLocationBtn = binding.addLocationBtn;
         Button logoutBtn = binding.logoutBtn;
-        TextView userEmail = binding.userEmail;
-        TextView userId = binding.userId;
-
-        // ========================= Set Adapters ==========================
-        RecyclerView interestedLocationsRecyclerView = binding.interestedLocationsRecyclerView;
-        interestedLocationsAdapter = new CustomListRecyclerViewAdapter(new ArrayList<>());
-        interestedLocationsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        interestedLocationsRecyclerView.setAdapter(interestedLocationsAdapter);
-
-        RecyclerView interestedFacilitiesRecyclerView = binding.interestedFacilitiesRecyclerView;
-        interestedFacilitiesAdapter = new CustomListRecyclerViewAdapter(new ArrayList<>());
-        interestedFacilitiesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        interestedFacilitiesRecyclerView.setAdapter(interestedFacilitiesAdapter);
 
         getUserInfo();
-
-        // ===== Add Location Dialog =====
-        ImageButton addLocationBtn = binding.addLocationBtn;
-        addLocationBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    // launch dialog
-                    showCustomDialog();
-                } catch (PackageManager.NameNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
 
         // ========================= Listeners ==========================
         editBtn.setOnClickListener(new View.OnClickListener() {
@@ -114,10 +95,21 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
             }
         });
 
+        addLocationBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    showAddLocationDialog();
+                } catch (PackageManager.NameNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
         addFacilityBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addFacility();
+                showAddFacilityDialog();
             }
         });
 
@@ -125,114 +117,10 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
             logout();
         });
 
-        // ========================= Add facility test ==========================
-        Button addFacilityTestBtn = binding.addFacilityTest;
-        Button addLocationTestBtn = binding.addLocationTest;
-
-        FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(activity);
-        FirebaseUser user = firebaseAuthHelper.getCurrentUser();
-        assert user != null;
-        addFacilityTestBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String userId = user.getUid();
-                FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
-                // TODO change hardcode here
-                String facility = "Coles";
-                firebaseFunctionsHelper.addInterestedFacility(userId, facility)
-                        .addOnSuccessListener(result -> {
-                            if (result.equals("success")) {
-                                Log.i("add-interested-facility-success", result);
-                                new BasicSnackbar(getActivity().findViewById(android.R.id.content),
-                                        "Success: Added new facility.", "success");
-                            } else {
-                                Log.e("add-interested-facility-fail", result);
-                                new BasicSnackbar(getActivity().findViewById(android.R.id.content),
-                                        "Error: Failed to add new facility.", "error");
-                            }
-                        })
-                        .addOnFailureListener(e -> {
-                            // pop error at input box
-                            Log.e("add-interested-facility-fail", e.getMessage());
-                            new BasicSnackbar(getActivity().findViewById(android.R.id.content),
-                                    e.getMessage(), "error");
-                        });
-            }
-        });
-
-        addLocationTestBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String userId = user.getUid();
-                FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
-                // TODO change hardcode here
-                String location = "Melbourne Central";
-                firebaseFunctionsHelper.addInterestedLocation(userId, location)
-                        .addOnSuccessListener(result -> {
-                            if (result.equals("success")) {
-                                Log.i("add-interested-location-success", result);
-                                new BasicSnackbar(getActivity().findViewById(android.R.id.content),
-                                        "Success: Added new location.", "success");
-                            } else {
-                                Log.e("add-interested-location-fail", result);
-                                new BasicSnackbar(getActivity().findViewById(android.R.id.content),
-                                        "Error: Failed to add new location.", "error");
-                            }
-                        })
-                        .addOnFailureListener(e -> {
-                            // pop error at input box
-                            Log.e("add-interested-location-fail", e.getMessage());
-                            new BasicSnackbar(getActivity().findViewById(android.R.id.content),
-                                    e.getMessage(), "error");
-                        });
-            }
-        });
-
-        // ========================= End Add facility test ==========================
         return root;
     }
 
     // ========================= Functions ==========================
-    private void showCustomDialog() throws PackageManager.NameNotFoundException {
-        Log.i("dialogView", "here");
-        View dialogView = getLayoutInflater().inflate(R.layout.custom_interested_location_dialog, null);
-        Log.i("dialogView", "here2");
-
-//        View autocompleteView = dialogView.findViewById(R.id.auto_fragment);
-
-
-        // ===== dialog =====
-        AlertDialog alertDialog = new MaterialAlertDialogBuilder(getContext())
-                .setTitle("Add Interested Location")
-                .setView(dialogView)
-                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        AutocompleteFragment autocompleteFragment = (AutocompleteFragment)
-                                getChildFragmentManager().findFragmentById(R.id.auto_fragment);
-                        if (autocompleteFragment == null) {
-                            Log.e("isnull", "autocompleteFragment is null");
-                            return;
-                        }
-                        selectedAddress = autocompleteFragment.getSelectedAddress();
-                        System.out.println("Add Location: " + selectedAddress);
-                        if (selectedAddress.equals("")) {
-                            Toast.makeText(getContext(), "Please select a location", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        // TODO POST new location to firebase
-                        dialogInterface.dismiss();
-                    }
-                }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        // clear selected address
-                        selectedAddress = "";
-                        dialogInterface.dismiss();
-                    }
-                }).create();
-        alertDialog.show();
-    }
 
     @Override
     public void onStart() {
@@ -267,15 +155,12 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
         db.getUserInfoById(user.getUid(), new GetUserInfoByIdCallback() {
             @Override
             public void onSuccess(User userObj) {
-                ArrayList<String> userInterestedLocations = userObj.getInterestedLocations();
-                if (userInterestedLocations != null && !userInterestedLocations.isEmpty()) {
-                    interestedLocationsAdapter.updateData(userInterestedLocations);
-                }
+                currentUser = userObj;
 
-                ArrayList<String> userInterestedFacilities = userObj.getInterestedFacilities();
-                if (userInterestedFacilities != null && !userInterestedFacilities.isEmpty()) {
-                    interestedFacilitiesAdapter.updateData(userInterestedFacilities);
-                }
+//                ArrayList propertyIds = new ArrayList<>(userObj.getProperties().keySet());
+//                ArrayList<String> userInterestedLocations = userObj.getInterestedLocations();
+                setInterestedLocationsRecycleView();
+                setInterestedFacilitiesRecycleView();
             }
 
             @Override
@@ -291,18 +176,106 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
         dialog.show(getChildFragmentManager(), "EditProfileDialogFragment");
     }
 
-    public void addFacility() {
+    public void showAddFacilityDialog() {
         DialogFragment dialog = new AddNewFacilityDialogFragment();
         dialog.show(getChildFragmentManager(), "AddNewFacilityDialogFragment");
     }
 
+    private void showAddLocationDialog() throws PackageManager.NameNotFoundException {
+        // remove the existing fragment if exists to avoid duplicate id
+        AutocompleteFragment existingFragment = (AutocompleteFragment)
+                getChildFragmentManager().findFragmentById(R.id.auto_fragment);
+        // if fragment exists, remove it
+        if (existingFragment != null) {
+            getChildFragmentManager().beginTransaction().remove(existingFragment).commitNow();
+        }
+        // inflate the dialog
+        View dialogView = getLayoutInflater().inflate(R.layout.custom_interested_location_dialog, null);
+
+        // ===== dialog =====
+        AlertDialog alertDialog = new MaterialAlertDialogBuilder(getContext())
+                .setTitle("Add Interested Location")
+                .setView(dialogView)
+                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        AutocompleteFragment autocompleteFragment = (AutocompleteFragment)
+                                getChildFragmentManager().findFragmentById(R.id.auto_fragment);
+                        if (autocompleteFragment == null) {
+                            Log.e("isnull", "autocompleteFragment is null");
+                            return;
+                        }
+
+                        selectedAddress = autocompleteFragment.getSelectedAddress();
+                        System.out.println("Add Location: " + selectedAddress);
+
+                        if (selectedAddress == null || selectedAddress.equals("")) {
+                            new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Error: Location cannot be empty", "error");
+                            return;
+                        }
+                        // check duplication
+                        for (String location : currentUser.getInterestedLocations()) {
+                            String location_lower = location.toLowerCase();
+                            if (location_lower.equals(selectedAddress.toLowerCase())) {
+                                new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Error: Location already exists", "error");
+                                return;
+                            }
+                        }
+                        addNewLocation(selectedAddress);
+                    }
+                }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // clear selected address
+                        selectedAddress = "";
+//                        dialogInterface.dismiss();
+                    }
+                }).create();
+        alertDialog.show();
+    }
+
+//    public void showAddLocationDialog() {
+//        DialogFragment dialog = new AddNewLocationDialogFragment();
+//        dialog.show(getChildFragmentManager(), "AddNewLocationDialogFragment");
+//    }
+
     @Override
     public void onProfileUpdated(String newUsername, String newEmail) {
+        if (!newUsername.isEmpty()) {
+            TextView UsernameTextView = getView().findViewById(R.id.userName);
+            UsernameTextView.setText(newUsername);
+        }
 
-        TextView UsernameTextView = getView().findViewById(R.id.userName);
-        UsernameTextView.setText(newUsername);
+        if (!newEmail.isEmpty()) {
+            TextView emailTextView = getView().findViewById(R.id.userEmail);
+            emailTextView.setText(newEmail);
+        }
+    }
 
-        TextView emailTextView = getView().findViewById(R.id.userEmail);
-        emailTextView.setText(newEmail);
+    public void setInterestedLocationsRecycleView(){
+        RecyclerView interestedLocationsRecyclerView = binding.interestedLocationsRecyclerView;
+        interestedLocationsAdapter = new CustomListRecyclerViewAdapter(currentUser, false);
+        interestedLocationsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        interestedLocationsRecyclerView.setAdapter(interestedLocationsAdapter);
+    }
+
+    public void setInterestedFacilitiesRecycleView(){
+        RecyclerView interestedFacilitiesRecyclerView = binding.interestedFacilitiesRecyclerView;
+        interestedFacilitiesAdapter = new CustomListRecyclerViewAdapter(currentUser, true);
+        interestedFacilitiesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        interestedFacilitiesRecyclerView.setAdapter(interestedFacilitiesAdapter);
+
+    }
+
+    public User getProfileUser() {
+        return currentUser;
+    }
+
+    public void addNewFacility(String facilityToAdd) {
+        interestedFacilitiesAdapter.addNewInterest(facilityToAdd);
+    }
+
+    public void addNewLocation(String locationToAdd) {
+        interestedLocationsAdapter.addNewInterest(locationToAdd);
     }
 }

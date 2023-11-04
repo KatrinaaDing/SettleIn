@@ -16,6 +16,7 @@ public class User {
     public User(String userId, ArrayList<String> interestedFacilities, ArrayList<String> interestedLocations, HashMap<String, UserProperty> properties) {
         this.userId = userId;
         this.interestedFacilities = interestedFacilities;
+        this.interestedLocations = interestedLocations;
         this.properties = properties;
     }
 

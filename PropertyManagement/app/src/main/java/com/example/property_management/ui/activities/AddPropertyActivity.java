@@ -1,6 +1,8 @@
 package com.example.property_management.ui.activities;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -17,19 +19,19 @@ import com.example.property_management.api.FirebaseFunctionsHelper;
 import com.example.property_management.api.FirebasePropertyRepository;
 import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.AddPropertyCallback;
+import com.example.property_management.callbacks.BasicDialogCallback;
 import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.NewProperty;
 import com.example.property_management.databinding.ActivityAddPropertyBinding;
 import com.example.property_management.ui.fragments.base.ArrowNumberPicker;
 import com.example.property_management.ui.fragments.base.AutocompleteFragment;
+import com.example.property_management.ui.fragments.base.BasicDialog;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
-import com.example.property_management.utils.DateTimeFormatter;
 import com.example.property_management.utils.Helpers;
 import com.example.property_management.utils.UrlValidator;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 
-import java.security.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -43,8 +45,7 @@ public class AddPropertyActivity extends AppCompatActivity {
     private int parkingNumber = 0;
     private int price = 0;
     private ArrayList<String> images;
-
-    AutocompleteFragment autocompleteFragment;
+     AutocompleteFragment autocompleteFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,23 +118,25 @@ public class AddPropertyActivity extends AppCompatActivity {
     }
 
     /**
-     * Disable edit price and amenities
+     * Allow edit price and amenities
+     * @param enable true to enable, false to disable
      */
-    private void disableEditPrice() {
+    private void enableEditPrice(boolean enable) {
         TextInputLayout priceInputLayout = findViewById(R.id.priceInputLayout);
-        priceInputLayout.setEnabled(false);
+        priceInputLayout.setEnabled(enable);
     }
 
     /**
-     * Disable edit price and amenities number picker
+     * Allow edit price and amenities number picker
+     * @param enable true to enable, false to disable
      */
-    private void disableEditAmenities() {
+    private void enableEditAmenities(boolean enable) {
         ArrowNumberPicker bedroomNumberPicker = findViewById(R.id.bedroomNumberPicker);
         ArrowNumberPicker bathroomNumberPicker = findViewById(R.id.bathroomNumberPicker);
         ArrowNumberPicker parkingNumberPicker = findViewById(R.id.parkingNumberPicker);
-        bedroomNumberPicker.setEnabled(false);
-        bathroomNumberPicker.setEnabled(false);
-        parkingNumberPicker.setEnabled(false);
+        bedroomNumberPicker.setEnabled(enable);
+        bathroomNumberPicker.setEnabled(enable);
+        parkingNumberPicker.setEnabled(enable);
     }
 
     /**
@@ -170,6 +173,8 @@ public class AddPropertyActivity extends AppCompatActivity {
                     urlInputLayout.setError(null);
                     urlInputLayout.setHelperText("");
                     scrapeUrlBtn.setEnabled(true);
+                    enableEditPrice(true);
+                    enableEditAmenities(true);
                 }
                 @Override
                 public void afterTextChanged(Editable editable) {}
@@ -192,6 +197,9 @@ public class AddPropertyActivity extends AppCompatActivity {
             if (!validateUrl()) return;
             // disable search and submit button on start scraping
             scrapeUrlBtn.setEnabled(false);
+            // assume scraped price and amenities are correct, disable edit
+            enableEditPrice(false);
+            enableEditAmenities(false);
             disableSubmit();
             urlInputLayout.setHelperText("Getting information...");
             fetchPropertyInfo(urlInputLayout, () -> {
@@ -199,9 +207,6 @@ public class AddPropertyActivity extends AppCompatActivity {
                 scrapeUrlBtn.setEnabled(true);
                 fetchCoordinates(() -> {
                     // run on finish fetching coordinates
-                    // assume scraped price and amenities are correct, disable edit
-                    disableEditPrice();
-                    disableEditAmenities();
                     // enable submit button
                     enableSubmit();
                 });
@@ -230,19 +235,32 @@ public class AddPropertyActivity extends AppCompatActivity {
         payLoad.put("address", autocompleteFragment.getSelectedAddress());
         FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
         firebaseFunctionsHelper.checkPropertyExists(payLoad)
-            .addOnSuccessListener(result -> {
-                if (result == null) {
+            .addOnSuccessListener(propertId -> {
+                if (propertId == null) {
                     // property does not exist, add the property
                     Log.d("add-property-exists", "can add property");
                     addProperty(activity);
                 } else {
-                    // property exists, return the document id
-                    // TODO: pop dialog to ask user if redirect to property page
-                    Log.d("add-property-exists", "property exists with document id " + result);
-                    enableSubmit();
-                    new BasicSnackbar(findViewById(android.R.id.content),
+                    // property exists, take user to property detail page
+                    BasicDialog dialog = new BasicDialog(true,
                             "You have already added this property.",
-                            "error");
+                            "Would you like to view the property?",
+                            "No, thanks",
+                            "Okay");
+                    dialog.setCallback(new BasicDialogCallback() {
+                        @Override
+                        public void onLeftBtnClick() {
+                            dialog.dismiss();
+                        }
+                        @Override
+                        public void onRightBtnClick() {
+                            Intent intent = new Intent(getApplicationContext(), PropertyDetailActivity.class);
+                            intent.putExtra("property_id", propertId);
+                            startActivity(intent);
+                        }
+                    });
+                    enableSubmit();
+                    dialog.show(getSupportFragmentManager(), "existing property dialog");
                 }
             })
             .addOnFailureListener(e -> {
@@ -340,7 +358,11 @@ public class AddPropertyActivity extends AppCompatActivity {
             .addOnFailureListener(e -> {
                 // pop error at input box
                 Log.e("scrape-url-error", e.getMessage());
-                urlInputLayout.setError("Error: " + e.getMessage());
+                if (e.getMessage().contains("INTERNAL")) {
+                    urlInputLayout.setError("Error: Cannot scrape the property. Please try again later.");
+                } else {
+                    urlInputLayout.setError("Error: " + e.getMessage());
+                }
             });
 
     }

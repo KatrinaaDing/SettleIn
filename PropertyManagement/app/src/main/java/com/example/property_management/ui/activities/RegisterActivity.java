@@ -1,11 +1,16 @@
 package com.example.property_management.ui.activities;
 
+import static com.example.property_management.utils.Helpers.specialCharFilter;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.widget.Button;
+import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -41,19 +46,23 @@ public class RegisterActivity extends AppCompatActivity {
         Button submitRegisterBtn = findViewById(R.id.submitRegisterBtn);
         Button goToLoginBtn = findViewById(R.id.goToLoginBtn);
         TextInputLayout emailLayout = findViewById(R.id.editTextRegisterEmail);
+        TextInputLayout usernameLayout = findViewById(R.id.editTextRegisterUsername);
         TextInputLayout passwordLayout = findViewById(R.id.editTextRegisterPassword);
         TextInputLayout confirmPasswordLayout = findViewById(R.id.editTextConfirmPassword);
 
+        EditText registerUsername = findViewById(R.id.registerUsername);
+        registerUsername.setFilters(new InputFilter[]{specialCharFilter});
         // ========================== Listeners ==========================
         submitRegisterBtn.setOnClickListener(view -> {
             // close keyboard
             Helpers.closeKeyboard(this);
-            if (validateEmail() && validatePassword()) {
+            if (validateEmail() && validateUsername() && validatePassword()) {
 //                Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
 //                startActivity(intent);
                 String email = emailLayout.getEditText().getText().toString();
+                String username = usernameLayout.getEditText().getText().toString();
                 String password = passwordLayout.getEditText().getText().toString();
-                registerUser(email, password);
+                registerUser(email, username, password);
             }
         });
         goToLoginBtn.setOnClickListener(view -> {
@@ -127,6 +136,18 @@ public class RegisterActivity extends AppCompatActivity {
         }
         return true;
     }
+
+    private boolean validateUsername() {
+        TextInputLayout usernameLayout = findViewById(R.id.editTextRegisterUsername);
+        String username = usernameLayout.getEditText().getText().toString();
+        if (username.isEmpty()) {
+            usernameLayout.setError("Username cannot be empty");
+            return false;
+        }
+        Log.d("check-usernmae", "validateUsername: " + username);
+        return true;
+    }
+
     private boolean validatePassword() {
         TextInputLayout passwordLayout = findViewById(R.id.editTextRegisterPassword);
         TextInputLayout confirmPasswordLayout = findViewById(R.id.editTextConfirmPassword);
@@ -152,22 +173,37 @@ public class RegisterActivity extends AppCompatActivity {
         }
         return isValid;
     }
+
     private void clearEmailError() {
         TextInputLayout emailLayout = findViewById(R.id.editTextRegisterEmail);
         emailLayout.setError(null);
     }
+
     private void clearPasswordError() {
         TextInputLayout passwordLayout = findViewById(R.id.editTextRegisterPassword);
         passwordLayout.setError(null);
     }
+
     private void clearConfirmPasswordError() {
         TextInputLayout confirmPasswordLayout = findViewById(R.id.editTextConfirmPassword);
         confirmPasswordLayout.setError(null);
     }
-    private void registerUser(String email, String password) {
+
+    private void setLoadingRegister(boolean isRegistering) {
+        Button submitRegisterBtn = findViewById(R.id.submitRegisterBtn);
+        if (isRegistering) {
+            submitRegisterBtn.setText("Registering...");
+        } else {
+            submitRegisterBtn.setText("Register");
+        }
+        binding.submitRegisterBtn.setEnabled(!isRegistering);
+    }
+
+    private void registerUser(String email, String username, String password) {
+        setLoadingRegister(true);
         // create user in firebase auth
         FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(this);
-        firebaseAuthHelper.createUser(email, password, new AuthCallback() {
+        firebaseAuthHelper.createUser(email, username, password, new AuthCallback() {
             @Override
             public void onSuccess(FirebaseUser user) {
                 // add created user to firestore
@@ -184,13 +220,17 @@ public class RegisterActivity extends AppCompatActivity {
                     }
                     @Override
                     public void onError(String msg) {
-                        System.out.println("Error: " + msg);
+                        setLoadingRegister(false);
+                        Log.e("register-user", "Error adding user to firestore: " + msg);
                     }
                 });
-                firebaseAuthHelper.addUsernameToFirestore(user.getUid(), "New User");
+                firebaseAuthHelper.addUsernameToFirestore(user.getUid(), username);
             }
             @Override
-            public void onFailure(Exception e) {}
+            public void onFailure(Exception e) {
+                setLoadingRegister(false);
+                Log.e("register-user", "Error creating user: " + e.getMessage());
+            }
         });
 
     }
