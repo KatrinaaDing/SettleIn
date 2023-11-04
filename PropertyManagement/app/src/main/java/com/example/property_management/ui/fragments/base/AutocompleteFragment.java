@@ -18,6 +18,8 @@ import com.example.property_management.R;
 import com.example.property_management.databinding.FragmentAutocompleteBinding;
 import com.example.property_management.ui.activities.AddPropertyActivity;
 import com.example.property_management.ui.activities.MainActivity;
+import com.example.property_management.ui.fragments.profile.AddNewFacilityDialogFragment;
+import com.example.property_management.ui.fragments.profile.ProfileFragment;
 import com.google.android.gms.common.api.Status;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
@@ -70,12 +72,18 @@ public class AutocompleteFragment extends Fragment {
             autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
                 @Override
                 public void onPlaceSelected(@NonNull Place place) {
+                    // get profile fragment
+                    ProfileFragment profileFragment = (ProfileFragment) AutocompleteFragment.this.getParentFragment();
+
                     System.out.println("name: " + place.getName() + ", Address: " + place.getAddress());
                     autocompleteFragment.setPlace(place);
                     selectedAddress = place.getAddress();
                     selectedName = place.getName();
                     lat = place.getLatLng().latitude;
                     lng = place.getLatLng().longitude;
+
+                    // set location name to the dialog UI
+                    profileFragment.setLocationNameTxt(place.getName());
 
                     // Access the parent activity
                     Activity parentActivity = getActivity();

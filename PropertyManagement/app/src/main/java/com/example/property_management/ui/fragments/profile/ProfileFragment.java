@@ -72,6 +72,8 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
     CustomListRecyclerViewAdapter interestedFacilitiesAdapter;
     User currentUser;
 
+    AlertDialog alertDialog;
+
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -198,7 +200,7 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
         View dialogView = getLayoutInflater().inflate(R.layout.custom_interested_location_dialog, null);
 
         // ===== dialog =====
-        AlertDialog alertDialog = new MaterialAlertDialogBuilder(getContext())
+        alertDialog = new MaterialAlertDialogBuilder(getContext())
                 .setTitle("Add Interested Location")
                 .setView(dialogView)
                 .setPositiveButton("Add", null)
@@ -291,5 +293,10 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
             }
         }
         return false;
+    }
+
+    public void setLocationNameTxt(String name) {
+        TextView locationNameTxt = (TextView) alertDialog.findViewById(R.id.locationNameTxt);
+        locationNameTxt.setText(name);
     }
 }

@@ -15,23 +15,27 @@
         android:text="Enter an exact location that you want to know how far from a property. e.g. Melbourne Central Station, Southern Cross Station, The University of Melbourne, etc."
         android:textColor="@color/grey"
         />
-    <TextView
-        android:id="@+id/locationNameTxt"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        />
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/locationEditTextLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingVertical="10dp">
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        >
 
        <fragment
             android:id="@+id/auto_fragment"
             android:name="com.example.property_management.ui.fragments.base.AutocompleteFragment"
             tools:layout="@layout/fragment_autocomplete"
             android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            />
+            android:layout_width="match_parent" />
+       <TextView
+           android:id="@+id/locationNameTxt"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:textColor="@color/purple_500"
+           android:textSize="@dimen/medium_title"
+           android:textFontWeight="500"
+           android:layout_marginTop="4dp"/>
     </com.google.android.material.textfield.TextInputLayout>
 </LinearLayout>
