@@ -95,7 +95,14 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Proper
     public void onResume() {
         super.onResume();
         // refresh properties when user returns to home fragment
-//        getAllProperties(this.getContext());
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences("propertyUpdated",
+                Context.MODE_PRIVATE);
+        if (sharedPreferences.getBoolean("isUpdated", false)) {
+            getAllProperties();
+            sharedPreferences.edit()
+                .remove("isUpdated")
+                .apply();
+        }
     }
 
     public void onHasProperties(boolean hasProperty) {
