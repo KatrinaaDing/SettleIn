@@ -28,6 +28,7 @@ public class AudioSensor {
     }
 
     public void startTest() {
+        Log.d("AudioSensor state", String.valueOf(audioRecord.getState()));
         Log.d("AudioSensor", "startTest() called");
         isRecording = true;
         new Thread(new Runnable() {
