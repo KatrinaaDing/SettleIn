@@ -73,6 +73,8 @@ import java.util.Map;
 
 import androidx.annotation.Nullable;
 import com.example.property_management.R;
+import com.google.android.material.snackbar.Snackbar;
+
 import android.app.AlertDialog;
 
 
@@ -248,10 +250,11 @@ public class DataCollectionActivity extends AppCompatActivity {
                 roomData.put(roomName, singleRoom);
             }
 
-
             updateInspectedData(roomData);
             //collectRoomPhotos();
-            Toast.makeText(this, "Upload data successfully! ", Toast.LENGTH_SHORT).show();
+            Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content), "Upload data successfully!", Snackbar.LENGTH_INDEFINITE);
+            snackbar.setDuration(5000);
+            snackbar.show();
 
             finish();
         });

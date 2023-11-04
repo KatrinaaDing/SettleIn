@@ -109,7 +109,6 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
 
         // fetch property data from firebase
         getPropertyById(this.propertyId);
-
         // ================================== Components =======================================
 
         // ===== dataCollectionBtn =====
@@ -118,19 +117,22 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             Intent newIntent = new Intent(this, DataCollectionActivity.class);
             newIntent.putExtra("propertyId", this.propertyId);
             newIntent.putExtra("inspectedData", this.userProperty.getInspectedData());
+            Log.d("uerproperty is null inter",String.valueOf(this.userProperty == null));
             Log.d("inspectedData in propertydetail",this.userProperty.getInspectedData().toString());
             startActivity(newIntent);
         });
 
+        Log.d("uerproperty is null outer",String.valueOf(this.userProperty == null));
 
         //获取到的inspected Data
-        HashMap<String, RoomData> inspectedData = new HashMap<>();
-        //nspectedData = this.userProperty.getInspectedData();
+        //HashMap<String, RoomData> inspectedData = new HashMap<>();
+
+        //inspectedData = this.userProperty.getInspectedData();
 
         //log 查看获取到的数据
-        for (String roomname: inspectedData.keySet()){
-            Log.d("inspectedData in propertydetail",this.userProperty.getInspectedData().get(roomname).toString());
-        }
+        //for (String roomname: this.userProperty.getInspectedData().keySet()){
+           // Log.d("inspectedData in propertydetail",this.userProperty.getInspectedData().get(roomname).toString());
+        //}
 
 
         // 假设这是你的 TextView ID
