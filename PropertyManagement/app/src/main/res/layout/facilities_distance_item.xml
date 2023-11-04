@@ -5,22 +5,40 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="5dp">
 
-    <TextView
-        android:id="@+id/detail_business_name"
-        style="?textAppearanceTitleSmall"
-        android:textFontWeight="500"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/interest_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="interested facility"
-        android:textColor="?android:attr/textColorLink"
-        android:paddingBottom="4dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/detail_name"
+            style="?textAppearanceTitleSmall"
+            android:textFontWeight="500"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="interest name"
+            android:textColor="?android:attr/textColorLink"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <TextView
+            android:id="@+id/detail_address"
+            style="?textAppearanceTitleSmall"
+            android:textFontWeight="300"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="interest address"
+            android:textColor="@color/grey"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/detail_name"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_constraintTop_toBottomOf="@+id/detail_business_name"
+        app:layout_constraintTop_toBottomOf="@+id/interest_container"
         android:orientation="horizontal">
         <TextView
             android:id="@+id/detail_distance"

@@ -579,11 +579,11 @@ def get_nearby(facility, lat, lng):
     r = r.json()
     status = r["status"]
     if status == "OK":
-        return r["results"][0]["name"]+ ", " + r["results"][0]["vicinity"]
+        return r["results"][0]["name"], r["results"][0]["vicinity"]
     
     # no interested facility within 5km from the property
     elif status == "ZERO_RESULTS":
-        return None
+        return None, None
     else:
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.PERMISSION_DENIED,
@@ -685,7 +685,7 @@ def update_distance2(origins, propertyIds, destination, destination_name, user_r
     destinations: a list of interested facilities/location specific addresses, 
     interests: a list of interested facilities general keyword (e.g. coles, kfc)
 """
-def update_distance1(origin, destinations, interests, user_ref, path):
+def update_distance1(origin, destinations, destination_names, interests, user_ref, path):
     # get distance info from google distance matrix api
     re= {}
     interests = [keep_letter_number(interest) for interest in interests]
@@ -722,6 +722,7 @@ def update_distance1(origin, destinations, interests, user_ref, path):
             if interests[i] not in re:
                 re[interests[i]] = {
                     "address": destinations[i],
+                    "name": destination_names[i],
                     "distance": distance, 
                     mode: duration
                 }
@@ -747,20 +748,25 @@ def add_interests_to_new_property(user, user_id, property_id):
     lng = property["lng"]
 
     interest_addresses = []
+    interest_names = []
     interests = []
     if "interestedFacilities" in user:
         interests = user["interestedFacilities"]
         # get address of each nearest interested facility for the property
         for facility in interests:
-            facility_address = get_nearby(facility, lat, lng)
+            facility_name, facility_address = get_nearby(facility, lat, lng)
             interest_addresses.append(facility_address)
+            interest_names.append(facility_name)
 
     if "interestedLocations" in user:
         current_interested_locations = user["interestedLocations"]
+        current_location_names = user["locationNames"]
         # combine the key list for interested facilities and locations
         interests.extend(current_interested_locations)
         # combine the addresses list for interested facilities and locations
         interest_addresses.extend(current_interested_locations)
+        # combine the names list for interested facilities and locations
+        interest_names.extend(current_location_names)
     
     path = f'properties.{property_id}.distances'
 
@@ -845,10 +851,10 @@ def calculate_distance(event: Event[Change[DocumentSnapshot]]) -> Any:
                 property_address = property["address"]
                 lat = property["lat"]
                 lng = property["lng"]
-                facility_address = get_nearby(facility, lat, lng)
+                facility_name, facility_address = get_nearby(facility, lat, lng)
             
                 # no interested facility within 5km from the property
-                if facility_address is None:
+                if facility_address is None or facility_name is None:
                     print(f"No {facility} within 5km from {property_address}")
                     continue
 
@@ -857,4 +863,4 @@ def calculate_distance(event: Event[Change[DocumentSnapshot]]) -> Any:
                 path = f'properties.{propertyId}.distances'
 
                 # update distance info from property to the facility
-                update_distance1(property_address, [facility_address], [facility], user_ref, path)
+                update_distance1(property_address, [facility_address], [facility_name], [facility], user_ref, path)
