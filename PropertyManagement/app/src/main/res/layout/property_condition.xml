@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:paddingVertical="10dp">
 
     <!-- recycler view for rooms-->
-  
+
     <!-- Room name -->
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,68 +24,19 @@
 
     </LinearLayout>
 
-
-    <!-- Camera sensor components for each room -->
-    <!--
-    <LinearLayout
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/image_carousel"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <ImageView
-            android:id="@+id/ic_camera"
-            android:layout_width="wrap_content"
-            android:layout_height="24dp"
-            android:layout_gravity="center_vertical"
-            android:adjustViewBounds="true"
-            android:src="@drawable/ic_camera" />
-
-        <TextView
-            android:id="@+id/image_View"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="10dp"
-            android:layout_weight="1.7"
-            android:paddingVertical="10dp"
-            android:text="Photos" />
-
-        <androidx.camera.view.PreviewView
-            android:id="@+id/previewView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/photoCount"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:focusable="true"
-            android:onClick="showPhotos"
-            android:text="Null" />
-
-        <Button
-            android:id="@+id/openCamera"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Add" />
-    </LinearLayout>
-     -->
-
-    <!-- Room photos: can be changed-->
-    <ImageView
-        android:id="@+id/capturedImage"
-        android:layout_width="250dp"
         android:layout_height="320dp"
         android:layout_marginTop="20dp"
-        android:layout_gravity="center"/>
+        app:layoutManager="com.google.android.material.carousel.CarouselLayoutManager"/>
 
     <!-- Row 1: Noise -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:weightSum="4">
 
         <ImageView
             android:id="@+id/ic_noise"
@@ -99,7 +51,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
-            android:layout_weight="1.7"
+            android:layout_weight="2.5"
             android:paddingVertical="10dp"
             android:text="Noise Level" />
 
@@ -107,9 +59,16 @@
             android:id="@+id/noiseValue1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="1.5"
             android:paddingVertical="10dp"
             android:text="--" />
+
+        <Button
+            android:id="@+id/noiseLevelButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Normal"
+        android:layout_marginLeft="10dp"/>
 
 
     </LinearLayout>
@@ -118,7 +77,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:weightSum="4">
 
         <ImageView
             android:id="@+id/ic_light"
@@ -133,18 +93,25 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
-            android:layout_weight="1.7"
+            android:layout_weight="1.85"
             android:paddingVertical="10dp"
-            android:text="Light Level" />
+            android:text="Brightness" />
 
         <TextView
             android:id="@+id/lightValue1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="1.8"
             android:paddingVertical="10dp"
             android:text="--" />
 
+        <ImageButton
+            android:id="@+id/infoButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="10dp"
+            android:src="@drawable/ic_info_data_collection" />
 
     </LinearLayout>
 
@@ -152,7 +119,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:weightSum="4">
 
         <ImageView
             android:id="@+id/ic_window"
@@ -167,19 +135,22 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
-            android:layout_weight="1.7"
+            android:layout_weight="1.6"
             android:paddingVertical="10dp"
-            android:text="Window Orientation" />
+            android:text="Window\nOrientation" />
 
         <TextView
             android:id="@+id/windowValue1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="2.4"
             android:paddingVertical="10dp"
             android:text="--" />
 
-
     </LinearLayout>
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:dividerColor="@color/lightGrey"/>
 
 </LinearLayout>

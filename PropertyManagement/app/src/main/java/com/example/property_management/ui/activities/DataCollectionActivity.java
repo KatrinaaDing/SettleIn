@@ -33,6 +33,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -77,6 +78,8 @@ import java.util.regex.Pattern;
 
 import androidx.annotation.Nullable;
 import com.example.property_management.R;
+import com.google.android.material.snackbar.Snackbar;
+
 import android.app.AlertDialog;
 
 
@@ -132,7 +135,6 @@ public class DataCollectionActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("onCreate in collection run","onCreate in collection run\"");
         super.onCreate(savedInstanceState);
         binding = ActivityDataCollectionBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -297,6 +299,7 @@ public class DataCollectionActivity extends AppCompatActivity {
             showInfoDialog();
         }
     }
+
 
     public void collectRoomPhotos() {
         // get image from adapter
@@ -482,6 +485,13 @@ public class DataCollectionActivity extends AppCompatActivity {
 
         final EditText editTextNote = noteDialog.findViewById(R.id.editTextNote);
         Button buttonSave = noteDialog.findViewById(R.id.buttonSave);
+
+        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+        layoutParams.copyFrom(noteDialog.getWindow().getAttributes());
+        int dialogWidth = (int)(getResources().getDisplayMetrics().widthPixels * 0.9);
+        layoutParams.width = dialogWidth;
+        layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        noteDialog.getWindow().setAttributes(layoutParams);
 
         // Load existing note, if any
         String existingNote = sharedPreferences.getString("note", "");

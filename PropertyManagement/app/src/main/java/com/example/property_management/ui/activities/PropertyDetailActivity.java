@@ -22,11 +22,13 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.property_management.adapters.PropertyConditionAdapter;
 import com.example.property_management.api.FirebaseAuthHelper;
 import com.example.property_management.api.FirebaseFunctionsHelper;
 import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.Property;
+import com.example.property_management.data.RoomData;
 import com.example.property_management.data.UserProperty;
 import com.example.property_management.sensors.CalendarSensor;
 import com.example.property_management.sensors.LocationSensor;
@@ -56,8 +58,10 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 public class PropertyDetailActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -69,7 +73,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     private String propertyId;
     private Property property;
     private UserProperty userProperty;
-    private boolean shouldRefresh = false;
+    private List<RoomData> roomDataList;
     DistanceAdapter distanceAdapter;
     RecyclerView distanceRecycler;
     // inspection date and time
@@ -81,10 +85,12 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     String NO_DATE_HINT = "Date not set";
     String NO_TIME_HINT = "Time not set";
     String NO_DATE_TIME_HINT = "Not set";
+    private RecyclerView recyclerView;
+    private PropertyConditionAdapter adapter;
+    List<List<Integer>> imagesPerRoom = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("onCreate run ","resume run ");
         super.onCreate(savedInstanceState);
         binding = ActivityPropertyDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -125,35 +131,63 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             startActivity(newIntent);
         });
 
+        // 假设这是 TextView ID
+       // TextView savedNotesTextView = findViewById(R.id.saved_notes);
+
+        // 模拟从 Firebase 获取的数据
+        //String simulatedData = "Notes11111111111111";
+
+        // 设置 TextView 文本为模拟数据
+        //savedNotesTextView.setText(simulatedData);
+        //HashMap<String, RoomData> roomData = collectRoomData();
+        /**
+        recyclerView = findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        // hard code
+
+        HashMap<String, RoomData> roomDataHashMap = new HashMap<>();
+
+        // 硬编码一些房间数据
+        roomDataHashMap.put("Living Room", new RoomData(200, 60, "East", new ArrayList<>(Arrays.asList(
+                "android.resource://com.example.property_management/" + R.drawable.ic_camera,
+                "android.resource://com.example.property_management/" + R.drawable.ic_noise))));
+        roomDataHashMap.put("Bedroom", new RoomData(150, 20, "West", new ArrayList<>(Arrays.asList(
+                "android.resource://com.example.property_management/" + R.drawable.ic_camera,
+                "android.resource://com.example.property_management/" + R.drawable.ic_noise))));
+        roomDataHashMap.put("Kitchen", new RoomData(250, 40, "South", new ArrayList<>(Arrays.asList(
+                "android.resource://com.example.property_management/" + R.drawable.ic_light,
+                "android.resource://com.example.property_management/" + R.drawable.ic_camera))));
+
+        // 准备适配器使用的数据
+        List<String> roomNames = new ArrayList<>(roomDataHashMap.keySet());
+        ArrayList<ArrayList<String>> imagesPerRoom = new ArrayList<>();
+        ArrayList<Float> brightnessList = new ArrayList<>();
+        ArrayList<Float> noiseList = new ArrayList<>();
+        ArrayList<String> windowOrientationList = new ArrayList<>();
+
+        for (String roomName : roomNames) {
+            RoomData roomData = roomDataHashMap.get(roomName);
+            if (roomData != null) {
+                imagesPerRoom.add(roomData.getImages());
+                brightnessList.add(roomData.getBrightness());
+                noiseList.add(roomData.getNoise());
+                windowOrientationList.add(roomData.getWindowOrientation());
+            }
+        }
+
+        // 创建适配器
+        PropertyConditionAdapter adapter = new PropertyConditionAdapter(
+                roomNames,
+                imagesPerRoom,
+                brightnessList,
+                noiseList,
+                windowOrientationList
+        );
+
+        // 设置适配器到 RecyclerView
+        recyclerView.setAdapter(adapter);
+         */
     }
-
-    /**
-     *
-     *     public void onPause() {
-     *         super.onPause();
-     *         shouldRefresh = true;
-     *     }
-     *
-     *     // Set the flag to true when navigating away
-     *
-     *     @Override
-     *     protected void onResume () {
-     *         super.onResume();
-     *         if (shouldRefresh == true) {
-     *             getPropertyById(this.propertyId);
-     *             shouldRefresh = false;
-     *         }
-     *         Log.d("resume run ","resume run ");
-     *     }
-     *
-     *
-     *
-     *
-     */
-
-
-
-
 
     /**
      * Initialize map fragment
@@ -351,6 +385,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                     setCarousel(property);
                     setLinkButton(property);
                     setDistances(userProperty.getDistances());
+                    setInspectedData(userProperty);
                     initMap();
                     setLoading(false);
                 })
@@ -696,5 +731,74 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             distanceInfoList.add(distanceInfo);
         }
         setDistanceRecycler(distanceInfoList);
+    }
+
+    private void setInspectedData(UserProperty userProperty){
+        //获取到的inspected Data
+        HashMap<String, RoomData> inspectedData = new HashMap<>();
+        inspectedData = this.userProperty.getInspectedData();
+        //log 查看获取到的数据
+        //根据房间名字获取指定数据  inspectedData.get("roomname1").get
+        //inspectedData 数据结构
+        // {  Roomname1: {brightness: 11.0   -> Float
+        // noise: 11.0         -> Float
+        // windowOrientation: 11  -> String
+        // images: [0 added] -> List of String }
+        // Roomname2: {brightness: 11.0   -> Float
+        //  noise: 11.0         -> Float
+        //  windowOrientation: 11  -> String
+        //  images: [0 added] -> List of String }
+        // Roomname3: {brightness: 11.0   -> Float
+        // noise: 11.0         -> Float
+        //  windowOrientation: 11  -> String
+        //   images: [0 added] -> List of String }
+        //   }
+        for (String roomname: inspectedData.keySet()){
+            Log.d("inspectedData in propertydetail",this.userProperty.getInspectedData().get(roomname).toString());
+        }
+
+        //房间数量
+        //int roomNum = inspectedData.keySet().size();
+        //note
+        String notes = userProperty.getNotes();
+
+        // note
+        TextView savedNotesTextView = findViewById(R.id.saved_notes);
+
+        // set note
+        savedNotesTextView.setText(notes);
+        //HashMap<String, RoomData> roomData = collectRoomData();
+        recyclerView = findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        // room data
+        List<String> roomNames = new ArrayList<>(inspectedData.keySet());
+        ArrayList<ArrayList<String>> imagesPerRoom = new ArrayList<>();
+        ArrayList<Float> brightnessList = new ArrayList<>();
+        ArrayList<Float> noiseList = new ArrayList<>();
+        ArrayList<String> windowOrientationList = new ArrayList<>();
+
+        for (String roomName : roomNames) {
+            RoomData roomData = inspectedData.get(roomName);
+            if (roomData != null) {
+                imagesPerRoom.add(roomData.getImages());
+                brightnessList.add(roomData.getBrightness());
+                noiseList.add(roomData.getNoise());
+                windowOrientationList.add(roomData.getWindowOrientation());
+            }
+        }
+
+        // set adapter
+        PropertyConditionAdapter adapter = new PropertyConditionAdapter(
+                roomNames,
+                imagesPerRoom,
+                brightnessList,
+                noiseList,
+                windowOrientationList
+        );
+
+       // RecyclerView
+        recyclerView.setAdapter(adapter);
+        Log.d("RecyclerViewSetup", "RecyclerView should be set. Room count: " + roomNames.size());
     }
 }

@@ -8,7 +8,7 @@
 
     <EditText
         android:id="@+id/editTextNote"
-        android:layout_width="500dp"
+        android:layout_width="match_parent"
         android:layout_height="200dp"
         android:gravity="start|top"
         android:inputType="textMultiLine"

@@ -728,7 +728,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        //测试
+        //test
         public boolean isNoiseTesting = false;
         public boolean isLightTesting = false;
         public boolean isCompassTesting = false;
@@ -778,7 +778,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     }
 
     public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> {
-
         private final List<Bitmap> images;
         private final RecyclerView recyclerView;
         private final int roomPosition;
@@ -825,7 +824,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             holder.imageView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    showSaveImageDialog(images.get(position), roomPosition);
+                    //showSaveImageDialog(images.get(position), roomPosition);
                     return true;
                 }
             });
