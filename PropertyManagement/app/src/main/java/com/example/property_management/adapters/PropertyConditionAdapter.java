@@ -16,7 +16,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import com.example.property_management.R;
 import com.example.property_management.data.RoomData;
-import com.example.property_management.adapters.CarouselAdapter;
+import com.example.property_management.adapters.PropertyConditionAdapter;
 import com.example.property_management.ui.activities.ImageViewActivity;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -110,22 +110,22 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
             }
         }
 
-        // Initialize CarouselAdapter
-        CarouselAdapter carouselAdapter = new CarouselAdapter(holder.itemView.getContext(), imagesPerRoom.get(position));
+        // initialize PropertyConditionCarouselAdapter
+        PropertyConditionCarouselAdapter propertyConditionCarouselAdapter = new PropertyConditionCarouselAdapter(holder.itemView.getContext(), imagesPerRoom.get(position));
 
-        // if no image, hide carousel
+       // if no image
         if (imagesPerRoom.get(position).isEmpty()) {
             holder.imageCarousel.setVisibility(View.GONE);
         } else {
             holder.imageCarousel.setVisibility(View.VISIBLE);
 
-            // on click open image
-            carouselAdapter.setOnItemClickListener(new CarouselAdapter.OnItemClickListener() {
+            // when click photo
+            propertyConditionCarouselAdapter.setOnItemClickListener(new PropertyConditionCarouselAdapter.OnItemClickListener() {
                 @Override
-                public void onClick(ImageView imageView, String imageUrl) {
-                    // show image
+                public void onClick(ImageView imageView, String imageResourceOrUrl) {
+                    // show placeholder
                     Intent intent = new Intent(holder.itemView.getContext(), ImageViewActivity.class);
-                    intent.putExtra("image", imageUrl);
+                    intent.putExtra("image", imageResourceOrUrl);
                     ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(
                             (Activity) holder.itemView.getContext(),
                             imageView,
@@ -135,8 +135,9 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
                 }
             });
 
-            // if only one image, set linear layout to center the image
-            if (carouselAdapter.getItemCount() == 1) {
+
+            // if only one photo
+            if (propertyConditionCarouselAdapter.getItemCount() == 1) {
                 LinearLayoutManager linearLayoutManager = new LinearLayoutManager(holder.itemView.getContext(),
                         LinearLayoutManager.HORIZONTAL, false);
                 holder.imageCarousel.setLayoutManager(linearLayoutManager);
@@ -145,8 +146,9 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
             }
 
             // set adapter
-            holder.imageCarousel.setAdapter(carouselAdapter);
+            holder.imageCarousel.setAdapter(propertyConditionCarouselAdapter);
         }
+
     }
 
     private void showInformationDialog(Context context) {
@@ -213,8 +215,6 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
                 }
             });
         }
-
     }
-
 
 }
