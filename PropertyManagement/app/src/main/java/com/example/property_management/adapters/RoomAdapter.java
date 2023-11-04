@@ -74,7 +74,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     private LightSensor lightSensor;
     private CompassSensor compassSensor;
     private AudioSensor audioSensor;
-    private static List<List<Bitmap>> roomImages = new ArrayList<>();
+    private  List<List<Bitmap>> roomImages = new ArrayList<>();
     private List<LightSensor> lightSensors = new ArrayList<>();
     private List<CompassSensor> compassSensors = new ArrayList<>();
     private List<AudioSensor> audioSensors = new ArrayList<>();
@@ -188,7 +188,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                 holder.lightValueTextView.setText(roomData.get(currentRoomName).getBrightness() + " X");
                 holder.noiseValueTextView.setText(roomData.get(currentRoomName).getNoise() + " dB");
                 holder.compassValueTextView.setText(roomData.get(currentRoomName).getWindowOrientation());
-
 
 
         AudioSensor currentAudioSensor = audioSensors.get(position);
@@ -434,9 +433,9 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-
                             roomImages.get(holder.getAdapterPosition()).add(bitmap);
                             notifyDataSetChanged();
+
                             //close camera page
                             cameraDialog.dismiss();
                         }

@@ -142,6 +142,11 @@ public class DataCollectionActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         requestStoragePermission();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.RECORD_AUDIO},
+                    MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
+        }
         //recycle room
         //int roomCount = 3;
 
@@ -180,15 +185,12 @@ public class DataCollectionActivity extends AppCompatActivity {
         //查看得到的房间数量数据
         Log.i("get-room num", String.valueOf(room_num));
 
-
-
-
         // Initialize rooms RecyclerView
         roomsRecyclerView = findViewById(R.id.recycler_view);
 
         // Define the list of room names
         List<String> roomNames = new ArrayList<>();
-        // assuming  3 rooms
+
         for (int i = 0; i <= room_num; i++) {
             if (i == 0) {
                 roomNames.add("Lounge Room");
@@ -203,12 +205,6 @@ public class DataCollectionActivity extends AppCompatActivity {
         roomAdapter = new RoomAdapter(this, roomNames, initialInspectedData);
         roomsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         roomsRecyclerView.setAdapter(roomAdapter);
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.RECORD_AUDIO},
-                    MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
-        }
 
         // Initialize SharedPreferences
         sharedPreferences = getSharedPreferences("notes", MODE_PRIVATE);
@@ -256,7 +252,6 @@ public class DataCollectionActivity extends AppCompatActivity {
                 roomDataMap.put(roomName, roomInfo);
             }
 
-
             // 转换为字符串并记录
             Log.d("AllRoomData", "Rooms Data: " + roomDataMap.toString());
 
@@ -276,10 +271,10 @@ public class DataCollectionActivity extends AppCompatActivity {
                 roomData.put(roomName, singleRoom);
             }
 
-
             updateInspectedData(propertyId, roomData);
             collectRoomPhotos();
-            Toast.makeText(this, "Upload data successfully! ", Toast.LENGTH_SHORT).show();
+            Log.d("Saved images",roomImagePathsMap.toString());
+            Snackbar.make(findViewById(android.R.id.content), "Upload data successfully!", Snackbar.LENGTH_SHORT).show();
 
             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                 @Override
@@ -289,9 +284,9 @@ public class DataCollectionActivity extends AppCompatActivity {
                 }
             }, 3500); // 2000 是延迟的时间（毫秒），即 2 秒
 
-            Log.d("Saved images",roomImagePathsMap.toString());
-        });
 
+        });
+        //roomAdapter.clearAllRoomImages();
         SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
         boolean hasShownInfo = prefs.getBoolean("has_shown_info", false);
 
@@ -374,21 +369,6 @@ public class DataCollectionActivity extends AppCompatActivity {
         return path;
     }
 
-    /**
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                return true;
-            case R.id.action_info:
-                showInfoDialog();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
@@ -400,7 +380,6 @@ public class DataCollectionActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -546,7 +525,6 @@ public class DataCollectionActivity extends AppCompatActivity {
         });
 
     }
-
 
     //从得到的字符inspected结果中提取数字。
     private String extractNumber(String input, Pattern pattern) {
