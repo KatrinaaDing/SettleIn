@@ -3,6 +3,7 @@ package com.example.property_management.ui.fragments.home;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
-import android.widget.ScrollView;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -22,14 +22,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.property_management.R;
 import com.example.property_management.adapters.PropertyCardAdapter;
 import com.example.property_management.api.FirebaseUserRepository;
+import com.example.property_management.callbacks.BasicDialogCallback;
 import com.example.property_management.callbacks.GetAllUserPropertiesCallback;
 import com.example.property_management.data.Property;
 import com.example.property_management.databinding.FragmentHomeBinding;
 import com.example.property_management.sensors.LocationSensor;
 import com.example.property_management.ui.activities.PropertyDetailActivity;
+import com.example.property_management.ui.fragments.base.BasicDialog;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.example.property_management.ui.fragments.base.PropertyCard;
-import com.example.property_management.utils.Helpers;
+import com.example.property_management.utils.DateTimeFormatter;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -45,10 +47,14 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.lang.reflect.Array;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class HomeFragment extends Fragment implements OnMapReadyCallback, PropertyCardAdapter.EventListener {
@@ -74,23 +80,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Proper
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-//        Button testBtn = binding.testBtn;
-//        testBtn.setOnClickListener(view -> {
-//            Intent intent = new Intent(getActivity(), TestActivity.class);
-//            startActivity(intent);
-//        });
-
         waitForAuth();
 
         return root;
-    }
-
-    public void onEvent(boolean hasProperty) {
-        if (hasProperty) {
-            binding.hint.setVisibility(View.GONE);
-        } else {
-            binding.hint.setVisibility(View.VISIBLE);
-        }
     }
 
     @Override
@@ -106,6 +98,120 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Proper
 //        getAllProperties(this.getContext());
     }
 
+    public void onHasProperties(boolean hasProperty) {
+        if (hasProperty) {
+            binding.hint.setVisibility(View.GONE);
+        } else {
+            binding.hint.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * Show alert when user is near a property that has not been inspected and it's close
+     * to the inspection date and time
+     */
+    public void showNearbyInspectionAlert(ArrayList<Property> allProperties) {
+        // get system date and time
+        Date now = new Date();
+
+        // loop all properties and check if there is any property that is close to inspection date
+        for (Property property : allProperties) {
+            AtomicBoolean showInspectionAlert = new AtomicBoolean(false);
+            // skip inspected properties
+            if (property.getInspected()) {
+                continue;
+            }
+            // skip if user has set preference to not show this dialog again
+            SharedPreferences sharedPreferences = getContext().getSharedPreferences("showInspectAlertPref", Context.MODE_PRIVATE);
+            if (!sharedPreferences.getBoolean(property.getPropertyId(), true)) {
+                continue;
+            }
+
+            // get inspection date and time. skip if none.
+            LocalDate inspectionDate = property.getInspectionDate();
+            LocalTime inspectionTime = property.getInspectionTime();
+            if (inspectionDate == null || inspectionTime == null) {
+                continue;
+            }
+
+            // if the difference is less than 10min, show dialog
+            long inspectionDateTimeMillis = DateTimeFormatter.localDateToMillis(LocalDateTime.of(inspectionDate, inspectionTime));
+            long nowMillis = now.getTime();
+            if (Math.abs(inspectionDateTimeMillis - nowMillis) < 10 * 60 * 1000) {
+                // get current location
+                LocationSensor locationSensor = new LocationSensor(getActivity(), null);
+                locationSensor.requiresPermissions(getActivity());
+
+                if (locationSensor.hasPermission(getActivity())) {
+                    locationSensor.getCurrentLocation().addOnSuccessListener(myLocation -> {
+                        if (myLocation != null) {
+                            // get distance between current location and property location
+                            Location propertyLocation = new Location("");
+                            propertyLocation.setLatitude(property.getLat());
+                            propertyLocation.setLongitude(property.getLng());
+
+                            // if distance is less than 500 meters, show dialog
+                            float distance = myLocation.distanceTo(propertyLocation);
+                            if (distance < 500) {
+                                showInspectionDialog(
+                                        property.getPropertyId(),
+                                        "You are near " + property.getAddress() +
+                                                ". Would you like to start the inspection now?"
+                                );
+
+                            }
+                        }
+                    });
+                } else {
+                    // if no location permission, show dialog
+                    showInspectionDialog(
+                            property.getPropertyId(),
+                            "Almost there! You're within 10 minutes of the scheduled inspection for " +
+                                    property.getAddress() +
+                                    ". Would you like to start the inspection now?"
+                    );
+                    showInspectionAlert.set(true);
+                }
+                showInspectionAlert.set(true);
+            }
+            // only show one dialog
+            if (showInspectionAlert.get()) {
+                break;
+            }
+        }
+    }
+
+    /**
+     * show inspection dialog and take user to property detail page if user clicks "Yes".
+     * If user clicks "Do not show again", set preference to not show this dialog again.
+     * @param propertyId the property id of the property to be inspected
+     * @param message the message to be displayed in the dialog
+     */
+    private void showInspectionDialog(String propertyId, String message) {
+        BasicDialog dialog = new BasicDialog(true,
+                "Ready for inspection?",
+                message + "\n\nClose this alert by clicking outside of it.",
+                "Do not show again for this property",
+                "Yes, let's go!");
+        dialog.setCallback(new BasicDialogCallback() {
+            @Override
+            public void onLeftBtnClick() {
+                // set preference to not show this dialog again
+                SharedPreferences sharedPreferences = getContext()
+                        .getSharedPreferences("showInspectAlertPref", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(propertyId, false);
+                editor.apply();
+            }
+            @Override
+            public void onRightBtnClick() {
+                Intent intent = new Intent(getActivity(), PropertyDetailActivity.class);
+                intent.putExtra("property_id", propertyId);
+                startActivity(intent);
+            }
+        });
+        dialog.show(getChildFragmentManager(), "inspection alert dialog");
+    }
     /**
      * Initialize the filter menu
      */
@@ -284,7 +390,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Proper
                     googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLatLng, 12));
                 }
             });
-
+        } else {
+            // if not location, set view to Australia by default
+            LatLng australia = new LatLng(-25.2744, 133.7751);
+            googleMap.moveCamera(CameraUpdateFactory.newLatLng(australia));
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(australia, 4));
         }
         addMarkersToMap(googleMap, allProperties);
 
@@ -375,14 +485,16 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Proper
      */
     private void waitForAuth() {
         FirebaseAuth.getInstance().addAuthStateListener(firebaseAuth -> {
-            FirebaseUser user = firebaseAuth.getCurrentUser();
-            if (user != null) {
-                // User is signed in
-                binding.loadingText.setText("Loading properties...");
-                getAllProperties();
-            } else {
-                // User is signed out
-                binding.loadingText.setText("Sign in failed. Please try again.");
+            if (isAdded() && !isRemoving() && !isDetached()) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (binding != null && user != null) {
+                    // User is signed in
+                    binding.loadingText.setText("Loading properties...");
+                    getAllProperties();
+                } else {
+                    // User is signed out
+                    binding.loadingText.setText("Sign in failed. Please try again.");
+                }
             }
         });
 
@@ -408,6 +520,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Proper
                         // otherwise initialize and display toolbar after all properties are loaded
                         initToolbar();
                         initMap();
+                        showNearbyInspectionAlert(properties);
                     }
                 }
             }

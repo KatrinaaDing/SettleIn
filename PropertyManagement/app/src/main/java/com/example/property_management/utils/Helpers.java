@@ -5,9 +5,13 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+
+import java.util.regex.Pattern;
 
 public class Helpers {
 
@@ -79,4 +83,18 @@ public class Helpers {
         float density = context.getResources().getDisplayMetrics().density;
         return Math.round((float) dp * density);
     }
+
+    // remove special characters
+    public static InputFilter specialCharFilter = new InputFilter() {
+        @Override
+        public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+            Pattern pattern = Pattern.compile("^[a-zA-Z0-9]*$");
+            for (int i = start; i < end; i++) {
+                if (!pattern.matcher(String.valueOf(source.charAt(i))).matches()) {
+                    return "";
+                }
+            }
+            return null;
+        }
+    };
 }

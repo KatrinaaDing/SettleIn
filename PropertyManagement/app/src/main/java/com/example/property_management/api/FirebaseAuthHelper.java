@@ -2,6 +2,7 @@ package com.example.property_management.api;
 
 import static android.content.ContentValues.TAG;
 
+import android.os.Handler;
 import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -12,6 +13,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.FirebaseException;
 import com.google.firebase.FirebaseNetworkException;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -49,16 +51,33 @@ public class FirebaseAuthHelper {
     public FirebaseUser getCurrentUser() {
         return mAuth.getCurrentUser();
     }
-    public void createUser(String email, String password, AuthCallback callback) {
+    public void createUser(String email, String username, String password, AuthCallback callback) {
         mAuth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     // Sign in success, update UI with the signed-in user's information
                     Log.d(TAG, "createUserWithEmail:success");
                     FirebaseUser user = mAuth.getCurrentUser();
-                    showSuccess("User created successfully.");
-                    System.out.println(user);
-                    callback.onSuccess(user);
+
+                    if (user != null) {
+                        // Create a request to update the user's profile with the desired username
+                        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                .setDisplayName(username)
+                                .build();
+
+                        // Update the user's profile with the request
+                        user.updateProfile(profileUpdates)
+                                .addOnCompleteListener(profileTask -> {
+                                    if (profileTask.isSuccessful()) {
+                                        Log.d(TAG, "Username added to user profile");
+                                        showSuccess("User created successfully.");
+                                        callback.onSuccess(user);
+                                    } else {
+                                        Log.w(TAG, "Failed to add username to user profile", profileTask.getException());
+                                        callback.onFailure(profileTask.getException());
+                                    }
+                                });
+                    }
 
                 } else {
                     // If sign in fails, display a message to the user.
@@ -77,7 +96,6 @@ public class FirebaseAuthHelper {
                     // Sign in success, update UI with the signed-in user's information
                     Log.d(TAG, "signInWithEmail:success");
                     FirebaseUser user = mAuth.getCurrentUser();
-                    showSuccess("Login successfully.");
                     callback.onSuccess(user);
                 } else {
                     // If sign in fails, display a message to the user.
@@ -95,39 +113,48 @@ public class FirebaseAuthHelper {
 
     // show error snackbar based on error code
     private void showError(Task<AuthResult> task) {
+        Log.e("firebase-auth", task.getException().getMessage());
         // handle network error
         if (task.getException() instanceof FirebaseNetworkException) {
             new BasicSnackbar(activity.findViewById(android.R.id.content),
                     "Network error. Please check your connection and try again later.",
                     "error",
                     Snackbar.LENGTH_LONG);
-            return;
+
+        } else if (task.getException() instanceof FirebaseAuthException) {
+            // handle other errors
+            FirebaseAuthException e = (FirebaseAuthException) task.getException();
+            String errorCode = e.getErrorCode();
+            String errorMessage;
+            switch (errorCode) {
+                case "ERROR_INVALID_EMAIL":
+                    errorMessage = "Invalid email format.";
+                    break;
+                case "ERROR_USER_NOT_FOUND":
+                    errorMessage = "User not found.";
+                    break;
+                case "ERROR_WRONG_PASSWORD":
+                    errorMessage = "Wrong password.";
+                    break;
+                case "ERROR_EMAIL_ALREADY_IN_USE":
+                    errorMessage = "Email already in use.";
+                    break;
+                default:
+                    errorMessage = "Something went wrong. Please try again later.";
+                    break;
+            }
+            new BasicSnackbar(activity.findViewById(android.R.id.content),
+                    errorMessage,
+                    "error",
+                    Snackbar.LENGTH_LONG);
+
+        } else {
+            new BasicSnackbar(activity.findViewById(android.R.id.content),
+                    "An unexpected error occurred. Please try again later.",
+                    "error",
+                    Snackbar.LENGTH_LONG);
         }
-        // handle other errors
-        FirebaseAuthException e = (FirebaseAuthException) task.getException();
-        String errorCode = e.getErrorCode();
-        String errorMessage;
-        switch (errorCode) {
-            case "ERROR_INVALID_EMAIL":
-                errorMessage = "Invalid email format.";
-                break;
-            case "ERROR_USER_NOT_FOUND":
-                errorMessage = "User not found.";
-                break;
-            case "ERROR_WRONG_PASSWORD":
-                errorMessage = "Wrong password.";
-                break;
-            case "ERROR_EMAIL_ALREADY_IN_USE":
-                errorMessage = "Email already in use.";
-                break;
-            default:
-                errorMessage = "Something went wrong. Please try again later.";
-                break;
-        }
-        new BasicSnackbar(activity.findViewById(android.R.id.content),
-                errorMessage,
-                "error",
-                Snackbar.LENGTH_LONG);
+
     }
 
     private void showSuccess(String msg) {

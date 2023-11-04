@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Locale;
 
@@ -96,9 +97,9 @@ public class DateTimeFormatter {
      * @return long epoch millis in long
      */
     public static long localDateToMillis(LocalDateTime datetime) {
-        return datetime.atZone(zoneId).toInstant().toEpochMilli();
+        // since the system is using UTC time, here set it to local time zone
+        ZonedDateTime zonedDateTime = datetime.atZone(ZoneId.of("UTC"));
+        return zonedDateTime.withZoneSameLocal(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
-
-
 
 }
