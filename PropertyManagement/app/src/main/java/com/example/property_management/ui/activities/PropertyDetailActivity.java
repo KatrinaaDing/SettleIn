@@ -751,8 +751,5 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     // 设置适配器到 RecyclerView
         recyclerView.setAdapter(adapter);
         Log.d("RecyclerViewSetup", "RecyclerView should be set. Room count: " + roomNames.size());
-
     }
-
-
 }

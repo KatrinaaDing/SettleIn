@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import com.example.property_management.R;
@@ -26,8 +27,6 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
 
     private List<String> roomNames;
     private ArrayList<ArrayList<String>> imagesPerRoom;
-    private HashMap<String, RoomData> roomDataMap;
-    private ArrayList<RoomData> roomDataList;
     private ArrayList<Float> brightnessList;
     private ArrayList<Float> noiseList;
     private ArrayList<String> windowOrientationList;
@@ -44,12 +43,6 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
         this.noiseList = noiseList;
         this.windowOrientationList = windowOrientationList;
     }
-    /**
-    public PropertyConditionAdapter(List<String> roomNames, ArrayList<ArrayList<Integer>> imagesPerRoom) {
-        this.roomNames = roomNames;
-        this.imagesPerRoom = imagesPerRoom;
-    }
-     */
 
     @NonNull
     @Override
@@ -60,26 +53,60 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.roomName.setText(roomNames.get(position));
+        String currentRoomName = roomNames.get(position);
+        holder.roomName.setText(currentRoomName);
         holder.noiseValue.setText(String.format(Locale.getDefault(), "%.0fdb", noiseList.get(position)));
 
         holder.lightValue.setText(String.format(Locale.getDefault(), "%.0f Lux", brightnessList.get(position)));
         holder.windowValue.setText(windowOrientationList.get(position));
+        if ("Others".equals(currentRoomName)) {
+            holder.noiseValue.setVisibility(View.GONE);
+            holder.lightValue.setVisibility(View.GONE);
+            holder.windowValue.setVisibility(View.GONE);
+            holder.noiseLevelButton.setVisibility(View.GONE);
+
+            holder.infoButton.setVisibility(View.GONE);
+
+            holder.noiseIcon.setVisibility(View.GONE);
+            holder.lightIcon.setVisibility(View.GONE);
+            holder.compassIcon.setVisibility(View.GONE);
+
+            holder.noiseView.setVisibility(View.GONE);
+            holder.lightView.setVisibility(View.GONE);
+            holder.compassView.setVisibility(View.GONE);
+        } else {
+
+            holder.noiseValue.setVisibility(View.VISIBLE);
+            holder.lightValue.setVisibility(View.VISIBLE);
+            holder.windowValue.setVisibility(View.VISIBLE);
+            holder.noiseLevelButton.setVisibility(View.VISIBLE);
+            holder.infoButton.setVisibility(View.VISIBLE);
+
+            holder.noiseIcon.setVisibility(View.VISIBLE);
+            holder.lightIcon.setVisibility(View.VISIBLE);
+            holder.compassIcon.setVisibility(View.VISIBLE);
+
+            holder.noiseView.setVisibility(View.VISIBLE);
+            holder.lightView.setVisibility(View.VISIBLE);
+            holder.compassView.setVisibility(View.VISIBLE);
+
+            // 设置噪音等级按钮的颜色和文本
+            float noiseValue = noiseList.get(position);
+            if (noiseValue >= 55) {
+                holder.noiseLevelButton.setBackgroundColor(Color.RED);
+                holder.noiseLevelButton.setText("High Risk");
+            } else if (noiseValue >= 40) {
+                holder.noiseLevelButton.setBackgroundColor(Color.parseColor("#FFA500"));
+                holder.noiseLevelButton.setText("Risk");
+            } else {
+                holder.noiseLevelButton.setBackgroundColor(Color.GREEN);
+                holder.noiseLevelButton.setText("Normal");
+            }
+        }
 
         CarouselAdapter carouselAdapter = new CarouselAdapter(holder.itemView.getContext(), imagesPerRoom.get(position));
         holder.imageCarousel.setAdapter(carouselAdapter);
 
-        float noiseValue = noiseList.get(position);
-        if (noiseValue >= 55) {
-            holder.noiseLevelButton.setBackgroundColor(Color.RED);
-            holder.noiseLevelButton.setText("High Risk");
-        } else if (noiseValue >= 40) {
-            holder.noiseLevelButton.setBackgroundColor(Color.parseColor("#FFA500"));
-            holder.noiseLevelButton.setText("Risk");
-        } else {
-            holder.noiseLevelButton.setBackgroundColor(Color.GREEN);
-            holder.noiseLevelButton.setText("Normal");
-        }
     }
 
     private void showInformationDialog(Context context) {
@@ -113,6 +140,8 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView roomName, noiseValue, lightValue, windowValue;
+        ImageView noiseIcon, lightIcon, compassIcon;
+        TextView noiseView, lightView, compassView;
         RecyclerView imageCarousel;
         Button noiseLevelButton;
         ImageButton infoButton;
@@ -127,6 +156,14 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
             windowValue = itemView.findViewById(R.id.windowValue1);
             imageCarousel = itemView.findViewById(R.id.image_carousel);
             noiseLevelButton = itemView.findViewById(R.id.noiseLevelButton);
+
+            noiseIcon = itemView.findViewById(R.id.ic_noise);
+            lightIcon = itemView.findViewById(R.id.ic_light);
+            compassIcon = itemView.findViewById(R.id.ic_window);
+
+            noiseView = itemView.findViewById(R.id.noiseView);
+            lightView = itemView.findViewById(R.id.lightView);
+            compassView = itemView.findViewById(R.id.windowView);
 
             infoButton = itemView.findViewById(R.id.infoButton);
             infoButton.setOnClickListener(new View.OnClickListener() {

@@ -820,7 +820,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             holder.imageView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    showSaveImageDialog(images.get(position), roomPosition);
+                    //showSaveImageDialog(images.get(position), roomPosition);
                     return true;
                 }
             });
