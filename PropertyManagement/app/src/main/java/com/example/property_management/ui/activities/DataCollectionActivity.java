@@ -251,7 +251,7 @@ public class DataCollectionActivity extends AppCompatActivity {
             }
 
             updateInspectedData(roomData);
-            //collectRoomPhotos();
+            collectRoomPhotos();
             Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content), "Upload data successfully!", Snackbar.LENGTH_INDEFINITE);
             snackbar.setDuration(5000);
             snackbar.show();

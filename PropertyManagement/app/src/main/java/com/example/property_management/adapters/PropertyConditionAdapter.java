@@ -1,7 +1,10 @@
 package com.example.property_management.adapters;
 
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +16,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import com.example.property_management.R;
 import com.example.property_management.data.RoomData;
+import com.example.property_management.adapters.CarouselAdapter;
+import com.example.property_management.ui.activities.ImageViewActivity;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -90,7 +96,7 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
             holder.lightView.setVisibility(View.VISIBLE);
             holder.compassView.setVisibility(View.VISIBLE);
 
-            // 设置噪音等级按钮的颜色和文本
+            // set texts and colour for different noise level
             float noiseValue = noiseList.get(position);
             if (noiseValue >= 55) {
                 holder.noiseLevelButton.setBackgroundColor(Color.RED);
@@ -104,9 +110,43 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
             }
         }
 
+        // Initialize CarouselAdapter
         CarouselAdapter carouselAdapter = new CarouselAdapter(holder.itemView.getContext(), imagesPerRoom.get(position));
-        holder.imageCarousel.setAdapter(carouselAdapter);
 
+        // if no image, hide carousel
+        if (imagesPerRoom.get(position).isEmpty()) {
+            holder.imageCarousel.setVisibility(View.GONE);
+        } else {
+            holder.imageCarousel.setVisibility(View.VISIBLE);
+
+            // on click open image
+            carouselAdapter.setOnItemClickListener(new CarouselAdapter.OnItemClickListener() {
+                @Override
+                public void onClick(ImageView imageView, String imageUrl) {
+                    // show image
+                    Intent intent = new Intent(holder.itemView.getContext(), ImageViewActivity.class);
+                    intent.putExtra("image", imageUrl);
+                    ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(
+                            (Activity) holder.itemView.getContext(),
+                            imageView,
+                            "image"
+                    );
+                    holder.itemView.getContext().startActivity(intent, options.toBundle());
+                }
+            });
+
+            // if only one image, set linear layout to center the image
+            if (carouselAdapter.getItemCount() == 1) {
+                LinearLayoutManager linearLayoutManager = new LinearLayoutManager(holder.itemView.getContext(),
+                        LinearLayoutManager.HORIZONTAL, false);
+                holder.imageCarousel.setLayoutManager(linearLayoutManager);
+
+                linearLayoutManager.setStackFromEnd(true);
+            }
+
+            // set adapter
+            holder.imageCarousel.setAdapter(carouselAdapter);
+        }
     }
 
     private void showInformationDialog(Context context) {

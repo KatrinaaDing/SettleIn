@@ -691,38 +691,38 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         //log 查看获取到的数据
         //根据房间名字获取指定数据  inspectedData.get("roomname1").get
         //inspectedData 数据结构
-        //                                                                                                 {  Roomname1: {brightness: 11.0   -> Float
-        //                                                                                                               noise: 11.0         -> Float
-        //                                                                                                               windowOrientation: 11  -> String
-        //                                                                                                                images: [0 added] -> List of String }
-        //                                                                                                   Roomname2: {brightness: 11.0   -> Float
-            //                                                                                                           noise: 11.0         -> Float
-            //                                                                                                           windowOrientation: 11  -> String
-            //                                                                                                           images: [0 added] -> List of String }
-        //                                                                                                   Roomname3: {brightness: 11.0   -> Float
-                //                                                                                                        noise: 11.0         -> Float
-                //                                                                                                        windowOrientation: 11  -> String
-                //                                                                                                        images: [0 added] -> List of String }
-        //                                                                                                }
+        // {  Roomname1: {brightness: 11.0   -> Float
+        // noise: 11.0         -> Float
+        // windowOrientation: 11  -> String
+        // images: [0 added] -> List of String }
+        // Roomname2: {brightness: 11.0   -> Float
+        //  noise: 11.0         -> Float
+        //  windowOrientation: 11  -> String
+        //  images: [0 added] -> List of String }
+        // Roomname3: {brightness: 11.0   -> Float
+        // noise: 11.0         -> Float
+        //  windowOrientation: 11  -> String
+        //   images: [0 added] -> List of String }
+        //   }
         for (String roomname: inspectedData.keySet()){
             Log.d("inspectedData in propertydetail",this.userProperty.getInspectedData().get(roomname).toString());
         }
 
         //房间数量
-        int roomNum = inspectedData.keySet().size();
+        //int roomNum = inspectedData.keySet().size();
         //note
         String notes = userProperty.getNotes();
 
-        // 假设这是 TextView ID
+        // note
         TextView savedNotesTextView = findViewById(R.id.saved_notes);
 
-        // 设置 TextView 文本为模拟数据
+        // set note
         savedNotesTextView.setText(notes);
         //HashMap<String, RoomData> roomData = collectRoomData();
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // 准备适配器使用的数据
+        // room data
         List<String> roomNames = new ArrayList<>(inspectedData.keySet());
         ArrayList<ArrayList<String>> imagesPerRoom = new ArrayList<>();
         ArrayList<Float> brightnessList = new ArrayList<>();
@@ -739,7 +739,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             }
         }
 
-        // 创建适配器
+        // set adapter
         PropertyConditionAdapter adapter = new PropertyConditionAdapter(
                 roomNames,
                 imagesPerRoom,
