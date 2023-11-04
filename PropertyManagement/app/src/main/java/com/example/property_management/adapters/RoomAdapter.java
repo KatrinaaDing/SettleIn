@@ -175,14 +175,17 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                 holder.noiseValueTextView.setText("11");
                 holder.compassValueTextView.setText("11");
                 return;
+            }else{
+                holder.roomName.setText(currentRoomName);
             }
 
+
             // Bind room name
-            if (position == 0) {
-                holder.roomName.setText("Lounge Room");
-            } else {
-                holder.roomName.setText("Room " + position);
-            }
+            //if (position == 0) {
+            //    holder.roomName.setText("Lounge Room");
+            //} else {
+            //    holder.roomName.setText("Room " + position);
+            //}
 
             //测试
                 holder.lightValueTextView.setText(roomData.get(currentRoomName).getBrightness() + " X");

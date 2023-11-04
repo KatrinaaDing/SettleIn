@@ -130,6 +130,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             newIntent.putExtra("notes", this.userProperty.getNotes());
             newIntent.putExtra("roomNames", this.userProperty.getRoomNames());
 
+            //Log.d("roomNames sent by detail page",this.userProperty.getRoomNames().toString());
             //Log.d("property id sent by detail page", this.propertyId);
             //Log.d("inspectedData sent by detail page", this.userProperty.getInspectedData().toString());
             //Log.d("roomNum sent by detail page", String.valueOf(this.property.getNumBedrooms() + this.property.getNumBathrooms()));

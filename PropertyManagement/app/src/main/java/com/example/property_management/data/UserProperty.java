@@ -34,6 +34,7 @@ public class UserProperty {
         this.distances = distances;
         this.inspectedData = inspectedData;
         this.createdAt = createdAt;
+        this.roomNames = roomNames;
     }
 
     public String getPropertyId() { return propertyId; }
