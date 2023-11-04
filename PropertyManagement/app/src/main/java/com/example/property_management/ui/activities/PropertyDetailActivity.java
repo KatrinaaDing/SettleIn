@@ -69,6 +69,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     private String propertyId;
     private Property property;
     private UserProperty userProperty;
+    private boolean shouldRefresh = false;
     DistanceAdapter distanceAdapter;
     RecyclerView distanceRecycler;
     // inspection date and time
@@ -83,6 +84,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("onCreate run ","resume run ");
         super.onCreate(savedInstanceState);
         binding = ActivityPropertyDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -124,7 +126,29 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
 
     }
 
-
+    /**
+     *
+     *     public void onPause() {
+     *         super.onPause();
+     *         shouldRefresh = true;
+     *     }
+     *
+     *     // Set the flag to true when navigating away
+     *
+     *     @Override
+     *     protected void onResume () {
+     *         super.onResume();
+     *         if (shouldRefresh == true) {
+     *             getPropertyById(this.propertyId);
+     *             shouldRefresh = false;
+     *         }
+     *         Log.d("resume run ","resume run ");
+     *     }
+     *
+     *
+     *
+     *
+     */
 
 
 
