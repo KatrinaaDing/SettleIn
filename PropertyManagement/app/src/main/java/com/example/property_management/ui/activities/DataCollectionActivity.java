@@ -129,8 +129,10 @@ public class DataCollectionActivity extends AppCompatActivity {
         }
     }
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("onCreate in collection run","onCreate in collection run\"");
         super.onCreate(savedInstanceState);
         binding = ActivityDataCollectionBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -146,6 +148,7 @@ public class DataCollectionActivity extends AppCompatActivity {
         Intent intent = getIntent();
         propertyId = intent.getStringExtra("propertyId");
         room_num = intent.getIntExtra("roomNum", 0);
+        //room_num = 5;
         notes = intent.getStringExtra("notes") != null ? intent.getStringExtra("notes") : "";
         initialInspectedData = (HashMap<String, RoomData>) intent.getSerializableExtra("inspectedData");
         //处理property第一次收集数据时，firebase相关字段为空的问题。此时根据房间数量设置房间名字，再设置初始值。

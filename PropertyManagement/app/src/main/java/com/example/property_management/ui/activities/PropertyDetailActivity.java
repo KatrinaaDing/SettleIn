@@ -124,6 +124,12 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
 
     }
 
+
+
+
+
+
+
     /**
      * Initialize map fragment
      */
