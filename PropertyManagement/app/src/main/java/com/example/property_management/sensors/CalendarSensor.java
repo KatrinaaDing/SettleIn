@@ -17,12 +17,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-public class Calendar {
+public class CalendarSensor {
     private Activity activity;
     private SensorCallback callback;
     private static final int MY_CALENDAR_REQUEST_CODE = 1;
 
-    public Calendar(Activity activity, SensorCallback callback) {
+    public CalendarSensor(Activity activity, SensorCallback callback) {
         this.activity = activity;
         this.callback = callback;
     }
@@ -41,6 +41,7 @@ public class Calendar {
                             String description, String address) throws Exception {
         LocalDate localDate = DateTimeFormatter.stringToDate(date);
         LocalTime localTime = DateTimeFormatter.stringToTime(time);
+
         boolean allDay = false;
         if (localDate == null) {
             throw new Exception("Invalid date format");
@@ -74,6 +75,5 @@ public class Calendar {
                 Manifest.permission.WRITE_CALENDAR) == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(context,
                         Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED;
-
     }
 }

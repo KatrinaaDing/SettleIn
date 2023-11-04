@@ -165,19 +165,7 @@
                 android:singleLine="true"
                 app:simpleItems="@array/properties_filter_options" />
         </com.google.android.material.textfield.TextInputLayout>
-
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-
-        <!-- Scrollable content -->
-            <!--            <Button-->
-            <!--                android:id="@+id/testBtn"-->
-            <!--                android:layout_width="match_parent"-->
-            <!--                android:layout_height="wrap_content"-->
-            <!--                android:text="Go to Test Screen"-->
-            <!--                style="@style/Widget.Material3.Button.ElevatedButton"-->
-            <!--                android:layout_marginVertical="20dp"/>-->
 
     <!-- properties list view -->
     <androidx.recyclerview.widget.RecyclerView
