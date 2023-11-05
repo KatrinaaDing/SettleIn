@@ -63,12 +63,19 @@
             android:paddingVertical="10dp"
             android:text="--" />
 
-        <Button
-            android:id="@+id/noiseLevelButton"
+        <TextView
+            android:id="@+id/noiseLevelText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Normal"
-        android:layout_marginLeft="10dp"/>
+            android:layout_marginLeft="10dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:gravity="center"
+            android:background="@drawable/noise_level_background" />
+
 
 
     </LinearLayout>

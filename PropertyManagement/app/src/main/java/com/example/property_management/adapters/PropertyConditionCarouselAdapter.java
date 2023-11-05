@@ -19,7 +19,6 @@ public class PropertyConditionCarouselAdapter extends RecyclerView.Adapter<Prope
     Context context;
     private ArrayList<String> imageUrls;
     private OnItemClickListener onItemClickListener;
-    private boolean isPlaceholder;
 
     public PropertyConditionCarouselAdapter(Context context, ArrayList<String> imageUrls) {
         this.context = context;
@@ -55,7 +54,7 @@ public class PropertyConditionCarouselAdapter extends RecyclerView.Adapter<Prope
 
         holder.imageView.setOnClickListener(view -> {
             if (onItemClickListener != null) {
-                // 如果是占位符，传递占位符资源ID，否则传递原始URL
+                // If it is a placeholder, use the placeholder resource ID, otherwise use the original URL
                 if (isPlaceholder) {
                     onItemClickListener.onClick(holder.imageView, "android.resource://" + context.getPackageName() + "/" + R.drawable.property_image_placeholder);
                 } else {

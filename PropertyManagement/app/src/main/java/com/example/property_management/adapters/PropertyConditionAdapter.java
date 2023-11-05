@@ -69,7 +69,7 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
             holder.noiseValue.setVisibility(View.GONE);
             holder.lightValue.setVisibility(View.GONE);
             holder.windowValue.setVisibility(View.GONE);
-            holder.noiseLevelButton.setVisibility(View.GONE);
+            holder.noiseLevelText.setVisibility(View.GONE);
 
             holder.infoButton.setVisibility(View.GONE);
 
@@ -85,7 +85,7 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
             holder.noiseValue.setVisibility(View.VISIBLE);
             holder.lightValue.setVisibility(View.VISIBLE);
             holder.windowValue.setVisibility(View.VISIBLE);
-            holder.noiseLevelButton.setVisibility(View.VISIBLE);
+            holder.noiseLevelText.setVisibility(View.VISIBLE);
             holder.infoButton.setVisibility(View.VISIBLE);
 
             holder.noiseIcon.setVisibility(View.VISIBLE);
@@ -99,14 +99,14 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
             // set texts and colour for different noise level
             float noiseValue = noiseList.get(position);
             if (noiseValue >= 55) {
-                holder.noiseLevelButton.setBackgroundColor(Color.RED);
-                holder.noiseLevelButton.setText("High Risk");
+                holder.noiseLevelText.setBackgroundColor(Color.RED);
+                holder.noiseLevelText.setText("High Risk");
             } else if (noiseValue >= 40) {
-                holder.noiseLevelButton.setBackgroundColor(Color.parseColor("#FFA500"));
-                holder.noiseLevelButton.setText("Risk");
+                holder.noiseLevelText.setBackgroundColor(Color.parseColor("#FFA500")); // 橙色
+                holder.noiseLevelText.setText("Risk");
             } else {
-                holder.noiseLevelButton.setBackgroundColor(Color.parseColor("#3CB371"));
-                holder.noiseLevelButton.setText("Normal");
+                holder.noiseLevelText.setBackgroundColor(Color.parseColor("#3CB371")); // 浅绿色
+                holder.noiseLevelText.setText("Normal");
             }
         }
 
@@ -185,7 +185,7 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
         ImageView noiseIcon, lightIcon, compassIcon;
         TextView noiseView, lightView, compassView;
         RecyclerView imageCarousel;
-        Button noiseLevelButton;
+        TextView noiseLevelText;
         ImageButton infoButton;
         Context context;
 
@@ -197,7 +197,7 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
             lightValue = itemView.findViewById(R.id.lightValue1);
             windowValue = itemView.findViewById(R.id.windowValue1);
             imageCarousel = itemView.findViewById(R.id.image_carousel);
-            noiseLevelButton = itemView.findViewById(R.id.noiseLevelButton);
+            noiseLevelText = itemView.findViewById(R.id.noiseLevelText);
 
             noiseIcon = itemView.findViewById(R.id.ic_noise);
             lightIcon = itemView.findViewById(R.id.ic_light);
