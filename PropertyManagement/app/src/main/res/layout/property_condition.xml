@@ -65,7 +65,7 @@
             android:id="@+id/noiseLevelText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Normal"
+            android:text=" "
             android:layout_weight="0.3"
             android:paddingStart="1dp"
             android:paddingEnd="2dp"
