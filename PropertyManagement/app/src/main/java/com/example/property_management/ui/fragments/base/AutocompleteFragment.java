@@ -18,6 +18,8 @@ import com.example.property_management.R;
 import com.example.property_management.databinding.FragmentAutocompleteBinding;
 import com.example.property_management.ui.activities.AddPropertyActivity;
 import com.example.property_management.ui.activities.MainActivity;
+import com.example.property_management.ui.fragments.profile.AddNewFacilityDialogFragment;
+import com.example.property_management.ui.fragments.profile.ProfileFragment;
 import com.google.android.gms.common.api.Status;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
@@ -32,6 +34,7 @@ public class AutocompleteFragment extends Fragment {
     CustomPlaceAutoCompleteFragment autocompleteFragment;
     private PlacesClient placesClient;
     String selectedAddress = "";
+    String selectedName = "";
 
     double lng = Double.NaN;
 
@@ -63,17 +66,24 @@ public class AutocompleteFragment extends Fragment {
                 getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
             // Specify the types of place data to return.
-            autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.LAT_LNG,Place.Field.NAME, Place.Field.ADDRESS));
+            autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.LAT_LNG,Place.Field.NAME, Place.Field.ADDRESS, Place.Field.NAME));
 
             // Set up a PlaceSelectionListener to handle the response.
             autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
                 @Override
                 public void onPlaceSelected(@NonNull Place place) {
+                    // get profile fragment
+                    ProfileFragment profileFragment = (ProfileFragment) AutocompleteFragment.this.getParentFragment();
+
                     System.out.println("name: " + place.getName() + ", Address: " + place.getAddress());
                     autocompleteFragment.setPlace(place);
                     selectedAddress = place.getAddress();
+                    selectedName = place.getName();
                     lat = place.getLatLng().latitude;
                     lng = place.getLatLng().longitude;
+
+                    // set location name to the dialog UI
+                    profileFragment.setLocationNameTxt(place.getName());
 
                     // Access the parent activity
                     Activity parentActivity = getActivity();
@@ -92,6 +102,7 @@ public class AutocompleteFragment extends Fragment {
                 @Override
                 public void onError(@NonNull Status status) {
                     selectedAddress = "";
+                    selectedName = "";
                     Log.i(TAG, "An error occurred: " + status);
                 }
 
@@ -128,6 +139,10 @@ public class AutocompleteFragment extends Fragment {
 
     public String getSelectedAddress() {
         return selectedAddress;
+    }
+
+    public String getSelectedName() {
+        return selectedName;
     }
 
     public void setAddressText(String placeNameText) {

@@ -92,6 +92,7 @@ public class FirebaseUserRepository {
                                 document.getId(),
                                 document.get("interestedFacilities") == null ? new ArrayList<>() : (ArrayList<String>) document.get("interestedFacilities"),
                                 document.get("interestedLocations") == null ? new ArrayList<>() : (ArrayList<String>) document.get("interestedLocations"),
+                                document.get("locationNames") == null ? new ArrayList<>() : (ArrayList<String>) document.get("locationNames"),
                                 document.get("properties") == null ? new HashMap<>() : (HashMap<String, UserProperty>) document.get("properties")
                         );
                         callback.onSuccess(user);
@@ -321,7 +322,7 @@ public class FirebaseUserRepository {
 
     }
 
-    public void deleteInterestedFacilityLocation(ArrayList<String> propertyIds, Boolean isFacility, ArrayList<String> interestedList,String interest_, DeleteInterestedFacilityCallback callback) {
+    public void deleteInterestedFacilityLocation(ArrayList<String> propertyIds, Boolean isFacility, ArrayList<String> interestedList, ArrayList<String> locationNamesList, String interest_, DeleteInterestedFacilityCallback callback) {
         // retrieve current user id
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         String userId = mAuth.getCurrentUser().getUid();
@@ -337,6 +338,7 @@ public class FirebaseUserRepository {
         } else {
             // update the interestedLocations field in firebase
             payload.put("interestedLocations", interestedList);
+            payload.put("locationNames", locationNamesList);
         }
         userRef.update(payload);
 

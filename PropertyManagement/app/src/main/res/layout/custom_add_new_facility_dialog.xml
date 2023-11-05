@@ -20,13 +20,21 @@
         android:layout_weight="1"
         android:text="Add a facility that you want to know how far from a property. E.g. Coles, KFC, Restaurants..." />
 
-    <EditText
-        android:id="@+id/facilityEditText"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/facilityEditTextLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:ems="10"
-        android:inputType="text" />
+        android:hint="Enter your interested facility"
+        android:paddingVertical="10dp">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/facilityEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:ems="10"
+            android:inputType="text"
+            />
+    </com.google.android.material.textfield.TextInputLayout>
 
 
 </LinearLayout>
