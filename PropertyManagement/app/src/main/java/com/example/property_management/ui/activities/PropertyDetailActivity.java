@@ -20,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -71,7 +72,10 @@ import java.util.List;
 import java.util.Map;
 
 public class PropertyDetailActivity extends AppCompatActivity implements OnMapReadyCallback {
-    private static final int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
+    private static final int MY_PERMISSIONS_REQUEST_CAMERA_AND_STORAGE = 2;
+    private boolean hasCameraPermission = false;
+    private boolean hasWriteExternalStoragePermission = false;
+
     private ActivityPropertyDetailBinding binding;
     // add calendar event flag
     private boolean firstTimeAddingCalendarEvent = false;
@@ -96,6 +100,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     private PropertyConditionAdapter adapter;
     List<List<Integer>> imagesPerRoom = new ArrayList<>();
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,7 +109,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         setTitle("Property Detail");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        requestStoragePermission();
+
 
         // get userId
         FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(this);
@@ -120,6 +125,10 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
 
         // fetch property data from firebase
         getPropertyById(this.propertyId);
+
+        requestStoragePermission();
+
+
 
         // ================================== Components =======================================
         initInfoButton();
@@ -670,6 +679,25 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                             "error");
                 }
             }
+        }else if (MY_PERMISSIONS_REQUEST_CAMERA_AND_STORAGE == requestCode){
+            // 如果请求被取消，结果数组为空
+            if (grantResults.length > 0) {
+                // 循环检查每个请求的结果
+                for (int i = 0; i < permissions.length; i++) {
+                    switch (permissions[i]) {
+                        case Manifest.permission.CAMERA:
+                            hasCameraPermission = grantResults[i] == PackageManager.PERMISSION_GRANTED;
+                            break;
+                        case Manifest.permission.WRITE_EXTERNAL_STORAGE:
+                            hasWriteExternalStoragePermission = grantResults[i] == PackageManager.PERMISSION_GRANTED;
+                            break;
+                    }
+                }
+                // 如果所有请求的权限都被授予，则可以进行相关操作
+                if (hasCameraPermission && hasWriteExternalStoragePermission) {
+                    setInspectedData(userProperty);
+                }
+            }
         }
     }
 
@@ -772,9 +800,24 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     }
 
     private void requestStoragePermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[] {
+                            Manifest.permission.CAMERA,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    },
+                    MY_PERMISSIONS_REQUEST_CAMERA_AND_STORAGE);
+        } else {
+            hasCameraPermission = true;
+            hasWriteExternalStoragePermission = true;
         }
     }
+
+
+
+
+
 
 }
