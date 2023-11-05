@@ -102,7 +102,7 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
             // set texts and colour for different noise level
             float noiseValue = noiseList.get(position);
             if (noiseValue == -1) {
-                holder.noiseLevelText.setVisibility(View.VISIBLE);
+                holder.noiseLevelText.setVisibility(View.GONE);
             } else if (noiseValue >= 55) {
                 holder.noiseLevelText.setBackgroundColor(Color.RED);
                 holder.noiseLevelText.setText("High Risk");
