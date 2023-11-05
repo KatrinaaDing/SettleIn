@@ -13,42 +13,39 @@ public class AudioSensor {
     private final int channelConfig = AudioFormat.CHANNEL_IN_MONO;
     private final int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
     private final int bufferSizeInBytes;
-    private final int bufferSizeInShorts;
     private final AudioRecord audioRecord;
     private SensorCallback callback;
     private boolean isRecording = false;
+    private final double offset = 80.0; // 设置偏移量为70
 
     @SuppressLint("MissingPermission")
     public AudioSensor(SensorCallback callback) {
         this.callback = callback;
         this.bufferSizeInBytes = AudioRecord.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat);
-        this.bufferSizeInShorts = bufferSizeInBytes / 2;
-
         this.audioRecord = new AudioRecord(audioSource, sampleRateInHz, channelConfig, audioFormat, bufferSizeInBytes);
     }
 
     public void startTest() {
-        Log.d("AudioSensor state", String.valueOf(audioRecord.getState()));
         Log.d("AudioSensor", "startTest() called");
         isRecording = true;
         new Thread(new Runnable() {
             @Override
             public void run() {
                 audioRecord.startRecording();
-                byte[] audioBuffer = new byte[bufferSizeInShorts];
+                short[] audioBuffer = new short[bufferSizeInBytes / 2];
                 double sumDb = 0;
                 int count = 0;
                 while (isRecording && count < 30) {
-                    int result = audioRecord.read(audioBuffer, 0, bufferSizeInShorts);
+                    int result = audioRecord.read(audioBuffer, 0, audioBuffer.length);
                     if (result > 0) {
                         double sum = 0;
                         for (int i = 0; i < result; i++) {
                             sum += audioBuffer[i] * audioBuffer[i];
                         }
                         if (sum > 0) {
-                            double amplitude = sum / result;
-                            Log.d("amplitude", String.valueOf(amplitude));
-                            double db = 10 * Math.log10(amplitude);
+                            double rms = Math.sqrt(sum / result);
+                            double db = 20 * Math.log10(rms / 32768.0); // 32768.0 is the maximum value for a signed 16-bit number
+                            db += offset; // 添加偏移量
                             sumDb += db;
                             count++;
                             callback.onCurrentDbCalculated(db);
@@ -58,7 +55,8 @@ public class AudioSensor {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        Thread.currentThread().interrupt();
+                        Log.e("AudioSensor", "Recording thread interrupted", e);
                     }
                 }
                 double averageDb = sumDb / count;
@@ -73,6 +71,7 @@ public class AudioSensor {
     public void stopTest() {
         isRecording = false;
         audioRecord.stop();
+        audioRecord.release(); // Make sure to release the audioRecord's resources
     }
 
     public void setCallback(SensorCallback callback) {
