@@ -31,6 +31,7 @@ import com.example.property_management.sensors.LightSensor;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 
 import android.view.Window;
 import android.view.WindowManager;
@@ -58,12 +59,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import android.app.AlertDialog;
 import android.widget.Toast;
@@ -88,6 +93,11 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     private boolean isFirstBind = true;
     private HashMap<String, RoomData> roomData = new HashMap<>();
 
+    private ConcurrentLinkedHashMap<String, RoomData> inspectedRoomData =
+            new ConcurrentLinkedHashMap.Builder<String, RoomData>()
+                    .maximumWeightedCapacity(100) // 设置最大权重容量
+                    .build();
+
     public RoomAdapter(Context context, List<String> roomNames, HashMap<String, RoomData> roomData) {
         this.context = context;
         this.roomNames = roomNames;
@@ -95,6 +105,13 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         for (String names:roomNames){
             this.roomNamesOrigin.add(names);
         }
+
+        for (String names:roomNames){
+            inspectedRoomData.put(names,roomData.get(names));
+            Log.d("XX roomNames name set roomAdapter", names);
+            Log.d("XX inspectedRoomData name set roomAdapter", inspectedRoomData.keySet().toString());
+        }
+
 
         for (int i = 0; i < roomNames.size(); i++) {
             roomImages.add(new ArrayList<>());
@@ -283,6 +300,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             public void onAverageDbCalculated(double averageDb) {
                 ((Activity) context).runOnUiThread(() -> {
                     holder.noiseValueTextView.setText(String.format("%.2f dB", averageDb));
+                    inspectedRoomData.get(position).setNoise((float)averageDb);
                     Log.d("onAverageDbCalculated", "onAverageDbCalculated called");
                 });
             }
@@ -302,6 +320,9 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     holder.lightTestButton.setText("Test");
                     holder.lightTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
                     holder.isLightTesting = false;
+                    String value = holder.lightValueTextView.getText().toString();
+                    float numValue = Float.valueOf(extractNumber(value));
+                    inspectedRoomData.get(position).setBrightness(numValue);
                 });
             }
 
@@ -311,6 +332,8 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     holder.compassTestButton.setText("Test");
                     holder.compassTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
                     holder.isCompassTesting = false;
+                    String value = holder.compassValueTextView.getText().toString();
+                    inspectedRoomData.get(position).setWindowOrientation(value);
                 });
             }
         };
@@ -784,6 +807,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                         int currentPosition = holder.getAdapterPosition();
                         if (currentPosition != RecyclerView.NO_POSITION) {
                             String newName = roomNameEditText.getText().toString();
+                            alterRoomName(inspectedRoomData,roomNames.get(currentPosition),newName);
                             roomNames.set(currentPosition, newName);
                             notifyItemChanged(currentPosition, "UPDATE_ROOM_NAME");
                         }
@@ -796,6 +820,45 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                 });
         builder.show();
     }
+    public static void alterRoomName(ConcurrentLinkedHashMap<String, RoomData> originRoomData, String oldRoomName, String newRoomName) {
+        // Check if the original map contains the old key
+        if (!originRoomData.containsKey(oldRoomName)) {
+            System.out.println("The old room name does not exist in the data.");
+            return;
+        }
+
+        // Get the value associated with the old key
+        RoomData value = originRoomData.get(oldRoomName);
+
+        // Create a new LinkedHashMapRoomData
+        LinkedHashMap<String, RoomData> newRoomData = new LinkedHashMap<>();
+
+        for (Map.Entry<String, RoomData> entry : originRoomData.entrySet()) {
+            if (entry.getKey().equals(oldRoomName)) {
+                // Replace old key with the new key
+                newRoomData.put(newRoomName, value);
+            } else {
+                // Copy other entries as they are
+                newRoomData.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        // Clear the original map and put all new entries to keep the insertion order
+        originRoomData.clear();
+        originRoomData.putAll(newRoomData);
+    }
+
+    private String extractNumber(String input) {
+        Pattern pattern = Pattern.compile("[+-]?([0-9]*[.])?[0-9]+");
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            return matcher.group(0);  // 返回找到的第一个数字
+        } else {
+            return "-1";  // 如果没有找到数字，返回0
+        }
+    }
+
+    public ConcurrentLinkedHashMap<String, RoomData> getInspectedRoomData () {return inspectedRoomData;};
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         //test
@@ -923,5 +986,10 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                 deleteButton = view.findViewById(R.id.delete_button);
             }
         }
+
+
+
+
+
     }
 }

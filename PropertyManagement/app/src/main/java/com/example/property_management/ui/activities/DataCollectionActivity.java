@@ -79,6 +79,7 @@ import java.util.regex.Pattern;
 import androidx.annotation.Nullable;
 import com.example.property_management.R;
 import com.google.android.material.snackbar.Snackbar;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 
 import android.app.AlertDialog;
 
@@ -106,6 +107,10 @@ public class DataCollectionActivity extends AppCompatActivity {
     private Map<Integer, List<String>> roomImagePathsMap = new LinkedHashMap<>();
     private int room_num;
     private String notes;
+    private ConcurrentLinkedHashMap<String, RoomData> inspectedRoomData =
+            new ConcurrentLinkedHashMap.Builder<String, RoomData>()
+                    .maximumWeightedCapacity(100) // 设置最大权重容量
+                    .build();
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -288,7 +293,22 @@ public class DataCollectionActivity extends AppCompatActivity {
             for (String roomName1: roomDataMap.keySet()){
                 roomName.add(roomName1);
             }
-            Log.d("roomNames before passed in updateInspectedData", roomName.toString());
+
+
+            //测试测试
+
+            inspectedRoomData = roomAdapter.getInspectedRoomData();
+            Log.d("roomName", roomName.toString());
+            Log.d("roomData name set", roomData.keySet().toString());
+            Log.d("roomData data", roomData.keySet().toString());
+            Log.d("inspectedRoomData name set", inspectedRoomData.keySet().toString());
+            for (String name:inspectedRoomData.keySet()){
+                Log.d("inspectedRoomData data", inspectedRoomData.get(name).toString());
+            }
+
+
+
+
             updateInspectedData(propertyId, roomData, roomName);
 
             //Toast.makeText(this, "Upload data successfully! ", Toast.LENGTH_SHORT).show();
