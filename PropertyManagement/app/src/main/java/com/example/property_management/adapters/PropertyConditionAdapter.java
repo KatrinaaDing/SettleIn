@@ -85,7 +85,7 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
             holder.noiseValue.setVisibility(View.VISIBLE);
             holder.lightValue.setVisibility(View.VISIBLE);
             holder.windowValue.setVisibility(View.VISIBLE);
-            holder.noiseLevelText.setVisibility(View.VISIBLE);
+            //holder.noiseLevelText.setVisibility(View.VISIBLE);
             holder.infoButton.setVisibility(View.VISIBLE);
 
             holder.noiseIcon.setVisibility(View.VISIBLE);
@@ -98,15 +98,20 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
 
             // set texts and colour for different noise level
             float noiseValue = noiseList.get(position);
-            if (noiseValue >= 55) {
+            if (noiseValue == -1) {
+                holder.noiseLevelText.setVisibility(View.VISIBLE);
+            } else if (noiseValue >= 55) {
                 holder.noiseLevelText.setBackgroundColor(Color.RED);
                 holder.noiseLevelText.setText("High Risk");
+                holder.noiseLevelText.setVisibility(View.VISIBLE);
             } else if (noiseValue >= 35 && noiseValue < 55) {
                 holder.noiseLevelText.setBackgroundColor(Color.parseColor("#FFA500")); // 橙色
                 holder.noiseLevelText.setText("Risk");
+                holder.noiseLevelText.setVisibility(View.VISIBLE);
             } else {
                 holder.noiseLevelText.setBackgroundColor(Color.parseColor("#3CB371")); // 浅绿色
                 holder.noiseLevelText.setText("Normal");
+                holder.noiseLevelText.setVisibility(View.VISIBLE);
             }
         }
 
@@ -180,7 +185,7 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
         builder.setTitle("Recommended noise levels for the Home in dB");
 
         String[] noiseLevels = {
-                "Normal dB < 35: Have good sleep at night",
+                "Normal dB 0 ~ 35: Have good sleep at night",
                 "Risk dB 35 ~ 55: Acceptable noise during the day",
                 "High risk dB > 55: Not recommended to live"
         };
@@ -197,7 +202,6 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
         AlertDialog dialog = builder.create();
         dialog.show();
     }
-
 
     @Override
     public int getItemCount() {

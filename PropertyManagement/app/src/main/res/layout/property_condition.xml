@@ -51,7 +51,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
-            android:layout_weight="2.5"
+            android:layout_weight="2"
             android:paddingVertical="10dp"
             android:text="Noise Level" />
 
@@ -59,7 +59,7 @@
             android:id="@+id/noiseValue1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1.5"
+            android:layout_weight="1.7"
             android:paddingVertical="10dp"
             android:text="--" />
 
@@ -68,15 +68,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Normal"
-            android:layout_marginLeft="10dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"
+            android:layout_weight="0.3"
+            android:paddingStart="1dp"
+            android:paddingEnd="1dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
             android:gravity="center"
             android:background="@drawable/noise_level_background" />
-
-
 
     </LinearLayout>
 
@@ -100,7 +98,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
-            android:layout_weight="1.85"
+            android:layout_weight="2"
             android:paddingVertical="10dp"
             android:text="Brightness" />
 
@@ -108,7 +106,7 @@
             android:id="@+id/lightValue1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1.8"
+            android:layout_weight="1.7"
             android:paddingVertical="10dp"
             android:text="--" />
 
@@ -118,6 +116,7 @@
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="10dp"
+            android:layout_weight="0.3"
             android:src="@drawable/ic_info_data_collection" />
 
     </LinearLayout>
@@ -142,7 +141,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
-            android:layout_weight="1.6"
+            android:layout_weight="1.7"
             android:paddingVertical="10dp"
             android:text="Window\nOrientation" />
 
@@ -150,9 +149,14 @@
             android:id="@+id/windowValue1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="2.4"
+            android:layout_weight="1.7"
             android:paddingVertical="10dp"
             android:text="--" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="0.6" />
 
     </LinearLayout>
 
