@@ -68,6 +68,7 @@ import java.util.List;
 import java.util.Map;
 
 public class PropertyDetailActivity extends AppCompatActivity implements OnMapReadyCallback {
+    private static final int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
     private ActivityPropertyDetailBinding binding;
     // add calendar event flag
     private boolean firstTimeAddingCalendarEvent = false;
@@ -744,4 +745,5 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
         }
     }
+
 }
