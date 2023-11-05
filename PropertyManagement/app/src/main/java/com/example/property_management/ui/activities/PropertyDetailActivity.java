@@ -812,12 +812,10 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     }
 
     private void requestStoragePermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
             ActivityCompat.requestPermissions(this,
                     new String[] {
-                            Manifest.permission.CAMERA,
                             Manifest.permission.WRITE_EXTERNAL_STORAGE
                     },
                     MY_PERMISSIONS_REQUEST_CAMERA_AND_STORAGE);

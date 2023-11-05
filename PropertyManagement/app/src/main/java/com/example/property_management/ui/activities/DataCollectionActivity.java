@@ -84,7 +84,8 @@ import android.app.AlertDialog;
 
 
 public class DataCollectionActivity extends AppCompatActivity {
-    private static final int MY_PERMISSIONS_REQUEST_CAMERA = 1;
+    private static final int PERMISSIONS_REQUEST_CAMERA = 1;
+    private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 2;
     // initial room data and property id
     private HashMap<String, RoomData> initialInspectedData;
     private String propertyId;
@@ -126,9 +127,31 @@ public class DataCollectionActivity extends AppCompatActivity {
         }
     }
 
-    private void requestStoragePermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+    private void requestPermissions() {
+        boolean shouldRequestCameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED;
+        boolean shouldRequestRecordAudioPermission = ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED;
+
+        if (shouldRequestCameraPermission && shouldRequestRecordAudioPermission) {
+            // 如果两个权限都没有被授予，一起请求
+            ActivityCompat.requestPermissions(this, new String[] {
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            }, PERMISSIONS_REQUEST_CAMERA);
+        } else if (shouldRequestCameraPermission) {
+            // 只请求摄像头权限
+            ActivityCompat.requestPermissions(this, new String[] {
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            }, PERMISSIONS_REQUEST_CAMERA);
+        } else if (shouldRequestRecordAudioPermission) {
+            // 只请求录音权限
+            ActivityCompat.requestPermissions(this, new String[] {
+                    Manifest.permission.RECORD_AUDIO
+            }, PERMISSIONS_REQUEST_RECORD_AUDIO);
+        } else {
+            // 权限都已经被授予，初始化 RecyclerView
+            initRecyclerView();
         }
     }
 
@@ -139,11 +162,6 @@ public class DataCollectionActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         setTitle("Collect data mode");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-
-
-        requestStoragePermission();
-
 
         // retrieve user's collected data from previous intent
         // if no inspected data, initialInspectedDat will be empty HashMap {}
@@ -189,15 +207,7 @@ public class DataCollectionActivity extends AppCompatActivity {
         Log.i("get-room num", String.valueOf(room_num));
 
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.RECORD_AUDIO},
-                    MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
-        }else {
-            // 如果权限已经被授予，初始化 RecyclerView
-            hasRecordAudioPermission = true;
-            initRecyclerView();
-        }
+        requestPermissions();
 
         // Initialize SharedPreferences
         sharedPreferences = getSharedPreferences("notes", MODE_PRIVATE);
