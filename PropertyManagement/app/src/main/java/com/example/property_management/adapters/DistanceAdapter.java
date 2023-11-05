@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.property_management.R;
 import com.example.property_management.data.DistanceInfo;
@@ -41,19 +42,23 @@ public class DistanceAdapter extends RecyclerView.Adapter<DistanceAdapter.Distan
 
     @Override
     public void onBindViewHolder(@NonNull DistanceViewHolder holder, int position) {
-        String address = distanceInfoList.get(position).getBusinessName();
+        // TODO:
+        String address = distanceInfoList.get(position).getAddress();
+        String name = distanceInfoList.get(position).getName();
 
-        holder.businessName.setText(address);
+
+        holder.name.setText(name);
+        holder.address.setText(address);
         holder.distance.setText(String.valueOf(distanceInfoList.get(position).getDistance()));
         holder.driving.setText(distanceInfoList.get(position).getDriving());
         holder.transit.setText(distanceInfoList.get(position).getTransit());
         holder.walking.setText(distanceInfoList.get(position).getWalking());
 
         // open in google map when click on business name
-        holder.businessName.setOnClickListener(view -> {
+        holder.interestContainer.setOnClickListener(view -> {
             // if address is null or empty, only open the destination location in google map
             // else, open the direction from the property to the interested facility
-            if (address == null || address.isEmpty()) {
+            if (address == null && address.isEmpty()) {
                 Helpers.openInGoogleMap(address, context);
             } else {
                 Helpers.openDirectionInGoogleMap(propertyLocation, address, context);
@@ -67,12 +72,14 @@ public class DistanceAdapter extends RecyclerView.Adapter<DistanceAdapter.Distan
     }
 
     public static final class DistanceViewHolder extends RecyclerView.ViewHolder{
-        TextView businessName, distance, driving, transit, walking;
+        ConstraintLayout interestContainer;
+        TextView name, address, distance, driving, transit, walking;
 
         public DistanceViewHolder(@NonNull View itemView) {
             super(itemView);
-
-            businessName = itemView.findViewById(R.id.detail_business_name);
+            interestContainer = itemView.findViewById(R.id.interest_container);
+            name = itemView.findViewById(R.id.detail_name);
+            address = itemView.findViewById(R.id.detail_address);
             distance = itemView.findViewById(R.id.detail_distance);
             driving = itemView.findViewById(R.id.driveTime);
             transit = itemView.findViewById(R.id.transitTime);

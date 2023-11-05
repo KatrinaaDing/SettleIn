@@ -56,13 +56,17 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
             @Override
             public void onClick(View v) {
                 // remove interested facility/location name from data
-                String facilityToDelete = interests.get(position);
+                String interestToDelete = interests.get(position);
 
                 // remove interested facility/location for all properties in firebase
                 ArrayList<String> propertyIds = getPropertyIds();
                 if (propertyIds != null && propertyIds.size() > 0) {
                     // Create an ArrayList to store the keys
-                    deleteInterest(facilityToDelete, position);
+                    if (isFacility) {
+                        deleteInterestedFacility(interestToDelete, position);
+                    } else {
+                        deleteInterestedLocation(position);
+                    }
                 }
             }
         });
@@ -88,24 +92,23 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
         if (isFacility) {
             return user.getInterestedFacilities();
         } else {
-            return user.getInterestedLocations();
+            return user.getLocationNames();
         }
+    }
+
+    private ArrayList<String> getInterestedLocations() {
+        return user.getInterestedLocations();
     }
 
     private ArrayList<String> getPropertyIds() {
         return new ArrayList<>(user.getProperties().keySet());
     }
 
-//    public void updateData(ArrayList<String> interests) {
-//        this.interests = interests;
-//        notifyDataSetChanged();
-//    }
-
     // delete interested facility/location
-    public void deleteInterest(String interest_, int position) {
+    public void deleteInterestedFacility(String interest_, int position) {
         ArrayList<String> interestsCopy = new ArrayList<>(getInterests());
         interestsCopy.remove(position);
-        userRepository.deleteInterestedFacilityLocation(getPropertyIds(), isFacility, interestsCopy, interest_, new DeleteInterestedFacilityCallback() {
+        userRepository.deleteInterestedFacilityLocation(getPropertyIds(), isFacility, interestsCopy, null, interest_, new DeleteInterestedFacilityCallback() {
             @Override
             public void onSuccess(String msg) {
                 // redirect to main activity on success
@@ -124,23 +127,55 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
         });
     }
 
+    public void deleteInterestedLocation(int position) {
+        String interest_ = getInterestedLocations().get(position);
+        ArrayList<String> interestsCopy = new ArrayList<>(getInterests());
+        interestsCopy.remove(position);
+
+        ArrayList<String> interestAddressesCopy = new ArrayList<>(getInterestedLocations());
+        interestAddressesCopy.remove(position);
+
+        userRepository.deleteInterestedFacilityLocation(getPropertyIds(), isFacility, interestAddressesCopy, interestsCopy, interest_, new DeleteInterestedFacilityCallback() {
+            @Override
+            public void onSuccess(String msg) {
+                // redirect to main activity on success
+                // do more actions
+                getInterests().remove(position);
+                getInterestedLocations().remove(position);
+                notifyItemRemoved(position);
+                notifyItemRangeChanged(position, getInterests().size());
+            }
+
+            @Override
+            public void onError(String msg) {
+                String errorMsg = "Error: " + msg + ". Please try again.";
+                new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), errorMsg, "error");
+                Log.e("add-property-failure", msg);
+            }
+        });
+    }
+
     // add new facility
-    public void addNewInterest(String interestToAdd) {
-        ArrayList<String> newInterests = new ArrayList<>(getInterests());
-        newInterests.add(interestToAdd);
+    public void addNewInterestedLocation(String interestAddress, String interestName) {
+        // get interests names
+        ArrayList<String> newInterestNames = new ArrayList<>(getInterests());
+        // get interests addresses
+        ArrayList<String> newInterestAddresses = new ArrayList<>(getInterestedLocations());
+        newInterestAddresses.add(interestAddress);
+        newInterestNames.add(interestName);
         HashMap<String, Object> updateDatePayload = new HashMap<>();
-        if (isFacility) {
-            updateDatePayload.put("interestedFacilities", newInterests);
-        } else {
-            updateDatePayload.put("interestedLocations", newInterests);
-        }
+
+        updateDatePayload.put("interestedLocations", newInterestAddresses);
+        updateDatePayload.put("locationNames", newInterestNames);
+
 
         // add new interest to firebase
         userRepository.updateUserFields(user.getUserId(), updateDatePayload, new UpdateUserCallback() {
             @Override
             public void onSuccess(String msg) {
                 // add new facility to local data
-                getInterests().add(interestToAdd);
+                getInterests().add(interestName);
+                getInterestedLocations().add(interestAddress);
                 notifyItemInserted(getInterests().size() - 1);
             }
 
@@ -151,56 +186,35 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
                 Log.e("add-interest-failure", msg);
             }
         });
-
-//        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
-//
-//        // add new facility to firebase
-//        firebaseFunctionsHelper.addInterestedFacility(user.getUserId(), facilityToAdd)
-//                .addOnSuccessListener(result -> {
-//                    if (result.equals("success")) {
-////                        new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Successfully add new facility", "success");
-//                        Log.i("add-interested-facility-success", result);
-//
-//                        // add new facility to local data
-//                        ArrayList<String> interestedFacilities = getInterests();
-//                        interestedFacilities.add(facilityToAdd);
-//                        notifyItemInserted(interestedFacilities.size() - 1);
-//                    } else {
-//                        new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Error: " + result + " Please try again.", "error");
-//                        Log.e("add-interested-facility-fail", result);
-//                    }
-//                })
-//                .addOnFailureListener(e -> {
-//                    // pop error at input box
-//                    Log.e("add-interested-facility-fail", e.getMessage());
-//                    new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Error: " + e.getMessage() + " Please try again.", "error");
-//                });
     }
 
-    // add new location
-//    public void addNewLocation(String locationToAdd) {
-//        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
-//        firebaseFunctionsHelper.addInterestedLocation(user.getUserId(), locationToAdd)
-//                .addOnSuccessListener(result -> {
-//                    if (result.equals("success")) {
-////                        new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Successfully add new facility", "success");
-//                        Log.i("add-interested-facility-success", result);
-//
-//                        // add new facility to local data
-//                        ArrayList<String> interestedLocations = getInterests();
-//                        interestedLocations.add(locationToAdd);
-//                        notifyItemInserted(interestedLocations.size() - 1);
-//                    } else {
-//                        new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Error: " + result + " Please try again.", "error");
-//                        Log.e("add-interested-location-fail", result);
-//                    }
-//                })
-//                .addOnFailureListener(e -> {
-//                    // pop error at input box
-//                    Log.e("add-interested-location-fail", e.getMessage());
-//                    new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), "Error: " + e.getMessage() + " Please try again.", "error");
-//                });
-//
-//    }
+    public void addNewInterestedFacility(String facilityToAdd) {
+        // copy interested facilities
+        ArrayList<String> newInterests = new ArrayList<>(getInterests());
+        // prepare payload
+        newInterests.add(facilityToAdd);
+        HashMap<String, Object> updateDatePayload = new HashMap<>();
+        updateDatePayload.put("interestedFacilities", newInterests);
+
+
+        // add new interest to firebase
+        userRepository.updateUserFields(user.getUserId(), updateDatePayload, new UpdateUserCallback() {
+            @Override
+            public void onSuccess(String msg) {
+                // add new facility to local data
+                getInterests().add(facilityToAdd);
+                notifyItemInserted(getInterests().size() - 1);
+            }
+
+            @Override
+            public void onError(String msg) {
+                String errorMsg = "Error: " + msg + ". Please try again.";
+                new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), errorMsg, "error");
+                Log.e("add-interest-failure", msg);
+            }
+        });
+    }
+
+
 }
 
