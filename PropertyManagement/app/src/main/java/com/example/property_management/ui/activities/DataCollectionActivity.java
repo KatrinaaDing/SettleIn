@@ -577,7 +577,7 @@ public class DataCollectionActivity extends AppCompatActivity {
                 initRecyclerView();
             } else {
                 // 权限被拒绝，向用户解释为什么需要这个权限
-                Toast.makeText(this, "The app needs audio recording permission to function properly.", Toast.LENGTH_LONG).show();
+                new BasicSnackbar(findViewById(android.R.id.content), "The app needs audio recording permission to function properly.", "info", Snackbar.LENGTH_LONG);
                 // 处理权限被拒绝的情况
             }
         }
