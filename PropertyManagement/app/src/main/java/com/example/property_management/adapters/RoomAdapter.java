@@ -20,6 +20,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+
+import com.bumptech.glide.Glide;
 import com.example.property_management.R;
 import com.example.property_management.callbacks.SensorCallback;
 import com.example.property_management.data.RoomData;
@@ -836,7 +838,15 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
             Bitmap bitmap = images.get(position);
 
-            holder.imageView.setImageBitmap(bitmap);
+            if (bitmap != null) {
+                holder.imageView.setImageBitmap(bitmap);
+            } else {
+                Glide.with(holder.itemView.getContext())
+                        .load(R.drawable.cannot_load_photo)
+                        .override(400, 400) // 以像素为单位指定尺寸
+                        .into(holder.imageView);
+            }
+
 
             // Set click listener for the delete button
             holder.deleteButton.setOnClickListener(new View.OnClickListener() {
