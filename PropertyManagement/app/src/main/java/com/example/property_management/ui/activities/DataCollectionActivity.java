@@ -132,7 +132,6 @@ public class DataCollectionActivity extends AppCompatActivity {
         }
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -176,7 +175,6 @@ public class DataCollectionActivity extends AppCompatActivity {
                 initialInspectedData.put(roomname, new RoomData(0,0,"--",new ArrayList<String>()));
             }
         }
-
 
         Log.i("get-initial-inspectedData", initialInspectedData.toString());
         Log.i("get-propertyId", propertyId);
