@@ -49,26 +49,24 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
-            android:layout_weight="2.1"
+            android:layout_weight="1.7"
             android:paddingVertical="10dp"
-            android:text="Noise Level" />
+            android:text="Noise\nLevel" />
 
         <TextView
             android:id="@+id/noiseValue1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1.6"
+            android:layout_weight="1.5"
             android:paddingVertical="10dp"
             android:text="--" />
 
         <TextView
             android:id="@+id/noiseLevelText"
-            android:layout_width="wrap_content"
+            android:layout_width="3dp"
             android:layout_height="wrap_content"
-            android:text=""
-            android:layout_weight="0.3"
-            android:paddingStart="1dp"
-            android:paddingEnd="2dp"
+            android:text="Normal"
+            android:layout_weight="0.8"
             android:paddingTop="2dp"
             android:paddingBottom="2dp"
             android:gravity="center"
@@ -104,7 +102,7 @@
             android:id="@+id/lightValue1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1.7"
+            android:layout_weight="1.75"
             android:paddingVertical="10dp"
             android:text="--" />
 
@@ -114,7 +112,7 @@
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="10dp"
-            android:layout_weight="0.3"
+            android:layout_weight="0.25"
             android:src="@drawable/ic_info_data_collection" />
 
     </LinearLayout>
