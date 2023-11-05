@@ -141,15 +141,7 @@ public class DataCollectionActivity extends AppCompatActivity {
         setTitle("Collect data mode");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.RECORD_AUDIO},
-                    MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
-        }else {
-            // 如果权限已经被授予，初始化 RecyclerView
-            hasRecordAudioPermission = true;
-            initRecyclerView();
-        }
+
 
         requestStoragePermission();
 
@@ -197,6 +189,15 @@ public class DataCollectionActivity extends AppCompatActivity {
         Log.i("get-room num", String.valueOf(room_num));
 
 
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.RECORD_AUDIO},
+                    MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
+        }else {
+            // 如果权限已经被授予，初始化 RecyclerView
+            hasRecordAudioPermission = true;
+            initRecyclerView();
+        }
 
         // Initialize SharedPreferences
         sharedPreferences = getSharedPreferences("notes", MODE_PRIVATE);
@@ -560,6 +561,7 @@ public class DataCollectionActivity extends AppCompatActivity {
         // Initialize rooms RecyclerView
         roomsRecyclerView = findViewById(R.id.recycler_view);
         // Setup the adapter for rooms
+        Log.d("initialInspectedData", String.valueOf((initialInspectedData.keySet() == null)));
         roomAdapter = new RoomAdapter(this, roomNames, initialInspectedData);
         roomsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         roomsRecyclerView.setAdapter(roomAdapter);
