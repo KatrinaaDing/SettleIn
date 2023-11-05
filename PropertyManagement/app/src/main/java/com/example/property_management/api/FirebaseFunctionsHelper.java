@@ -370,12 +370,14 @@ public class FirebaseFunctionsHelper {
             for (String key : distancesData.keySet()) {
                 Map<String, Object> entry = (Map<String, Object>) distancesData.get(key);
                 String address = (String) entry.get("address");
+                String name = (String) entry.get("name");
                 String distance = (String) entry.get("distance");
                 String driving = (String) entry.get("driving");
                 String transit = (String) entry.get("transit");
                 String walking = (String) entry.get("walking");
                 distances.put(key, new DistanceInfo(
                         address,
+                        name,
                         distance,
                         driving,
                         transit,

@@ -3,7 +3,8 @@ package com.example.property_management.data;
 import java.util.HashMap;
 
 public class DistanceInfo {
-    private String businessName;
+    private String address;
+    private String name;
     private String distance;
     private String driving;
     private String transit;
@@ -11,17 +12,18 @@ public class DistanceInfo {
 
     public DistanceInfo() {}
 
-    public DistanceInfo(String businessName, String distance, String driving, String transit, String walking) {
-        this.businessName = businessName;
+    public DistanceInfo(String address, String name,String distance, String driving, String transit, String walking) {
+        this.address = address;
+        this.name = name;
         this.distance = distance;
         this.driving = driving;
         this.transit = transit;
         this.walking = walking;
     }
 
-    public String getBusinessName() { return businessName; }
+    public String getAddress() { return address; }
 
-    public void setBusinessName(String businessName) { this.businessName = businessName; }
+    public String getName() { return name; }
 
     public String getDistance() { return distance; }
 

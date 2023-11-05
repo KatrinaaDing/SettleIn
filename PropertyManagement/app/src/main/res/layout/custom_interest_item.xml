@@ -26,6 +26,7 @@
         style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
         android:insetTop="5dp"
         android:insetBottom="5dp"
+        android:backgroundTint="@color/transparent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:icon="@drawable/baseline_delete_24"
