@@ -287,7 +287,7 @@
                 android:id="@+id/recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingHorizontal="20dp" />
+                android:paddingVertical="10dp"/>
 
             <TextView
                 android:id="@+id/no_data_text_view"
@@ -310,7 +310,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    android:text="Notes" />
+                    android:text="Notes"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/saved_notes"
