@@ -16,7 +16,8 @@
             android:id="@+id/room_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Lounge room" />
+            android:text="Lounge room"
+            android:textStyle="bold" />
 
         <ImageView
             android:id="@+id/editRoomNameIcon"

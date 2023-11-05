@@ -185,12 +185,12 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
 
     private void showNoiseLevelDialog(Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("Recommended noise levels for the Home in dB");
+        builder.setTitle("Recommended noise levels for the Home in db");
 
         String[] noiseLevels = {
-                "Normal dB 0 ~ 35: Have good sleep at night",
-                "Risk dB 35 ~ 55: Acceptable noise during the day",
-                "High risk dB > 55: Not recommended to live"
+                "Normal db 0 ~ 35: Have good sleep at night",
+                "Risk db 35 ~ 55: Acceptable noise during the day",
+                "High risk db > 55: Not recommended to live"
         };
 
         builder.setItems(noiseLevels, null);
