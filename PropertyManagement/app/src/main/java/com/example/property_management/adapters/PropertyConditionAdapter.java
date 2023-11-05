@@ -88,7 +88,7 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
             holder.noiseValue.setVisibility(View.VISIBLE);
             holder.lightValue.setVisibility(View.VISIBLE);
             holder.windowValue.setVisibility(View.VISIBLE);
-            holder.noiseLevelText.setVisibility(View.VISIBLE);
+            //holder.noiseLevelText.setVisibility(View.VISIBLE);
             holder.infoButton.setVisibility(View.VISIBLE);
 
             holder.noiseIcon.setVisibility(View.VISIBLE);
@@ -101,15 +101,20 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
 
             // set texts and colour for different noise level
             float noiseValue = noiseList.get(position);
-            if (noiseValue >= 55) {
+            if (noiseValue == -1) {
+                holder.noiseLevelText.setVisibility(View.VISIBLE);
+            } else if (noiseValue >= 55) {
                 holder.noiseLevelText.setBackgroundColor(Color.RED);
                 holder.noiseLevelText.setText("High Risk");
-            } else if (noiseValue >= 40) {
+                holder.noiseLevelText.setVisibility(View.VISIBLE);
+            } else if (noiseValue >= 35 && noiseValue < 55) {
                 holder.noiseLevelText.setBackgroundColor(Color.parseColor("#FFA500")); // 橙色
                 holder.noiseLevelText.setText("Risk");
+                holder.noiseLevelText.setVisibility(View.VISIBLE);
             } else {
                 holder.noiseLevelText.setBackgroundColor(Color.parseColor("#3CB371")); // 浅绿色
                 holder.noiseLevelText.setText("Normal");
+                holder.noiseLevelText.setVisibility(View.VISIBLE);
             }
         }
 
@@ -178,6 +183,29 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
         dialog.show();
     }
 
+    private void showNoiseLevelDialog(Context context) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Recommended noise levels for the Home in dB");
+
+        String[] noiseLevels = {
+                "Normal dB 0 ~ 35: Have good sleep at night",
+                "Risk dB 35 ~ 55: Acceptable noise during the day",
+                "High risk dB > 55: Not recommended to live"
+        };
+
+        builder.setItems(noiseLevels, null);
+
+        builder.setNegativeButton("Close", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
     @Override
     public int getItemCount() {
         return roomNames.size();
@@ -215,6 +243,13 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
                 @Override
                 public void onClick(View v) {
                     showInformationDialog(context);
+                }
+            });
+
+            noiseLevelText.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showNoiseLevelDialog(v.getContext());
                 }
             });
         }

@@ -20,8 +20,6 @@
         android:layout_marginTop="16dp"
         android:orientation="horizontal">
 
-
-
     </LinearLayout>
 
 </LinearLayout>

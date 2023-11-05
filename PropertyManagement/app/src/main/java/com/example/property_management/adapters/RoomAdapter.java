@@ -380,7 +380,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                 }
             }
 
-
         });
 
         holder.compassTestButton.setOnClickListener(v -> {
