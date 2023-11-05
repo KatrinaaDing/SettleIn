@@ -180,15 +180,11 @@ public class DataCollectionActivity extends AppCompatActivity {
         }
         //处理property第一次收集数据时，firebase相关字段为空的问题。此时根据房间数量设置房间名字，再设置初始值。
         if (initialInspectedData.size() == 0){
-            for (int i = 0; i <= room_num; i++) {
-                if (i == 0) {
-                    roomNames.add("Lounge Room");
-                } else if (i == room_num) {
-                    roomNames.add("Others");
-                } else {
-                    roomNames.add("Room " + i);
-                }
+            roomNames.add("Lounge Room");
+            for (int i = 1; i <= room_num; i++) {
+                roomNames.add("Room " + i);
             }
+            roomNames.add("Others");
             for (String roomname: roomNames){
                 initialInspectedData.put(roomname, new RoomData(-1,-1,"--",new ArrayList<String>()));
             }
