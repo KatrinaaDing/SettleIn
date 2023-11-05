@@ -185,6 +185,7 @@ public class DataCollectionActivity extends AppCompatActivity {
                 roomNames.add("Room " + i);
             }
             roomNames.add("Others");
+            //roomNames.add("NNN");
             for (String roomname: roomNames){
                 initialInspectedData.put(roomname, new RoomData(-1,-1,"--",new ArrayList<String>()));
             }
@@ -237,6 +238,7 @@ public class DataCollectionActivity extends AppCompatActivity {
             // 正则表达式用于找到数字（包括小数点）
             Pattern pattern = Pattern.compile("[+-]?([0-9]*[.])?[0-9]+");
 
+            Log.d("roomsRecyclerView.getChildCount()", String.valueOf(roomsRecyclerView.getChildCount()));
             for (int i = 0; i < roomsRecyclerView.getChildCount(); i++) {
                 View itemView = roomsRecyclerView.getChildAt(i);
                 RoomAdapter.ViewHolder viewHolder = (RoomAdapter.ViewHolder) roomsRecyclerView.getChildViewHolder(itemView);
@@ -286,7 +288,7 @@ public class DataCollectionActivity extends AppCompatActivity {
             for (String roomName1: roomDataMap.keySet()){
                 roomName.add(roomName1);
             }
-
+            Log.d("roomNames before passed in updateInspectedData", roomName.toString());
             updateInspectedData(propertyId, roomData, roomName);
 
             //Toast.makeText(this, "Upload data successfully! ", Toast.LENGTH_SHORT).show();
@@ -514,6 +516,7 @@ public class DataCollectionActivity extends AppCompatActivity {
     }
 
     private void updateInspectedData(String propertyId, HashMap<String, RoomData> inspectedData, ArrayList<String> roomNames) {
+        Log.d("roomName passed in updateInspectedData", inspectedData.keySet().toString());
         // update ispected status to firebase
         HashMap<String, Object> payload = new HashMap<>();
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();

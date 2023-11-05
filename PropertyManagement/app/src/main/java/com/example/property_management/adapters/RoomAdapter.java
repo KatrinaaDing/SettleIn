@@ -70,6 +70,7 @@ import android.widget.Toast;
 
 public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     private final List<String> roomNames;
+    private final List<String> roomNamesOrigin = new ArrayList<>();
     private int roomCount;
     private Context context;
     private Set<Integer> initializedRooms = new HashSet<>();
@@ -84,12 +85,17 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     private ArrayList<ArrayList<String>> roomImagePaths = new ArrayList<>();
     private List<Preview> cameraPreviews = new ArrayList<>();
     private List<ImageCapture> imageCaptures = new ArrayList<>();
-
+    private boolean isFirstBind = true;
     private HashMap<String, RoomData> roomData = new HashMap<>();
 
     public RoomAdapter(Context context, List<String> roomNames, HashMap<String, RoomData> roomData) {
         this.context = context;
         this.roomNames = roomNames;
+
+        for (String names:roomNames){
+            this.roomNamesOrigin.add(names);
+        }
+
         for (int i = 0; i < roomNames.size(); i++) {
             roomImages.add(new ArrayList<>());
 
@@ -142,6 +148,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position, @NonNull List<Object> payloads) {
+        Log.d("payloads",payloads.toString());
         if (!payloads.isEmpty()) {
             for (Object payload : payloads) {
                 if ("UPDATE_PHOTO_COUNT".equals(payload)) {
@@ -157,7 +164,10 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             }
         } else {
             // If no payloads are available, call the full bind method
+            Log.d("full bind called","full bind called");
             onBindViewHolder(holder, position);
+
+
         }
     }
 
@@ -223,18 +233,21 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             //}
 
             //测试
-                if (roomData.get(currentRoomName).getBrightness() == -1) {
+                Log.d("bindView Called, currentRoomName: ",currentRoomName);
+                Log.d("bindView Called, current position roomName: ",roomNames.get(position));
+                Log.d("bindView Called, room set  ",roomData.keySet().toString());
+                if (roomData.get(roomNamesOrigin.get(position)).getBrightness() == -1) {
                     holder.lightValueTextView.setText("--");
                 } else {
-                    holder.lightValueTextView.setText(roomData.get(currentRoomName).getBrightness() + " Lux");
+                    holder.lightValueTextView.setText(roomData.get(roomNamesOrigin.get(position)).getBrightness() + " Lux");
                 }
 
-                if (roomData.get(currentRoomName).getNoise() == -1) {
+                if (roomData.get(roomNamesOrigin.get(position)).getNoise() == -1) {
                     holder.noiseValueTextView.setText("--");
                 } else {
-                    holder.noiseValueTextView.setText(roomData.get(currentRoomName).getNoise() + " dB");
+                    holder.noiseValueTextView.setText(roomData.get(roomNamesOrigin.get(position)).getNoise() + " dB");
                 }
-                holder.compassValueTextView.setText(roomData.get(currentRoomName).getWindowOrientation());
+                holder.compassValueTextView.setText(roomData.get(roomNamesOrigin.get(position)).getWindowOrientation());
 
 
         AudioSensor currentAudioSensor = audioSensors.get(position);
@@ -335,10 +348,10 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     holder.testAudioThread = null;
 
                     // 清除TextView
-                    if (roomData.get(currentRoomName).getNoise() == -1) {
+                    if (roomData.get(roomNamesOrigin.get(position)).getNoise() == -1) {
                         holder.noiseValueTextView.setText("--");
                     } else {
-                        holder.noiseValueTextView.setText(roomData.get(currentRoomName).getNoise() + " dB");
+                        holder.noiseValueTextView.setText(roomData.get(roomNamesOrigin.get(position)).getNoise() + " dB");
                     }
                 }
             }
@@ -372,10 +385,10 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     holder.testLightThread = null;
 
                     // 清除TextView
-                    if (roomData.get(currentRoomName).getBrightness() == -1) {
+                    if (roomData.get(roomNamesOrigin.get(position)).getBrightness() == -1) {
                         holder.lightValueTextView.setText("--");
                     } else {
-                        holder.lightValueTextView.setText(roomData.get(currentRoomName).getBrightness() + " Lux");
+                        holder.lightValueTextView.setText(roomData.get(roomNamesOrigin.get(position)).getBrightness() + " Lux");
                     }
                 }
             }
@@ -411,7 +424,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     holder.testCompassThread = null;
 
                     // 清除TextView
-                    holder.compassValueTextView.setText(roomData.get(currentRoomName).getWindowOrientation());
+                    holder.compassValueTextView.setText(roomData.get(roomNamesOrigin.get(position)).getWindowOrientation());
                 }
             }
 
@@ -756,6 +769,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     }
 
     private void showRenameRoomDialog(int position, ViewHolder holder) {
+        isFirstBind = false;
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.dialog_rename_room, null);
