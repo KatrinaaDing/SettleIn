@@ -27,7 +27,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/image_carousel"
         android:layout_width="match_parent"
-        android:layout_height="320dp"
+        android:layout_height="220dp"
         android:layout_marginTop="20dp"
         app:layoutManager="com.google.android.material.carousel.CarouselLayoutManager"/>
 

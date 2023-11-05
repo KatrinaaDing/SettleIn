@@ -20,6 +20,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+
+import com.bumptech.glide.Glide;
 import com.example.property_management.R;
 import com.example.property_management.callbacks.SensorCallback;
 import com.example.property_management.data.RoomData;
@@ -27,6 +29,7 @@ import com.example.property_management.sensors.AudioSensor;
 import com.example.property_management.sensors.CompassSensor;
 import com.example.property_management.sensors.LightSensor;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.button.MaterialButton;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import android.view.Window;
@@ -836,7 +839,15 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
             Bitmap bitmap = images.get(position);
 
-            holder.imageView.setImageBitmap(bitmap);
+            if (bitmap != null) {
+                holder.imageView.setImageBitmap(bitmap);
+            } else {
+                Glide.with(holder.itemView.getContext())
+                        .load(R.drawable.cannot_load_photo)
+                        .override(400, 400) // 以像素为单位指定尺寸
+                        .into(holder.imageView);
+            }
+
 
             // Set click listener for the delete button
             holder.deleteButton.setOnClickListener(new View.OnClickListener() {
@@ -874,7 +885,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
         public class ViewHolder extends RecyclerView.ViewHolder {
             public ImageView imageView;
-            public ImageButton deleteButton;
+            public MaterialButton deleteButton;
 
             public ViewHolder(View view) {
                 super(view);

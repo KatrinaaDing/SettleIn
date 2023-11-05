@@ -285,7 +285,8 @@ public class DataCollectionActivity extends AppCompatActivity {
 
             updateInspectedData(propertyId, roomData, roomName);
 
-            Toast.makeText(this, "Upload data successfully! ", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Upload data successfully! ", Toast.LENGTH_SHORT).show();
+            Snackbar.make(findViewById(android.R.id.content), "Upload data successfully!", Snackbar.LENGTH_SHORT).show();
 
             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                 @Override

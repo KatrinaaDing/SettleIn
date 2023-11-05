@@ -48,7 +48,7 @@ public class PropertyConditionCarouselAdapter extends RecyclerView.Adapter<Prope
             Glide.with(context).load(imageFile).into(holder.imageView);
         } else {
             // Load the placeholder and set the flag
-            Glide.with(context).load(R.drawable.property_image_placeholder).into(holder.imageView);
+            Glide.with(context).load(R.drawable.cannot_load_photo).into(holder.imageView);
             isPlaceholder = true;
         }
 
@@ -56,7 +56,7 @@ public class PropertyConditionCarouselAdapter extends RecyclerView.Adapter<Prope
             if (onItemClickListener != null) {
                 // If it is a placeholder, use the placeholder resource ID, otherwise use the original URL
                 if (isPlaceholder) {
-                    onItemClickListener.onClick(holder.imageView, "android.resource://" + context.getPackageName() + "/" + R.drawable.property_image_placeholder);
+                    onItemClickListener.onClick(holder.imageView, "android.resource://" + context.getPackageName() + "/" + R.drawable.cannot_load_photo);
                 } else {
                     onItemClickListener.onClick(holder.imageView, imageUrl);
                 }
