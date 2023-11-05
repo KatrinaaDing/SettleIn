@@ -214,6 +214,13 @@ public class DataCollectionActivity extends AppCompatActivity {
         });
 
         binding.finishButton.setOnClickListener(view -> {
+            //返回detail页面时刷新
+            SharedPreferences sharedPreferences = getSharedPreferences("propertyDetailUpdated", MODE_PRIVATE);
+            sharedPreferences
+                    .edit()
+                    .putBoolean("isUpdated", true)
+                    .apply();
+
             //更新成功前禁用按钮
             binding.finishButton.setEnabled(false);
             binding.finishButton.setText("Updating...");
@@ -295,6 +302,8 @@ public class DataCollectionActivity extends AppCompatActivity {
         if (!hasShownInfo) {
             showInfoDialog();
         }
+
+
     }
 
 

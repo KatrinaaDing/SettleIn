@@ -1,8 +1,10 @@
 package com.example.property_management.ui.activities;
 
 import android.Manifest;
+
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -142,6 +144,23 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         });
 
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // refresh properties when user returns to home fragment
+        // getAllProperties(this); // 如果 getAllProperties 需要 Context 作为参数
+        SharedPreferences sharedPreferences = this.getSharedPreferences("propertyDetailUpdated",
+                Context.MODE_PRIVATE);
+        if (sharedPreferences.getBoolean("isUpdated", false)) {
+            getPropertyById(this.propertyId);
+            sharedPreferences.edit()
+                    .remove("isUpdated")
+                    .apply();
+        }
+    }
+
+
 
     /**
      * Initialize map fragment
