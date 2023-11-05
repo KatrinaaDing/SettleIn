@@ -102,6 +102,15 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         for (String key: roomData.keySet()){
             Log.d("new RoomAdapter data for " + key,roomData.toString());
         }
+
+        int i = 0;
+        for (String roomName: roomNames){
+            for (String imgPath: roomData.get(roomName).getImages()){
+                Bitmap bitmap = BitmapFactory.decodeFile(imgPath);
+                roomImages.get(i).add(bitmap);
+            }
+            i++;
+        }
     }
 
     @NonNull
