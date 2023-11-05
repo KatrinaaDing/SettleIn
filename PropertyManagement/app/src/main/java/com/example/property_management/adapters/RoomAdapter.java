@@ -223,7 +223,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             //}
 
             //测试
-                holder.lightValueTextView.setText(roomData.get(currentRoomName).getBrightness() + " X");
+                holder.lightValueTextView.setText(roomData.get(currentRoomName).getBrightness() + " Lux");
                 holder.noiseValueTextView.setText(roomData.get(currentRoomName).getNoise() + " dB");
                 holder.compassValueTextView.setText(roomData.get(currentRoomName).getWindowOrientation());
 
@@ -359,7 +359,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     holder.testLightThread = null;
 
                     // 清除TextView
-                    holder.lightValueTextView.setText(roomData.get(currentRoomName).getBrightness() + " X");
+                    holder.lightValueTextView.setText(roomData.get(currentRoomName).getBrightness() + " Lux");
                 }
             }
 
@@ -699,7 +699,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
     private void updateLightData(ViewHolder holder, float lightValue) {
         ((Activity) context).runOnUiThread(() -> {
-            holder.lightValueTextView.setText(lightValue + " X");
+            holder.lightValueTextView.setText(lightValue + " Lux");
         });
     }
 

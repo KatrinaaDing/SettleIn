@@ -48,8 +48,11 @@ import com.example.property_management.ui.fragments.base.AutocompleteFragment;
 import com.example.property_management.ui.fragments.base.BasicDialog;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.android.libraries.places.api.net.PlacesClient;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,6 +63,7 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
     private AppCompatActivity activity;
     PlacesClient placesClient;
     String selectedAddress = "";
+    String selectedName = "";
     String username;
     String email;
     String uid;
@@ -67,6 +71,8 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
     CustomListRecyclerViewAdapter interestedLocationsAdapter;
     CustomListRecyclerViewAdapter interestedFacilitiesAdapter;
     User currentUser;
+
+    AlertDialog alertDialog;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -157,8 +163,6 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
             public void onSuccess(User userObj) {
                 currentUser = userObj;
 
-//                ArrayList propertyIds = new ArrayList<>(userObj.getProperties().keySet());
-//                ArrayList<String> userInterestedLocations = userObj.getInterestedLocations();
                 setInterestedLocationsRecycleView();
                 setInterestedFacilitiesRecycleView();
             }
@@ -193,51 +197,50 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
         View dialogView = getLayoutInflater().inflate(R.layout.custom_interested_location_dialog, null);
 
         // ===== dialog =====
-        AlertDialog alertDialog = new MaterialAlertDialogBuilder(getContext())
+        alertDialog = new MaterialAlertDialogBuilder(getContext())
                 .setTitle("Add Interested Location")
                 .setView(dialogView)
-                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        AutocompleteFragment autocompleteFragment = (AutocompleteFragment)
-                                getChildFragmentManager().findFragmentById(R.id.auto_fragment);
-                        if (autocompleteFragment == null) {
-                            Log.e("isnull", "autocompleteFragment is null");
-                            return;
-                        }
-
-                        selectedAddress = autocompleteFragment.getSelectedAddress();
-                        System.out.println("Add Location: " + selectedAddress);
-
-                        if (selectedAddress == null || selectedAddress.equals("")) {
-                            new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Error: Location cannot be empty", "error");
-                            return;
-                        }
-                        // check duplication
-                        for (String location : currentUser.getInterestedLocations()) {
-                            String location_lower = location.toLowerCase();
-                            if (location_lower.equals(selectedAddress.toLowerCase())) {
-                                new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Error: Location already exists", "error");
-                                return;
-                            }
-                        }
-                        addNewLocation(selectedAddress);
-                    }
-                }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                .setPositiveButton("Add", null)
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         // clear selected address
                         selectedAddress = "";
-//                        dialogInterface.dismiss();
                     }
                 }).create();
         alertDialog.show();
-    }
 
-//    public void showAddLocationDialog() {
-//        DialogFragment dialog = new AddNewLocationDialogFragment();
-//        dialog.show(getChildFragmentManager(), "AddNewLocationDialogFragment");
-//    }
+        ((androidx.appcompat.app.AlertDialog) alertDialog).getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
+
+            AutocompleteFragment autocompleteFragment = (AutocompleteFragment)
+                    getChildFragmentManager().findFragmentById(R.id.auto_fragment);
+            if (autocompleteFragment == null) {
+                new BasicSnackbar(getActivity().findViewById(android.R.id.content), "Error: autocompleteFragment is null", "error");
+                alertDialog.dismiss();
+                return;
+            }
+
+            selectedAddress = autocompleteFragment.getSelectedAddress();
+            selectedName = autocompleteFragment.getSelectedName();
+            System.out.println("SelectedAddress: " + selectedAddress);
+            System.out.println("SelectedName: " + selectedName);
+
+            TextInputLayout locationEditTextLayout = (TextInputLayout) alertDialog.findViewById(R.id.locationEditTextLayout);
+
+            // check if selectedAddress is empty
+            if (selectedAddress == null || selectedAddress.equals("") || selectedName == null || selectedName.equals("")) {
+                locationEditTextLayout.setError("Error: Location address or business name cannot be empty");
+                return;
+            }
+            // check duplication
+            if (ifDuplicate(selectedAddress)) {
+                locationEditTextLayout.setError("Error: Location already exists");
+                return;
+            }
+            addNewLocation(selectedAddress, selectedName);
+            alertDialog.dismiss();
+        });
+    }
 
     @Override
     public void onProfileUpdated(String newUsername, String newEmail) {
@@ -267,15 +270,33 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
 
     }
 
-    public User getProfileUser() {
-        return currentUser;
-    }
-
     public void addNewFacility(String facilityToAdd) {
-        interestedFacilitiesAdapter.addNewInterest(facilityToAdd);
+        interestedFacilitiesAdapter.addNewInterestedFacility(facilityToAdd);
     }
 
-    public void addNewLocation(String locationToAdd) {
-        interestedLocationsAdapter.addNewInterest(locationToAdd);
+    public void addNewLocation(String locationAddress, String locationName) {
+        interestedLocationsAdapter.addNewInterestedLocation(locationAddress, locationName);
+    }
+
+    public boolean ifDuplicate(String toAdd) {
+        for (String location : currentUser.getInterestedLocations()) {
+            String location_lower = location.toLowerCase();
+            if (location_lower.equals(toAdd.toLowerCase())) {
+                return true;
+            }
+        }
+
+        for (String facility : currentUser.getInterestedFacilities()) {
+            String facility_lower = facility.toLowerCase();
+            if (facility_lower.equals(toAdd.toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void setLocationNameTxt(String name) {
+        TextView locationNameTxt = (TextView) alertDialog.findViewById(R.id.locationNameTxt);
+        locationNameTxt.setText(name);
     }
 }

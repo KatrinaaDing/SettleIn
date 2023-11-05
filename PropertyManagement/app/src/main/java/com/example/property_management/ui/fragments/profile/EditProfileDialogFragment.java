@@ -36,6 +36,7 @@ import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.User;
 import com.example.property_management.ui.activities.LoginActivity;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
+import com.example.property_management.utils.EmailValidator;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -184,13 +185,15 @@ public class EditProfileDialogFragment extends DialogFragment {
                     TextInputLayout providedPasswordLayout = view.findViewById(R.id.providePasswordLayout);
 
                     View rootView = getActivity().findViewById(android.R.id.content);
-
                     // Check for any validation errors
                     if (userInputUsername.isEmpty()) {
                         editUsernameLayout.setError("Username Cannot be Empty.");
                     } else if (userInputEmail.isEmpty()) {
                         editEmailLayout.setError("Email Cannot be Empty.");
-                    } else if (!userInputEmail.isEmpty() && !userInputEmail.equals(email) && userInputProvidePassword.isEmpty()) {
+                    } else if (!userInputEmail.equals(email) && !EmailValidator.isValidEmail(userInputEmail)) {
+                        editEmailLayout.setError("Please enter a valid email.");
+                    } else if (!userInputEmail.equals(email) && userInputProvidePassword.isEmpty()) {
+                        if (EmailValidator.isValidEmail(userInputEmail)) editEmailLayout.setError(null);
                         providedPasswordLayout.setError("Must provide password to update email");
                     } else if (userInputUsername.equals(username) && userInputEmail.equals(email)) {
                         // If no changes are made, just dismiss the dialog

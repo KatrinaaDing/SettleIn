@@ -1,8 +1,10 @@
 package com.example.property_management.ui.activities;
 
 import android.Manifest;
+
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -18,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -69,7 +72,10 @@ import java.util.List;
 import java.util.Map;
 
 public class PropertyDetailActivity extends AppCompatActivity implements OnMapReadyCallback {
-    private static final int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
+    private static final int MY_PERMISSIONS_REQUEST_CAMERA_AND_STORAGE = 2;
+    private boolean hasCameraPermission = false;
+    private boolean hasWriteExternalStoragePermission = false;
+
     private ActivityPropertyDetailBinding binding;
     // add calendar event flag
     private boolean firstTimeAddingCalendarEvent = false;
@@ -94,6 +100,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     private PropertyConditionAdapter adapter;
     List<List<Integer>> imagesPerRoom = new ArrayList<>();
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,7 +109,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         setTitle("Property Detail");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        requestStoragePermission();
+
 
         // get userId
         FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(this);
@@ -118,6 +125,10 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
 
         // fetch property data from firebase
         getPropertyById(this.propertyId);
+
+        requestStoragePermission();
+
+
 
         // ================================== Components =======================================
         initInfoButton();
@@ -142,6 +153,23 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         });
 
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // refresh properties when user returns to home fragment
+        // getAllProperties(this); // 如果 getAllProperties 需要 Context 作为参数
+        SharedPreferences sharedPreferences = this.getSharedPreferences("propertyDetailUpdated",
+                Context.MODE_PRIVATE);
+        if (sharedPreferences.getBoolean("isUpdated", false)) {
+            getPropertyById(this.propertyId);
+            sharedPreferences.edit()
+                    .remove("isUpdated")
+                    .apply();
+        }
+    }
+
+
 
     /**
      * Initialize map fragment
@@ -651,6 +679,25 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                             "error");
                 }
             }
+        }else if (MY_PERMISSIONS_REQUEST_CAMERA_AND_STORAGE == requestCode){
+            // 如果请求被取消，结果数组为空
+            if (grantResults.length > 0) {
+                // 循环检查每个请求的结果
+                for (int i = 0; i < permissions.length; i++) {
+                    switch (permissions[i]) {
+                        case Manifest.permission.CAMERA:
+                            hasCameraPermission = grantResults[i] == PackageManager.PERMISSION_GRANTED;
+                            break;
+                        case Manifest.permission.WRITE_EXTERNAL_STORAGE:
+                            hasWriteExternalStoragePermission = grantResults[i] == PackageManager.PERMISSION_GRANTED;
+                            break;
+                    }
+                }
+                // 如果所有请求的权限都被授予，则可以进行相关操作
+                if (hasCameraPermission && hasWriteExternalStoragePermission) {
+                    setInspectedData(userProperty);
+                }
+            }
         }
     }
 
@@ -717,7 +764,12 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // room data
-        List<String> roomNames = new ArrayList<>(userProperty.getRoomNames());
+        List<String> roomNames;
+        if (userProperty.getRoomNames() != null){
+            roomNames = userProperty.getRoomNames();
+        }else{
+            roomNames = new ArrayList<>();
+        }
         ArrayList<ArrayList<String>> imagesPerRoom = new ArrayList<>();
         ArrayList<Float> brightnessList = new ArrayList<>();
         ArrayList<Float> noiseList = new ArrayList<>();
@@ -748,9 +800,24 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     }
 
     private void requestStoragePermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[] {
+                            Manifest.permission.CAMERA,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    },
+                    MY_PERMISSIONS_REQUEST_CAMERA_AND_STORAGE);
+        } else {
+            hasCameraPermission = true;
+            hasWriteExternalStoragePermission = true;
         }
     }
+
+
+
+
+
 
 }
