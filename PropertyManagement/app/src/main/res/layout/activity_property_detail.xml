@@ -297,7 +297,7 @@
                 android:visibility="gone"
                 android:gravity="start|center_vertical"
                 android:layout_marginBottom="16dp"
-            android:textColor="#757575"
+                android:textColor="#757575"
             />
 
             <LinearLayout
@@ -317,7 +317,8 @@
                     android:id="@+id/saved_notes"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="None" />
+                    android:text="None"
+                    android:textColor="#757575"/>
             </LinearLayout>
 
             <Button
