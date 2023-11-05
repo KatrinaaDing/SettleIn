@@ -47,6 +47,7 @@ public class AudioSensor {
                         }
                         if (sum > 0) {
                             double amplitude = sum / result;
+                            Log.d("amplitude", String.valueOf(amplitude));
                             double db = 10 * Math.log10(amplitude);
                             sumDb += db;
                             count++;
