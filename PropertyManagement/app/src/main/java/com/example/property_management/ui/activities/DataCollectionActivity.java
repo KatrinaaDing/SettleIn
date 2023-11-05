@@ -88,7 +88,7 @@ public class DataCollectionActivity extends AppCompatActivity {
     // initial room data and property id
     private HashMap<String, RoomData> initialInspectedData;
     private String propertyId;
-
+    private boolean hasRecordAudioPermission = false;
     private @NonNull ActivityDataCollectionBinding binding;
     private LightSensor lightSensor;
     private CompassSensor compassSensor;
@@ -141,14 +141,10 @@ public class DataCollectionActivity extends AppCompatActivity {
         setTitle("Collect data mode");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+
+
         requestStoragePermission();
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.RECORD_AUDIO},
-                    MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
-        }
-        //recycle room
-        //int roomCount = 3;
+
 
         // retrieve user's collected data from previous intent
         // if no inspected data, initialInspectedDat will be empty HashMap {}
@@ -192,12 +188,16 @@ public class DataCollectionActivity extends AppCompatActivity {
         //查看得到的房间数量数据
         Log.i("get-room num", String.valueOf(room_num));
 
-        // Initialize rooms RecyclerView
-        roomsRecyclerView = findViewById(R.id.recycler_view);
-        // Setup the adapter for rooms
-        roomAdapter = new RoomAdapter(this, roomNames, initialInspectedData);
-        roomsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        roomsRecyclerView.setAdapter(roomAdapter);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.RECORD_AUDIO},
+                    MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
+        }else {
+            // 如果权限已经被授予，初始化 RecyclerView
+            hasRecordAudioPermission = true;
+            initRecyclerView();
+        }
 
         // Initialize SharedPreferences
         sharedPreferences = getSharedPreferences("notes", MODE_PRIVATE);
@@ -538,5 +538,34 @@ public class DataCollectionActivity extends AppCompatActivity {
             return "0";  // 如果没有找到数字，返回0
         }
     }
+
+    private void initRecyclerView() {
+        // Initialize rooms RecyclerView
+        roomsRecyclerView = findViewById(R.id.recycler_view);
+        // Setup the adapter for rooms
+        Log.d("initialInspectedData", String.valueOf((initialInspectedData.keySet() == null)));
+        roomAdapter = new RoomAdapter(this, roomNames, initialInspectedData);
+        roomsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        roomsRecyclerView.setAdapter(roomAdapter);
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == MY_PERMISSIONS_REQUEST_RECORD_AUDIO) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // 权限被授予，初始化 RecyclerView
+                hasRecordAudioPermission = true;
+                initRecyclerView();
+            } else {
+                // 权限被拒绝，向用户解释为什么需要这个权限
+                Toast.makeText(this, "The app needs audio recording permission to function properly.", Toast.LENGTH_LONG).show();
+                // 处理权限被拒绝的情况
+            }
+        }
+    }
+
+
 
 }
