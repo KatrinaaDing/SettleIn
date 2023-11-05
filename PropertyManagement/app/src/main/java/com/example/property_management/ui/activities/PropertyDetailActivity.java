@@ -717,7 +717,12 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // room data
-        List<String> roomNames = new ArrayList<>(userProperty.getRoomNames());
+        List<String> roomNames;
+        if (userProperty.getRoomNames() != null){
+            roomNames = userProperty.getRoomNames();
+        }else{
+            roomNames = new ArrayList<>();
+        }
         ArrayList<ArrayList<String>> imagesPerRoom = new ArrayList<>();
         ArrayList<Float> brightnessList = new ArrayList<>();
         ArrayList<Float> noiseList = new ArrayList<>();
