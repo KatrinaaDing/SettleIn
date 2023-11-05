@@ -126,7 +126,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         // fetch property data from firebase
         getPropertyById(this.propertyId);
 
-        requestStoragePermission();
+
 
 
 
@@ -373,6 +373,9 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                     setInspectedData(userProperty);
                     initMap();
                     setLoading(false);
+
+                    //成功fetch数据之后再请求权限setInspectedData,以免闪退
+                    requestStoragePermission();
                 })
                 .addOnFailureListener(e -> {
                     // if error happens, show error message and hide detail content
@@ -697,7 +700,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                     }
                 }
                 // 如果所有请求的权限都被授予，则可以进行相关操作
-                if (hasCameraPermission && hasWriteExternalStoragePermission) {
+                if (hasWriteExternalStoragePermission) {
                     setInspectedData(userProperty);
                 }
             }

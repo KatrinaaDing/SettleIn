@@ -16,7 +16,7 @@ public class AudioSensor {
     private final AudioRecord audioRecord;
     private SensorCallback callback;
     private boolean isRecording = false;
-    private final double offset = 80.0; // 设置偏移量为70
+    private final double offset = 100.0;
 
     @SuppressLint("MissingPermission")
     public AudioSensor(SensorCallback callback) {
