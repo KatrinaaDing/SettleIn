@@ -759,7 +759,11 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         TextView savedNotesTextView = findViewById(R.id.saved_notes);
 
         // set note
-        savedNotesTextView.setText(notes);
+        if (notes == null || notes.trim().isEmpty()) {
+            savedNotesTextView.setText("No inspected note, you can write your note in inspection!");
+        } else {
+            savedNotesTextView.setText(notes);
+        }
 
         // 获取房间名称列表
         List<String> roomNames = userProperty.getRoomNames();
