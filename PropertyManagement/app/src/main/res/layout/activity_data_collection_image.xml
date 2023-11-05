@@ -13,12 +13,18 @@
         android:layout_gravity="center"
         android:adjustViewBounds="true" />
 
-    <ImageButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/delete_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
-        android:background="?android:attr/selectableItemBackground"
-        android:src="@android:drawable/ic_delete" />
+        android:backgroundTint="?attr/colorPrimary"
+        android:textColor="@android:color/white"
+        android:drawableLeft="@android:drawable/ic_delete"
+        android:drawableStart="@android:drawable/ic_delete"
+        android:text="Delete"
+        android:drawablePadding="4dp"
+        style="@style/Widget.MaterialComponents.Button.TextButton" />
+
 
 </LinearLayout>
