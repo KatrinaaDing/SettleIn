@@ -173,7 +173,7 @@ public class DataCollectionActivity extends AppCompatActivity {
                 }
             }
             for (String roomname: roomNames){
-                initialInspectedData.put(roomname, new RoomData(0,0,"--",new ArrayList<String>()));
+                initialInspectedData.put(roomname, new RoomData(-1,-1,"--",new ArrayList<String>()));
             }
         }
 
@@ -547,7 +547,7 @@ public class DataCollectionActivity extends AppCompatActivity {
         if (matcher.find()) {
             return matcher.group(0);  // 返回找到的第一个数字
         } else {
-            return "0";  // 如果没有找到数字，返回0
+            return "-1";  // 如果没有找到数字，返回0
         }
     }
 

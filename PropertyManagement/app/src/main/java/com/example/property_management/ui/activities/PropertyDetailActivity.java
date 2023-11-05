@@ -166,6 +166,9 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             sharedPreferences.edit()
                     .remove("isUpdated")
                     .apply();
+
+            TextView noDataTextView = findViewById(R.id.no_data_text_view);
+            noDataTextView.setVisibility(View.GONE);
         }
     }
 
@@ -749,9 +752,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             Log.d("inspectedData in propertydetail",this.userProperty.getInspectedData().get(roomname).toString());
         }
 
-        //房间数量
-        //int roomNum = inspectedData.keySet().size();
-        //note
+        // note
         String notes = userProperty.getNotes();
 
         // note
@@ -759,44 +760,55 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
 
         // set note
         savedNotesTextView.setText(notes);
-        //HashMap<String, RoomData> roomData = collectRoomData();
-        recyclerView = findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // room data
-        List<String> roomNames;
-        if (userProperty.getRoomNames() != null){
-            roomNames = userProperty.getRoomNames();
-        }else{
-            roomNames = new ArrayList<>();
-        }
-        ArrayList<ArrayList<String>> imagesPerRoom = new ArrayList<>();
-        ArrayList<Float> brightnessList = new ArrayList<>();
-        ArrayList<Float> noiseList = new ArrayList<>();
-        ArrayList<String> windowOrientationList = new ArrayList<>();
+        // 获取房间名称列表
+        List<String> roomNames = userProperty.getRoomNames();
 
-        for (String roomName : roomNames) {
-            RoomData roomData = inspectedData.get(roomName);
-            if (roomData != null) {
-                imagesPerRoom.add(roomData.getImages());
-                brightnessList.add(roomData.getBrightness());
-                noiseList.add(roomData.getNoise());
-                windowOrientationList.add(roomData.getWindowOrientation());
+        // 检查是否存在已检查的房间数据
+        if (roomNames == null || roomNames.isEmpty()){
+            // 如果没有房间数据，显示提示信息
+            TextView noDataTextView = findViewById(R.id.no_data_text_view);
+            noDataTextView.setText("No inspected data found, lets go to conduct your first inspection!");
+            noDataTextView.setVisibility(View.VISIBLE);
+
+            // 隐藏RecyclerView
+            RecyclerView recyclerView = findViewById(R.id.recycler_view);
+            recyclerView.setVisibility(View.GONE);
+        } else {
+            // 如果有房间数据，设置RecyclerView
+            RecyclerView recyclerView = findViewById(R.id.recycler_view);
+            recyclerView.setVisibility(View.VISIBLE); // 显示RecyclerView
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+            // 初始化房间数据相关的列表
+            ArrayList<ArrayList<String>> imagesPerRoom = new ArrayList<>();
+            ArrayList<Float> brightnessList = new ArrayList<>();
+            ArrayList<Float> noiseList = new ArrayList<>();
+            ArrayList<String> windowOrientationList = new ArrayList<>();
+
+            for (String roomName : roomNames) {
+                RoomData roomData = inspectedData.get(roomName);
+                if (roomData != null) {
+                    imagesPerRoom.add(roomData.getImages());
+                    brightnessList.add(roomData.getBrightness());
+                    noiseList.add(roomData.getNoise());
+                    windowOrientationList.add(roomData.getWindowOrientation());
+                }
             }
+
+            // 设置适配器
+            PropertyConditionAdapter adapter = new PropertyConditionAdapter(
+                    roomNames,
+                    imagesPerRoom,
+                    brightnessList,
+                    noiseList,
+                    windowOrientationList
+            );
+
+            // RecyclerView设置适配器
+            recyclerView.setAdapter(adapter);
+            Log.d("RecyclerViewSetup", "RecyclerView should be set. Room count: " + roomNames.size());
         }
-
-        // set adapter
-        PropertyConditionAdapter adapter = new PropertyConditionAdapter(
-                roomNames,
-                imagesPerRoom,
-                brightnessList,
-                noiseList,
-                windowOrientationList
-        );
-
-       // RecyclerView
-        recyclerView.setAdapter(adapter);
-        Log.d("RecyclerViewSetup", "RecyclerView should be set. Room count: " + roomNames.size());
     }
 
     private void requestStoragePermission() {

@@ -223,8 +223,17 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             //}
 
             //测试
-                holder.lightValueTextView.setText(roomData.get(currentRoomName).getBrightness() + " Lux");
-                holder.noiseValueTextView.setText(roomData.get(currentRoomName).getNoise() + " dB");
+                if (roomData.get(currentRoomName).getBrightness() == -1) {
+                    holder.lightValueTextView.setText("--");
+                } else {
+                    holder.lightValueTextView.setText(roomData.get(currentRoomName).getBrightness() + " Lux");
+                }
+
+                if (roomData.get(currentRoomName).getNoise() == -1) {
+                    holder.noiseValueTextView.setText("--");
+                } else {
+                    holder.noiseValueTextView.setText(roomData.get(currentRoomName).getNoise() + " dB");
+                }
                 holder.compassValueTextView.setText(roomData.get(currentRoomName).getWindowOrientation());
 
 
@@ -326,7 +335,11 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     holder.testAudioThread = null;
 
                     // 清除TextView
-                    holder.noiseValueTextView.setText(roomData.get(currentRoomName).getNoise() + " dB");
+                    if (roomData.get(currentRoomName).getNoise() == -1) {
+                        holder.noiseValueTextView.setText("--");
+                    } else {
+                        holder.noiseValueTextView.setText(roomData.get(currentRoomName).getNoise() + " dB");
+                    }
                 }
             }
 
@@ -359,7 +372,11 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     holder.testLightThread = null;
 
                     // 清除TextView
-                    holder.lightValueTextView.setText(roomData.get(currentRoomName).getBrightness() + " Lux");
+                    if (roomData.get(currentRoomName).getBrightness() == -1) {
+                        holder.lightValueTextView.setText("--");
+                    } else {
+                        holder.lightValueTextView.setText(roomData.get(currentRoomName).getBrightness() + " Lux");
+                    }
                 }
             }
 

@@ -61,9 +61,12 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String currentRoomName = roomNames.get(position);
         holder.roomName.setText(currentRoomName);
-        holder.noiseValue.setText(String.format(Locale.getDefault(), "%.0fdb", noiseList.get(position)));
 
-        holder.lightValue.setText(String.format(Locale.getDefault(), "%.0f Lux", brightnessList.get(position)));
+        float noise = noiseList.get(position);
+        holder.noiseValue.setText(noise == -1 ? "--" : String.format(Locale.getDefault(), "%.0f dB", noise));
+        float brightness = brightnessList.get(position);
+        holder.lightValue.setText(brightness == -1 ? "--" : String.format(Locale.getDefault(), "%.0f Lux", brightness));
+
         holder.windowValue.setText(windowOrientationList.get(position));
         if ("Others".equals(currentRoomName)) {
             holder.noiseValue.setVisibility(View.GONE);
