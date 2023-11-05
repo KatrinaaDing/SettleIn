@@ -17,11 +17,13 @@ import com.example.property_management.api.FirebaseFunctionsHelper;
 import com.example.property_management.api.FirebasePropertyRepository;
 import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.AddPropertyCallback;
+import com.example.property_management.callbacks.BasicDialogCallback;
 import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.NewProperty;
 import com.example.property_management.databinding.ActivityAddPropertyBinding;
 import com.example.property_management.ui.fragments.base.ArrowNumberPicker;
 import com.example.property_management.ui.fragments.base.AutocompleteFragment;
+import com.example.property_management.ui.fragments.base.BasicDialog;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.example.property_management.utils.Helpers;
 import com.example.property_management.utils.UrlValidator;
@@ -231,19 +233,32 @@ public class AddPropertyActivity extends AppCompatActivity {
         payLoad.put("address", autocompleteFragment.getSelectedAddress());
         FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
         firebaseFunctionsHelper.checkPropertyExists(payLoad)
-            .addOnSuccessListener(result -> {
-                if (result == null) {
+            .addOnSuccessListener(propertId -> {
+                if (propertId == null) {
                     // property does not exist, add the property
                     Log.d("add-property-exists", "can add property");
                     addProperty(activity);
                 } else {
-                    // property exists, return the document id
-                    // TODO: pop dialog to ask user if redirect to property page
-                    Log.d("add-property-exists", "property exists with document id " + result);
-                    enableSubmit();
-                    new BasicSnackbar(findViewById(android.R.id.content),
+                    // property exists, take user to property detail page
+                    BasicDialog dialog = new BasicDialog(true,
                             "You have already added this property.",
-                            "error");
+                            "Would you like to view the property?",
+                            "No, thanks",
+                            "Okay");
+                    dialog.setCallback(new BasicDialogCallback() {
+                        @Override
+                        public void onLeftBtnClick() {
+                            dialog.dismiss();
+                        }
+                        @Override
+                        public void onRightBtnClick() {
+                            Intent intent = new Intent(getApplicationContext(), PropertyDetailActivity.class);
+                            intent.putExtra("property_id", propertId);
+                            startActivity(intent);
+                        }
+                    });
+                    enableSubmit();
+                    dialog.show(getSupportFragmentManager(), "existing property dialog");
                 }
             })
             .addOnFailureListener(e -> {

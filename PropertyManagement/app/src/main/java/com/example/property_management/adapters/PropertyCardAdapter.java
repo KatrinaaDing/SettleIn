@@ -1,20 +1,14 @@
 package com.example.property_management.adapters;
 
-import static androidx.core.content.ContextCompat.startActivity;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -33,14 +27,10 @@ import com.example.property_management.data.Property;
 import com.example.property_management.ui.activities.PropertyDetailActivity;
 import com.example.property_management.ui.fragments.base.BasicDialog;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
-import com.example.property_management.ui.fragments.base.PropertyCard;
 import com.example.property_management.ui.fragments.property.AmenitiesGroup;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 
-import org.w3c.dom.Text;
-
-import java.util.EventListener;
 import java.util.List;
 
 public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapter.ViewHolder>{
@@ -51,7 +41,7 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
     EventListener listener;
 
     public interface EventListener {
-        void onEvent(boolean hasProperty);
+        void onHasProperties(boolean hasProperty);
     }
 
     public PropertyCardAdapter(List<Property> properties, EventListener listener) {
@@ -181,9 +171,7 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
                         notifyItemRangeChanged(position, properties.size());
 
                         // show hint if property list is empty
-                        if (properties.size() == 0) {
-                            listener.onEvent(false);
-                        }
+                        listener.onHasProperties(properties.size() == 0);
                     }
                     @Override
                     public void onError(String msg) {

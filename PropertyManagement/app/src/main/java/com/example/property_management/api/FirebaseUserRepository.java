@@ -13,6 +13,7 @@ import com.example.property_management.callbacks.DeleteInterestedFacilityCallbac
 import com.example.property_management.data.Property;
 import com.example.property_management.data.User;
 import com.example.property_management.data.UserProperty;
+import com.example.property_management.utils.DateTimeFormatter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -233,17 +234,19 @@ public class FirebaseUserRepository {
             @Override
             public void onComplete(Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
+                    DocumentSnapshot snapshot = task.getResult();
+                    User user = snapshot.toObject(User.class);
                     List<String> docIds = new ArrayList<>();
-                    HashMap<String, UserProperty> userProperties = task.getResult().toObject(User.class).getProperties();
-                    if (userProperties != null && !userProperties.isEmpty()) {
-                        for (String docId : userProperties.keySet()) {
-                            docIds.add(docId);
+                    if (user != null) {
+                        HashMap<String, UserProperty> userProperties = task.getResult().toObject(User.class).getProperties();
+                        if (userProperties != null && !userProperties.isEmpty()) {
+                            for (String docId : userProperties.keySet()) {
+                                docIds.add(docId);
+                            }
                         }
-                    }
 
-                    Log.d("get-all-user-properties-success", docIds.toString());
-                    if (docIds != null) {
-                        if (!docIds.isEmpty()) {
+                        Log.d("get-all-user-properties-success", docIds.toString());
+                        if (docIds != null && !docIds.isEmpty()) {
                             collecRef.whereIn(FieldPath.documentId(), docIds)
                                     .get()
                                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -258,6 +261,13 @@ public class FirebaseUserRepository {
                                                     property.setPropertyId(document.getId());
                                                     property.setInspected(userProperties.get(document.getId()).getInspected());
                                                     property.setCreatedAt(userProperties.get(document.getId()).getCreatedAt());
+                                                    property.setInspectionDate(
+                                                            DateTimeFormatter.stringToDate(userProperties.get(document.getId()).getInspectionDate())
+                                                    );
+                                                    property.setInspectionTime(
+                                                            DateTimeFormatter.stringToTime(userProperties.get(document.getId()).getInspectionTime())
+                                                    );
+
                                                     properties.add(property);
                                                 }
                                                 callback.onSuccess(properties);

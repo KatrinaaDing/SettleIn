@@ -9,15 +9,33 @@
         android:orientation="vertical"
         android:paddingHorizontal="20dp"
         >
-
         <!-- insert email -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/editTextRegisterEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Enter your email"
-            android:paddingVertical="20dp">
+            android:layout_marginTop="20dp">
             <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                />
+        </com.google.android.material.textfield.TextInputLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="10dp"
+            android:text="Please enter a valid email address, otherwise you will not be able to reset your password."/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/editTextRegisterUsername"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter your Username"
+            android:layout_marginBottom="20dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/registerUsername"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
@@ -60,7 +78,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Register"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="40dp"
             />
 
         <Button
@@ -68,7 +86,6 @@
             style="@style/Widget.Material3.Button.ElevatedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
             android:text="Go to Login" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

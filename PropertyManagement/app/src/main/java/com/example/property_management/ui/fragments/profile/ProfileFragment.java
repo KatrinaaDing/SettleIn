@@ -85,9 +85,6 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
 
         activity = (AppCompatActivity) getActivity();
 
-        final TextView textView = binding.textProfile;
-//        profileViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
-
         // ========================= Components ==========================
         Button editBtn = binding.editBtn;
         ImageButton addFacilityBtn = binding.addFacilityBtn;
@@ -247,12 +244,15 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
 
     @Override
     public void onProfileUpdated(String newUsername, String newEmail) {
+        if (!newUsername.isEmpty()) {
+            TextView UsernameTextView = getView().findViewById(R.id.userName);
+            UsernameTextView.setText(newUsername);
+        }
 
-        TextView UsernameTextView = getView().findViewById(R.id.userName);
-        UsernameTextView.setText(newUsername);
-
-        TextView emailTextView = getView().findViewById(R.id.userEmail);
-        emailTextView.setText(newEmail);
+        if (!newEmail.isEmpty()) {
+            TextView emailTextView = getView().findViewById(R.id.userEmail);
+            emailTextView.setText(newEmail);
+        }
     }
 
     public void setInterestedLocationsRecycleView(){

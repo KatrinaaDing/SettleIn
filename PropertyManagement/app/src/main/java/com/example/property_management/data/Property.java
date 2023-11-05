@@ -1,5 +1,7 @@
 package com.example.property_management.data;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,6 +21,8 @@ public class Property {
     private ArrayList<String> images;
     private boolean inspected;
     private Date createdAt;
+    private LocalDate inspectionDate;
+    private LocalTime inspectionTime;
 
     public Property() {};
     public Property(String propertyId, String href, String address, double lat, double lng, int numBedrooms, int numBathrooms, int numParking, HashMap<String, RoomData> propertyData, ArrayList<String> images, int price) {
@@ -86,6 +90,14 @@ public class Property {
     public Date getCreatedAt() { return createdAt; }
 
     public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
+
+    public LocalDate getInspectionDate() { return inspectionDate; }
+
+    public void setInspectionDate(LocalDate inspectionDate) { this.inspectionDate = inspectionDate; }
+
+    public LocalTime getInspectionTime() { return inspectionTime; }
+
+    public void setInspectionTime(LocalTime inspectionTime) { this.inspectionTime = inspectionTime; }
 
     public String toformattedString() {
         return
