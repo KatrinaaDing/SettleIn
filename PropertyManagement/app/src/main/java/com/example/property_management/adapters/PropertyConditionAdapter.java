@@ -29,6 +29,9 @@ import java.util.Locale;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 
+/**
+ * Adapter for a RecyclerView that displays property condition details per room.
+ */
 public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyConditionAdapter.ViewHolder> {
 
     private List<String> roomNames;
@@ -37,6 +40,14 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
     private ArrayList<Float> noiseList;
     private ArrayList<String> windowOrientationList;
 
+    /**
+     * Constructor for the adapter.
+     * @param roomNames List of room names.
+     * @param imagesPerRoom List of image lists, each corresponding to a room.
+     * @param brightnessList List of brightness values for rooms.
+     * @param noiseList List of noise values for rooms.
+     * @param windowOrientationList List of window orientations for rooms.
+     */
     public PropertyConditionAdapter(
             List<String> roomNames,
             ArrayList<ArrayList<String>> imagesPerRoom,
@@ -50,6 +61,12 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
         this.windowOrientationList = windowOrientationList;
     }
 
+    /**
+     * Called when RecyclerView needs a new ViewHolder of the given type to represent an item.
+     * @param parent The ViewGroup into which the new View will be added.
+     * @param viewType The view type of the new View.
+     * @return A new ViewHolder that holds a View of the given view type.
+     */
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -57,17 +74,24 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
         return new ViewHolder(view, parent.getContext());
     }
 
+    /**
+     * Called by RecyclerView to display the data at the specified position.
+     * @param holder The ViewHolder which should be updated.
+     * @param position The position of the item within the adapter's data set.
+     */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String currentRoomName = roomNames.get(position);
         holder.roomName.setText(currentRoomName);
 
         float noise = noiseList.get(position);
+        // Set the noise value for the current item.
         holder.noiseValue.setText(noise == -1 ? "--" : String.format(Locale.getDefault(), "%.0f dB", noise));
         float brightness = brightnessList.get(position);
         holder.lightValue.setText(brightness == -1 ? "--" : String.format(Locale.getDefault(), "%.0f Lux", brightness));
 
         holder.windowValue.setText(windowOrientationList.get(position));
+        // Handle display for the "Others" room type, hiding certain elements.
         if ("Others".equals(currentRoomName)) {
             holder.noiseValue.setVisibility(View.GONE);
             holder.lightValue.setVisibility(View.GONE);
@@ -84,7 +108,7 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
             holder.lightView.setVisibility(View.GONE);
             holder.compassView.setVisibility(View.GONE);
         } else {
-
+            // Show all elements for normal room types.
             holder.noiseValue.setVisibility(View.VISIBLE);
             holder.lightValue.setVisibility(View.VISIBLE);
             holder.windowValue.setVisibility(View.VISIBLE);
@@ -121,7 +145,7 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
         // initialize PropertyConditionCarouselAdapter
         PropertyConditionCarouselAdapter propertyConditionCarouselAdapter = new PropertyConditionCarouselAdapter(holder.itemView.getContext(), imagesPerRoom.get(position));
 
-       // if no image
+        // Handle visibility of the image carousel depending on whether images are available.
         if (imagesPerRoom.get(position).isEmpty()) {
             holder.imageCarousel.setVisibility(View.GONE);
         } else {
@@ -131,7 +155,7 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
             propertyConditionCarouselAdapter.setOnItemClickListener(new PropertyConditionCarouselAdapter.OnItemClickListener() {
                 @Override
                 public void onClick(ImageView imageView, String imageResourceOrUrl) {
-                    // show placeholder
+                    // Launch an activity to show the image in full screen.
                     Intent intent = new Intent(holder.itemView.getContext(), ImageViewActivity.class);
                     intent.putExtra("image", imageResourceOrUrl);
                     ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(
@@ -143,8 +167,7 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
                 }
             });
 
-
-            // if only one photo
+            // Special handling if there is only one photo in the carousel.
             if (propertyConditionCarouselAdapter.getItemCount() == 1) {
                 LinearLayoutManager linearLayoutManager = new LinearLayoutManager(holder.itemView.getContext(),
                         LinearLayoutManager.HORIZONTAL, false);
@@ -153,12 +176,16 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
                 linearLayoutManager.setStackFromEnd(true);
             }
 
-            // set adapter
+            // Set the adapter for the image carousel.
             holder.imageCarousel.setAdapter(propertyConditionCarouselAdapter);
         }
 
     }
 
+    /**
+     * Displays an informational dialog with recommended lighting levels for various rooms in a home.
+     * @param context The context where the dialog is to be displayed.
+     */
     private void showInformationDialog(Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Recommended lighting levels for the Home in Lux");
@@ -170,8 +197,10 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
                 "Bathrooms: 150-300 Lux"
         };
 
+        // Set the items to display in the dialog and provide no additional behavior on click.
         builder.setItems(lightingLevels, null);
 
+        // Set the 'Close' button and its click listener to dismiss the dialog.
         builder.setNegativeButton("Close", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -179,10 +208,15 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
             }
         });
 
+        // Create and show the dialog.
         AlertDialog dialog = builder.create();
         dialog.show();
     }
 
+    /**
+     * Displays an informational dialog with recommended noise levels for a home.
+     * @param context The context where the dialog is to be displayed.
+     */
     private void showNoiseLevelDialog(Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Recommended noise levels for the Home in db");
@@ -193,8 +227,10 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
                 "High risk db > 55: Not recommended to live"
         };
 
+        // Set the items to display in the dialog and provide no additional behavior on click.
         builder.setItems(noiseLevels, null);
 
+        // Set the 'Close' button and its click listener to dismiss the dialog.
         builder.setNegativeButton("Close", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -202,15 +238,23 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
             }
         });
 
+        // Create and show the dialog.
         AlertDialog dialog = builder.create();
         dialog.show();
     }
 
+    /**
+     * Returns the total number of items in the data set held by the adapter.
+     * @return The number of items in the data set.
+     */
     @Override
     public int getItemCount() {
         return roomNames.size();
     }
 
+    /**
+     * ViewHolder class for caching views associated with the default property condition item.
+     */
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView roomName, noiseValue, lightValue, windowValue;
         ImageView noiseIcon, lightIcon, compassIcon;
@@ -220,6 +264,11 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
         ImageButton infoButton;
         Context context;
 
+        /**
+         * Constructor for the ViewHolder.
+         * @param itemView The View for the individual item.
+         * @param context The context in which the ViewHolder is operating.
+         */
         public ViewHolder(@NonNull View itemView, Context context) {
             super(itemView);
             this.context = context;
@@ -241,6 +290,7 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
             infoButton = itemView.findViewById(R.id.infoButton);
             infoButton.setOnClickListener(new View.OnClickListener() {
                 @Override
+                // Display the information dialog for lighting levels.
                 public void onClick(View v) {
                     showInformationDialog(context);
                 }
@@ -248,6 +298,7 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
 
             noiseLevelText.setOnClickListener(new View.OnClickListener() {
                 @Override
+                // Display the information dialog for noise levels.
                 public void onClick(View v) {
                     showNoiseLevelDialog(v.getContext());
                 }

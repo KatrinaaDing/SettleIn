@@ -100,7 +100,6 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     private PropertyConditionAdapter adapter;
     List<List<Integer>> imagesPerRoom = new ArrayList<>();
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,8 +107,6 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         setContentView(binding.getRoot());
         setTitle("Property Detail");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-
 
         // get userId
         FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(this);
@@ -125,10 +122,6 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
 
         // fetch property data from firebase
         getPropertyById(this.propertyId);
-
-
-
-
 
         // ================================== Components =======================================
         initInfoButton();
@@ -154,25 +147,29 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
 
     }
 
+    /**
+     * Called when the fragment's activity has been resumed and is visible again.
+     */
     @Override
     public void onResume() {
         super.onResume();
-        // refresh properties when user returns to home fragment
-        // getAllProperties(this); // 如果 getAllProperties 需要 Context 作为参数
+        // When the fragment view is being created, check if property details have been updated.
         SharedPreferences sharedPreferences = this.getSharedPreferences("propertyDetailUpdated",
                 Context.MODE_PRIVATE);
+        // If property details have been updated, refresh the data displayed.
         if (sharedPreferences.getBoolean("isUpdated", false)) {
+            // Retrieve the updated property details by ID.
             getPropertyById(this.propertyId);
+            // Clear the update flag from shared preferences.
             sharedPreferences.edit()
                     .remove("isUpdated")
                     .apply();
 
+            // Hide the "no data" text view if property details are updated.
             TextView noDataTextView = findViewById(R.id.no_data_text_view);
             noDataTextView.setVisibility(View.GONE);
         }
     }
-
-
 
     /**
      * Initialize map fragment
@@ -374,7 +371,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                     initMap();
                     setLoading(false);
 
-                    //成功fetch数据之后再请求权限setInspectedData,以免闪退
+                    //setInspectedData after fetch
                     requestStoragePermission();
                 })
                 .addOnFailureListener(e -> {
@@ -686,9 +683,9 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 }
             }
         }else if (MY_PERMISSIONS_REQUEST_CAMERA_AND_STORAGE == requestCode){
-            // 如果请求被取消，结果数组为空
+            // if cancel
             if (grantResults.length > 0) {
-                // 循环检查每个请求的结果
+                // check result
                 for (int i = 0; i < permissions.length; i++) {
                     switch (permissions[i]) {
                         case Manifest.permission.CAMERA:
@@ -699,7 +696,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                             break;
                     }
                 }
-                // 如果所有请求的权限都被授予，则可以进行相关操作
+                // if get permission
                 if (hasWriteExternalStoragePermission) {
                     setInspectedData(userProperty);
                 }
@@ -746,53 +743,54 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         setDistanceRecycler(distanceInfoList);
     }
 
+    /**
+     * Sets the data for the inspected rooms.
+     * @param userProperty The property containing room inspection data.
+     */
     private void setInspectedData(UserProperty userProperty){
-        //获取到的inspected Data
-        HashMap<String, RoomData> inspectedData = new HashMap<>();
-        inspectedData = this.userProperty.getInspectedData();
+        // Retrieve the inspected data for all rooms.
+        HashMap<String, RoomData> inspectedData = userProperty.getInspectedData();
 
-        for (String roomname: inspectedData.keySet()){
-            Log.d("inspectedData in propertydetail",this.userProperty.getInspectedData().get(roomname).toString());
+        for (String roomName : inspectedData.keySet()){
+            Log.d("inspectedData in propertydetail", inspectedData.get(roomName).toString());
         }
 
-        // note
+        // Get the inspection notes.
         String notes = userProperty.getNotes();
-
-        // note
         TextView savedNotesTextView = findViewById(R.id.saved_notes);
 
-        // set note
+        // Display inspection notes or a default message if notes are empty.
         if (notes == null || notes.trim().isEmpty()) {
             savedNotesTextView.setText("No inspected note, you can write your note in inspection!");
         } else {
             savedNotesTextView.setText(notes);
         }
 
-        // 获取房间名称列表
         List<String> roomNames = userProperty.getRoomNames();
 
-        // 检查是否存在已检查的房间数据
+        // Check for existing inspected room data.
         if (roomNames == null || roomNames.isEmpty()){
-            // 如果没有房间数据，显示提示信息
+            // If no room data is found, show a message prompting the user to start inspection.
             TextView noDataTextView = findViewById(R.id.no_data_text_view);
             noDataTextView.setText("No inspected data found, lets go to conduct your first inspection!");
             noDataTextView.setVisibility(View.VISIBLE);
 
-            // 隐藏RecyclerView
+            // Hide the RecyclerView if there are no rooms to display.
             RecyclerView recyclerView = findViewById(R.id.recycler_view);
             recyclerView.setVisibility(View.GONE);
         } else {
-            // 如果有房间数据，设置RecyclerView
+            // If room data exists, prepare the RecyclerView to display it.
             RecyclerView recyclerView = findViewById(R.id.recycler_view);
-            recyclerView.setVisibility(View.VISIBLE); // 显示RecyclerView
+            recyclerView.setVisibility(View.VISIBLE);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-            // 初始化房间数据相关的列表
+            // Initialize lists to hold room data for the adapter.
             ArrayList<ArrayList<String>> imagesPerRoom = new ArrayList<>();
             ArrayList<Float> brightnessList = new ArrayList<>();
             ArrayList<Float> noiseList = new ArrayList<>();
             ArrayList<String> windowOrientationList = new ArrayList<>();
 
+            // Populate lists with room data.
             for (String roomName : roomNames) {
                 RoomData roomData = inspectedData.get(roomName);
                 if (roomData != null) {
@@ -803,7 +801,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 }
             }
 
-            // 设置适配器
+            // Set up the adapter with the room data.
             PropertyConditionAdapter adapter = new PropertyConditionAdapter(
                     roomNames,
                     imagesPerRoom,
@@ -811,30 +809,25 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                     noiseList,
                     windowOrientationList
             );
-
-            // RecyclerView设置适配器
             recyclerView.setAdapter(adapter);
             Log.d("RecyclerViewSetup", "RecyclerView should be set. Room count: " + roomNames.size());
         }
     }
 
+    /**
+     * Requests permission to write to external storage if it has not already been granted.
+     */
     private void requestStoragePermission() {
+        // Check if write external storage permission has been granted.
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-
+            // If not granted, request the write external storage permission.
             ActivityCompat.requestPermissions(this,
-                    new String[] {
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE
-                    },
+                    new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE },
                     MY_PERMISSIONS_REQUEST_CAMERA_AND_STORAGE);
         } else {
+            // Set flags indicating that camera and storage permissions have been granted.
             hasCameraPermission = true;
             hasWriteExternalStoragePermission = true;
         }
     }
-
-
-
-
-
-
 }

@@ -92,26 +92,37 @@ public class CompassSensor implements SensorEventListener {
         }
     }
 
+    /**
+     * Starts the compass test by registering sensor listeners and starting the automatic stop runnable.
+     */
     public void startTest() {
+        // Begin recording sensor data.
         isRecording = true;
+        // Register sensor listeners with a specific delay for real-time updates.
         sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_GAME);
         sensorManager.registerListener(this, magnetometerSensor, SensorManager.SENSOR_DELAY_GAME);
+        // Schedule the stopRunnable to execute after 3 seconds.
         handler.postDelayed(stopRunnable, 3000);
-
+        // Start a new thread to manage the test duration.
         new Thread(new Runnable() {
             @Override
             public void run() {
+                // Track the time elapsed during the test.
                 int count = 0;
+                // Check if recording should continue and if the duration has not exceeded 30 iterations.
                 while (isRecording && count < 30) {
+                    // Log the recording status.
                     Log.d("isCompassRecording","true");
                     count++;
                     try {
+                        // Pause the thread for a short duration before the next iteration.
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
-                if (isRecording) { // 只有当仍在记录时才更新平均值
+                // If recording is still active, stop the test.
+                if (isRecording) {
                     Log.d("Final compass stop","called");
                     stopTest();
                 }
@@ -119,14 +130,26 @@ public class CompassSensor implements SensorEventListener {
         }).start();
     }
 
+    /**
+     * Stops the compass test by unregistering sensor listeners and notifying the callback.
+     */
     public void stopTest() {
+        // Unregister sensor listeners to stop receiving updates.
         sensorManager.unregisterListener(this, accelerometerSensor);
         sensorManager.unregisterListener(this, magnetometerSensor);
+        // Remove any pending post of the stopRunnable from the handler queue.
         handler.removeCallbacks(stopRunnable);
+        // Notify that the compass test has completed.
         callback.onCompassTestCompleted();
     }
 
+    /**
+     * Converts a degree value to a compass direction.
+     * @param degree the degree value (0-360) representing the azimuth.
+     * @return A string representing the compass direction.
+     */
     private String getDirection(float degree) {
+        // Determine the compass direction based on degree ranges.
         if (degree >= 337.5 || degree < 22.5) {
             return "N";
         } else if (degree >= 22.5 && degree < 67.5) {
@@ -146,7 +169,13 @@ public class CompassSensor implements SensorEventListener {
         }
     }
 
+    /**
+     * Provides a small decimal value corresponding to a compass direction.
+     * @param direction the compass direction as a string (e.g., "N", "NE").
+     * @return A decimal value associated with the compass direction.
+     */
     private float getDirectionDecimal(String direction) {
+        // Map the compass direction to a specific small decimal value.
         switch (direction) {
             case "N": return 0.01f;
             case "NE": return 0.02f;
@@ -160,11 +189,20 @@ public class CompassSensor implements SensorEventListener {
         }
     }
 
+    /**
+     * Responds to changes in the accuracy of a sensor.
+     * @param sensor The sensor whose accuracy changed.
+     * @param i The new accuracy of this sensor.
+     */
     @Override
     public void onAccuracyChanged(Sensor sensor, int i){
         // Handle sensor accuracy changes if needed
     }
 
+    /**
+     * Sets the callback interface for sensor data updates.
+     * @param callback The callback interface to set.
+     */
     public void setCallback(SensorCallback callback) {
         this.callback = callback;
     }
