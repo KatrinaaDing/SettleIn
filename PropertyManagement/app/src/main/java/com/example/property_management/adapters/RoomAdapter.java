@@ -93,10 +93,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     private boolean isFirstBind = true;
     private HashMap<String, RoomData> roomData = new HashMap<>();
 
-    private ConcurrentLinkedHashMap<String, RoomData> inspectedRoomData =
-            new ConcurrentLinkedHashMap.Builder<String, RoomData>()
-                    .maximumWeightedCapacity(100) // 设置最大权重容量
-                    .build();
+    private LinkedHashMap<String, RoomData> inspectedRoomData = new LinkedHashMap<>();
 
     public RoomAdapter(Context context, List<String> roomNames, HashMap<String, RoomData> roomData) {
         this.context = context;
@@ -111,7 +108,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             Log.d("XX roomNames name set roomAdapter", names);
             Log.d("XX inspectedRoomData name set roomAdapter", inspectedRoomData.keySet().toString());
         }
-
 
         for (int i = 0; i < roomNames.size(); i++) {
             roomImages.add(new ArrayList<>());
@@ -146,6 +142,10 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         return new ViewHolder(view);
     }
 
+
+
+
+
     /**
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position, @NonNull List<Object> payloads) {
@@ -176,6 +176,10 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                 } else if ("UPDATE_ROOM_NAME".equals(payload)) {
                     // Update only room name related views
                     holder.roomName.setText(roomNames.get(position));
+                } else if ("DISABLE_BUTTON".equals(payload)) {
+                    holder.noiseTestButton.setEnabled(false);
+                    holder.lightTestButton.setEnabled(false);
+                    holder.compassTestButton.setEnabled(false);
                 }
                 // Handle other specific updates with else-if statements
             }
@@ -300,8 +304,8 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             public void onAverageDbCalculated(double averageDb) {
                 ((Activity) context).runOnUiThread(() -> {
                     holder.noiseValueTextView.setText(String.format("%.2f dB", averageDb));
-                    inspectedRoomData.get(position).setNoise((float)averageDb);
-                    Log.d("onAverageDbCalculated", "onAverageDbCalculated called");
+                    inspectedRoomData.get(roomNamesOrigin.get(position)).setNoise((float)averageDb);
+
                 });
             }
 
@@ -322,7 +326,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     holder.isLightTesting = false;
                     String value = holder.lightValueTextView.getText().toString();
                     float numValue = Float.valueOf(extractNumber(value));
-                    inspectedRoomData.get(position).setBrightness(numValue);
+                    inspectedRoomData.get(roomNamesOrigin.get(position)).setBrightness(numValue);
                 });
             }
 
@@ -333,7 +337,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     holder.compassTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
                     holder.isCompassTesting = false;
                     String value = holder.compassValueTextView.getText().toString();
-                    inspectedRoomData.get(position).setWindowOrientation(value);
+                    inspectedRoomData.get(roomNamesOrigin.get(position)).setWindowOrientation(value);
                 });
             }
         };
@@ -347,6 +351,8 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
             if (!holder.isNoiseTesting) {
                 // 开始测试
+
+                notifyItemChanged(position,"DISABLE_BUTTON");
                 holder.isNoiseTesting = true;
                 holder.noiseTestButton.setText("Cancel");
                 holder.noiseTestButton.setBackgroundColor(Color.RED); // 设置为您选择的红色色值
@@ -490,6 +496,8 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             }
         });
     }
+
+
 
     //Use cameraX library
     private void startCamera(PreviewView previewView, Button captureButton, Dialog cameraDialog, ViewHolder holder) {
@@ -820,7 +828,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                 });
         builder.show();
     }
-    public static void alterRoomName(ConcurrentLinkedHashMap<String, RoomData> originRoomData, String oldRoomName, String newRoomName) {
+    public static void alterRoomName(LinkedHashMap<String, RoomData> originRoomData, String oldRoomName, String newRoomName) {
         // Check if the original map contains the old key
         if (!originRoomData.containsKey(oldRoomName)) {
             System.out.println("The old room name does not exist in the data.");
@@ -858,18 +866,20 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         }
     }
 
-    public ConcurrentLinkedHashMap<String, RoomData> getInspectedRoomData () {return inspectedRoomData;};
+
+
+
+
+    public LinkedHashMap<String, RoomData> getInspectedRoomData () {return inspectedRoomData;};
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         //test
         public boolean isNoiseTesting = false;
         public boolean isLightTesting = false;
         public boolean isCompassTesting = false;
-
         public Thread testAudioThread;
         public Thread testLightThread;
         public Thread testCompassThread;
-
         ImageView editRoomNameIcon;
         public TextView roomName;
         ImageView cameraIcon, noiseIcon, lightIcon, compassIcon;

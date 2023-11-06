@@ -83,7 +83,9 @@ import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 
 import android.app.AlertDialog;
 
-
+/**
+ * Activity for collecting data on room conditions including images, noise, light, and compass orientation.
+ */
 public class DataCollectionActivity extends AppCompatActivity {
     private static final int PERMISSIONS_REQUEST_CAMERA = 1;
     private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 2;
@@ -107,10 +109,7 @@ public class DataCollectionActivity extends AppCompatActivity {
     private Map<Integer, List<String>> roomImagePathsMap = new LinkedHashMap<>();
     private int room_num;
     private String notes;
-    private ConcurrentLinkedHashMap<String, RoomData> inspectedRoomData =
-            new ConcurrentLinkedHashMap.Builder<String, RoomData>()
-                    .maximumWeightedCapacity(100) // 设置最大权重容量
-                    .build();
+    private LinkedHashMap<String, RoomData> inspectedRoomData = new LinkedHashMap<>();
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -298,12 +297,12 @@ public class DataCollectionActivity extends AppCompatActivity {
             //测试测试
 
             inspectedRoomData = roomAdapter.getInspectedRoomData();
-            Log.d("roomName", roomName.toString());
-            Log.d("roomData name set", roomData.keySet().toString());
-            Log.d("roomData data", roomData.keySet().toString());
-            Log.d("inspectedRoomData name set", inspectedRoomData.keySet().toString());
+            Log.d("NN roomName", roomName.toString());
+            Log.d("NN roomData name set", roomData.keySet().toString());
+            Log.d("NN roomData data", roomData.keySet().toString());
+            Log.d("NN inspectedRoomData name set", inspectedRoomData.keySet().toString());
             for (String name:inspectedRoomData.keySet()){
-                Log.d("inspectedRoomData data", inspectedRoomData.get(name).toString());
+                Log.d("NN inspectedRoomData data", inspectedRoomData.get(name).toString());
             }
 
 
