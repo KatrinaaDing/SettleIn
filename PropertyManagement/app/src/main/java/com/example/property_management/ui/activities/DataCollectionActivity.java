@@ -300,7 +300,6 @@ public class DataCollectionActivity extends AppCompatActivity {
 
             updateInspectedData(propertyId, roomData, roomName);
 
-            //Toast.makeText(this, "Upload data successfully! ", Toast.LENGTH_SHORT).show();
             new BasicSnackbar(findViewById(android.R.id.content), "Upload data successfully!", "success");
 
 
@@ -588,7 +587,6 @@ public class DataCollectionActivity extends AppCompatActivity {
                 hasRecordAudioPermission = true;
                 initRecyclerView();
             } else {
-                // 权限被拒绝，向用户解释为什么需要这个权限
                 new BasicSnackbar(findViewById(android.R.id.content), "The app needs audio recording permission to function properly.", "info", Snackbar.LENGTH_LONG);
                 // 处理权限被拒绝的情况
             }

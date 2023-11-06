@@ -250,7 +250,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             //}
 
             //测试
-                if (roomData.get(currentRoomName).getBrightness() == -1) {
+                if (roomData.get(roomNamesOrigin.get(position)).getBrightness() == -1) {
                     holder.lightValueTextView.setText("--");
                 } else {
                     holder.lightValueTextView.setText(roomData.get(roomNamesOrigin.get(position)).getBrightness() + " Lux");
@@ -297,7 +297,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             public void onAverageDbCalculated(double averageDb) {
                 ((Activity) context).runOnUiThread(() -> {
                     holder.noiseValueTextView.setText(String.format("%.2f dB", averageDb));
-                    inspectedRoomData.get(roomNamesOrigin.get(position)).setNoise((float)averageDb);
+                    inspectedRoomData.get(roomNames.get(position)).setNoise((float)averageDb);
 
                 });
             }
@@ -346,7 +346,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     holder.isLightTesting = false;
                     String value = holder.lightValueTextView.getText().toString();
                     float numValue = Float.valueOf(extractNumber(value));
-                    inspectedRoomData.get(roomNamesOrigin.get(position)).setBrightness(numValue);
+                    inspectedRoomData.get(roomNames.get(position)).setBrightness(numValue);
                 });
             }
 
@@ -357,7 +357,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     holder.compassTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
                     holder.isCompassTesting = false;
                     String value = holder.compassValueTextView.getText().toString();
-                    inspectedRoomData.get(roomNamesOrigin.get(position)).setWindowOrientation(value);
+                    inspectedRoomData.get(roomNames.get(position)).setWindowOrientation(value);
                 });
             }
         };
@@ -856,7 +856,8 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                                 notifyItemChanged(currentPosition, "UPDATE_ROOM_NAME");
                             } else {
                                 View view = holder.itemView;
-                                Snackbar.make(view, "Room name cannot be duplicated", Snackbar.LENGTH_LONG).show();
+                                new BasicSnackbar(view, "Room name cannot be duplicated", "info", Snackbar.LENGTH_LONG);
+
                             }
                         }
                     }
