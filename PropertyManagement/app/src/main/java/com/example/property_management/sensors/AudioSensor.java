@@ -94,7 +94,7 @@ public class AudioSensor {
     public void stopTest() {
         isRecording = false;
         audioRecord.stop();
-        audioRecord.release(); // Ensure the AudioRecord's resources are released
+        //audioRecord.release(); // Ensure the AudioRecord's resources are released
     }
 
     /**

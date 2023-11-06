@@ -287,13 +287,13 @@ public class DataCollectionActivity extends AppCompatActivity {
             //测试测试
 
 
-            Log.d("NN roomName", roomName.toString());
-            Log.d("NN roomData name set", roomData.keySet().toString());
-            Log.d("NN roomData data", roomData.keySet().toString());
-            Log.d("NN inspectedRoomData name set", inspectedRoomData.keySet().toString());
-            for (String name:inspectedRoomData.keySet()){
-                Log.d("NN inspectedRoomData data", inspectedRoomData.get(name).toString());
-            }
+            //Log.d("NN roomName", roomName.toString());
+            //Log.d("NN roomData name set", roomData.keySet().toString());
+            //Log.d("NN roomData data", roomData.keySet().toString());
+            //Log.d("NN inspectedRoomData name set", inspectedRoomData.keySet().toString());
+            //for (String name:inspectedRoomData.keySet()){
+            //    Log.d("NN inspectedRoomData data", inspectedRoomData.get(name).toString());
+            //}
 
 
 
