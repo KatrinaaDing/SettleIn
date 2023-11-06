@@ -28,10 +28,11 @@ import com.example.property_management.data.RoomData;
 import com.example.property_management.sensors.AudioSensor;
 import com.example.property_management.sensors.CompassSensor;
 import com.example.property_management.sensors.LightSensor;
+import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 
 import android.view.Window;
 import android.view.WindowManager;
@@ -165,7 +166,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position, @NonNull List<Object> payloads) {
-        Log.d("payloads",payloads.toString());
         if (!payloads.isEmpty()) {
             for (Object payload : payloads) {
                 if ("UPDATE_PHOTO_COUNT".equals(payload)) {
@@ -176,19 +176,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                 } else if ("UPDATE_ROOM_NAME".equals(payload)) {
                     // Update only room name related views
                     holder.roomName.setText(roomNames.get(position));
-                } else if ("DISABLE_NOISE_BUTTON".equals(payload)) {
-                    holder.lightTestButton.setEnabled(false);
-                    holder.compassTestButton.setEnabled(false);
-                } else if ("DISABLE_LIGHT_BUTTON".equals(payload)) {
-                    holder.noiseTestButton.setEnabled(false);
-                    holder.compassTestButton.setEnabled(false);
-                } else if ("DISABLE_COMPASS_BUTTON".equals(payload)) {
-                    holder.lightTestButton.setEnabled(false);
-                    holder.lightTestButton.setEnabled(false);
-                } else if ("ENABLE_BUTTON".equals(payload)) {
-                    holder.noiseTestButton.setEnabled(true);
-                    holder.lightTestButton.setEnabled(true);
-                    holder.compassTestButton.setEnabled(true);
                 }
                 // Handle other specific updates with else-if statements
             }
@@ -263,10 +250,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             //}
 
             //测试
-                Log.d("bindView Called, currentRoomName: ",currentRoomName);
-                Log.d("bindView Called, current position roomName: ",roomNames.get(position));
-                Log.d("bindView Called, room set  ",roomData.keySet().toString());
-                if (roomData.get(roomNamesOrigin.get(position)).getBrightness() == -1) {
+                if (roomData.get(currentRoomName).getBrightness() == -1) {
                     holder.lightValueTextView.setText("--");
                 } else {
                     holder.lightValueTextView.setText(roomData.get(roomNamesOrigin.get(position)).getBrightness() + " Lux");
@@ -856,9 +840,24 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                         int currentPosition = holder.getAdapterPosition();
                         if (currentPosition != RecyclerView.NO_POSITION) {
                             String newName = roomNameEditText.getText().toString();
-                            alterRoomName(inspectedRoomData,roomNames.get(currentPosition),newName);
-                            roomNames.set(currentPosition, newName);
-                            notifyItemChanged(currentPosition, "UPDATE_ROOM_NAME");
+
+                            // 检查是否有重复的房间名
+                            boolean isDuplicate = false;
+                            for (int i = 0; i < roomNames.size(); i++) {
+                                if (newName.equalsIgnoreCase(roomNames.get(i)) && currentPosition != i) {
+                                    isDuplicate = true;
+                                    break;
+                                }
+                            }
+
+                            if (!isDuplicate) {
+                                alterRoomName(inspectedRoomData,roomNames.get(currentPosition),newName);
+                                roomNames.set(currentPosition, newName);
+                                notifyItemChanged(currentPosition, "UPDATE_ROOM_NAME");
+                            } else {
+                                View view = holder.itemView;
+                                Snackbar.make(view, "Room name cannot be duplicated", Snackbar.LENGTH_LONG).show();
+                            }
                         }
                     }
                 })
