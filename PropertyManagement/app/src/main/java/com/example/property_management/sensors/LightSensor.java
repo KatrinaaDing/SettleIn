@@ -68,11 +68,30 @@ public class LightSensor implements SensorEventListener{
                 // Stop the test when recording is still true after the loop
                 if (isRecording) {
                     Log.d("Final light stop", "called");
-                    stopTest();
+                    stopTestFull();
                 }
             }
         }).start();
     }
+
+    public void stopTestFull() {
+        // Mark recording as complete and unregister the sensor listener
+        isRecording = false;
+        sensorManager.unregisterListener(this);
+
+        // Calculate the average value from the total sum of readings and the count
+        float averageValue = totalValue / readingCount;
+
+        // Format the average value to two decimal places
+        String formattedAverageValue = String.format(Locale.US, "%.2f", averageValue);
+
+        // Notify the callback with the average light data
+        if (callback != null) {
+            callback.onSensorDataChanged("Light", Float.valueOf(formattedAverageValue));
+            callback.onLightTestCompletedFull();
+        }
+    }
+
 
     /**
      * Stops the light sensor test, calculates the average light value, and notifies the callback.

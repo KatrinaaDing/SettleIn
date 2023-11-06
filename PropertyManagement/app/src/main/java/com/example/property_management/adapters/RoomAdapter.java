@@ -176,10 +176,19 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                 } else if ("UPDATE_ROOM_NAME".equals(payload)) {
                     // Update only room name related views
                     holder.roomName.setText(roomNames.get(position));
-                } else if ("DISABLE_BUTTON".equals(payload)) {
-                    holder.noiseTestButton.setEnabled(false);
+                } else if ("DISABLE_NOISE_BUTTON".equals(payload)) {
                     holder.lightTestButton.setEnabled(false);
                     holder.compassTestButton.setEnabled(false);
+                } else if ("DISABLE_LIGHT_BUTTON".equals(payload)) {
+                    holder.noiseTestButton.setEnabled(false);
+                    holder.compassTestButton.setEnabled(false);
+                } else if ("DISABLE_COMPASS_BUTTON".equals(payload)) {
+                    holder.lightTestButton.setEnabled(false);
+                    holder.lightTestButton.setEnabled(false);
+                } else if ("ENABLE_BUTTON".equals(payload)) {
+                    holder.noiseTestButton.setEnabled(true);
+                    holder.lightTestButton.setEnabled(true);
+                    holder.compassTestButton.setEnabled(true);
                 }
                 // Handle other specific updates with else-if statements
             }
@@ -324,6 +333,33 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     holder.lightTestButton.setText("Test");
                     holder.lightTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
                     holder.isLightTesting = false;
+                });
+            }
+
+            @Override
+            public void onCompassTestCompleted() {
+                ((Activity) context).runOnUiThread(() -> {
+                    holder.compassTestButton.setText("Test");
+                    holder.compassTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
+                    holder.isCompassTesting = false;
+                });
+            }
+
+            @Override
+            public void onAudioTestCompletedFull() {
+                ((Activity) context).runOnUiThread(() -> {
+                    holder.noiseTestButton.setText("Test");
+                    holder.noiseTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
+                    holder.isNoiseTesting = false;
+                });
+            }
+
+            @Override
+            public void onLightTestCompletedFull() {
+                ((Activity) context).runOnUiThread(() -> {
+                    holder.lightTestButton.setText("Test");
+                    holder.lightTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
+                    holder.isLightTesting = false;
                     String value = holder.lightValueTextView.getText().toString();
                     float numValue = Float.valueOf(extractNumber(value));
                     inspectedRoomData.get(roomNamesOrigin.get(position)).setBrightness(numValue);
@@ -331,7 +367,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             }
 
             @Override
-            public void onCompassTestCompleted() {
+            public void onCompassTestCompletedFull() {
                 ((Activity) context).runOnUiThread(() -> {
                     holder.compassTestButton.setText("Test");
                     holder.compassTestButton.setBackgroundColor(Color.parseColor("#FF6200EE")); // 使用 16 进制字符串设置颜色
@@ -352,7 +388,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             if (!holder.isNoiseTesting) {
                 // 开始测试
 
-                notifyItemChanged(position,"DISABLE_BUTTON");
+                //notifyItemChanged(position,"DISABLE_NOISE_BUTTON");
                 holder.isNoiseTesting = true;
                 holder.noiseTestButton.setText("Cancel");
                 holder.noiseTestButton.setBackgroundColor(Color.RED); // 设置为您选择的红色色值
@@ -376,6 +412,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     holder.testAudioThread.interrupt(); // 这将中断线程
                     holder.testAudioThread = null;
 
+                    //notifyItemChanged(position,"ENABLE_BUTTON");
                     // 清除TextView
                     if (roomData.get(roomNamesOrigin.get(position)).getNoise() == -1) {
                         holder.noiseValueTextView.setText("--");
@@ -390,6 +427,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         holder.lightTestButton.setOnClickListener(v -> {
             if (!holder.isLightTesting) {
                 // 开始测试
+                //notifyItemChanged(position,"DISABLE_LIGHT_BUTTON");
                 holder.isLightTesting = true;
                 holder.lightTestButton.setText("Cancel");
                 holder.lightTestButton.setBackgroundColor(Color.RED); // 设置为您选择的红色色值
@@ -413,6 +451,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     holder.testLightThread.interrupt(); // 这将中断线程
                     holder.testLightThread = null;
 
+                    //notifyItemChanged(position,"ENABLE_BUTTON");
                     // 清除TextView
                     if (roomData.get(roomNamesOrigin.get(position)).getBrightness() == -1) {
                         holder.lightValueTextView.setText("--");
@@ -429,6 +468,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
             if (!holder.isCompassTesting) {
                 // 开始测试
+                //notifyItemChanged(position,"DISABLE_COMPASS_BUTTON");
                 holder.isCompassTesting = true;
                 holder.compassTestButton.setText("Cancel");
                 holder.compassTestButton.setBackgroundColor(Color.RED); // 设置为您选择的红色色值
@@ -454,6 +494,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
                     // 清除TextView
                     holder.compassValueTextView.setText(roomData.get(roomNamesOrigin.get(position)).getWindowOrientation());
+                    //notifyItemChanged(position,"ENABLE_BUTTON");
                 }
             }
 

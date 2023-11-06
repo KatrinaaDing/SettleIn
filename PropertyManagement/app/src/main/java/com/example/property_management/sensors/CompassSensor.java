@@ -124,10 +124,24 @@ public class CompassSensor implements SensorEventListener {
                 // If recording is still active, stop the test.
                 if (isRecording) {
                     Log.d("Final compass stop","called");
-                    stopTest();
+                    stopTestFull();
                 }
             }
         }).start();
+    }
+
+
+    /**
+     * Stops the compass test by unregistering sensor listeners and notifying the callback.
+     */
+    public void stopTestFull() {
+        // Unregister sensor listeners to stop receiving updates.
+        sensorManager.unregisterListener(this, accelerometerSensor);
+        sensorManager.unregisterListener(this, magnetometerSensor);
+        // Remove any pending post of the stopRunnable from the handler queue.
+        handler.removeCallbacks(stopRunnable);
+        // Notify that the compass test has completed.
+        callback.onCompassTestCompletedFull();
     }
 
     /**

@@ -7,5 +7,7 @@ public interface SensorCallback {
     void onAudioTestCompleted ();
     void onLightTestCompleted ();
     void onCompassTestCompleted ();
-
+    void onAudioTestCompletedFull ();
+    void onLightTestCompletedFull ();
+    void onCompassTestCompletedFull ();
 }
