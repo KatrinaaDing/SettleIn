@@ -269,7 +269,9 @@ public class DataCollectionActivity extends AppCompatActivity {
             collectRoomPhotos();
             LinkedHashMap<String, RoomData> roomData = new LinkedHashMap<>(); //将获取的房间数据转化为roomData类
 
+            //测试测试
             int count = 0;
+            inspectedRoomData = roomAdapter.getInspectedRoomData();
             for (String roomName:roomDataMap.keySet()){
                 HashMap<String,String> singleRoomData = (HashMap<String,String>)roomDataMap.get(roomName);
                 ArrayList<String> imgs = new ArrayList<>();
@@ -296,7 +298,7 @@ public class DataCollectionActivity extends AppCompatActivity {
 
             //测试测试
 
-            inspectedRoomData = roomAdapter.getInspectedRoomData();
+
             Log.d("NN roomName", roomName.toString());
             Log.d("NN roomData name set", roomData.keySet().toString());
             Log.d("NN roomData data", roomData.keySet().toString());
