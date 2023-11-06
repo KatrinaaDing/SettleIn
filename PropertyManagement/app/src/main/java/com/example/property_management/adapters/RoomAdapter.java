@@ -28,8 +28,10 @@ import com.example.property_management.data.RoomData;
 import com.example.property_management.sensors.AudioSensor;
 import com.example.property_management.sensors.CompassSensor;
 import com.example.property_management.sensors.LightSensor;
+import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import android.view.Window;
@@ -770,8 +772,23 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                         int currentPosition = holder.getAdapterPosition();
                         if (currentPosition != RecyclerView.NO_POSITION) {
                             String newName = roomNameEditText.getText().toString();
-                            roomNames.set(currentPosition, newName);
-                            notifyItemChanged(currentPosition, "UPDATE_ROOM_NAME");
+
+                            // 检查是否有重复的房间名
+                            boolean isDuplicate = false;
+                            for (int i = 0; i < roomNames.size(); i++) {
+                                if (newName.equalsIgnoreCase(roomNames.get(i)) && currentPosition != i) {
+                                    isDuplicate = true;
+                                    break;
+                                }
+                            }
+
+                            if (!isDuplicate) {
+                                roomNames.set(currentPosition, newName);
+                                notifyItemChanged(currentPosition, "UPDATE_ROOM_NAME");
+                            } else {
+                                View view = holder.itemView;
+                                Snackbar.make(view, "Room name cannot be duplicated", Snackbar.LENGTH_LONG).show();
+                            }
                         }
                     }
                 })
