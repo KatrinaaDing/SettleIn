@@ -242,25 +242,14 @@ public class DataCollectionActivity extends AppCompatActivity {
             // 正则表达式用于找到数字（包括小数点）
             Pattern pattern = Pattern.compile("[+-]?([0-9]*[.])?[0-9]+");
 
-            Log.d("roomsRecyclerView.getChildCount()", String.valueOf(roomsRecyclerView.getChildCount()));
-            for (int i = 0; i < roomsRecyclerView.getChildCount(); i++) {
-                View itemView = roomsRecyclerView.getChildAt(i);
-                RoomAdapter.ViewHolder viewHolder = (RoomAdapter.ViewHolder) roomsRecyclerView.getChildViewHolder(itemView);
-
-                String roomName = viewHolder.roomName.getText().toString();
-
-                // 以下方法将尝试从字符串中提取数字
-                String photoCount = viewHolder.photoCount.getText().toString();
-                String noiseValue = extractNumber(viewHolder.noiseValueTextView.getText().toString(), pattern);
-                String lightValue = extractNumber(viewHolder.lightValueTextView.getText().toString(), pattern);
-                String compassValue = viewHolder.compassValueTextView.getText().toString();
-
+            inspectedRoomData = roomAdapter.getInspectedRoomData();
+            for (String roomName: inspectedRoomData.keySet()) {
+                RoomData singleRoomData = inspectedRoomData.get(roomName);
                 HashMap<String, String> roomInfo = new HashMap<>();
-                roomInfo.put("images", photoCount);
-                roomInfo.put("noise", noiseValue);
-                roomInfo.put("brightness", lightValue);
-                roomInfo.put("windowOrientation", compassValue);
-
+                roomInfo.put("images", "--");
+                roomInfo.put("noise", String.valueOf(singleRoomData.getNoise()));
+                roomInfo.put("brightness", String.valueOf(singleRoomData.getBrightness()));
+                roomInfo.put("windowOrientation", singleRoomData.getWindowOrientation());
                 roomDataMap.put(roomName, roomInfo);
             }
 
@@ -271,7 +260,6 @@ public class DataCollectionActivity extends AppCompatActivity {
 
             //测试测试
             int count = 0;
-            inspectedRoomData = roomAdapter.getInspectedRoomData();
             for (String roomName:roomDataMap.keySet()){
                 HashMap<String,String> singleRoomData = (HashMap<String,String>)roomDataMap.get(roomName);
                 ArrayList<String> imgs = new ArrayList<>();
