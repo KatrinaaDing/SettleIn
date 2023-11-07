@@ -31,6 +31,7 @@ import com.example.property_management.sensors.LightSensor;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -42,6 +43,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageCapture;
@@ -71,7 +73,6 @@ import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import android.app.AlertDialog;
 import android.widget.Toast;
 
 public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
@@ -826,48 +827,49 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
     private void showRenameRoomDialog(int position, ViewHolder holder) {
         isFirstBind = false;
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+       ;
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.dialog_rename_room, null);
 
         EditText roomNameEditText = view.findViewById(R.id.roomNameEditText);
         roomNameEditText.setText(roomNames.get(holder.getAdapterPosition()));
 
-        builder.setView(view)
-                .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        int currentPosition = holder.getAdapterPosition();
-                        if (currentPosition != RecyclerView.NO_POSITION) {
-                            String newName = roomNameEditText.getText().toString().trim();
-
-                            // 检查是否有重复的房间名
-                            boolean isDuplicate = false;
-                            for (int i = 0; i < roomNames.size(); i++) {
-                                if (newName.equalsIgnoreCase(roomNames.get(i).trim()) && currentPosition != i) {
-                                    isDuplicate = true;
-                                    break;
-                                }
-                            }
-
-                            if (!isDuplicate) {
-                                alterRoomName(inspectedRoomData,roomNames.get(currentPosition),newName);
-                                roomNames.set(currentPosition, newName);
-                                notifyItemChanged(currentPosition, "UPDATE_ROOM_NAME");
-                            } else {
-                                View view = holder.itemView;
-                                new BasicSnackbar(view, "Room name cannot be duplicated", "error", Snackbar.LENGTH_LONG);
-
-                            }
-                        }
-                    }
-                })
+        AlertDialog builder = new MaterialAlertDialogBuilder(context)
+                .setTitle("Rename Room")
+                .setView(view)
+                .setPositiveButton("Confirm", null)
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.dismiss();
                     }
-                });
+                })
+                .create();
         builder.show();
+        builder.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
+                int currentPosition = holder.getAdapterPosition();
+                if (currentPosition != RecyclerView.NO_POSITION) {
+                    String newName = roomNameEditText.getText().toString().trim();
+
+                    // 检查是否有重复的房间名
+                    boolean isDuplicate = false;
+                    for (int i = 0; i < roomNames.size(); i++) {
+                        if (newName.equalsIgnoreCase(roomNames.get(i).trim()) && currentPosition != i) {
+                            isDuplicate = true;
+                            break;
+                        }
+                    }
+
+                    if (!isDuplicate) {
+                        alterRoomName(inspectedRoomData,roomNames.get(currentPosition),newName);
+                        roomNames.set(currentPosition, newName);
+                        notifyItemChanged(currentPosition, "UPDATE_ROOM_NAME");
+                        builder.dismiss();
+                    } else {
+                        roomNameEditText.setError("Room name cannot be duplicated");
+
+                    }
+                }
+        });
     }
     public static void alterRoomName(LinkedHashMap<String, RoomData> originRoomData, String oldRoomName, String newRoomName) {
         // Check if the original map contains the old key

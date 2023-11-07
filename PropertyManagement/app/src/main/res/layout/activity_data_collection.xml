@@ -20,7 +20,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="55dp">
+            android:paddingBottom="55dp"
+            android:paddingTop="10dp">
 
             <!-- note -->
 
@@ -45,7 +46,7 @@
                     android:layout_marginHorizontal="10dp"
                     android:layout_weight="1.7"
                     android:paddingVertical="10dp"
-                    android:text="Notes" />
+                    android:text="Note" />
 
                 <Button
                     android:id="@+id/buttonNote"
