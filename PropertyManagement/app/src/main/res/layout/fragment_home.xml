@@ -129,10 +129,9 @@
             <!-- sort menu ascending/descending button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/sort_order_button"
-                style="@style/Widget.Material3.Button.TextButton.Dialog"
+                style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/extraLightGrey"
                 android:checkable="false"
                 android:insetRight="5dp"
                 android:insetTop="10dp"

@@ -14,10 +14,11 @@
         android:inputType="textMultiLine"
         android:hint="Enter your note" />
 
-    <Button
-        android:id="@+id/buttonSave"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Save" />
+<!--    <Button-->
+<!--        android:id="@+id/buttonSave"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_gravity="end"-->
+<!--        android:text="Save" />-->
 
 </LinearLayout>
