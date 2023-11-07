@@ -89,7 +89,6 @@ import android.app.AlertDialog;
 public class DataCollectionActivity extends AppCompatActivity {
     private static final int PERMISSIONS_REQUEST_CAMERA = 1;
     private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 2;
-    // initial room data and property id
     private HashMap<String, RoomData> initialInspectedData;
     private String propertyId;
     private boolean hasRecordAudioPermission = false;
@@ -110,6 +109,13 @@ public class DataCollectionActivity extends AppCompatActivity {
     private int room_num;
     private String notes;
     private LinkedHashMap<String, RoomData> inspectedRoomData = new LinkedHashMap<>();
+
+    /**
+     * Handles the result from a previous activity, specifically for receiving images selected or taken by the camera.
+     * @param requestCode The integer request code originally supplied to startActivityForResult()
+     * @param resultCode  The integer result code returned by the child activity through its setResult().
+     * @param data        An Intent, which can return result data to the caller (various data can be attached to Intent "extras").
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -117,51 +123,63 @@ public class DataCollectionActivity extends AppCompatActivity {
         if (resultCode == Activity.RESULT_OK) {
             // select from library
             if (data != null && data.getData() != null) {
+                // If an image is selected from the gallery
                 try {
+                    // Retrieve the image as a Bitmap
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
                     roomAdapter.addImageToRoom(requestCode, bitmap);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             } else if (data != null && data.getExtras() != null) {
-                // take photo
+                // If the image is captured by the camera
                 Bitmap photo = (Bitmap) data.getExtras().get("data");
                 roomAdapter.addImageToRoom(requestCode, photo);
             }
         }
     }
 
+    /**
+     * Requests necessary permissions for the app, specifically camera and audio recording permissions.
+     */
     private void requestPermissions() {
         boolean shouldRequestCameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED;
         boolean shouldRequestRecordAudioPermission = ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED;
 
+        // Request both camera and audio recording permissions if neither are granted
         if (shouldRequestCameraPermission && shouldRequestRecordAudioPermission) {
-            // 如果两个权限都没有被授予，一起请求
+
             ActivityCompat.requestPermissions(this, new String[] {
                     Manifest.permission.CAMERA,
                     Manifest.permission.RECORD_AUDIO,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
             }, PERMISSIONS_REQUEST_CAMERA);
         } else if (shouldRequestCameraPermission) {
-            // 只请求摄像头权限
+            // Request only camera permission if it hasn't been granted
             ActivityCompat.requestPermissions(this, new String[] {
                     Manifest.permission.CAMERA,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
             }, PERMISSIONS_REQUEST_CAMERA);
         } else if (shouldRequestRecordAudioPermission) {
-            // 只请求录音权限
+            // Request only audio recording permission if it hasn't been granted
             ActivityCompat.requestPermissions(this, new String[] {
                     Manifest.permission.RECORD_AUDIO
             }, PERMISSIONS_REQUEST_RECORD_AUDIO);
         } else {
-            // 权限都已经被授予，初始化 RecyclerView
+            // If all permissions are granted, initialize the RecyclerView
             initRecyclerView();
         }
     }
 
+    /**
+     * Called when the activity is starting. This is where most initialization should go.
+     * @param savedInstanceState If the activity is being re-initialized after previously being shut down then
+     *                           this Bundle contains the data it most recently supplied in onSaveInstanceState(Bundle).
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Inflate the layout for this activity
         binding = ActivityDataCollectionBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         setTitle("Collect data mode");
@@ -172,51 +190,39 @@ public class DataCollectionActivity extends AppCompatActivity {
         Intent intent = getIntent();
         propertyId = intent.getStringExtra("propertyId");
         room_num = intent.getIntExtra("roomNum", 0);
-        //room_num = 5;
         notes = intent.getStringExtra("notes") != null ? intent.getStringExtra("notes") : "";
         initialInspectedData = (HashMap<String, RoomData>) intent.getSerializableExtra("inspectedData");
 
-
-        // Define the list of room names
+        // Initialize the list of room names
         roomNames = (ArrayList<String>) intent.getSerializableExtra("roomNames");
+        // Create a new list if none was passed with the intent
         if (roomNames == null) {
-            roomNames = new ArrayList<>(); // 初始化一个新的 ArrayList
+            roomNames = new ArrayList<>();
         }
-        //处理property第一次收集数据时，firebase相关字段为空的问题。此时根据房间数量设置房间名字，再设置初始值。
+
+        // Handle the case where there is no previously inspected data
         if (initialInspectedData.size() == 0){
+            // Define default room names based on the number of rooms
             roomNames.add("Lounge Room");
             for (int i = 1; i <= room_num; i++) {
                 roomNames.add("Room " + i);
             }
             roomNames.add("Others");
-            //roomNames.add("NNN");
+            // Initialize room data with default values
             for (String roomname: roomNames){
                 initialInspectedData.put(roomname, new RoomData(-1,-1,"--",new ArrayList<String>()));
             }
         }
-
-        Log.i("get-initial-inspectedData", initialInspectedData.toString());
-        Log.i("get-propertyId", propertyId);
-        Log.i("get-initial-roomNames", roomNames.toString());
-
-        //查看得到的房间数据具体值
-        for (String roomname: initialInspectedData.keySet()){
-            Log.i("get-" + roomname + " data", initialInspectedData.get(roomname).toString());
-        }
-
-        //查看得到的房间数量数据
-        Log.i("get-room num", String.valueOf(room_num));
-
-
+        // Request permissions necessary for the app to function
         requestPermissions();
 
         // Initialize SharedPreferences
         sharedPreferences = getSharedPreferences("notes", MODE_PRIVATE);
-        Log.d("loading note in datacollection",notes);
+        // Save the retrieved notes into SharedPreferences
         saveNote(notes);
 
+        // Set up the note button with an event listener
         Button buttonNote = findViewById(R.id.buttonNote);
-
         buttonNote.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -224,25 +230,28 @@ public class DataCollectionActivity extends AppCompatActivity {
             }
         });
 
+        // Set up the finish button with an event listener
         binding.finishButton.setOnClickListener(view -> {
-            //返回detail页面时刷新
+            // Set a flag in SharedPreferences to indicate that details have been updated
             SharedPreferences sharedPreferences = getSharedPreferences("propertyDetailUpdated", MODE_PRIVATE);
             sharedPreferences
                     .edit()
                     .putBoolean("isUpdated", true)
                     .apply();
 
-            //更新成功前禁用按钮
+            // Disable the finish button while updating
             binding.finishButton.setEnabled(false);
             binding.finishButton.setText("Updating...");
 
-            // 创建一个映射来保存所有房间的数据
+            // Prepare a map to hold all room data
             LinkedHashMap<String, Object> roomDataMap = new LinkedHashMap<>();
 
-            // 正则表达式用于找到数字（包括小数点）
+            // Compile a pattern for extracting numbers from strings
             Pattern pattern = Pattern.compile("[+-]?([0-9]*[.])?[0-9]+");
-
+            // Retrieve room data from the adapter
             inspectedRoomData = roomAdapter.getInspectedRoomData();
+
+            // Iterate over each room to extract and map its data
             for (String roomName: inspectedRoomData.keySet()) {
                 RoomData singleRoomData = inspectedRoomData.get(roomName);
                 HashMap<String, String> roomInfo = new HashMap<>();
@@ -253,12 +262,12 @@ public class DataCollectionActivity extends AppCompatActivity {
                 roomDataMap.put(roomName, roomInfo);
             }
 
-            // 转换为字符串并记录
-            Log.d("AllRoomData", "Rooms Data: " + roomDataMap.toString());
+            // Collect photos for each room
             collectRoomPhotos();
-            LinkedHashMap<String, RoomData> roomData = new LinkedHashMap<>(); //将获取的房间数据转化为roomData类
+            // Create a new RoomData LinkedHashMap
+            LinkedHashMap<String, RoomData> roomData = new LinkedHashMap<>();
 
-            //测试测试
+            // Process and map the room data
             int count = 0;
             for (String roomName:roomDataMap.keySet()){
                 HashMap<String,String> singleRoomData = (HashMap<String,String>)roomDataMap.get(roomName);
@@ -268,63 +277,44 @@ public class DataCollectionActivity extends AppCompatActivity {
                         new ArrayList<String>();
                 count++;
 
-                Log.d("brightness",String.valueOf(singleRoomData.get("brightness")) );
-                Log.d("noise",String.valueOf(singleRoomData.get("noise")) );
-                Log.d("windowOrientation",String.valueOf(singleRoomData.get("windowOrientation")) );
-
+                // Create a RoomData object for the room
                 RoomData singleRoom = new RoomData(Float.valueOf(singleRoomData.get("brightness")), Float.valueOf(singleRoomData.get("noise")),singleRoomData.get("windowOrientation"), imgs);
-
+                // Add the RoomData object to the map
                 roomData.put(roomName, singleRoom);
             }
 
-            //将recycler view 里的房间名有序保存
+            // Save the order of room names from the RecyclerView
             ArrayList<String> roomName = new ArrayList<>();
             for (String roomName1: roomDataMap.keySet()){
                 roomName.add(roomName1);
             }
-
-
-            //测试测试
-
-
-            //Log.d("NN roomName", roomName.toString());
-            //Log.d("NN roomData name set", roomData.keySet().toString());
-            //Log.d("NN roomData data", roomData.keySet().toString());
-            //Log.d("NN inspectedRoomData name set", inspectedRoomData.keySet().toString());
-            //for (String name:inspectedRoomData.keySet()){
-            //    Log.d("NN inspectedRoomData data", inspectedRoomData.get(name).toString());
-            //}
-
-
-
-
+            // Update the inspected data in the database
             updateInspectedData(propertyId, roomData, roomName);
-
+            // Show a Snackbar to indicate successful upload
             new BasicSnackbar(findViewById(android.R.id.content), "Upload data successfully!", "success");
 
-
+            // Delay finishing the activity for a brief period
             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    // 这里调用 finish() 方法
+
                     finish();
                 }
-            }, 3500); // 2000 是延迟的时间（毫秒），即 2 秒
-
-            Log.d("Saved images",roomImagePathsMap.toString());
+            }, 3500);
         });
-
+        // Retrieve SharedPreferences for the application
         SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+        // Check if the info dialog has been shown before
         boolean hasShownInfo = prefs.getBoolean("has_shown_info", false);
-
+        // If the info dialog has not been shown, display it
         if (!hasShownInfo) {
             showInfoDialog();
         }
-
-
     }
 
-
+    /**
+     * Collects photos from all rooms and handles logging of image paths.
+     */
     public void collectRoomPhotos() {
         // get image from adapter
         List<List<Bitmap>> allRoomImages = roomAdapter.getAllRoomImages();
@@ -340,89 +330,125 @@ public class DataCollectionActivity extends AppCompatActivity {
 
         // get room image path
         ArrayList<ArrayList<String>> allRoomImagePaths = roomAdapter.getAllRoomImagePaths();
-
-         for (int i = 0; i < allRoomImagePaths.size(); i++) {
-             List<String> imagePathList = allRoomImagePaths.get(i);
-             StringBuilder sb = new StringBuilder();
-             sb.append("Room ").append(i).append(": ");
-             for (String path : imagePathList) {
-                 sb.append(path).append(", ");
-             }
-             Log.d("RoomImagePaths", sb.toString());
-         }
-         logRoomImagePaths();
-
-
+        // Log image paths for each room
+        for (int i = 0; i < allRoomImagePaths.size(); i++) {
+            List<String> imagePathList = allRoomImagePaths.get(i);
+            StringBuilder sb = new StringBuilder();
+            sb.append("Room ").append(i).append(": ");
+            for (String path : imagePathList) {
+                sb.append(path).append(", ");
+            }
+            Log.d("RoomImagePaths", sb.toString());
+        }
+        // Log all room image paths
+        logRoomImagePaths();
     }
 
+    /**
+     * Saves a given image to the device's gallery in a specific room folder.
+     * @param image Bitmap representation of the image to save.
+     * @param roomPosition The position of the room in the list, used to name the folder.
+     */
     private void saveImageToGallery(Bitmap image, int roomPosition) {
+        // Set up metadata for the image
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.Media.DISPLAY_NAME, "Image_" + System.currentTimeMillis() + ".jpg");
         values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+        // Specify the directory path for the image
         values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Room_" + roomPosition);
 
+        // Insert the metadata into the MediaStore and get the URI for the image
         Uri uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
         try {
+            // Open an output stream to the URI and compress the image
             OutputStream os = getContentResolver().openOutputStream(uri);
             image.compress(Bitmap.CompressFormat.JPEG, 100, os);
             os.flush();
             os.close();
-
+            // Get the actual file path from the URI
             String realPath = getRealPathFromURI(uri);
 
-            //Toast.makeText(this, "Image saved as: " + realPath, Toast.LENGTH_SHORT).show();
-
+            // If the room doesn't have an entry in the map, create one
             if (!roomImagePathsMap.containsKey(roomPosition)) {
                 roomImagePathsMap.put(roomPosition, new ArrayList<>());
             }
+            // Add the image path to the map
             roomImagePathsMap.get(roomPosition).add(realPath);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Logs the paths of all saved room images.
+     */
     private void logRoomImagePaths() {
         Log.d("RoomImagePaths", roomImagePathsMap.toString());
     }
 
+    /**
+     * Retrieves the real file system path from a content URI.
+     * @param uri The content URI to resolve.
+     * @return The real path as a String.
+     */
     private String getRealPathFromURI(Uri uri) {
         String path = "";
+        // Query the content resolver for the file path
         Cursor cursor = getContentResolver().query(uri, null, null, null, null);
         if (cursor != null) {
             cursor.moveToFirst();
+            // Get the index of the column containing the file path
             int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+            // Retrieve the file path
             path = cursor.getString(idx);
             cursor.close();
         }
         return path;
     }
 
+    /**
+     * Handles action bar item clicks.
+     * @param item The menu item that was clicked.
+     * @return true if the event was handled, false otherwise.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle the back button in the action bar
         if (item.getItemId() == android.R.id.home) {
+            // Close the activity when the back button is pressed
             finish();
             return true;
         } else if (item.getItemId() == R.id.action_info) {
+            // Show the info dialog when the info button is pressed
             showInfoDialog();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Initializes the contents of the Activity's standard options menu.
+     * @param menu The options menu in which items are placed.
+     * @return true for the menu to be displayed; if false, it will not be shown.
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_info_data_collection, menu);
         return true;
     }
 
+    /**
+     * Displays an informational dialog to the user with guidance on how to use the app.
+     */
     private void showInfoDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Tutorial");
 
+        // Use a SpannableStringBuilder to format dialog message text
         SpannableStringBuilder ssb = new SpannableStringBuilder();
 
-        // format all text
+        // Arrays to hold titles and descriptions for each tutorial section
         String[] titles = {
                 "Taking photos",
                 "Collecting brightness data",
@@ -440,6 +466,7 @@ public class DataCollectionActivity extends AppCompatActivity {
                 "You can change names of rooms by pressing the edit icon."
         };
 
+        // Loop to append each title and description to the SpannableStringBuilder
         for (int i = 0; i < titles.length; i++) {
             SpannableString title = new SpannableString(titles[i]);
             title.setSpan(new StyleSpan(Typeface.BOLD), 0, title.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -453,6 +480,7 @@ public class DataCollectionActivity extends AppCompatActivity {
             }
         }
 
+        // Set the message and the positive button for the dialog
         builder.setMessage(ssb);
         builder.setPositiveButton("OK", (dialog, id) -> {
             dialog.dismiss();
@@ -465,35 +493,18 @@ public class DataCollectionActivity extends AppCompatActivity {
         builder.show();
     }
 
-
-    private String getDirectionFromDecimal(float directionDecimal) {
-        int directionCode = (int)(directionDecimal * 100);
-        switch (directionCode) {
-            case 1: return "N";
-            case 2: return "NE";
-            case 3: return "E";
-            case 4: return "SE";
-            case 5: return "S";
-            case 6: return "SW";
-            case 7: return "W";
-            case 8: return "NW";
-            default: return "";
-        }
-    }
-
-    private void updatePhotoCount() {
-        String text = images.size() + " added";
-        photoCountTextView.setText(text);
-    }
-
-    //note
+    /**
+     * Displays a dialog for taking notes.
+     */
     private void showNoteDialog() {
         noteDialog = new Dialog(this);
         noteDialog.setContentView(R.layout.dialog_note);
 
+        // Get references to the EditText and Button in the custom dialog layout
         final EditText editTextNote = noteDialog.findViewById(R.id.editTextNote);
         Button buttonSave = noteDialog.findViewById(R.id.buttonSave);
 
+        // Set dialog width to a percentage of the screen width
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
         layoutParams.copyFrom(noteDialog.getWindow().getAttributes());
         int dialogWidth = (int)(getResources().getDisplayMetrics().widthPixels * 0.9);
@@ -501,10 +512,11 @@ public class DataCollectionActivity extends AppCompatActivity {
         layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
         noteDialog.getWindow().setAttributes(layoutParams);
 
-        // Load existing note, if any
+        // Retrieve and display existing note from SharedPreferences
         String existingNote = sharedPreferences.getString("note", "");
         editTextNote.setText(existingNote);
 
+        // Set up the button click listener to save the note and close the dialog
         buttonSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -514,17 +526,27 @@ public class DataCollectionActivity extends AppCompatActivity {
                 noteDialog.dismiss();
             }
         });
-
+        // Show the custom dialog
         noteDialog.show();
     }
 
+    /**
+     * Saves the user's note to SharedPreferences.
+     * @param note The note text to be saved.
+     */
     private void saveNote(String note) {
         // Save the note in SharedPreferences
         sharedPreferences.edit().putString("note", note).apply();
     }
 
+    /**
+     * Updates the inspected data in Firebase.
+     * @param propertyId   The ID of the property.
+     * @param inspectedData The data that has been inspected.
+     * @param roomNames    The names of the rooms.
+     */
     private void updateInspectedData(String propertyId, HashMap<String, RoomData> inspectedData, ArrayList<String> roomNames) {
-        Log.d("roomName passed in updateInspectedData", inspectedData.keySet().toString());
+
         // update ispected status to firebase
         HashMap<String, Object> payload = new HashMap<>();
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -532,10 +554,11 @@ public class DataCollectionActivity extends AppCompatActivity {
         payload.put("properties." + propertyId + ".notes", sharedPreferences.getString("note", ""));
         payload.put("properties." + propertyId + ".roomNames", roomNames);
         FirebaseUserRepository userRepository = new FirebaseUserRepository();
+
+        // Perform the update and handle callbacks for success or error
         userRepository.updateUserFields(userId, payload, new UpdateUserCallback() {
             @Override
             public void onSuccess(String msg) {
-                Log.i("update-inspectedData-successfully", msg);
                 // Re-enable the button and reset its text after successful update
                 runOnUiThread(() -> {
                     //binding.finishButton.setEnabled(true);
