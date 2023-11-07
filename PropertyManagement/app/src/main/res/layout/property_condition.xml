@@ -18,7 +18,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Lounge room"
-            android:textSize="8pt"
+            android:textSize="7pt"
             android:paddingTop="5dp"
             android:textStyle="bold" />
 
@@ -118,7 +118,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="10dp"
             android:src="@drawable/outline_info_24"
-            app:tint="?attr/colorOnSecondary" />
+            app:tint="@color/lightGrey"/>
 
     </LinearLayout>
 

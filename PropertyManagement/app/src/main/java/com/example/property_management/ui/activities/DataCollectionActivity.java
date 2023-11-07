@@ -47,6 +47,7 @@ import java.util.Map;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -75,7 +76,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.android.material.snackbar.Snackbar;
-import android.app.AlertDialog;
 
 /**
  * Activity for collecting data on room conditions including images, noise, light, and compass orientation.
@@ -91,7 +91,7 @@ public class DataCollectionActivity extends AppCompatActivity {
     private RecyclerView roomsRecyclerView;
     private RoomAdapter roomAdapter;
     private ArrayList<String> roomNames = new ArrayList<>();
-    private Dialog noteDialog;
+    private AlertDialog noteDialog;
     private SharedPreferences sharedPreferences;
     private Map<Integer, List<String>> roomImagePathsMap = new LinkedHashMap<>();
     private int room_num;
@@ -474,36 +474,20 @@ public class DataCollectionActivity extends AppCompatActivity {
      * Displays a dialog for taking notes.
      */
     private void showNoteDialog() {
-        noteDialog = new Dialog(this);
-        noteDialog.setContentView(R.layout.dialog_note);
-
-        // Get references to the EditText and Button in the custom dialog layout
-        final EditText editTextNote = noteDialog.findViewById(R.id.editTextNote);
-        Button buttonSave = noteDialog.findViewById(R.id.buttonSave);
-
-        // Set dialog width to a percentage of the screen width
-        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
-        layoutParams.copyFrom(noteDialog.getWindow().getAttributes());
-        int dialogWidth = (int)(getResources().getDisplayMetrics().widthPixels * 0.9);
-        layoutParams.width = dialogWidth;
-        layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        noteDialog.getWindow().setAttributes(layoutParams);
-
-        // Retrieve and display existing note from SharedPreferences
-        String existingNote = sharedPreferences.getString("note", "");
-        editTextNote.setText(existingNote);
-
-        // Set up the button click listener to save the note and close the dialog
-        buttonSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String note;
-                note = editTextNote.getText().toString();
-                saveNote(note);
-                noteDialog.dismiss();
-            }
-        });
-        // Show the custom dialog
+        noteDialog = new MaterialAlertDialogBuilder(this)
+                .setTitle("Add Note")
+                .setView(R.layout.dialog_note)
+                .setPositiveButton("Save", (dialog, which) -> {
+                    EditText editTextNote = noteDialog.findViewById(R.id.editTextNote);
+                    String note = editTextNote.getText().toString();
+                    saveNote(note);
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                    dialog.dismiss();
+                })
+                .create();
+        // prevent accidental dismiss
+        noteDialog.setCanceledOnTouchOutside(false);
         noteDialog.show();
     }
 
