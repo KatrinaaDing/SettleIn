@@ -11,6 +11,7 @@ import com.example.property_management.data.RoomData;
 import com.example.property_management.data.UserProperty;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
+import com.google.api.LogDescriptor;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.HttpsCallableResult;
@@ -282,6 +283,11 @@ public class FirebaseFunctionsHelper {
                     String msg = e.getMessage().substring(msgIdx);
                     throw new Exception(msg);
                 }
+
+                //Log.d("result set get by getPropertyById function",result.toString());
+                //Log.d("InspectedData get by getPropertyById function",result.keySet().toString());
+                //Log.d("roomNames get by getPropertyById function",((ArrayList<String>)result.get("roomNames")).toString());
+                //Log.d("roomNames class get by getPropertyById function",((ArrayList<String>)result.get("roomNames")).getClass().toString());
                 // get result and create Property object
                 Property propertyData = new Property(
                         (String) result.get("propertyId"),
@@ -308,10 +314,7 @@ public class FirebaseFunctionsHelper {
                 String inspectionTime = result.get("inspectionTime") == null
                         ? ""
                         : (String) result.get("inspectionTime");
-                // parse createdAt timestamp
-                Date createdAt = result.get("createdAt") == null
-                        ? new Date()
-                        : new Date(((Double) result.get("createdAt")).longValue());
+
                 UserProperty userPropertyData = new UserProperty(
                         (String) result.get("propertyId"),
                         inspected,
@@ -321,8 +324,10 @@ public class FirebaseFunctionsHelper {
                         getPropertyDistancesData(result),
                         getRoomsData(result, "inspectedData"),
                         (int) result.get("price"),
-                        new Date(((Double) result.get("createdAt")).longValue())
+                        new Date(((Double) result.get("createdAt")).longValue()),
+                        (ArrayList<String>)result.get("roomNames")
                 );
+
                 Map<String, Object> res = new HashMap<>();
                 res.put("propertyData", propertyData);
                 res.put("userPropertyData", userPropertyData);
@@ -341,13 +346,22 @@ public class FirebaseFunctionsHelper {
     private HashMap<String, RoomData> getRoomsData(Map<String, Object> result, String key) {
         // convert propertyData for each room to HashMap<String, RoomData>
         HashMap<String, RoomData> propertyRoomsData = new HashMap<>();
-        if (result.get("propertyData") != null) {
-            Map<String, Object> publicRoomsData = (Map<String, Object>) result.get(key);
-            for (String roomName : publicRoomsData.keySet()) {
-                Map<String, Object> entry = (Map<String, Object>) publicRoomsData.get(roomName);
-                float brightness = (float) entry.get("brightness");
-                float noise = (float) entry.get("noise");
-                String windowOrientation = (String) entry.get("windowOrientation");
+        Log.d("whether getRoomdata excuted",String.valueOf(result.get(key) != null));
+        if (result.get(key) != null) {
+            Map<String, Object> roomsData = (Map<String, Object>) result.get(key);
+            Log.d("roomData in getRoomsData function",roomsData.toString());
+            // for each room, create RoomData object
+            for (String roomName : roomsData.keySet()) {
+                Map<String, Object> entry = (Map<String, Object>) roomsData.get(roomName);
+                float brightness = entry.get("brightness")  == null
+                        ? 0
+                        : ((Double) entry.get("brightness")).floatValue();
+                float noise = entry.get("noise") == null
+                        ? 0
+                        : ((Double) entry.get("noise")).floatValue();
+                String windowOrientation = entry.get("windowOrientation") == null
+                        ? null
+                        : (String) entry.get("windowOrientation");
                 ArrayList<String> images = (ArrayList<String>) entry.get("images");
 
                 RoomData singleRoomData = new RoomData(brightness, noise, windowOrientation, images);

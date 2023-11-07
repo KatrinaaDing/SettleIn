@@ -1,5 +1,7 @@
 package com.example.property_management.data;
 
+import androidx.annotation.NonNull;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -16,12 +18,13 @@ public class UserProperty {
     private Date createdAt;
     private HashMap<String, DistanceInfo> distances;
     private HashMap<String, RoomData> inspectedData;
+    private ArrayList<String> roomNames;
 
     public UserProperty() {}
 
     public UserProperty(String propertyId, boolean inspected, String inspectionDate,
                         String inspectionTime, String notes, HashMap<String, DistanceInfo> distances,
-                        HashMap<String, RoomData> inspectedData, int price, Date createdAt) {
+                        HashMap<String, RoomData> inspectedData, int price, Date createdAt, ArrayList<String> roomNames) {
         this.propertyId = propertyId;
         this.inspected = inspected;
         this.inspectionDate = inspectionDate;
@@ -31,6 +34,7 @@ public class UserProperty {
         this.distances = distances;
         this.inspectedData = inspectedData;
         this.createdAt = createdAt;
+        this.roomNames = roomNames;
     }
 
     public String getPropertyId() { return propertyId; }
@@ -68,5 +72,21 @@ public class UserProperty {
     public void setInspected() { this.inspected = inspected; }
     public Date getCreatedAt() { return createdAt; }
     public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
+    public ArrayList<String> getRoomNames (){ return roomNames;}
 
+    @NonNull
+    @Override
+    public String toString() {
+        return "UserProperty{" +
+                "propertyId='" + propertyId + '\'' +
+                ", inspected=" + inspected +
+                ", inspectionDate='" + inspectionDate + '\'' +
+                ", inspectionTime='" + inspectionTime + '\'' +
+                ", notes='" + notes + '\'' +
+                ", price=" + price +
+                ", createdAt=" + createdAt +
+                ", distances=" + distances +
+                ", inspectedData=" + inspectedData +
+                '}';
+    }
 }
