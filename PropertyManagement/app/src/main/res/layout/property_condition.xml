@@ -18,6 +18,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Lounge room"
+            android:textSize="8pt"
+            android:paddingTop="5dp"
             android:textStyle="bold" />
 
     </LinearLayout>
@@ -51,7 +53,7 @@
             android:layout_marginHorizontal="10dp"
             android:layout_weight="1.74"
             android:paddingVertical="10dp"
-            android:text="Noise\nLevel" />
+            android:text="Noise Level" />
 
         <TextView
             android:id="@+id/noiseValue1"
@@ -66,7 +68,8 @@
             android:layout_width="3dp"
             android:layout_height="wrap_content"
             android:text="Normal"
-            android:layout_weight="0.7"
+            android:textColor="@color/white"
+            android:layout_weight="0.8"
             android:paddingTop="2dp"
             android:paddingBottom="2dp"
             android:gravity="center"
@@ -112,8 +115,8 @@
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="10dp"
-            android:layout_weight="0.25"
-            android:src="@drawable/ic_info_data_collection" />
+            app:tint="@color/lightGrey"
+            android:src="@drawable/outline_info_24" />
 
     </LinearLayout>
 
@@ -139,7 +142,7 @@
             android:layout_marginHorizontal="10dp"
             android:layout_weight="1.7"
             android:paddingVertical="10dp"
-            android:text="Window\nOrientation" />
+            android:text="Window Orientation" />
 
         <TextView
             android:id="@+id/windowValue1"

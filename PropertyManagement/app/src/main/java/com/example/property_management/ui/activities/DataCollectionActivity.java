@@ -62,6 +62,7 @@ import com.example.property_management.sensors.AudioSensor;
 import com.example.property_management.sensors.CompassSensor;
 import com.example.property_management.sensors.LightSensor;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.FileNotFoundException;
@@ -410,7 +411,7 @@ public class DataCollectionActivity extends AppCompatActivity {
     }
 
     private void showInfoDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
         builder.setTitle("Tutorial");
 
         SpannableStringBuilder ssb = new SpannableStringBuilder();
