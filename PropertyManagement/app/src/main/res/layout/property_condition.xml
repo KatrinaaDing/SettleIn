@@ -118,7 +118,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="10dp"
             android:src="@drawable/outline_info_24"
-            app:tint="?attr/colorOnSecondary" />
+            app:tint="@color/lightGrey"/>
 
     </LinearLayout>
 

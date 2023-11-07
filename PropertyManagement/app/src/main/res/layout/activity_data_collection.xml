@@ -37,7 +37,8 @@
                     android:layout_height="24dp"
                     android:layout_gravity="center_vertical"
                     android:adjustViewBounds="true"
-                    android:src="@drawable/ic_note" />
+                    android:src="@drawable/ic_note"
+                    app:tint="?attr/colorOnSecondary" />
 
                 <TextView
                     android:id="@+id/noteView"
