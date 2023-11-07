@@ -239,7 +239,6 @@ public class EditProfileDialogFragment extends DialogFragment {
                                             positiveButton.setText("Save");
                                             positiveButton.setEnabled(true);
 
-                                            Log.d("update-username", "Username updated.");
                                             notifyProfileUpdated(userInputUsername, "");
 
                                             // If only the username was changed, display a message and dismiss the dialog
@@ -266,7 +265,6 @@ public class EditProfileDialogFragment extends DialogFragment {
                             user.reauthenticate(credential)
                                     .addOnCompleteListener(task -> {
                                         if (task.isSuccessful()) {
-                                            Log.d("user-auth", "User re-authenticated.");
                                             user.updateEmail(userInputEmail)
                                                     .addOnCompleteListener(emailTask -> {
                                                         if (emailTask.isSuccessful()) {
