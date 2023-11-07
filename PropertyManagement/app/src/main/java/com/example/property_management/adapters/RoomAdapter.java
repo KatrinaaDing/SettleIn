@@ -699,9 +699,21 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
      * @param roomPosition The position of the room in the adapter.
      */
     private void showPhotosDialog(int roomPosition) {
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View dialogView = inflater.inflate(R.layout.dialog_photo_gallery, null);
+
         // Create and set up a new dialog for displaying photos
-        Dialog dialog = new Dialog(context);
-        dialog.setContentView(R.layout.dialog_photo_gallery);
+        AlertDialog dialog = new MaterialAlertDialogBuilder(context)
+                .setTitle("Added Photos")
+                .setView(dialogView)
+                .setNegativeButton("Back", null)
+                .create();
+        // if no images, display a message
+        if (roomImages.get(roomPosition).size() == 0) {
+            dialog.setMessage("No photos added yet.");
+        }
+        // Show the dialog
+        dialog.show();
 
         // Initialize the RecyclerView for displaying images
         RecyclerView recyclerView = dialog.findViewById(R.id.recyclerView);
@@ -727,21 +739,21 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     @Override
                     public void onClick(View v) {
                         // delete notification
-                        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                        AlertDialog builder = new MaterialAlertDialogBuilder(context)
+                                .setTitle("Delete Photo")
+                                .setMessage("Are you sure to delete the photo?")
+                                .setPositiveButton("Yes", (dialogInterface, i) -> {
+                                    // Remove the image from the list and update the adapter
+                                    roomImages.get(roomPosition).remove(position);
+                                    // Update the photo count display
+                                    notifyDataSetChanged();
+                                    updatePhotoCountForRoom(roomPosition);
+                                })
+                                // Set up the negative button with no action
+                                .setNegativeButton("No", null)
+                                .create();
                         builder.setTitle("Delete Photo");
                         builder.setMessage("Are you sure to delete the photo?");
-                        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            // Remove the image from the list and update the adapter
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                roomImages.get(roomPosition).remove(position);
-                                // Update the photo count display
-                                notifyDataSetChanged();
-                                updatePhotoCountForRoom(roomPosition);
-                            }
-                        });
-                        // Set up the negative button with no action
-                        builder.setNegativeButton("No", null);
                         builder.show();
                     }
                 });
@@ -752,16 +764,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setAdapter(imageAdapter);
 
-        // Initialize and set up the back button
-        Button backButtonGallery = dialog.findViewById(R.id.back_button_gallery);
-        backButtonGallery.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
-        // Show the dialog
-        dialog.show();
+
     }
 
     /**

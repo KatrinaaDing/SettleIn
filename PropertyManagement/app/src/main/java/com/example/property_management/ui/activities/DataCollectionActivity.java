@@ -431,16 +431,16 @@ public class DataCollectionActivity extends AppCompatActivity {
                 "Collecting brightness data",
                 "Collecting noise data",
                 "Collecting orientation data",
-                "Note",
+                "Adding Note",
                 "Changing room name"
         };
         String[] descriptions = {
-                "You can take photo or upload photos from library for each room by pressing the button of \"Add\" in the line of \"Photos\". And then you can show or delete photo in the bottom of \"X added\", where X is the number of collected photos.",
-                "You can collect brightness data for each room by pressing the button of \"Add\" in the line of \"Light Level\".",
-                "You can collect noise data for each room by pressing the button of \"Add\" in the line of \"Noise Level\".",
-                "You can collect orientation data for each room by pressing the button of \"Add\" in the line of \"Window Orientation\".",
-                "You can write your note for property in the note area.",
-                "You can change names of rooms by pressing the edit icon."
+                "Add images directly using your camera or choose from the photo library for each room. Access and manage these images by tapping 'X added'—where 'X' represents the total images gathered.",
+                "To gauge brightness, press 'Add' alongside 'Light Level.' Ensure your phone is face-up and the front camera remains unobstructed during data collection.",
+                "Measure ambient noise by selecting 'Add' next to 'Noise Level.' Keep the microphone area (usually at the bottom) clear to avoid data interference.",
+                "For orientation details, hit 'Add' under 'Window Orientation.' Hold your phone face-up, aiming towards room windows or the lounge area's balcony for accurate readings.",
+                "Document any additional observations or remarks in the note section provided for each property.\"",
+                "Customize room names as needed by tapping the edit icon next to each listed room."
         };
 
         // Loop to append each title and description to the SpannableStringBuilder
@@ -456,7 +456,7 @@ public class DataCollectionActivity extends AppCompatActivity {
                 ssb.append("\n\n");
             }
         }
-
+        ssb.append("You can view this tutorial again by tapping the info icon in the top right corner of the screen.");
         // Set the message and the positive button for the dialog
         builder.setMessage(ssb);
         builder.setPositiveButton("OK", (dialog, id) -> {
