@@ -29,16 +29,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomListRecyclerViewAdapter.ViewHolder> {
 
     private User user;
-
     View view;
-
     private Boolean isFacility;
-
     FirebaseUserRepository userRepository = new FirebaseUserRepository();
+    EventListener listener;
 
-    public CustomListRecyclerViewAdapter(User user, Boolean isFacility) {
+    public interface EventListener {
+        void onEvent(boolean isFacility, boolean ifShowPlaceholder);
+    }
+
+    public CustomListRecyclerViewAdapter(User user, Boolean isFacility, EventListener listener) {
         this.user = user;
         this.isFacility = isFacility;
+        this.listener = listener;
     }
 
     @Override
@@ -70,6 +73,13 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
                 }
             }
         });
+
+        // show placeholder if no interested facility, hide otherwise
+        if (interests.size() == 0) {
+            listener.onEvent(isFacility, true);
+        } else {
+            listener.onEvent(isFacility, false);
+        }
     }
 
     @Override
@@ -116,6 +126,11 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
                 getInterests().remove(position);
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position, getInterests().size());
+
+                // show placeholder if no interested facility
+                if (getInterests().size() == 0) {
+                    listener.onEvent(isFacility, true);
+                }
             }
 
             @Override
@@ -144,6 +159,11 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
                 getInterestedLocations().remove(position);
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position, getInterests().size());
+
+                // show placeholder if no interested location
+                if (getInterests().size() == 0) {
+                    listener.onEvent(isFacility, true);
+                }
             }
 
             @Override
@@ -177,6 +197,11 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
                 getInterests().add(interestName);
                 getInterestedLocations().add(interestAddress);
                 notifyItemInserted(getInterests().size() - 1);
+
+                // hide placeholder if the first interested location is added
+                if (getInterests().size() == 1) {
+                    listener.onEvent(isFacility, false);
+                }
             }
 
             @Override
@@ -204,6 +229,11 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
                 // add new facility to local data
                 getInterests().add(facilityToAdd);
                 notifyItemInserted(getInterests().size() - 1);
+
+                // hide placeholder if the first interested facility is added
+                if (getInterests().size() == 1) {
+                    listener.onEvent(isFacility, false);
+                }
             }
 
             @Override
