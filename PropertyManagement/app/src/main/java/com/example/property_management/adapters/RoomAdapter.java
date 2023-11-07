@@ -268,11 +268,9 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                 switch (sensorType) {
                     case "Light":
                         updateLightData(holder, value);
-                        Log.d("SensorCallback", "onSensorDataChanged called for " + sensorType);
                         break;
                     case "Compass":
                         updateCompassData(holder, value);
-                        Log.d("SensorCallback", "onSensorDataChanged called for " + sensorType);
                         break;
                 }
             }
@@ -281,9 +279,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             @Override
             public void onCurrentDbCalculated(double currentDb) {
                 ((Activity) context).runOnUiThread(() -> {
-
                     holder.noiseValueTextView.setText(String.format("%.2f dB", currentDb));
-                    Log.d("onCurrentDbCalculated", "onCurrentDbCalculated called");
                 });
             }
 

@@ -307,7 +307,6 @@ public class DataCollectionActivity extends AppCompatActivity {
         // get image from adapter
         List<List<Bitmap>> allRoomImages = roomAdapter.getAllRoomImages();
 
-        Log.d("allRoomImages key",allRoomImages.toString());
         // get and save image from each room
         for (int roomPosition = 0; roomPosition < allRoomImages.size(); roomPosition++) {
             List<Bitmap> images = allRoomImages.get(roomPosition);
@@ -326,7 +325,6 @@ public class DataCollectionActivity extends AppCompatActivity {
             for (String path : imagePathList) {
                 sb.append(path).append(", ");
             }
-            Log.d("RoomImagePaths", sb.toString());
         }
         // Log all room image paths
         logRoomImagePaths();
@@ -599,6 +597,26 @@ public class DataCollectionActivity extends AppCompatActivity {
                 // Permission was denied, inform the user with a Snackbar
                 new BasicSnackbar(findViewById(android.R.id.content), "The app needs audio recording permission to function properly.", "info", Snackbar.LENGTH_LONG);
             }
+        }
+    }
+
+    /**
+     * Converts the decimal part of a compass value to a cardinal direction.
+     * @param directionDecimal The decimal part of a compass value.
+     * @return The cardinal direction as a string.
+     */
+    private String getDirectionFromDecimal(float directionDecimal) {
+        int directionCode = (int)(directionDecimal * 100);  // Convert the decimal part to an integer
+        switch (directionCode) {
+            case 1: return "N";
+            case 2: return "NE";
+            case 3: return "E";
+            case 4: return "SE";
+            case 5: return "S";
+            case 6: return "SW";
+            case 7: return "W";
+            case 8: return "NW";
+            default: return "";  // Return an empty string if the direction code is invalid
         }
     }
 }

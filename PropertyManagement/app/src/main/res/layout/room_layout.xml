@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:paddingVertical="10dp">
 
@@ -24,7 +24,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:src="@drawable/ic_room_name" />
+            android:src="@drawable/ic_room_name"
+            app:tint="?attr/colorOnSecondary" />/>
 
     </LinearLayout>
 
@@ -39,7 +40,8 @@
             android:layout_height="24dp"
             android:layout_gravity="center_vertical"
             android:adjustViewBounds="true"
-            android:src="@drawable/ic_camera" />
+            android:src="@drawable/ic_camera"
+            app:tint="?attr/colorOnSecondary" />
 
         <androidx.camera.view.PreviewView
             android:id="@+id/previewView"
@@ -87,7 +89,8 @@
             android:layout_height="24dp"
             android:layout_gravity="center_vertical"
             android:adjustViewBounds="true"
-            android:src="@drawable/ic_noise" />
+            android:src="@drawable/ic_noise"
+            app:tint="?attr/colorOnSecondary" />
 
         <TextView
             android:id="@+id/noiseView"
@@ -126,7 +129,8 @@
             android:layout_height="24dp"
             android:layout_gravity="center_vertical"
             android:adjustViewBounds="true"
-            android:src="@drawable/ic_light" />
+            android:src="@drawable/ic_light"
+            app:tint="?attr/colorOnSecondary" />
 
         <TextView
             android:id="@+id/lightView"
@@ -165,7 +169,8 @@
             android:layout_height="24dp"
             android:layout_gravity="center_vertical"
             android:adjustViewBounds="true"
-            android:src="@drawable/ic_window" />
+            android:src="@drawable/ic_window"
+            app:tint="?attr/colorOnSecondary" />
 
         <TextView
             android:id="@+id/windowView"

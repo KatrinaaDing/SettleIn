@@ -44,7 +44,8 @@
             android:layout_height="24dp"
             android:layout_gravity="center_vertical"
             android:adjustViewBounds="true"
-            android:src="@drawable/ic_noise" />
+            android:src="@drawable/ic_noise"
+            app:tint="?attr/colorOnSecondary" />
 
         <TextView
             android:id="@+id/noiseView"
@@ -90,7 +91,8 @@
             android:layout_height="24dp"
             android:layout_gravity="center_vertical"
             android:adjustViewBounds="true"
-            android:src="@drawable/ic_light" />
+            android:src="@drawable/ic_light"
+            app:tint="?attr/colorOnSecondary" />
 
         <TextView
             android:id="@+id/lightView"
@@ -115,8 +117,8 @@
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="10dp"
-            app:tint="@color/lightGrey"
-            android:src="@drawable/outline_info_24" />
+            android:src="@drawable/outline_info_24"
+            app:tint="?attr/colorOnSecondary" />
 
     </LinearLayout>
 
@@ -133,7 +135,8 @@
             android:layout_height="24dp"
             android:layout_gravity="center_vertical"
             android:adjustViewBounds="true"
-            android:src="@drawable/ic_window" />
+            android:src="@drawable/ic_window"
+            app:tint="?attr/colorOnSecondary" />
 
         <TextView
             android:id="@+id/windowView"
