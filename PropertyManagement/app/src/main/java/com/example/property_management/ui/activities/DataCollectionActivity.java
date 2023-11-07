@@ -87,13 +87,7 @@ public class DataCollectionActivity extends AppCompatActivity {
     private String propertyId;
     private boolean hasRecordAudioPermission = false;
     private @NonNull ActivityDataCollectionBinding binding;
-    private LightSensor lightSensor;
-    private CompassSensor compassSensor;
-    private AudioSensor audioSensor;
     private static final int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 1;
-    private RecyclerView recyclerView;
-    private final List<Bitmap> images = new ArrayList<>();
-    private TextView photoCountTextView;
     private RecyclerView roomsRecyclerView;
     private RoomAdapter roomAdapter;
     private ArrayList<String> roomNames = new ArrayList<>();
@@ -250,8 +244,8 @@ public class DataCollectionActivity extends AppCompatActivity {
                 RoomData singleRoomData = inspectedRoomData.get(roomName);
                 HashMap<String, String> roomInfo = new HashMap<>();
                 roomInfo.put("images", "--");
-                roomInfo.put("noise", String.valueOf(singleRoomData.getNoise()));
-                roomInfo.put("brightness", String.valueOf(singleRoomData.getBrightness()));
+                roomInfo.put("noise", String.format("%.2f", singleRoomData.getNoise()));
+                roomInfo.put("brightness", String.format("%.2f", singleRoomData.getBrightness()));
                 roomInfo.put("windowOrientation", singleRoomData.getWindowOrientation());
                 roomDataMap.put(roomName, roomInfo);
             }
@@ -562,6 +556,7 @@ public class DataCollectionActivity extends AppCompatActivity {
             @Override
             public void onError(String msg) {
                 String errorMsg = "Error: " + msg;
+                // Display an error message using Snackbar
                 new BasicSnackbar(findViewById(android.R.id.content), errorMsg, "error");
                 Log.e("update-inspected-failure", msg);
                 // Re-enable the button and reset its text after successful update
@@ -571,45 +566,39 @@ public class DataCollectionActivity extends AppCompatActivity {
                 });
             }
         });
-
     }
 
-    //从得到的字符inspected结果中提取数字。
-    private String extractNumber(String input, Pattern pattern) {
-        Matcher matcher = pattern.matcher(input);
-        if (matcher.find()) {
-            return matcher.group(0);  // 返回找到的第一个数字
-        } else {
-            return "-1";  // 如果没有找到数字，返回0
-        }
-    }
-
+    /**
+     * Initializes the RecyclerView for displaying room data.
+     */
     private void initRecyclerView() {
         // Initialize rooms RecyclerView
         roomsRecyclerView = findViewById(R.id.recycler_view);
-        // Setup the adapter for rooms
-        Log.d("initialInspectedData", String.valueOf((initialInspectedData.keySet() == null)));
+        // Set up the adapter with room names and initial data
         roomAdapter = new RoomAdapter(this, roomNames, initialInspectedData);
         roomsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         roomsRecyclerView.setAdapter(roomAdapter);
     }
 
-
+    /**
+     * Callback for the result from requesting permissions.
+     * @param requestCode  The request code passed in requestPermissions(android.app.Activity, String[], int)
+     * @param permissions  The requested permissions.
+     * @param grantResults The grant results for the corresponding permissions.
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // Check if the permission request was for audio recording
         if (requestCode == MY_PERMISSIONS_REQUEST_RECORD_AUDIO) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // 权限被授予，初始化 RecyclerView
+                // Permission was granted, initialize the RecyclerView
                 hasRecordAudioPermission = true;
                 initRecyclerView();
             } else {
+                // Permission was denied, inform the user with a Snackbar
                 new BasicSnackbar(findViewById(android.R.id.content), "The app needs audio recording permission to function properly.", "info", Snackbar.LENGTH_LONG);
-                // 处理权限被拒绝的情况
             }
         }
     }
-
-
-
 }
