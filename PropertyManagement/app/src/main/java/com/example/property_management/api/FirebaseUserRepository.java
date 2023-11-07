@@ -276,6 +276,16 @@ public class FirebaseUserRepository {
 
     }
 
+    /**
+     * Deletes a specific facility or location from a user's list of interests.
+     *
+     * @param propertyIds         An ArrayList of property IDs from which the interest will be removed.
+     * @param isFacility          A Boolean flag to determine if the interest is a facility or not.
+     * @param interestedList      An ArrayList of the remaining interested facilities or locations after deletion.
+     * @param locationNamesList   An ArrayList of the names of the locations, used only if `isFacility` is false.
+     * @param interest_           The interest (facility/location) name that will be processed for deletion.
+     * @param callback            An instance of DeleteInterestedFacilityCallback to handle callback operations.
+     */
     public void deleteInterestedFacilityLocation(ArrayList<String> propertyIds, Boolean isFacility, ArrayList<String> interestedList, ArrayList<String> locationNamesList, String interest_, DeleteInterestedFacilityCallback callback) {
         // retrieve current user id
         FirebaseAuth mAuth = FirebaseAuth.getInstance();

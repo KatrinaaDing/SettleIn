@@ -188,7 +188,11 @@ public class LoginActivity extends AppCompatActivity {
             submitLoginBtn.setEnabled(true);
         }
     }
-    
+
+    /**
+     * Sends an email to reset the user's password.
+     * @param email The email address of the user to send the password reset email to.
+     */
     private void sendPasswordResetEmail(String email) {
         FirebaseAuth.getInstance().sendPasswordResetEmail(email)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {

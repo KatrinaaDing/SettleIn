@@ -57,6 +57,31 @@ import org.w3c.dom.Text;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * This class represents the Profile Fragment in a property management application.
+ * It manages the user's profile, allowing them to edit their details, add interested locations
+ * and facilities, and log out of the app. It interfaces with Firebase for user authentication
+ * and data storage to handle user information and their preferences.
+ *
+ * Methods:
+ * - onCreateView: Inflates the layout for the profile fragment and initializes its components.
+ * - onStart: A lifecycle callback method called when the fragment becomes visible.
+ * - onDestroyView: A lifecycle callback method called to clean up bindings when the fragment's view is destroyed.
+ * - logout: Signs out the current user and redirects to the login activity.
+ * - getUserInfo: Fetches the current user's information from Firebase and updates the UI accordingly.
+ * - editProfile: Opens a dialog for the user to edit their profile details.
+ * - showAddFacilityDialog: Opens a dialog for the user to add a new facility to their interested list.
+ * - showAddLocationDialog: Opens a dialog for the user to add a new location to their interested list.
+ * - onProfileUpdated: Updates the profile UI with the new username and email upon successful profile edit.
+ * - setInterestedLocationsRecycleView: Sets up the RecyclerView for displaying interested locations.
+ * - setInterestedFacilitiesRecycleView: Sets up the RecyclerView for displaying interested facilities.
+ * - addNewFacility: Adds a new facility to the user's interested list.
+ * - addNewLocation: Adds a new location to the user's interested list.
+ * - ifDuplicate: Checks if the location or facility to be added already exists in the user's interested list.
+ * - setLocationNameTxt: Sets the text of the location name in the dialog.
+ *
+ * This fragment allows for dynamic user interaction with their profile data and preferences related to property management.
+ */
 public class ProfileFragment extends Fragment implements EditProfileDialogFragment.OnProfileUpdatedListener{
 
     private FragmentProfileBinding binding;
