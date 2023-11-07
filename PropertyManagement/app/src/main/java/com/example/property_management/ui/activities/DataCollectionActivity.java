@@ -68,19 +68,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import androidx.annotation.Nullable;
-import com.example.property_management.R;
 import com.google.android.material.snackbar.Snackbar;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-
 import android.app.AlertDialog;
 
 /**
@@ -309,7 +302,7 @@ public class DataCollectionActivity extends AppCompatActivity {
                     // 这里调用 finish() 方法
                     finish();
                 }
-            }, 3500); // 2000 是延迟的时间（毫秒），即 2 秒
+            }, 1000); // 2000 是延迟的时间（毫秒），即 2 秒
 
             Log.d("Saved images",roomImagePathsMap.toString());
         });

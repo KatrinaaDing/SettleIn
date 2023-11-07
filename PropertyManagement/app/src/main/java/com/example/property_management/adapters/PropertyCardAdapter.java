@@ -150,7 +150,7 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
     private void confirmDeleteProperty(Property property, int position) {
         BasicDialog dialog = new BasicDialog(true,
                 "Are you sure you want to delete this property?",
-                "This action cannot be undone.",
+                "Your collected data will also be removed. This action cannot be undone.",
                 "Cancel", "Delete");
         dialog.setCallback(new BasicDialogCallback() {
             @Override
@@ -169,9 +169,9 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
                         properties.remove(position);
                         notifyItemRemoved(position);
                         notifyItemRangeChanged(position, properties.size());
-
+                        Log.d("delete property", "properties size: " + properties.size());
                         // show hint if property list is empty
-                        listener.onHasProperties(properties.size() == 0);
+                        listener.onHasProperties(properties.size() != 0);
                     }
                     @Override
                     public void onError(String msg) {

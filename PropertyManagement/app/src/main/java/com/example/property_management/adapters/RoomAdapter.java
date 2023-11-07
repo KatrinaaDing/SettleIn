@@ -839,12 +839,12 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     public void onClick(DialogInterface dialog, int id) {
                         int currentPosition = holder.getAdapterPosition();
                         if (currentPosition != RecyclerView.NO_POSITION) {
-                            String newName = roomNameEditText.getText().toString();
+                            String newName = roomNameEditText.getText().toString().trim();
 
                             // 检查是否有重复的房间名
                             boolean isDuplicate = false;
                             for (int i = 0; i < roomNames.size(); i++) {
-                                if (newName.equalsIgnoreCase(roomNames.get(i)) && currentPosition != i) {
+                                if (newName.equalsIgnoreCase(roomNames.get(i).trim()) && currentPosition != i) {
                                     isDuplicate = true;
                                     break;
                                 }
@@ -856,7 +856,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                                 notifyItemChanged(currentPosition, "UPDATE_ROOM_NAME");
                             } else {
                                 View view = holder.itemView;
-                                new BasicSnackbar(view, "Room name cannot be duplicated", "info", Snackbar.LENGTH_LONG);
+                                new BasicSnackbar(view, "Room name cannot be duplicated", "error", Snackbar.LENGTH_LONG);
 
                             }
                         }
