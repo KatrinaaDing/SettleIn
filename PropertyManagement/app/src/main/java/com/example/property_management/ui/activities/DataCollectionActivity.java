@@ -326,8 +326,6 @@ public class DataCollectionActivity extends AppCompatActivity {
                 sb.append(path).append(", ");
             }
         }
-        // Log all room image paths
-        logRoomImagePaths();
     }
 
     /**
@@ -364,13 +362,6 @@ public class DataCollectionActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Logs the paths of all saved room images.
-     */
-    private void logRoomImagePaths() {
-        Log.d("RoomImagePaths", roomImagePathsMap.toString());
     }
 
     /**
@@ -556,7 +547,6 @@ public class DataCollectionActivity extends AppCompatActivity {
                 String errorMsg = "Error: " + msg;
                 // Display an error message using Snackbar
                 new BasicSnackbar(findViewById(android.R.id.content), errorMsg, "error");
-                Log.e("update-inspected-failure", msg);
                 // Re-enable the button and reset its text after successful update
                 runOnUiThread(() -> {
                     //binding.finishButton.setEnabled(true);
@@ -616,7 +606,7 @@ public class DataCollectionActivity extends AppCompatActivity {
             case 6: return "SW";
             case 7: return "W";
             case 8: return "NW";
-            default: return "";  // Return an empty string if the direction code is invalid
+            default: return "";
         }
     }
 }

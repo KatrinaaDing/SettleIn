@@ -5,7 +5,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.util.Log;
 
 import com.example.property_management.callbacks.SensorCallback;
 
@@ -56,7 +55,6 @@ public class LightSensor implements SensorEventListener{
                 int count = 0;
                 // Loop for a specified duration or until recording stops
                 while (isRecording && count < 30) {
-                    Log.d("isLightRecording", "true");
                     count++;
                     try {
                         // Pause for a short duration before the next reading
@@ -67,7 +65,6 @@ public class LightSensor implements SensorEventListener{
                 }
                 // Stop the test when recording is still true after the loop
                 if (isRecording) {
-                    Log.d("Final light stop", "called");
                     stopTestFull();
                 }
             }

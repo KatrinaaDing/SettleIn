@@ -818,7 +818,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             case 7: return "W";
             case 8: return "NW";
             // Return an empty string if the direction code is invalid
-            default: return "";
+            default: return "N";
         }
     }
 

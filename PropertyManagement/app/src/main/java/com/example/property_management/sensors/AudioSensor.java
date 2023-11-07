@@ -37,7 +37,6 @@ public class AudioSensor {
      * Starts the audio recording and dB calculation on a separate thread.
      */
     public void startTest() {
-        Log.d("AudioSensor", "startTest() called");
         isRecording = true;
         new Thread(new Runnable() {
             @Override
@@ -75,7 +74,6 @@ public class AudioSensor {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
-                        Log.e("AudioSensor", "Recording thread interrupted", e);
                     }
                 }
                 // Calculate the average dB if recording is still active

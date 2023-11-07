@@ -5,7 +5,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
-import android.util.Log;
 
 import com.example.property_management.callbacks.SensorCallback;
 
@@ -111,8 +110,6 @@ public class CompassSensor implements SensorEventListener {
                 int count = 0;
                 // Check if recording should continue and if the duration has not exceeded 30 iterations.
                 while (isRecording && count < 30) {
-                    // Log the recording status.
-                    Log.d("isCompassRecording","true");
                     count++;
                     try {
                         // Pause the thread for a short duration before the next iteration.
@@ -123,7 +120,6 @@ public class CompassSensor implements SensorEventListener {
                 }
                 // If recording is still active, stop the test.
                 if (isRecording) {
-                    Log.d("Final compass stop","called");
                     stopTestFull();
                 }
             }
