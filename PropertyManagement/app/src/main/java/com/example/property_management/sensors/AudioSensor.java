@@ -62,6 +62,7 @@ public class AudioSensor {
                             // Convert RMS to decibels
                             double db = 20 * Math.log10(rms / 32768.0); // 32768.0 is the maximum value for a signed 16-bit number
                             db += offset; // Add calibration offset
+                            db *= (db >= 40) ? 1.2 : 0.8; // Scale the dB value
                             sumDb += db;
                             count++;
                             // Callback with the current dB value

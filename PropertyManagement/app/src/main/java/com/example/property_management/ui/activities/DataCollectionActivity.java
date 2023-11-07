@@ -62,25 +62,19 @@ import com.example.property_management.sensors.AudioSensor;
 import com.example.property_management.sensors.CompassSensor;
 import com.example.property_management.sensors.LightSensor;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import androidx.annotation.Nullable;
-import com.example.property_management.R;
 import com.google.android.material.snackbar.Snackbar;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-
 import android.app.AlertDialog;
 
 /**
@@ -442,7 +436,7 @@ public class DataCollectionActivity extends AppCompatActivity {
      * Displays an informational dialog to the user with guidance on how to use the app.
      */
     private void showInfoDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
         builder.setTitle("Tutorial");
 
         // Use a SpannableStringBuilder to format dialog message text

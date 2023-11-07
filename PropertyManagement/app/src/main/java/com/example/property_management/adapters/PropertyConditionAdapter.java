@@ -18,7 +18,10 @@ import com.example.property_management.R;
 import com.example.property_management.data.RoomData;
 import com.example.property_management.adapters.PropertyConditionAdapter;
 import com.example.property_management.ui.activities.ImageViewActivity;
+import com.example.property_management.ui.fragments.base.InfoDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -187,30 +190,12 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
      * @param context The context where the dialog is to be displayed.
      */
     private void showInformationDialog(Context context) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("Recommended lighting levels for the Home in Lux");
-
-        String[] lightingLevels = {
-                "Bedroom general: 50-150 Lux",
-                "Kitchen general: 150 Lux",
-                "Kitchen working areas: 400 Lux",
-                "Bathrooms: 150-300 Lux"
-        };
-
-        // Set the items to display in the dialog and provide no additional behavior on click.
-        builder.setItems(lightingLevels, null);
-
-        // Set the 'Close' button and its click listener to dismiss the dialog.
-        builder.setNegativeButton("Close", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        // Create and show the dialog.
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        InfoDialog dialog = new InfoDialog("Home Lighting: Recommended Lux Levels",
+                "Bedroom general: 50-150 Lux\n" +
+                        "Kitchen general: 150 Lux\n" +
+                        "Kitchen working areas: 400 Lux\n" +
+                        "Bathrooms: 150-300 Lux");
+        dialog.show(((FragmentActivity) context).getSupportFragmentManager(), "Hint dialog");
     }
 
     /**
@@ -218,29 +203,11 @@ public class PropertyConditionAdapter extends RecyclerView.Adapter<PropertyCondi
      * @param context The context where the dialog is to be displayed.
      */
     private void showNoiseLevelDialog(Context context) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("Recommended noise levels for the Home in db");
-
-        String[] noiseLevels = {
-                "Normal db 0 ~ 35: Have good sleep at night",
-                "Risk db 35 ~ 55: Acceptable noise during the day",
-                "High risk db > 55: Not recommended to live"
-        };
-
-        // Set the items to display in the dialog and provide no additional behavior on click.
-        builder.setItems(noiseLevels, null);
-
-        // Set the 'Close' button and its click listener to dismiss the dialog.
-        builder.setNegativeButton("Close", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        // Create and show the dialog.
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        InfoDialog dialog = new InfoDialog("Home Noise: Recommended Decibel Levels",
+                "Normal 0-35db: Have good sleep at night\n" +
+                        "Risk 35-55db: Acceptable noise during the day\n" +
+                        "High risk >55db: Not recommended to live");
+        dialog.show(((FragmentActivity) context).getSupportFragmentManager(), "Hint dialog");
     }
 
     /**
