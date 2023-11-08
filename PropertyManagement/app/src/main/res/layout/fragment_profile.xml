@@ -58,15 +58,16 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginVertical="10dp"
                 android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/textView2"
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="40px"
+                    android:layout_height="wrap_content"
                     android:text="Interested Locations"
-                    android:textSize="8pt" />
+                    android:textSize="@dimen/medium_title"
+                    android:textStyle="bold"/>
 
                 <ImageButton
                     android:id="@+id/addLocationBtn"
@@ -77,24 +78,33 @@
                     android:src="@drawable/baseline_add_circle_24" />
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/noLocationTxt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/grey"
+                android:text="No interested locations."/>
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/interestedLocationsRecyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="132dp"
+                android:layout_height="200dp"
+                android:fadeScrollbars="false"
                 android:scrollbars="vertical" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginVertical="10dp"
                 android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/textView3"
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="40px"
+                    android:layout_height="wrap_content"
                     android:text="Interested Facilities"
-                    android:textSize="8pt" />
+                    android:textSize="@dimen/medium_title"
+                    android:textStyle="bold"/>
 
                 <ImageButton
                     android:id="@+id/addFacilityBtn"
@@ -105,12 +115,20 @@
                     android:src="@drawable/baseline_add_circle_24" />
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/noFacilityTxt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/grey"
+                android:text="No interested facilities."/>
+
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/interestedFacilitiesRecyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="228dp"
+                android:layout_height="200dp"
+                android:fadeScrollbars="false"
                 android:scrollbars="vertical"/>
-
         </LinearLayout>
         <Button
             android:id="@+id/logoutBtn"

@@ -47,6 +47,7 @@ import com.example.property_management.ui.activities.MainActivity;
 import com.example.property_management.ui.fragments.base.AutocompleteFragment;
 import com.example.property_management.ui.fragments.base.BasicDialog;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
+import com.example.property_management.utils.Helpers;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseUser;
@@ -57,32 +58,7 @@ import org.w3c.dom.Text;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-/**
- * This class represents the Profile Fragment in a property management application.
- * It manages the user's profile, allowing them to edit their details, add interested locations
- * and facilities, and log out of the app. It interfaces with Firebase for user authentication
- * and data storage to handle user information and their preferences.
- *
- * Methods:
- * - onCreateView: Inflates the layout for the profile fragment and initializes its components.
- * - onStart: A lifecycle callback method called when the fragment becomes visible.
- * - onDestroyView: A lifecycle callback method called to clean up bindings when the fragment's view is destroyed.
- * - logout: Signs out the current user and redirects to the login activity.
- * - getUserInfo: Fetches the current user's information from Firebase and updates the UI accordingly.
- * - editProfile: Opens a dialog for the user to edit their profile details.
- * - showAddFacilityDialog: Opens a dialog for the user to add a new facility to their interested list.
- * - showAddLocationDialog: Opens a dialog for the user to add a new location to their interested list.
- * - onProfileUpdated: Updates the profile UI with the new username and email upon successful profile edit.
- * - setInterestedLocationsRecycleView: Sets up the RecyclerView for displaying interested locations.
- * - setInterestedFacilitiesRecycleView: Sets up the RecyclerView for displaying interested facilities.
- * - addNewFacility: Adds a new facility to the user's interested list.
- * - addNewLocation: Adds a new location to the user's interested list.
- * - ifDuplicate: Checks if the location or facility to be added already exists in the user's interested list.
- * - setLocationNameTxt: Sets the text of the location name in the dialog.
- *
- * This fragment allows for dynamic user interaction with their profile data and preferences related to property management.
- */
-public class ProfileFragment extends Fragment implements EditProfileDialogFragment.OnProfileUpdatedListener{
+public class ProfileFragment extends Fragment implements EditProfileDialogFragment.OnProfileUpdatedListener, CustomListRecyclerViewAdapter.EventListener{
 
     private FragmentProfileBinding binding;
     private AppCompatActivity activity;
@@ -163,6 +139,9 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
         binding = null;
     }
 
+    /**
+     * Logout the user
+     */
     private void logout() {
         FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(activity);
         firebaseAuthHelper.signout();
@@ -171,6 +150,9 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
         getActivity().finish();
     }
 
+    /**
+     * Get the user information and set the user information in the profile page
+     */
     private void getUserInfo() {
         FirebaseAuthHelper firebaseAuthHelper = new FirebaseAuthHelper(activity);
         user = firebaseAuthHelper.getCurrentUser();
@@ -187,7 +169,6 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
             @Override
             public void onSuccess(User userObj) {
                 currentUser = userObj;
-
                 setInterestedLocationsRecycleView();
                 setInterestedFacilitiesRecycleView();
             }
@@ -199,17 +180,27 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
         });
     }
 
+    /**
+     * Show the edit profile dialog
+     */
     public void editProfile() {
         EditProfileDialogFragment dialog = new EditProfileDialogFragment(user);
         dialog.setOnProfileUpdatedListener(this);
         dialog.show(getChildFragmentManager(), "EditProfileDialogFragment");
     }
 
+    /**
+     * Show the add facility dialog
+     */
     public void showAddFacilityDialog() {
         DialogFragment dialog = new AddNewFacilityDialogFragment();
         dialog.show(getChildFragmentManager(), "AddNewFacilityDialogFragment");
     }
 
+    /**
+     * Show the add location dialog
+     * @throws PackageManager.NameNotFoundException
+     */
     private void showAddLocationDialog() throws PackageManager.NameNotFoundException {
         // remove the existing fragment if exists to avoid duplicate id
         AutocompleteFragment existingFragment = (AutocompleteFragment)
@@ -267,6 +258,11 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
         });
     }
 
+    /**
+     * Update the profile information
+     * @param newUsername the new username
+     * @param newEmail the new email
+     */
     @Override
     public void onProfileUpdated(String newUsername, String newEmail) {
         if (!newUsername.isEmpty()) {
@@ -280,29 +276,48 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
         }
     }
 
+    /**
+     * Set interested location recycle view
+     */
     public void setInterestedLocationsRecycleView(){
         RecyclerView interestedLocationsRecyclerView = binding.interestedLocationsRecyclerView;
-        interestedLocationsAdapter = new CustomListRecyclerViewAdapter(currentUser, false);
+        interestedLocationsAdapter = new CustomListRecyclerViewAdapter(currentUser, false, this);
         interestedLocationsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         interestedLocationsRecyclerView.setAdapter(interestedLocationsAdapter);
     }
 
+    /**
+     * Set interested facility recycle view
+     */
     public void setInterestedFacilitiesRecycleView(){
         RecyclerView interestedFacilitiesRecyclerView = binding.interestedFacilitiesRecyclerView;
-        interestedFacilitiesAdapter = new CustomListRecyclerViewAdapter(currentUser, true);
+        interestedFacilitiesAdapter = new CustomListRecyclerViewAdapter(currentUser, true, this);
         interestedFacilitiesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         interestedFacilitiesRecyclerView.setAdapter(interestedFacilitiesAdapter);
-
     }
 
+    /**
+     * Add new facility to the interested facility list
+     * @param facilityToAdd the facility to add
+     */
     public void addNewFacility(String facilityToAdd) {
         interestedFacilitiesAdapter.addNewInterestedFacility(facilityToAdd);
     }
 
+    /**
+     * Add new location to the interested location list
+     * @param locationAddress the address of the location
+     * @param locationName the name of the location
+     */
     public void addNewLocation(String locationAddress, String locationName) {
         interestedLocationsAdapter.addNewInterestedLocation(locationAddress, locationName);
     }
 
+    /**
+     * Check if the location/facility to add is already in the interested location/facility list
+     * @param toAdd the location/facility to add
+     * @return true if the location/facility to add is already in the interested location/facility list, false otherwise
+     */
     public boolean ifDuplicate(String toAdd) {
         for (String location : currentUser.getInterestedLocations()) {
             String location_lower = location.toLowerCase();
@@ -320,8 +335,38 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
         return false;
     }
 
+    /**
+     * Set location name text in the dialog
+     * @param name the name of the location
+     */
     public void setLocationNameTxt(String name) {
         TextView locationNameTxt = (TextView) alertDialog.findViewById(R.id.locationNameTxt);
         locationNameTxt.setText(name);
+    }
+
+    /**
+     * Show no interested facility/location placeholder if there is no interested facility/location
+     * @param isFacility true if the recycle view is for interested facility, false if it is for interested location
+     * @param ifShowPlaceholder true if show placeholder, false if hide placeholder
+     */
+    @Override
+    public void onEvent(boolean isFacility, boolean ifShowPlaceholder) {
+        TextView noLocationTxt = binding.noLocationTxt;
+        TextView noFacilityTxt = binding.noFacilityTxt;
+
+        if (isFacility) {
+            if (ifShowPlaceholder) {
+                noFacilityTxt.setVisibility(View.VISIBLE);
+            } else {
+                noFacilityTxt.setVisibility(View.GONE);
+            }
+        } else {
+            if (ifShowPlaceholder) {
+                noLocationTxt.setVisibility(View.VISIBLE);
+            } else {
+                noLocationTxt.setVisibility(View.GONE);
+            }
+        }
+
     }
 }
