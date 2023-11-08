@@ -51,11 +51,11 @@ public class AutocompleteFragment extends Fragment {
                 String apiKey = getApiKey();
                 // if cannot get api key
                 if (apiKey == null) {
-                    System.out.println("error: api key is null");
+                    Log.e("AutocompleteFragmentNullKey", "error: api key is null");
                 }
                 Places.initialize(getContext(), apiKey);
             } catch (PackageManager.NameNotFoundException e) {
-                System.out.println("error: " + e.getMessage());
+                Log.e("AutocompleteFragmentError", "error: " + e.getMessage());
             }
         }
         this.placesClient = Places.createClient(getContext());
@@ -75,7 +75,6 @@ public class AutocompleteFragment extends Fragment {
                     // get profile fragment
                     ProfileFragment profileFragment = (ProfileFragment) AutocompleteFragment.this.getParentFragment();
 
-                    System.out.println("name: " + place.getName() + ", Address: " + place.getAddress());
                     autocompleteFragment.setPlace(place);
                     selectedAddress = place.getAddress();
                     selectedName = place.getName();
@@ -108,7 +107,7 @@ public class AutocompleteFragment extends Fragment {
 
             });
         } catch (Exception e) {
-            System.out.println("error: " + e.getMessage());
+            Log.e("AutocompleteFragmentError", "error: " + e.getMessage());
         }
         return root;
     }
@@ -129,10 +128,10 @@ public class AutocompleteFragment extends Fragment {
             String apiKey = metaData.getString("com.google.android.geo.API_KEY");
             return apiKey;
         } catch (PackageManager.NameNotFoundException e) {
-            System.out.println("error: " + e.getMessage());
+            Log.e("AutocompleteFragmentError", "error: " + e.getMessage());
             throw new PackageManager.NameNotFoundException("Unable to load meta-data: " + e.getMessage());
         } catch (NullPointerException e) {
-            System.out.println("error: " + e.getMessage());
+            Log.e("AutocompleteFragmentError", "error: " + e.getMessage());
         }
         return null;
     }

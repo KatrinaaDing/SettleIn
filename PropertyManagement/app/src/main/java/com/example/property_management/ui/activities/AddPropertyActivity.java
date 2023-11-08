@@ -308,7 +308,6 @@ public class AddPropertyActivity extends AppCompatActivity {
     private void fetchCoordinates(Runnable onSuccess) {
         // check if autocompleteFragment is null
         if (autocompleteFragment == null) {
-            System.out.println("fetch coordinate, autocompleteFragment is null");
             new BasicSnackbar(findViewById(android.R.id.content), "Error: Cannot fetch property location. Try again later.", "error");
             return;
         }
