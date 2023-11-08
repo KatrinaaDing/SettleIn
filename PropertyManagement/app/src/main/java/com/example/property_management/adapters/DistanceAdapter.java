@@ -18,6 +18,9 @@ import com.example.property_management.utils.Helpers;
 
 import java.util.ArrayList;
 
+/**
+ * Adapter for the distance recycler view
+ */
 public class DistanceAdapter extends RecyclerView.Adapter<DistanceAdapter.DistanceViewHolder> {
 
     Context context;
@@ -42,11 +45,11 @@ public class DistanceAdapter extends RecyclerView.Adapter<DistanceAdapter.Distan
 
     @Override
     public void onBindViewHolder(@NonNull DistanceViewHolder holder, int position) {
-        // TODO:
+        // get address and name of the interested facility/location
         String address = distanceInfoList.get(position).getAddress();
         String name = distanceInfoList.get(position).getName();
 
-
+        // set the distance data to text views
         holder.name.setText(name);
         holder.address.setText(address);
         holder.distance.setText(String.valueOf(distanceInfoList.get(position).getDistance()));

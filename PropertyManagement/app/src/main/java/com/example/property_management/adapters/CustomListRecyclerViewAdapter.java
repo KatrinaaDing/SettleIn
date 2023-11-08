@@ -1,39 +1,35 @@
 package com.example.property_management.adapters;
-
-import static android.app.PendingIntent.getActivity;
-
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.property_management.R;
-import com.example.property_management.api.FirebaseFunctionsHelper;
 import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.DeleteInterestedFacilityCallback;
 import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.User;
 import com.example.property_management.ui.activities.MainActivity;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
-
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Adapter for the custom list recycler view.
+ * Used for the interested facilities and locations
+ */
 public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomListRecyclerViewAdapter.ViewHolder> {
-
     private User user;
     View view;
-    private Boolean isFacility;
+    private Boolean isFacility; // true if interested facility, false if interested location
     FirebaseUserRepository userRepository = new FirebaseUserRepository();
     EventListener listener;
 
+    // listener for the event to show or hide no interest placeholder
     public interface EventListener {
         void onEvent(boolean isFacility, boolean ifShowPlaceholder);
     }
@@ -52,9 +48,11 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
+        // set interested facility/location name to the recycler view
         ArrayList<String> interests = getInterests();
         holder.interest.setText(interests.get(position));
 
+        // set on click listener for delete button
         holder.deleteBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -64,7 +62,6 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
                 // remove interested facility/location for all properties in firebase
                 ArrayList<String> propertyIds = getPropertyIds();
                 if (propertyIds != null && propertyIds.size() > 0) {
-                    // Create an ArrayList to store the keys
                     if (isFacility) {
                         deleteInterestedFacility(interestToDelete, position);
                     } else {
@@ -98,6 +95,10 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
         }
     }
 
+    /**
+     * Get name of interested facilities/locations
+     * @return ArrayList of interested facility/location names
+     */
     private ArrayList<String> getInterests() {
         if (isFacility) {
             return user.getInterestedFacilities();
@@ -106,23 +107,36 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
         }
     }
 
+    /**
+     * Get address of interested locations
+     * @return ArrayList of interested location addresses
+     */
     private ArrayList<String> getInterestedLocations() {
         return user.getInterestedLocations();
     }
 
+    /**
+     * Get all propertyIds of the user
+     * @return ArrayList of propertyIds
+     */
     private ArrayList<String> getPropertyIds() {
         return new ArrayList<>(user.getProperties().keySet());
     }
 
-    // delete interested facility/location
+    /**
+     * Delete interested facility/location
+     * @param interest_ facility to delete
+     * @param position position of the facility to delete in the recycler view
+     */
     public void deleteInterestedFacility(String interest_, int position) {
         ArrayList<String> interestsCopy = new ArrayList<>(getInterests());
         interestsCopy.remove(position);
+
+        // remove interested facility from all properties in firebase
         userRepository.deleteInterestedFacilityLocation(getPropertyIds(), isFacility, interestsCopy, null, interest_, new DeleteInterestedFacilityCallback() {
             @Override
             public void onSuccess(String msg) {
-                // redirect to main activity on success
-                // do more actions
+                // remove interested facility from local data
                 getInterests().remove(position);
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position, getInterests().size());
@@ -135,13 +149,17 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
 
             @Override
             public void onError(String msg) {
+                // show error message
                 String errorMsg = "Error: " + msg + ". Please try again.";
                 new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), errorMsg, "error");
-                Log.e("add-property-failure", msg);
             }
         });
     }
 
+    /**
+     * Delete interested location
+     * @param position position of the location to delete in the recycler view
+     */
     public void deleteInterestedLocation(int position) {
         String interest_ = getInterestedLocations().get(position);
         ArrayList<String> interestsCopy = new ArrayList<>(getInterests());
@@ -150,11 +168,11 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
         ArrayList<String> interestAddressesCopy = new ArrayList<>(getInterestedLocations());
         interestAddressesCopy.remove(position);
 
+        // remove interested location from all properties in firebase
         userRepository.deleteInterestedFacilityLocation(getPropertyIds(), isFacility, interestAddressesCopy, interestsCopy, interest_, new DeleteInterestedFacilityCallback() {
             @Override
             public void onSuccess(String msg) {
-                // redirect to main activity on success
-                // do more actions
+                // remove interested location from local data
                 getInterests().remove(position);
                 getInterestedLocations().remove(position);
                 notifyItemRemoved(position);
@@ -168,19 +186,24 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
 
             @Override
             public void onError(String msg) {
+                // show error message
                 String errorMsg = "Error: " + msg + ". Please try again.";
                 new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), errorMsg, "error");
-                Log.e("add-property-failure", msg);
             }
         });
     }
 
-    // add new facility
+    /**
+     * Add new interested location
+     * @param interestAddress address of the interested location to add
+     * @param interestName name of the interested location to add
+     */
     public void addNewInterestedLocation(String interestAddress, String interestName) {
         // get interests names
         ArrayList<String> newInterestNames = new ArrayList<>(getInterests());
         // get interests addresses
         ArrayList<String> newInterestAddresses = new ArrayList<>(getInterestedLocations());
+        // prepare payload
         newInterestAddresses.add(interestAddress);
         newInterestNames.add(interestName);
         HashMap<String, Object> updateDatePayload = new HashMap<>();
@@ -206,13 +229,17 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
 
             @Override
             public void onError(String msg) {
+                // show error message
                 String errorMsg = "Error: " + msg + ". Please try again.";
                 new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), errorMsg, "error");
-                Log.e("add-interest-failure", msg);
             }
         });
     }
 
+    /**
+     * Add new interested facility
+     * @param facilityToAdd facility to add
+     */
     public void addNewInterestedFacility(String facilityToAdd) {
         // copy interested facilities
         ArrayList<String> newInterests = new ArrayList<>(getInterests());
@@ -240,7 +267,6 @@ public class CustomListRecyclerViewAdapter extends RecyclerView.Adapter<CustomLi
             public void onError(String msg) {
                 String errorMsg = "Error: " + msg + ". Please try again.";
                 new BasicSnackbar(((MainActivity) view.getContext()).findViewById(android.R.id.content), errorMsg, "error");
-                Log.e("add-interest-failure", msg);
             }
         });
     }
