@@ -1,7 +1,10 @@
 package com.example.property_management.ui.activities;
 
+import android.Manifest;
+
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -17,17 +20,22 @@ import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.property_management.adapters.PropertyConditionAdapter;
 import com.example.property_management.api.FirebaseAuthHelper;
 import com.example.property_management.api.FirebaseFunctionsHelper;
 import com.example.property_management.api.FirebaseUserRepository;
 import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.Property;
+import com.example.property_management.data.RoomData;
 import com.example.property_management.data.UserProperty;
 import com.example.property_management.sensors.CalendarSensor;
 import com.example.property_management.sensors.LocationSensor;
@@ -57,11 +65,17 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 public class PropertyDetailActivity extends AppCompatActivity implements OnMapReadyCallback {
+    private static final int MY_PERMISSIONS_REQUEST_CAMERA_AND_STORAGE = 2;
+    private boolean hasCameraPermission = false;
+    private boolean hasWriteExternalStoragePermission = false;
+
     private ActivityPropertyDetailBinding binding;
     // add calendar event flag
     private boolean firstTimeAddingCalendarEvent = false;
@@ -70,6 +84,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     private String propertyId;
     private Property property;
     private UserProperty userProperty;
+    private List<RoomData> roomDataList;
     DistanceAdapter distanceAdapter;
     RecyclerView distanceRecycler;
     // inspection date and time
@@ -81,6 +96,9 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     String NO_DATE_HINT = "Date not set";
     String NO_TIME_HINT = "Time not set";
     String NO_DATE_TIME_HINT = "Not set";
+    private RecyclerView recyclerView;
+    private PropertyConditionAdapter adapter;
+    List<List<Integer>> imagesPerRoom = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,9 +130,45 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         Button dataCollectionBtn = findViewById(R.id.dataCollectionBtn);
         dataCollectionBtn.setOnClickListener(view -> {
             Intent newIntent = new Intent(this, DataCollectionActivity.class);
+            newIntent.putExtra("propertyId", this.propertyId);
+            newIntent.putExtra("inspectedData", this.userProperty.getInspectedData());
+            newIntent.putExtra("roomNum", this.property.getNumBedrooms());
+            newIntent.putExtra("notes", this.userProperty.getNotes());
+            newIntent.putExtra("roomNames", this.userProperty.getRoomNames());
+
+            //Log.d("roomNames sent by detail page",this.userProperty.getRoomNames().toString());
+            //Log.d("property id sent by detail page", this.propertyId);
+            //Log.d("inspectedData sent by detail page", this.userProperty.getInspectedData().toString());
+            //Log.d("roomNum sent by detail page", String.valueOf(this.property.getNumBedrooms() + this.property.getNumBathrooms()));
+            //Log.d("notes sent by detail page", this.userProperty.getNotes());
+
             startActivity(newIntent);
         });
 
+    }
+
+    /**
+     * Called when the fragment's activity has been resumed and is visible again.
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        // When the fragment view is being created, check if property details have been updated.
+        SharedPreferences sharedPreferences = this.getSharedPreferences("propertyDetailUpdated",
+                Context.MODE_PRIVATE);
+        // If property details have been updated, refresh the data displayed.
+        if (sharedPreferences.getBoolean("isUpdated", false)) {
+            // Retrieve the updated property details by ID.
+            getPropertyById(this.propertyId);
+            // Clear the update flag from shared preferences.
+            sharedPreferences.edit()
+                    .remove("isUpdated")
+                    .apply();
+
+            // Hide the "no data" text view if property details are updated.
+            TextView noDataTextView = findViewById(R.id.no_data_text_view);
+            noDataTextView.setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -302,6 +356,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                                     "and user collected property data");
                     property = (Property) resultObj.get("propertyData");
                     userProperty = (UserProperty) resultObj.get("userPropertyData");
+
                     // set ui
                     binding.detailAddressTxt.setText(property.getAddress());
                     setInspectionDateTimeText();
@@ -312,12 +367,16 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                     setCarousel(property);
                     setLinkButton(property);
                     setDistances(userProperty.getDistances());
+                    setInspectedData(userProperty);
                     initMap();
                     setLoading(false);
+
+                    //setInspectedData after fetch
+                    requestStoragePermission();
                 })
                 .addOnFailureListener(e -> {
                     // if error happens, show error message and hide detail content
-                    Log.e("get-property-by-id-fail", e.getMessage());
+                    Log.e("get-property-by-id-fail", "failed to get property: " + e.getMessage());
                     ScrollView detailContent = binding.detailContent;
                     detailContent.setVisibility(View.GONE);
                     setError(true);
@@ -623,6 +682,25 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                             "error");
                 }
             }
+        }else if (MY_PERMISSIONS_REQUEST_CAMERA_AND_STORAGE == requestCode){
+            // if cancel
+            if (grantResults.length > 0) {
+                // check result
+                for (int i = 0; i < permissions.length; i++) {
+                    switch (permissions[i]) {
+                        case Manifest.permission.CAMERA:
+                            hasCameraPermission = grantResults[i] == PackageManager.PERMISSION_GRANTED;
+                            break;
+                        case Manifest.permission.WRITE_EXTERNAL_STORAGE:
+                            hasWriteExternalStoragePermission = grantResults[i] == PackageManager.PERMISSION_GRANTED;
+                            break;
+                    }
+                }
+                // if get permission
+                if (hasWriteExternalStoragePermission) {
+                    setInspectedData(userProperty);
+                }
+            }
         }
     }
 
@@ -663,5 +741,93 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             distanceInfoList.add(distanceInfo);
         }
         setDistanceRecycler(distanceInfoList);
+    }
+
+    /**
+     * Sets the data for the inspected rooms.
+     * @param userProperty The property containing room inspection data.
+     */
+    private void setInspectedData(UserProperty userProperty){
+        // Retrieve the inspected data for all rooms.
+        HashMap<String, RoomData> inspectedData = userProperty.getInspectedData();
+
+        for (String roomName : inspectedData.keySet()){
+            Log.d("inspectedData in propertydetail", inspectedData.get(roomName).toString());
+        }
+
+        // Get the inspection notes.
+        String notes = userProperty.getNotes();
+        TextView savedNotesTextView = findViewById(R.id.saved_notes);
+
+        // Display inspection notes or a default message if notes are empty.
+        if (notes == null || notes.trim().isEmpty()) {
+            savedNotesTextView.setText("No inspected note, you can write your note in inspection!");
+        } else {
+            savedNotesTextView.setText(notes);
+        }
+
+        List<String> roomNames = userProperty.getRoomNames();
+
+        // Check for existing inspected room data.
+        if (roomNames == null || roomNames.isEmpty()){
+            // If no room data is found, show a message prompting the user to start inspection.
+            TextView noDataTextView = findViewById(R.id.no_data_text_view);
+            noDataTextView.setText("No inspected data found, lets go to conduct your first inspection!");
+            noDataTextView.setVisibility(View.VISIBLE);
+
+            // Hide the RecyclerView if there are no rooms to display.
+            RecyclerView recyclerView = findViewById(R.id.recycler_view);
+            recyclerView.setVisibility(View.GONE);
+        } else {
+            // If room data exists, prepare the RecyclerView to display it.
+            RecyclerView recyclerView = findViewById(R.id.recycler_view);
+            recyclerView.setVisibility(View.VISIBLE);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+            // Initialize lists to hold room data for the adapter.
+            ArrayList<ArrayList<String>> imagesPerRoom = new ArrayList<>();
+            ArrayList<Float> brightnessList = new ArrayList<>();
+            ArrayList<Float> noiseList = new ArrayList<>();
+            ArrayList<String> windowOrientationList = new ArrayList<>();
+
+            // Populate lists with room data.
+            for (String roomName : roomNames) {
+                RoomData roomData = inspectedData.get(roomName);
+                if (roomData != null) {
+                    imagesPerRoom.add(roomData.getImages());
+                    brightnessList.add(roomData.getBrightness());
+                    noiseList.add(roomData.getNoise());
+                    windowOrientationList.add(roomData.getWindowOrientation());
+                }
+            }
+
+            // Set up the adapter with the room data.
+            PropertyConditionAdapter adapter = new PropertyConditionAdapter(
+                    roomNames,
+                    imagesPerRoom,
+                    brightnessList,
+                    noiseList,
+                    windowOrientationList
+            );
+            recyclerView.setAdapter(adapter);
+            Log.d("RecyclerViewSetup", "RecyclerView should be set. Room count: " + roomNames.size());
+        }
+    }
+
+    /**
+     * Requests permission to write to external storage if it has not already been granted.
+     */
+    private void requestStoragePermission() {
+        // Check if write external storage permission has been granted.
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            // If not granted, request the write external storage permission.
+            ActivityCompat.requestPermissions(this,
+                    new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE },
+                    MY_PERMISSIONS_REQUEST_CAMERA_AND_STORAGE);
+        } else {
+            // Set flags indicating that camera and storage permissions have been granted.
+            hasCameraPermission = true;
+            hasWriteExternalStoragePermission = true;
+        }
     }
 }

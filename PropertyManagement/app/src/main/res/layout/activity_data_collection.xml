@@ -20,7 +20,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="55dp">
+            android:paddingBottom="55dp"
+            android:paddingTop="10dp">
 
             <!-- note -->
 
@@ -36,7 +37,8 @@
                     android:layout_height="24dp"
                     android:layout_gravity="center_vertical"
                     android:adjustViewBounds="true"
-                    android:src="@drawable/ic_note" />
+                    android:src="@drawable/ic_note"
+                    app:tint="?attr/colorOnSecondary" />
 
                 <TextView
                     android:id="@+id/noteView"
@@ -45,7 +47,7 @@
                     android:layout_marginHorizontal="10dp"
                     android:layout_weight="1.7"
                     android:paddingVertical="10dp"
-                    android:text="Notes" />
+                    android:text="Note" />
 
                 <Button
                     android:id="@+id/buttonNote"

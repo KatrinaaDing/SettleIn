@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
@@ -19,12 +20,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+
+import com.bumptech.glide.Glide;
 import com.example.property_management.R;
 import com.example.property_management.callbacks.SensorCallback;
+import com.example.property_management.data.RoomData;
 import com.example.property_management.sensors.AudioSensor;
 import com.example.property_management.sensors.CompassSensor;
 import com.example.property_management.sensors.LightSensor;
+import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import android.view.Window;
@@ -35,6 +43,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageCapture;
@@ -51,99 +60,160 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import android.app.AlertDialog;
 import android.widget.Toast;
 
 public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     private final List<String> roomNames;
-    private int roomCount;
+    private final List<String> roomNamesOrigin = new ArrayList<>();
     private Context context;
     private Set<Integer> initializedRooms = new HashSet<>();
-    public TextView photoCount;
     private LightSensor lightSensor;
     private CompassSensor compassSensor;
     private AudioSensor audioSensor;
-    private static List<List<Bitmap>> roomImages = new ArrayList<>();
+    private  List<List<Bitmap>> roomImages = new ArrayList<>();
     private List<LightSensor> lightSensors = new ArrayList<>();
     private List<CompassSensor> compassSensors = new ArrayList<>();
     private List<AudioSensor> audioSensors = new ArrayList<>();
     private ArrayList<ArrayList<String>> roomImagePaths = new ArrayList<>();
     private List<Preview> cameraPreviews = new ArrayList<>();
     private List<ImageCapture> imageCaptures = new ArrayList<>();
+    private boolean isFirstBind = true;
+    private HashMap<String, RoomData> roomData = new HashMap<>();
+    private LinkedHashMap<String, RoomData> inspectedRoomData = new LinkedHashMap<>();
 
-    public RoomAdapter(Context context, List<String> roomNames) {
+    /**
+     * Constructor for RoomAdapter.
+     * @param context The current context.
+     * @param roomNames A list of room names.
+     * @param roomData A map of room names to their respective RoomData.
+     */
+    public RoomAdapter(Context context, List<String> roomNames, HashMap<String, RoomData> roomData) {
         this.context = context;
         this.roomNames = roomNames;
-        for (int i = 0; i < roomNames.size(); i++) {
-            roomImages.add(new ArrayList<>());
 
+        // Initialize the original room names list
+        for (String names:roomNames){
+            this.roomNamesOrigin.add(names);
+        }
+
+        // Populate the inspected room data map
+        for (String names:roomNames){
+            inspectedRoomData.put(names,roomData.get(names));
+        }
+
+        // Initialize lists for images and sensors for each room
+        for (int i = 0; i < roomNames.size(); i++) {
+            // Image list for the room
+            roomImages.add(new ArrayList<>());
+            // Sensor objects for the room
             audioSensors.add(new AudioSensor(null));
             lightSensors.add(new LightSensor(context, null));
             compassSensors.add(new CompassSensor(context, null));
-
+            // Camera preview and capture objects
             cameraPreviews.add(new Preview.Builder().build());
             imageCaptures.add(new ImageCapture.Builder().build());
         }
+        this.roomData = roomData;
+
+        // Decode and add images to the roomImages list for each room
+        int i = 0;
+        for (String roomName: roomNames){
+            for (String imgPath: roomData.get(roomName).getImages()){
+                Bitmap bitmap = BitmapFactory.decodeFile(imgPath);
+                roomImages.get(i).add(bitmap);
+            }
+            i++;
+        }
     }
 
+    /**
+     * Called when RecyclerView needs a new ViewHolder of the given type to represent an item.
+     * @param parent The ViewGroup into which the new View will be added after it is bound to an adapter position.
+     * @param viewType The view type of the new View.
+     * @return A new ViewHolder that holds a View of the given view type.
+     */
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // Inflate the room layout XML and create a new ViewHolder
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.room_layout, parent, false);
         return new ViewHolder(view);
     }
 
+    /**
+     * Called by RecyclerView to display the data at the specified position.
+     * This method should update the contents of the ViewHolder to reflect the item at the given position.
+     * @param holder The ViewHolder which should be updated to represent the contents of the item at the given position in the data set.
+     * @param position The position of the item within the adapter's data set.
+     * @param payloads A list of payload objects, can be used to update partial changes to the item's view.
+     */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position, @NonNull List<Object> payloads) {
-        if (payloads.contains("UPDATE_ROOM_NAME")) {
-            holder.roomName.setText(roomNames.get(position));
-        } else if (!payloads.isEmpty() && payloads.get(0).equals("UPDATE_PHOTO_COUNT")) {
-
-            int updatedPhotoCount = roomImages.get(position).size();
-            Log.d("RoomAdapter", "Updated photo count: " + updatedPhotoCount);
-            holder.photoCount.setText(updatedPhotoCount + " added");
+        if (!payloads.isEmpty()) {
+            // Partial update based on the payload
+            for (Object payload : payloads) {
+                if ("UPDATE_PHOTO_COUNT".equals(payload)) {
+                    // Update only photo count related views
+                    int updatedPhotoCount = roomImages.get(position).size();
+                    holder.photoCount.setText(updatedPhotoCount + " added");
+                } else if ("UPDATE_ROOM_NAME".equals(payload)) {
+                    // Update only room name related views
+                    holder.roomName.setText(roomNames.get(position));
+                }
+            }
         } else {
-
+            // If no payloads are available, call the full bind method
             onBindViewHolder(holder, position);
         }
     }
 
+    /**
+     * Binds the data to the view holder at the specified position.
+     * @param holder The view holder to bind to.
+     * @param position The position in the data set.
+     */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
-        // Others room
+        // Set up the room name
         String currentRoomName = roomNames.get(position);
         if ("Others".equals(currentRoomName)) {
             holder.roomName.setText("Others");
-            // camera function
+            // Make camera function visible
             holder.openCameraButton.setVisibility(View.VISIBLE);
             holder.openCameraButton.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    showCameraOptionsDialog(holder);
-                }
-            });
+                    public void onClick(View v) {
+                        showCameraOptionsDialog(holder);
+                    }
+                });
 
             int currentPosition = holder.getAdapterPosition();
             if (currentPosition != RecyclerView.NO_POSITION) {
                 holder.photoCount.setText(roomImages.get(currentPosition).size() + " added");
             }
 
+            // Set click listener for photo count
             holder.photoCount.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    showPhotosDialog(holder.getAdapterPosition());
-                }
+                        showPhotosDialog(holder.getAdapterPosition());
+                    }
             });
 
-            // other components invisible
+            // Other components invisible
             holder.noiseIcon.setVisibility(View.GONE);
             holder.lightIcon.setVisibility(View.GONE);
             holder.compassIcon.setVisibility(View.GONE);
@@ -161,48 +231,131 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             holder.compassTestButton.setVisibility(View.GONE);
 
             holder.editRoomNameIcon.setVisibility(View.GONE);
+            holder.lightValueTextView.setText("11");
+            holder.noiseValueTextView.setText("11");
+            holder.compassValueTextView.setText("11");
             return;
+        }else{
+            holder.roomName.setText(currentRoomName);
         }
 
-        // Bind room name
-        if (position == 0) {
-            holder.roomName.setText("Lounge Room");
+        // Set sensor values
+        if (roomData.get(roomNamesOrigin.get(position)).getBrightness() == -1) {
+            // Display noise sensor value or "--" if not available
+            holder.lightValueTextView.setText("--");
         } else {
-            holder.roomName.setText("Room " + position);
+            holder.lightValueTextView.setText(roomData.get(roomNamesOrigin.get(position)).getBrightness() + " Lux");
         }
 
+        // Display noise sensor value or "--" if not available
+        if (roomData.get(roomNamesOrigin.get(position)).getNoise() == -1) {
+            holder.noiseValueTextView.setText("--");
+        } else {
+            holder.noiseValueTextView.setText(roomData.get(roomNamesOrigin.get(position)).getNoise() + " dB");
+        }
+        // Display compass sensor orientation
+        holder.compassValueTextView.setText(roomData.get(roomNamesOrigin.get(position)).getWindowOrientation());
+
+        // Retrieve current sensors for the room
         AudioSensor currentAudioSensor = audioSensors.get(position);
         LightSensor currentLightSensor = lightSensors.get(position);
         CompassSensor currentCompassSensor = compassSensors.get(position);
 
         // Create a callback for this room
         SensorCallback roomCallback = new SensorCallback() {
+            // Define behavior for sensor data changes
             @Override
             public void onSensorDataChanged(String sensorType, float value) {
                 switch (sensorType) {
                     case "Light":
                         updateLightData(holder, value);
-                        Log.d("SensorCallback", "onSensorDataChanged called for " + sensorType);
                         break;
                     case "Compass":
                         updateCompassData(holder, value);
-                        Log.d("SensorCallback", "onSensorDataChanged called for " + sensorType);
                         break;
                 }
             }
 
+            // Define behavior for current dB calculations
             @Override
             public void onCurrentDbCalculated(double currentDb) {
                 ((Activity) context).runOnUiThread(() -> {
-
                     holder.noiseValueTextView.setText(String.format("%.2f dB", currentDb));
                 });
             }
 
+            // Define behavior for current dB calculations
             @Override
             public void onAverageDbCalculated(double averageDb) {
                 ((Activity) context).runOnUiThread(() -> {
                     holder.noiseValueTextView.setText(String.format("%.2f dB", averageDb));
+                    inspectedRoomData.get(roomNames.get(position)).setNoise((float)averageDb);
+
+                });
+            }
+
+            // Define behavior for Audio test
+            @Override
+            public void onAudioTestCompleted() {
+                ((Activity) context).runOnUiThread(() -> {
+                    holder.noiseTestButton.setText("Test");
+                    holder.noiseTestButton.setBackgroundColor(Color.parseColor("#FF6200EE"));
+                    holder.isNoiseTesting = false;
+                });
+            }
+
+            // Define behavior for light test
+            @Override
+            public void onLightTestCompleted() {
+                ((Activity) context).runOnUiThread(() -> {
+                    holder.lightTestButton.setText("Test");
+                    holder.lightTestButton.setBackgroundColor(Color.parseColor("#FF6200EE"));
+                    holder.isLightTesting = false;
+                });
+            }
+
+            // Define behavior for compass test
+            @Override
+            public void onCompassTestCompleted() {
+                ((Activity) context).runOnUiThread(() -> {
+                    holder.compassTestButton.setText("Test");
+                    holder.compassTestButton.setBackgroundColor(Color.parseColor("#FF6200EE"));
+                    holder.isCompassTesting = false;
+                });
+            }
+
+            // Define behavior for Audio test completion
+            @Override
+            public void onAudioTestCompletedFull() {
+                ((Activity) context).runOnUiThread(() -> {
+                    holder.noiseTestButton.setText("Test");
+                    holder.noiseTestButton.setBackgroundColor(Color.parseColor("#FF6200EE"));
+                    holder.isNoiseTesting = false;
+                });
+            }
+
+            // Define behavior for light test completion
+            @Override
+            public void onLightTestCompletedFull() {
+                ((Activity) context).runOnUiThread(() -> {
+                    holder.lightTestButton.setText("Test");
+                    holder.lightTestButton.setBackgroundColor(Color.parseColor("#FF6200EE"));
+                    holder.isLightTesting = false;
+                    String value = holder.lightValueTextView.getText().toString();
+                    float numValue = Float.valueOf(extractNumber(value));
+                    inspectedRoomData.get(roomNames.get(position)).setBrightness(numValue);
+                });
+            }
+
+            // Define behavior for compass test completion
+            @Override
+            public void onCompassTestCompletedFull() {
+                ((Activity) context).runOnUiThread(() -> {
+                    holder.compassTestButton.setText("Test");
+                    holder.compassTestButton.setBackgroundColor(Color.parseColor("#FF6200EE"));
+                    holder.isCompassTesting = false;
+                    String value = holder.compassValueTextView.getText().toString();
+                    inspectedRoomData.get(roomNames.get(position)).setWindowOrientation(value);
                 });
             }
         };
@@ -213,18 +366,109 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
         // Use the callback with the sensors
         holder.noiseTestButton.setOnClickListener(v -> {
-            currentAudioSensor.startTest();
-            Log.d("AiSensor", "startTest() called");
+
+            if (!holder.isNoiseTesting) {
+                // Start noise level testing
+                holder.isNoiseTesting = true;
+                holder.noiseTestButton.setText("Cancel");
+                holder.noiseTestButton.setBackgroundColor(Color.RED);
+
+                // Initialize and start the noise test thread
+                holder.testAudioThread = new Thread(() -> {
+                    currentAudioSensor.startTest();
+                });
+                holder.testAudioThread.start();
+
+            } else {
+                // Cancel the noise level testing
+                holder.isNoiseTesting = false;
+                holder.noiseTestButton.setText("Test");
+                holder.noiseTestButton.setBackgroundColor(Color.parseColor("#FF6200EE"));
+
+                // Stop the noise test thread if it's running
+                if (holder.testAudioThread != null) {
+                    currentAudioSensor.stopTest();
+                    holder.testAudioThread.interrupt();
+                    holder.testAudioThread = null;
+
+                    // Reset the noise value text view to previous state or to "--" if no data
+                    if (roomData.get(roomNamesOrigin.get(position)).getNoise() == -1) {
+                        holder.noiseValueTextView.setText("--");
+                    } else {
+                        holder.noiseValueTextView.setText(roomData.get(roomNamesOrigin.get(position)).getNoise() + " dB");
+                    }
+                }
+            }
         });
 
+        // Set a click listener for the light test button
         holder.lightTestButton.setOnClickListener(v -> {
-            currentLightSensor.startTest();
+            if (!holder.isLightTesting) {
+                // Start light level testing
+                holder.isLightTesting = true;
+                holder.lightTestButton.setText("Cancel");
+                holder.lightTestButton.setBackgroundColor(Color.RED);
+
+                // Initialize and start the light test thread
+                holder.testLightThread = new Thread(() -> {
+                    currentLightSensor.startTest();
+                });
+                holder.testLightThread.start();
+
+            } else {
+                // Cancel the light level testing
+                holder.isLightTesting = false;
+                holder.lightTestButton.setText("Test");
+                holder.lightTestButton.setBackgroundColor(Color.parseColor("#FF6200EE"));
+
+                // Stop the light test thread if it's running
+                if (holder.testLightThread != null) {
+                    currentLightSensor.stopTest();
+                    holder.testLightThread.interrupt();
+                    holder.testLightThread = null;
+
+                    // Reset the light value text view to previous state or to "--" if no data
+                    if (roomData.get(roomNamesOrigin.get(position)).getBrightness() == -1) {
+                        holder.lightValueTextView.setText("--");
+                    } else {
+                        holder.lightValueTextView.setText(roomData.get(roomNamesOrigin.get(position)).getBrightness() + " Lux");
+                    }
+                }
+            }
         });
 
+        // Set a click listener for the compass test button
         holder.compassTestButton.setOnClickListener(v -> {
-            currentCompassSensor.startTest();
+            if (!holder.isCompassTesting) {
+                // Start compass orientation testing
+                holder.isCompassTesting = true;
+                holder.compassTestButton.setText("Cancel");
+                holder.compassTestButton.setBackgroundColor(Color.RED);
+
+                // Initialize and start the compass test thread
+                holder.testCompassThread = new Thread(() -> {
+                    currentCompassSensor.startTest();
+                });
+                holder.testCompassThread.start();
+
+            } else {
+                // Cancel the compass orientation testing
+                holder.isCompassTesting = false;
+                holder.compassTestButton.setText("Test");
+                holder.compassTestButton.setBackgroundColor(Color.parseColor("#FF6200EE"));
+
+                // Stop the compass test thread if it's running
+                if (holder.testCompassThread != null) {
+                    currentCompassSensor.stopTest();
+                    holder.testCompassThread.interrupt();
+                    holder.testCompassThread = null;
+
+                    holder.compassValueTextView.setText(roomData.get(roomNamesOrigin.get(position)).getWindowOrientation());
+                }
+            }
         });
 
+        // Initialize sensors if they haven't been already
         if (!initializedRooms.contains(position)) {
             //Initialize sensors
             audioSensor = new AudioSensor(roomCallback);
@@ -234,7 +478,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             initializedRooms.add(position);
         }
 
-        // camera function
+        // Set a click listener for the camera button
         holder.openCameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -243,10 +487,12 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         });
 
         int currentPosition = holder.getAdapterPosition();
+        // Update the photo count if the current position is valid
         if (currentPosition != RecyclerView.NO_POSITION) {
             holder.photoCount.setText(roomImages.get(currentPosition).size() + " added");
         }
 
+        // Set a click listener for the photo count view
         holder.photoCount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -254,6 +500,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             }
         });
 
+        // Set a click listener for the edit room name icon
         holder.editRoomNameIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -262,64 +509,91 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         });
     }
 
-    //Use cameraX library
+    /**
+     * Initialize and start the camera for taking photos.
+     * @param previewView The view to display the camera preview.
+     * @param captureButton The button used to capture the photo.
+     * @param cameraDialog The dialog within which the camera UI is displayed.
+     * @param holder The ViewHolder associated with the current item.
+     */
     private void startCamera(PreviewView previewView, Button captureButton, Dialog cameraDialog, ViewHolder holder) {
+        // Obtain the future for the camera provider
         ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(context);
-
+        // Get the main thread executor to run the camera operations
         Executor executor = ContextCompat.getMainExecutor(context);
+
+        // Add a listener to set up the camera once the camera provider is available
         cameraProviderFuture.addListener(() -> {
             try {
+                // Obtain the camera provider
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
                 Preview preview = new Preview.Builder().build();
+                // Set up the image capture use case
                 ImageCapture imageCapture = new ImageCapture.Builder().build();
 
+                // Select the back camera
                 CameraSelector cameraSelector = new CameraSelector.Builder()
                         .requireLensFacing(CameraSelector.LENS_FACING_BACK)
                         .build();
 
+                // Unbind any previous use cases and bind the current ones to the lifecycle
                 cameraProvider.unbindAll();
                 Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner) context, cameraSelector, preview, imageCapture);
                 preview.setSurfaceProvider(previewView.getSurfaceProvider());
 
+                // Set up the capture button to take a photo when clicked
                 captureButton.setOnClickListener(v -> {
+                    // Create a file to save the captured image
                     File photoFile = new File(context.getExternalFilesDir(null), System.currentTimeMillis() + ".jpg");
                     ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(photoFile).build();
+
+                    // Take the picture and save it to the file created
                     imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback() {
                         public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+                            // Process the saved image
                             String photoPath = photoFile.getAbsolutePath();
                             Bitmap bitmap = BitmapFactory.decodeFile(photoPath);
 
                             try {
+                                // Rotate the image if required
                                 bitmap = rotateImageIfRequired(bitmap, photoPath);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
+                            // Add the image to the collection and notify the adapter
+                            int position = holder.getAdapterPosition();
+                            roomImages.get(position).add(bitmap);
+                            notifyItemChanged(position, "UPDATE_PHOTO_COUNT");
 
-                            roomImages.get(holder.getAdapterPosition()).add(bitmap);
-                            notifyDataSetChanged();
                             //close camera page
                             cameraDialog.dismiss();
                         }
 
                         @Override
                         public void onError(@NonNull ImageCaptureException exception) {
-                            Log.e("RoomAdapter", "Image capture failed", exception);
-                            Toast.makeText(context, "Error capturing the image.", Toast.LENGTH_SHORT).show();
+                            new BasicSnackbar(holder.itemView, "Error capturing the image.", "error");
                         }
                     });
                 });
-
             } catch (ExecutionException | InterruptedException e) {
                 Log.e("RoomAdapter", "Use case binding failed", e);
             }
         }, executor);
     }
 
-    // handle rotated photos
+    /**
+     * Rotates an image if required based on its EXIF orientation tag.
+     * @param img The image to be rotated.
+     * @param path The file path of the image to check EXIF data.
+     * @return The rotated image if rotation was necessary, or the original image otherwise.
+     * @throws IOException If reading EXIF data fails.
+     */
     private Bitmap rotateImageIfRequired(Bitmap img, String path) throws IOException {
+        // Read the EXIF data from the image file
         ExifInterface ei = new ExifInterface(path);
         int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
 
+        // Rotate the image based on the orientation tag
         switch (orientation) {
             case ExifInterface.ORIENTATION_ROTATE_90:
                 return rotateImage(img, 90);
@@ -332,110 +606,66 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         }
     }
 
-    // keep original rotation
+    /**
+     * Rotates an image by a specific degree.
+     * @param img The image bitmap to rotate.
+     * @param degree The degree to rotate the image.
+     * @return The rotated image.
+     */
     private Bitmap rotateImage(Bitmap img, int degree) {
         Matrix matrix = new Matrix();
+        // Rotate the matrix by the specified degree
         matrix.postRotate(degree);
+        // Create and return the new bitmap rotated using the matrix
         return Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
     }
 
-    // test save function
-    private void showSaveImageDialog(Bitmap image, int roomPosition) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("Save Image");
-        builder.setMessage("Do you want to save this image to your gallery?");
-        builder.setPositiveButton("Save Image", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // Save the single image to gallery
-                saveImageToGallery(image, roomPosition);
-                //检查保存路径
-                logRoomImagePaths();
-            }
-        });
-
-        builder.setNegativeButton("Cancel", null);
-        builder.show();
-    }
-
-    private void saveImageToGallery(Bitmap image, int roomPosition) {
-        String imageUri = MediaStore.Images.Media.insertImage(
-                context.getContentResolver(),
-                image,
-                "Room Image",
-                "Image of a room"
-        );
-        String imagePath = getPathFromUri(Uri.parse(imageUri));
-        Toast.makeText(context, "Image saved to gallery at: " + imagePath, Toast.LENGTH_SHORT).show();
-
-        while (roomPosition >= roomImagePaths.size()) {
-
-            roomImagePaths.add(new ArrayList<>());
-        }
-
-        roomImagePaths.get(roomPosition).add(imagePath);
-    }
-
-    private String getPathFromUri(Uri uri) {
-        String[] projection = { MediaStore.Images.Media.DATA };
-        Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null);
-        if (cursor == null) {
-            return null;
-        }
-        int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        String imagePath = cursor.getString(columnIndex);
-        cursor.close();
-        return imagePath;
-    }
-
-    // test photo path
-    private void logRoomImagePaths() {
-        for (int i = 0; i < roomImagePaths.size(); i++) {
-            List<String> imagePathList = roomImagePaths.get(i);
-            StringBuilder sb = new StringBuilder();
-            sb.append("Room ").append(i).append(": ");
-            for (String path : imagePathList) {
-                sb.append(path).append(", ");
-            }
-            Log.d("RoomImagePaths", sb.toString());
-        }
-    }
-
-    // take photo or upload from library
+    /**
+     * Displays a dialog with options to take a photo or upload from the library.
+     * @param holder The ViewHolder associated with the current item.
+     */
     private void showCameraOptionsDialog(ViewHolder holder) {
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
         View view = LayoutInflater.from(context).inflate(R.layout.dialog_camera_options, null);
 
+        // Initialize buttons for taking photo and adding from library
         Button btnTakePhoto = view.findViewById(R.id.btn_take_photo);
         Button btnAddFromLibrary = view.findViewById(R.id.btn_add_from_library);
 
+        // Set up click listener for the take photo button
         btnTakePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int currentPosition = holder.getAdapterPosition();
                 if (currentPosition != RecyclerView.NO_POSITION) {
-
+                    // Inflate camera preview layout
                     LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                     View cameraView = inflater.inflate(R.layout.camera_preview_layout, null);
 
+                    // Initialize preview view and capture button
                     PreviewView previewView = cameraView.findViewById(R.id.previewView);
                     Button captureButton = cameraView.findViewById(R.id.captureButton);
 
+                    // Set up and show camera dialog
                     Dialog cameraDialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
                     cameraDialog.setContentView(cameraView);
                     cameraDialog.show();
 
+                    // Start the camera
                     startCamera(previewView, captureButton, cameraDialog, holder);
                 }
 
+                // Dismiss the bottom sheet dialog
                 bottomSheetDialog.dismiss();
             }
         });
 
+        // Set up click listener for the add from library button
         btnAddFromLibrary.setOnClickListener(new View.OnClickListener() {
+            // Start intent to pick image from the gallery
             @Override
             public void onClick(View v) {
+                // Start intent to pick image from the gallery
                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 ((Activity) context).startActivityForResult(intent, holder.getAdapterPosition());
 
@@ -443,23 +673,52 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             }
         });
 
+        // Set the custom view to the bottom sheet and show it
         bottomSheetDialog.setContentView(view);
         bottomSheetDialog.show();
     }
 
-   // test camera function
-    public static List<List<Bitmap>> getRoomImages() {
-        return roomImages;
+    /**
+     * Retrieves all images for each room.
+     * @return A list of lists containing bitmaps for each room.
+     */
+   public List<List<Bitmap>> getAllRoomImages() {
+       return roomImages;
+   }
+
+    /**
+     * Retrieves the file paths for all images of each room.
+     * @return A list of lists containing the file paths for each room.
+     */
+    public ArrayList<ArrayList<String>> getAllRoomImagePaths() {
+        return roomImagePaths;
     }
 
-    // photo display
+    /**
+     * Displays a dialog with a gallery of photos for a specific room.
+     * @param roomPosition The position of the room in the adapter.
+     */
     private void showPhotosDialog(int roomPosition) {
-        Dialog dialog = new Dialog(context);
-        dialog.setContentView(R.layout.dialog_photo_gallery);
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View dialogView = inflater.inflate(R.layout.dialog_photo_gallery, null);
 
+        // Create and set up a new dialog for displaying photos
+        AlertDialog dialog = new MaterialAlertDialogBuilder(context)
+                .setTitle("Added Photos")
+                .setView(dialogView)
+                .setNegativeButton("Back", null)
+                .create();
+        // if no images, display a message
+        if (roomImages.get(roomPosition).size() == 0) {
+            dialog.setMessage("No photos added yet.");
+        }
+        // Show the dialog
+        dialog.show();
+
+        // Initialize the RecyclerView for displaying images
         RecyclerView recyclerView = dialog.findViewById(R.id.recyclerView);
 
-        // show photo with window size
+        // Adjust the dialog window size to match the content
         Window window = dialog.getWindow();
         if (window != null) {
             WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
@@ -469,70 +728,90 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             window.setAttributes(layoutParams);
         }
 
+        // Set up the adapter for the RecyclerView
         ImageAdapter imageAdapter = new ImageAdapter(roomImages.get(roomPosition), recyclerView, roomPosition) {
             @Override
             public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
                 super.onBindViewHolder(holder, position);
+                // Set up the delete button click listener
                 holder.deleteButton.setOnClickListener(new View.OnClickListener() {
+                    // Show confirmation dialog for deleting a photo
                     @Override
                     public void onClick(View v) {
                         // delete notification
-                        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                        AlertDialog builder = new MaterialAlertDialogBuilder(context)
+                                .setTitle("Delete Photo")
+                                .setMessage("Are you sure to delete the photo?")
+                                .setPositiveButton("Yes", (dialogInterface, i) -> {
+                                    // Remove the image from the list and update the adapter
+                                    roomImages.get(roomPosition).remove(position);
+                                    // Update the photo count display
+                                    notifyDataSetChanged();
+                                    updatePhotoCountForRoom(roomPosition);
+                                })
+                                // Set up the negative button with no action
+                                .setNegativeButton("No", null)
+                                .create();
                         builder.setTitle("Delete Photo");
                         builder.setMessage("Are you sure to delete the photo?");
-                        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                roomImages.get(roomPosition).remove(position);
-                                // change made
-                                notifyDataSetChanged();
-                                updatePhotoCountForRoom(roomPosition);
-                            }
-                        });
-                        // No action
-                        builder.setNegativeButton("No", null);
                         builder.show();
                     }
                 });
             }
         };
 
+        // Set up the layout manager and adapter for the RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setAdapter(imageAdapter);
 
-        Button backButtonGallery = dialog.findViewById(R.id.back_button_gallery);
-        backButtonGallery.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
 
-        dialog.show();
     }
 
+    /**
+     * Notifies that the photo count has been updated for a specific room.
+     * @param roomPosition The position of the room in the adapter.
+     */
     private void updatePhotoCountForRoom(int roomPosition) {
         notifyItemChanged(roomPosition, "UPDATE_PHOTO_COUNT");
     }
 
+    /**
+     * Updates the display of light data for a particular ViewHolder.
+     * @param holder The ViewHolder associated with the current item.
+     * @param lightValue The light value to display.
+     */
     private void updateLightData(ViewHolder holder, float lightValue) {
+        // Update the light value on the UI thread
         ((Activity) context).runOnUiThread(() -> {
-            holder.lightValueTextView.setText(String.valueOf(lightValue));
+            holder.lightValueTextView.setText(lightValue + " Lux");
         });
     }
 
+    /**
+     * Updates the compass data display for a particular ViewHolder.
+     * @param holder The ViewHolder associated with the current item.
+     * @param combinedValue The raw compass value combining degree and direction decimal.
+     */
     private void updateCompassData(ViewHolder holder, float combinedValue) {
+        // Extract degree and direction from the combined value
         int degree = (int) combinedValue;
         float directionDecimal = combinedValue - degree;
         String direction = getDirectionFromDecimal(directionDecimal);
+        // Update the compass value on the UI thread
         ((Activity) context).runOnUiThread(() -> {
             holder.compassValueTextView.setText(String.format(Locale.US, "%d° %s", degree, direction));
         });
     }
 
+    /**
+     * Converts the decimal part of a compass value to a cardinal direction.
+     * @param directionDecimal The decimal part of a compass value.
+     * @return The cardinal direction as a string.
+     */
     private String getDirectionFromDecimal(float directionDecimal) {
         // Convert the decimal part to an integer
         int directionCode = (int)(directionDecimal * 100);
+        // Determine the cardinal direction from the direction code
         switch (directionCode) {
             case 1: return "N";
             case 2: return "NE";
@@ -543,60 +822,167 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             case 7: return "W";
             case 8: return "NW";
             // Return an empty string if the direction code is invalid
-            default: return "";
+            default: return "N";
         }
     }
 
+    /**
+     * Gets the total count of items in the adapter.
+     * @return The total number of rooms.
+     */
     @Override
     public int getItemCount() {
         return roomNames.size();
     }
 
+    /**
+     * Adds an image to the specified room and updates the display.
+     * @param roomPosition The position of the room in the list.
+     * @param image The image bitmap to add.
+     */
     public void addImageToRoom(int roomPosition, Bitmap image) {
         roomImages.get(roomPosition).add(image);
         notifyItemChanged(roomPosition, "UPDATE_PHOTO_COUNT");
     }
 
+    /**
+     * Displays a dialog for renaming a room.
+     * @param position The position of the room in the adapter.
+     * @param holder   The ViewHolder associated with the room.
+     */
     private void showRenameRoomDialog(int position, ViewHolder holder) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        // Prevent the dialog from showing on the initial bind
+        isFirstBind = false;
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.dialog_rename_room, null);
 
+        // Set up the EditText with the current room name
         EditText roomNameEditText = view.findViewById(R.id.roomNameEditText);
         roomNameEditText.setText(roomNames.get(holder.getAdapterPosition()));
 
-        builder.setView(view)
-                .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        int currentPosition = holder.getAdapterPosition();
-                        if (currentPosition != RecyclerView.NO_POSITION) {
-                            String newName = roomNameEditText.getText().toString();
-                            roomNames.set(currentPosition, newName);
-                            notifyItemChanged(currentPosition, "UPDATE_ROOM_NAME");
-                        }
-                    }
-                })
+        AlertDialog builder = new MaterialAlertDialogBuilder(context)
+                .setTitle("Rename Room")
+                .setView(view)
+                .setPositiveButton("Confirm", null)
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.dismiss();
                     }
-                });
+                })
+                .create();
         builder.show();
+        builder.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
+                int currentPosition = holder.getAdapterPosition();
+                if (currentPosition != RecyclerView.NO_POSITION) {
+                    String newName = roomNameEditText.getText().toString().trim();
+
+                    // 检查是否有重复的房间名
+                    boolean isDuplicate = false;
+                    for (int i = 0; i < roomNames.size(); i++) {
+                        if (newName.equalsIgnoreCase(roomNames.get(i).trim()) && currentPosition != i) {
+                            isDuplicate = true;
+                            break;
+                        }
+                    }
+
+                    if (!isDuplicate) {
+                        alterRoomName(inspectedRoomData,roomNames.get(currentPosition),newName);
+                        roomNames.set(currentPosition, newName);
+                        notifyItemChanged(currentPosition, "UPDATE_ROOM_NAME");
+                        builder.dismiss();
+                    } else {
+                        roomNameEditText.setError("Room name cannot be duplicated");
+
+                    }
+                }
+        });
     }
 
+    /**
+     * Alters the name of a room within a LinkedHashMap while preserving order.
+     * @param originRoomData The original LinkedHashMap of room data.
+     * @param oldRoomName    The current name of the room.
+     * @param newRoomName    The new name for the room.
+     */
+    public static void alterRoomName(LinkedHashMap<String, RoomData> originRoomData, String oldRoomName, String newRoomName) {
+        // Check if the original map contains the old key
+        if (!originRoomData.containsKey(oldRoomName)) {
+            System.out.println("The old room name does not exist in the data.");
+            return;
+        }
+
+        // Get the value associated with the old key
+        RoomData value = originRoomData.get(oldRoomName);
+
+        // Create a new LinkedHashMapRoomData
+        LinkedHashMap<String, RoomData> newRoomData = new LinkedHashMap<>();
+
+        for (Map.Entry<String, RoomData> entry : originRoomData.entrySet()) {
+            if (entry.getKey().equals(oldRoomName)) {
+                // Replace old key with the new key
+                newRoomData.put(newRoomName, value);
+            } else {
+                // Copy other entries as they are
+                newRoomData.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        // Clear the original map and put all new entries to keep the insertion order
+        originRoomData.clear();
+        originRoomData.putAll(newRoomData);
+    }
+
+    /**
+     * Extracts the first number found in a string.
+     * @param input The string containing potential number(s).
+     * @return The first number found as a string, or "-1" if none found.
+     */
+    private String extractNumber(String input) {
+        // Define a pattern to identify numbers in the input string
+        Pattern pattern = Pattern.compile("[+-]?([0-9]*[.])?[0-9]+");
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            return matcher.group(0);
+        } else {
+            return "-1";
+        }
+    }
+
+    /**
+     * Retrieves the map containing data of all inspected rooms.
+     * @return A LinkedHashMap with room names as keys and RoomData as values.
+     */
+    public LinkedHashMap<String, RoomData> getInspectedRoomData () {return inspectedRoomData;};
+
+    /**
+     * ViewHolder for displaying room information and handling test actions.
+     */
     public static class ViewHolder extends RecyclerView.ViewHolder {
+        public boolean isNoiseTesting = false;
+        public boolean isLightTesting = false;
+        public boolean isCompassTesting = false;
+        public Thread testAudioThread;
+        public Thread testLightThread;
+        public Thread testCompassThread;
         ImageView editRoomNameIcon;
-        TextView roomName;
+        public TextView roomName;
         ImageView cameraIcon, noiseIcon, lightIcon, compassIcon;
         TextView imageView, noiseView, lightView, compassView;
-        TextView photoCount, noiseValueTextView, lightValueTextView, compassValueTextView;
+        public TextView photoCount;
+        public TextView noiseValueTextView;
+        public TextView lightValueTextView;
+        public TextView compassValueTextView;
         Button openCameraButton, noiseTestButton, lightTestButton, compassTestButton;
         PreviewView previewView;
 
+        /**
+         * Constructor for initializing the ViewHolder with itemView.
+         * @param itemView The view of the individual list items.
+         */
         public ViewHolder(View itemView) {
             super(itemView);
 
+            // Binding the UI elements to their respective views in the layout
             roomName = itemView.findViewById(R.id.room_name);
             cameraIcon = itemView.findViewById(R.id.ic_camera);
             noiseIcon = itemView.findViewById(R.id.ic_noise);
@@ -623,18 +1009,32 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         }
     }
 
+    /**
+     * Adapter for handling a list of images within a RecyclerView.
+     */
     public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> {
-
         private final List<Bitmap> images;
         private final RecyclerView recyclerView;
         private final int roomPosition;
 
+        /**
+         * Constructor for ImageAdapter.
+         * @param images List of Bitmap objects representing the images.
+         * @param recyclerView The RecyclerView instance.
+         * @param roomPosition The position of the room in the list.
+         */
         public ImageAdapter(List<Bitmap> images, RecyclerView recyclerView, int roomPosition) {
             this.images = images;
             this.recyclerView = recyclerView;
             this.roomPosition = roomPosition;
         }
 
+        /**
+         * Called when RecyclerView needs a new ViewHolder of the given type to represent an item.
+         * @param parent The ViewGroup into which the new View will be added after it is bound to an adapter position.
+         * @param viewType The view type of the new View.
+         * @return A new ViewHolder that holds a View of the given view type.
+         */
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -642,11 +1042,26 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             return new ViewHolder(view);
         }
 
+        /**
+         * Called by RecyclerView to display the data at the specified position.
+         * @param holder The ViewHolder which should be updated to represent the contents of the item at the given position.
+         * @param position The position of the item within the adapter's data set.
+         */
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
             Bitmap bitmap = images.get(position);
 
-            holder.imageView.setImageBitmap(bitmap);
+            // If the bitmap is not null, display it in the ImageView
+            if (bitmap != null) {
+                holder.imageView.setImageBitmap(bitmap);
+            } else {
+                // If the bitmap is null, display a placeholder image
+                Glide.with(holder.itemView.getContext())
+                        .load(R.drawable.cannot_load_photo)
+                        .override(400, 400)
+                        .into(holder.imageView);
+            }
+
 
             // Set click listener for the delete button
             holder.deleteButton.setOnClickListener(new View.OnClickListener() {
@@ -667,30 +1082,34 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     builder.show();
                 }
             });
-
-            holder.imageView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    showSaveImageDialog(images.get(position), roomPosition);
-                    return true;
-                }
-            });
         }
 
+        /**
+         * Returns the total number of items in the data set held by the adapter.
+         * @return The total number of items in this adapter.
+         */
         @Override
         public int getItemCount() {
             return images.size();
         }
 
+        /**
+         * ViewHolder for image items.
+         */
         public class ViewHolder extends RecyclerView.ViewHolder {
             public ImageView imageView;
-            public ImageButton deleteButton;
+            public MaterialButton deleteButton;
 
+            /**
+             * Constructor for the ViewHolder.
+             * @param view The underlying view for the ViewHolder.
+             */
             public ViewHolder(View view) {
                 super(view);
                 imageView = view.findViewById(R.id.image);
                 deleteButton = view.findViewById(R.id.delete_button);
             }
         }
+
     }
 }
