@@ -83,6 +83,19 @@ public class RegisterActivity extends AppCompatActivity {
 
             });
         });
+        usernameLayout.addOnEditTextAttachedListener(textInputLayout -> {
+            textInputLayout.getEditText().addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    clearUserNameError();
+                }
+                @Override
+                public void afterTextChanged(Editable editable) {}
+
+            });
+        });
         passwordLayout.addOnEditTextAttachedListener(textInputLayout -> {
             textInputLayout.getEditText().addTextChangedListener(new TextWatcher() {
                 @Override
@@ -178,7 +191,10 @@ public class RegisterActivity extends AppCompatActivity {
         TextInputLayout emailLayout = findViewById(R.id.editTextRegisterEmail);
         emailLayout.setError(null);
     }
-
+    private void clearUserNameError() {
+        TextInputLayout usernameLayout = findViewById(R.id.editTextRegisterUsername);
+        usernameLayout.setError(null);
+    }
     private void clearPasswordError() {
         TextInputLayout passwordLayout = findViewById(R.id.editTextRegisterPassword);
         passwordLayout.setError(null);
