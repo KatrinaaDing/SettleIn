@@ -81,15 +81,16 @@ public class AutocompleteFragment extends Fragment {
                     lat = place.getLatLng().latitude;
                     lng = place.getLatLng().longitude;
 
-                    // set location name to the dialog UI
-                    profileFragment.setLocationNameTxt(place.getName());
-
                     // Access the parent activity
                     Activity parentActivity = getActivity();
                     View submitBtn = null;
                     if (parentActivity instanceof AddPropertyActivity) {
+                        // parent is add property activity, enable submit button
                         AddPropertyActivity addPropertyActivity = (AddPropertyActivity) parentActivity;
                         submitBtn = addPropertyActivity.binding.submitBtn;
+                    } else {
+                        // parent is profile fragment, set location name to the dialog UI
+                        profileFragment.setLocationNameTxt(place.getName());
                     }
 
                     if (submitBtn != null) {

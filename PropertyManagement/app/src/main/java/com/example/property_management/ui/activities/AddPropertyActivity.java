@@ -207,6 +207,8 @@ public class AddPropertyActivity extends AppCompatActivity {
                     // run on finish fetching coordinates
                     // enable submit button
                     enableSubmit();
+                    enableEditPrice(true);
+                    enableEditAmenities(true);
                 });
             });
 
@@ -309,6 +311,9 @@ public class AddPropertyActivity extends AppCompatActivity {
         // check if autocompleteFragment is null
         if (autocompleteFragment == null) {
             new BasicSnackbar(findViewById(android.R.id.content), "Error: Cannot fetch property location. Try again later.", "error");
+            enableEditPrice(true);
+            enableEditAmenities(true);
+            enableSubmit();
             return;
         }
         FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
@@ -360,6 +365,9 @@ public class AddPropertyActivity extends AppCompatActivity {
                 } else {
                     urlInputLayout.setError("Error: " + e.getMessage());
                 }
+                enableSubmit();
+                enableEditPrice(true);
+                enableEditAmenities(true);
             });
 
     }
