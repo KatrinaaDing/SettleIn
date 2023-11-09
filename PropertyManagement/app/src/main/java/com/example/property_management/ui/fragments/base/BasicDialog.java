@@ -1,16 +1,15 @@
 package com.example.property_management.ui.fragments.base;
 
-import android.app.Activity;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
-
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDialogFragment;
-
 import com.example.property_management.callbacks.BasicDialogCallback;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+/**
+ * Basic dialog
+ */
 public class BasicDialog extends AppCompatDialogFragment {
     private String title;
     private String content;
@@ -76,6 +75,10 @@ public class BasicDialog extends AppCompatDialogFragment {
         return dialog;
     }
 
+    /**
+     * Set callback for button click
+     * @param callback
+     */
     public void setCallback(BasicDialogCallback callback) {
         this.callback = callback;
     }

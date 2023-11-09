@@ -8,7 +8,9 @@ import android.view.ViewGroup;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 
-// Custom AutocompleteSupportFragment to get full address
+/**
+ * Custom AutocompleteSupportFragment to get full address
+ */
 public class CustomPlaceAutoCompleteFragment extends AutocompleteSupportFragment {
     Place place;
 
@@ -17,6 +19,16 @@ public class CustomPlaceAutoCompleteFragment extends AutocompleteSupportFragment
         return super.onCreateView(layoutInflater, viewGroup, bundle);
     }
 
+    /**
+     * Return address of the selected place
+     * @param i The integer request code originally supplied to
+     *                    startActivityForResult(), allowing you to identify who this
+     *                    result came from.
+     * @param i1 The integer result code returned by the child activity
+     *                   through its setResult().
+     * @param intent An Intent, which can return result data to the caller
+     *               (various data can be attached to Intent "extras").
+     */
     @Override
     public void onActivityResult(int i, int i1, Intent intent) {
         super.onActivityResult(i, i1, intent);
@@ -29,6 +41,10 @@ public class CustomPlaceAutoCompleteFragment extends AutocompleteSupportFragment
         }
     }
 
+    /**
+     * Set the selected place
+     * @param place
+     */
     public void setPlace(Place place) {
         this.place = place;
     }
