@@ -328,8 +328,23 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 .build();
         timePicker.addOnPositiveButtonClickListener(selection -> {
             // on click set time
+            // if the time is outside working hours, pop up a dialog to confirm
             String formattedTime = setInspectionTime(timePicker.getHour(), timePicker.getMinute());
-            timeTxt.setText(formattedTime);
+            if (timePicker.getHour() < 9|| timePicker.getHour() > 17) {
+                new MaterialAlertDialogBuilder(PropertyDetailActivity.this)
+                        .setTitle("Confirm Inspection Time")
+                        .setMessage("The inspection time is outside working hours. " +
+                                "Are you sure you want to set the inspection time to " +
+                                formattedTime + "?")
+                        .setPositiveButton("Yes", (dialogInterface, i) -> {
+                            timeTxt.setText(formattedTime);
+                        })
+                        .setNegativeButton("No", (dialogInterface, i) -> {
+                            // reset time
+                            timePicker.show(getSupportFragmentManager(), "time_picker");
+                        })
+                        .show();
+            }
         });
         addTimeBtn.setOnClickListener(v -> {
             // on select time
