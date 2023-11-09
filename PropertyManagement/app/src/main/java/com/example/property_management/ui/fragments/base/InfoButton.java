@@ -1,18 +1,18 @@
 package com.example.property_management.ui.fragments.base;
 
-import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.FrameLayout;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.property_management.R;
 import com.google.android.material.button.MaterialButton;
 
+/**
+ * Custom info button to show info dialog
+ */
 public class InfoButton extends FrameLayout {
 
     private String title;
@@ -23,6 +23,7 @@ public class InfoButton extends FrameLayout {
         LayoutInflater.from(context).inflate(R.layout.custom_info_button, this, true);
         MaterialButton button = findViewById(R.id.infoBtn);
 
+        // click button to show dialog
         button.setOnClickListener(v -> {
             Log.i("info-button", "clicked");
             if (context instanceof AppCompatActivity) {
@@ -33,10 +34,18 @@ public class InfoButton extends FrameLayout {
         });
     }
 
+    /**
+     * Set title of the info dialog
+     * @param title
+     */
     public void setTitle(String title) {
         this.title = title;
     }
 
+    /**
+     * Set content of the info dialog
+     * @param content
+     */
     public void setContent(String content) {
         this.content = content;
     }

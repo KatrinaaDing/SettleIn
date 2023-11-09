@@ -11,6 +11,10 @@ import com.example.property_management.R;
 import com.example.property_management.callbacks.onValueChangeCallback;
 import com.google.android.material.button.MaterialButton;
 
+/**
+ * Custom number picker with arrow buttons,
+ * up arrow to increase value and down arrow to decrease value
+ */
 public class ArrowNumberPicker extends LinearLayout {
     private int value;
     private int direction;
@@ -57,6 +61,11 @@ public class ArrowNumberPicker extends LinearLayout {
         });
     }
 
+    /**
+     * Set value and direction for the number picker
+     * @param value
+     * @param direction
+     */
     public void handleAttribute(int value, int direction) {
         // set initial value
         TextView textViewNumber = findViewById(R.id.textViewNumber);

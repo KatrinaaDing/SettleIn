@@ -15,9 +15,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.bumptech.glide.Glide;
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseUserRepository;
@@ -27,6 +25,9 @@ import com.example.property_management.ui.activities.PropertyDetailActivity;
 import com.example.property_management.ui.fragments.property.AmenitiesGroup;
 import com.google.android.material.card.MaterialCardView;
 
+/**
+ * Custom property card to display property information in HomeFragment
+ */
 public class PropertyCard extends MaterialCardView {
     private String address = "No Address Available";
     private String propertyId = null;
@@ -57,21 +58,8 @@ public class PropertyCard extends MaterialCardView {
                 a.getInteger(R.styleable.PropertyCard_bathrooms, 0),
                 a.getInteger(R.styleable.PropertyCard_parkings, 0)
             );
-//        try {
-//            // get amenities values
-//            int bedrooms = a.getInteger(R.styleable.PropertyCard_bedrooms, 0);
-//            int bathrooms = a.getInteger(R.styleable.PropertyCard_bathrooms, 0);
-//            int parkings = a.getInteger(R.styleable.PropertyCard_parkings, 0);
-//            amenitiesGroup.setValues(bedrooms, bathrooms, parkings);
-//            // get other values
-//            this.price = a.getInteger(R.styleable.PropertyCard_price, 0);
-//            this.isInspected = a.getBoolean(R.styleable.PropertyCard_isInspected, false);
-//            if (a.hasValue(R.styleable.PropertyCard_address)){
-//                this.address = a.getString(R.styleable.PropertyCard_address);
-//            }
-//            // set values to ui
-//            setUiValue();
         } finally {
+            // release TypedArray object
             a.recycle();
         }
 
@@ -111,7 +99,7 @@ public class PropertyCard extends MaterialCardView {
 
     public void setValues(String id, String address, int price, String thumbnail, boolean isInspected,
                           int bedrooms, int bathrooms, int parkings) {
-        // set amentities group
+        // set amenities group
         AmenitiesGroup amenitiesGroup = findViewById(R.id.amenitiesGroup);
         amenitiesGroup.setValues(bedrooms, bathrooms, parkings);
 

@@ -3,14 +3,14 @@ package com.example.property_management.ui.activities;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.bumptech.glide.Glide;
 import com.example.property_management.R;
 import com.example.property_management.databinding.ActivityImageViewBinding;
-import com.example.property_management.databinding.ActivityPropertyDetailBinding;
 
+/**
+ * This activity is used to view the image in full screen
+ */
 public class ImageViewActivity extends AppCompatActivity {
 
     private ActivityImageViewBinding binding;

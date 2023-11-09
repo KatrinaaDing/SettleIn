@@ -8,9 +8,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Button;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseAuthHelper;
 import com.example.property_management.api.FirebaseFunctionsHelper;
@@ -29,12 +27,15 @@ import com.example.property_management.utils.Helpers;
 import com.example.property_management.utils.UrlValidator;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * AddPropertyActivity
+ * Allow user to add new property by entering url or manually entering property information
+ */
 public class AddPropertyActivity extends AppCompatActivity {
     public ActivityAddPropertyBinding binding;
     private String url = "";
@@ -245,7 +246,6 @@ public class AddPropertyActivity extends AppCompatActivity {
         // check if property exists
         Map<String, String> payLoad = new HashMap<>();
         payLoad.put("href", url);
-        System.out.println("selected address111: " + selectedAddress);
         payLoad.put("address", selectedAddress);
         FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
         firebaseFunctionsHelper.checkPropertyExists(payLoad)
@@ -285,7 +285,6 @@ public class AddPropertyActivity extends AppCompatActivity {
                         "Error: " + e.getMessage(),
                         "error");
             });
-
     }
 
     /**
@@ -381,7 +380,6 @@ public class AddPropertyActivity extends AppCompatActivity {
                 } else {
                     urlInputLayout.setError("Error: " + e.getMessage());
                 }
-                enableSubmit();
                 enableEditPrice(true);
                 enableEditAmenities(true);
             });
@@ -481,11 +479,19 @@ public class AddPropertyActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Set selected address from autocomplete fragment to AddPropertyActivity
+     * @param selectedAddress
+     */
     public void setSelectedAddress(String selectedAddress) {
         this.selectedAddress = selectedAddress;
-        System.out.println("selected address: " + selectedAddress);
     }
 
+    /**
+     * Set lat and lng from autocomplete fragment to AddPropertyActivity
+     * @param lat
+     * @param lng
+     */
     public void setCoordinates(double lat, double lng) {
         this.lat = lat;
         this.lng = lng;

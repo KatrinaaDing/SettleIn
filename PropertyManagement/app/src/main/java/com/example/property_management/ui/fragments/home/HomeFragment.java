@@ -11,14 +11,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
-
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.property_management.R;
 import com.example.property_management.adapters.PropertyCardAdapter;
 import com.example.property_management.api.FirebaseUserRepository;
@@ -46,7 +44,6 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -57,6 +54,9 @@ import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+/**
+ * Home fragment
+ */
 public class HomeFragment extends Fragment implements OnMapReadyCallback, PropertyCardAdapter.EventListener {
 
     private FragmentHomeBinding binding;
@@ -74,8 +74,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Proper
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        HomeViewModel homeViewModel =
-                new ViewModelProvider(this).get(HomeViewModel.class);
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
@@ -105,6 +103,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Proper
         }
     }
 
+    /**
+     * Show hint when there is no property, hide hint otherwise
+     * @param hasProperty
+     */
     public void onHasProperties(boolean hasProperty) {
         if (hasProperty) {
             binding.hint.setVisibility(View.GONE);
@@ -165,7 +167,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Proper
                                         "You are near " + property.getAddress() +
                                                 ". Would you like to start the inspection now?"
                                 );
-
                             }
                         }
                     });
@@ -443,6 +444,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Proper
         this.gMap = googleMap;
     }
 
+    /**
+     * Add markers to show added properties on map
+     * @param googleMap
+     * @param properties
+     */
     private void addMarkersToMap(GoogleMap googleMap, ArrayList<Property> properties) {
         // a set for tracking duplicate locations
         HashSet<LatLng> addedMarkers = new HashSet<>();
@@ -479,6 +485,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Proper
         }
     }
 
+    /**
+     * Update text on sortOrderBtn
+     */
     private void updateSortOrderBtnIcon() {
         MaterialButton sortOrderBtn = binding.sortOrderButton;
         if (sortAscending) {
@@ -487,6 +496,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Proper
             sortOrderBtn.setText(sortTypeIsTime ? OLDEST_LABEL : DESCENDING_LABEL);
         }
     }
+
     /**
      * Wait for firebase authentication to finish
      */
@@ -537,30 +547,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Proper
                 new BasicSnackbar(getView(), msg, "error", Snackbar.LENGTH_LONG);
             }
         });
-//        FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
-//        firebaseFunctionsHelper.getAllProperties()
-//                .addOnSuccessListener(result -> {
-//                    ArrayList<Property> properties = (ArrayList<Property>) result;
-//                    if (properties.isEmpty()) {
-//                        // show hint if no property exists
-//                        binding.hint.setVisibility(View.VISIBLE);
-//                    }
-//
-//                    RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
-//                    if (propertiesRecyclerView != null) {
-    //                    renderProperties(properties);
-    //                    binding.loadingText.setVisibility(View.GONE);
-    //                    allProperties = properties;
-    //                    // initialize and display toolbar after all properties are loaded
-    //                    initToolbar();
-//                    }
-//                })
-//                .addOnFailureListener(e -> {
-//                    Log.e("get-all-properties-fail", e.getMessage());
-//                    binding.loadingText.setText("Failed to load properties. Please try again later.");
-//                });
     }
 
+    /**
+     * Given properties, render properties in the recycler view
+     * @param properties
+     */
     private void renderProperties(ArrayList<Property> properties) {
         RecyclerView propertiesRecyclerView = binding.propertiesRecyclerView;
         propertiesRecyclerView.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.VERTICAL, false));

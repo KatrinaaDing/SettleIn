@@ -2,27 +2,18 @@ package com.example.property_management.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseAuthHelper;
-import com.example.property_management.api.FirebaseUserRepository;
-import com.example.property_management.callbacks.GetAllUserPropertiesCallback;
-import com.example.property_management.callbacks.UpdateUserCallback;
-import com.example.property_management.data.Property;
 import com.google.android.material.bottomappbar.BottomAppBar;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-
 import com.example.property_management.databinding.ActivityMainBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
+/**
+ * This activity is used to navigate between pages
+ */
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
@@ -37,13 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
         // =================================== Components ======================================
         // Bottom navigation bar
-        BottomAppBar navView = findViewById(R.id.bottomAppBar);
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_profile, R.id.navigation_profile)
-                .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
-//        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-//        NavigationUI.setupWithNavController(navView, navController);
 
         // floating activity button (plus button)
         FloatingActionButton fab = findViewById(R.id.addProperty);

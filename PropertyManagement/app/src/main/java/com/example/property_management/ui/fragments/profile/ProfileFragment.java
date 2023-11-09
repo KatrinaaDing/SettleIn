@@ -1,68 +1,43 @@
 package com.example.property_management.ui.fragments.profile;
 
-import static android.content.ContentValues.TAG;
-
-import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.property_management.R;
 import com.example.property_management.adapters.CustomListRecyclerViewAdapter;
 import com.example.property_management.api.FirebaseAuthHelper;
-import com.example.property_management.api.FirebaseFunctionsHelper;
 import com.example.property_management.api.FirebaseUserRepository;
-import com.example.property_management.callbacks.BasicDialogCallback;
-import com.example.property_management.callbacks.DeleteInterestedFacilityCallback;
 import com.example.property_management.callbacks.GetUserInfoByIdCallback;
-import com.example.property_management.callbacks.UpdateUserCallback;
 import com.example.property_management.data.User;
-import com.example.property_management.data.UserProperty;
 import com.example.property_management.databinding.FragmentProfileBinding;
-import com.example.property_management.ui.activities.AddPropertyActivity;
 import com.example.property_management.ui.activities.LoginActivity;
-import com.example.property_management.ui.activities.MainActivity;
 import com.example.property_management.ui.fragments.base.AutocompleteFragment;
-import com.example.property_management.ui.fragments.base.BasicDialog;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
-import com.example.property_management.utils.Helpers;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.android.libraries.places.api.net.PlacesClient;
 
-import org.w3c.dom.Text;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-
+/**
+ * A fragment that displays the profile page.
+ */
 public class ProfileFragment extends Fragment implements EditProfileDialogFragment.OnProfileUpdatedListener, CustomListRecyclerViewAdapter.EventListener{
-
     private FragmentProfileBinding binding;
     private AppCompatActivity activity;
-    PlacesClient placesClient;
     String selectedAddress = "";
     String selectedName = "";
     String username;
@@ -72,14 +47,10 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
     CustomListRecyclerViewAdapter interestedLocationsAdapter;
     CustomListRecyclerViewAdapter interestedFacilitiesAdapter;
     User currentUser;
-
     AlertDialog alertDialog;
-
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        ProfileViewModel profileViewModel =
-                new ViewModelProvider(this).get(ProfileViewModel.class);
 
         binding = FragmentProfileBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
@@ -95,6 +66,7 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
         getUserInfo();
 
         // ========================= Listeners ==========================
+        // click edit button to show the edit profile dialog
         editBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -102,6 +74,7 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
             }
         });
 
+        // click add location button to show the add location dialog
         addLocationBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -113,6 +86,7 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
             }
         });
 
+        // click add facility button to show the add facility dialog
         addFacilityBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -120,6 +94,7 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
             }
         });
 
+        // click logout button to logout the user
         logoutBtn.setOnClickListener(v -> {
             logout();
         });
@@ -226,6 +201,7 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
                 }).create();
         alertDialog.show();
 
+        // override positive button
         ((androidx.appcompat.app.AlertDialog) alertDialog).getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
 
             AutocompleteFragment autocompleteFragment = (AutocompleteFragment)
