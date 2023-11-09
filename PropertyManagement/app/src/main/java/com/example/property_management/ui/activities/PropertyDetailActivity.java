@@ -344,6 +344,8 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                             timePicker.show(getSupportFragmentManager(), "time_picker");
                         })
                         .show();
+            } else {
+                timeTxt.setText(formattedTime);
             }
         });
         addTimeBtn.setOnClickListener(v -> {
