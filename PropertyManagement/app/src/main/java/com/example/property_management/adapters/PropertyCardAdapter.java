@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,12 +11,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
 import com.example.property_management.R;
 import com.example.property_management.api.FirebaseUserRepository;
@@ -30,9 +27,11 @@ import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.example.property_management.ui.fragments.property.AmenitiesGroup;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
-
 import java.util.List;
 
+/**
+ * Adapter for property card
+ */
 public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapter.ViewHolder>{
 
     private List<Property> properties;
@@ -40,6 +39,9 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
 
     EventListener listener;
 
+    /**
+     * Interface for event listener to show/hide no property placeholder
+     */
     public interface EventListener {
         void onHasProperties(boolean hasProperty);
     }
@@ -144,7 +146,6 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
 
     /**
      * Show a dialog to confirm delete property
-     *
      * @param property the property to be deleted
      */
     private void confirmDeleteProperty(Property property, int position) {
@@ -160,16 +161,15 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
             @Override
             public void onRightBtnClick() {
                 FirebaseUserRepository firebaseUserRepository = new FirebaseUserRepository();
+                // delete property from firebase
                 firebaseUserRepository.deleteUserProperty(property.getPropertyId(), new DeletePropertyByIdCallback() {
                     @Override
                     public void onSuccess(String msg) {
                         Activity activity = (Activity) context;
                         new BasicSnackbar(activity.findViewById(android.R.id.content), msg, "success");
-                        Log.d("property-card-adapter", "delete property success");
                         properties.remove(position);
                         notifyItemRemoved(position);
                         notifyItemRangeChanged(position, properties.size());
-                        Log.d("delete property", "properties size: " + properties.size());
                         // show hint if property list is empty
                         listener.onHasProperties(properties.size() != 0);
                     }
@@ -178,13 +178,12 @@ public class PropertyCardAdapter extends RecyclerView.Adapter<PropertyCardAdapte
                         Activity activity = (Activity) context;
                         new BasicSnackbar(activity.findViewById(android.R.id.content),
                                 msg + ". Please try again later.", "error");
-                        Log.e("property-card-adapter", "delete property failure: " + msg);
-
                     }
                 });
             }
         });
         AppCompatActivity activity = (AppCompatActivity) context;
+        // show confirm dialog
         dialog.show(activity.getSupportFragmentManager(), "confirm-delete-property-dialog");
     }
 }

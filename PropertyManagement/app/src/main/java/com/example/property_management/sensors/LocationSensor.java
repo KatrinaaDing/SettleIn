@@ -5,20 +5,16 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
 import android.location.Location;
-
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
 import com.example.property_management.callbacks.SensorCallback;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.Task;
 
-import java.util.List;
-
+/**
+ * LocationSensor class to get the current location
+ */
 public class LocationSensor {
     private static final int MY_LOCATION_REQUEST_CODE = 1;
     private Activity activity;

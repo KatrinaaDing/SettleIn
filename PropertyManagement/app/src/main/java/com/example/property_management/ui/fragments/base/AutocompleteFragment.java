@@ -51,11 +51,11 @@ public class AutocompleteFragment extends Fragment {
                 String apiKey = getApiKey();
                 // if cannot get api key
                 if (apiKey == null) {
-                    System.out.println("error: api key is null");
+                    Log.e("AutocompleteFragmentNullKey", "error: api key is null");
                 }
                 Places.initialize(getContext(), apiKey);
             } catch (PackageManager.NameNotFoundException e) {
-                System.out.println("error: " + e.getMessage());
+                Log.e("AutocompleteFragmentError", "error: " + e.getMessage());
             }
         }
         this.placesClient = Places.createClient(getContext());
@@ -75,22 +75,24 @@ public class AutocompleteFragment extends Fragment {
                     // get profile fragment
                     ProfileFragment profileFragment = (ProfileFragment) AutocompleteFragment.this.getParentFragment();
 
-                    System.out.println("name: " + place.getName() + ", Address: " + place.getAddress());
                     autocompleteFragment.setPlace(place);
                     selectedAddress = place.getAddress();
                     selectedName = place.getName();
                     lat = place.getLatLng().latitude;
                     lng = place.getLatLng().longitude;
 
-                    // set location name to the dialog UI
-                    profileFragment.setLocationNameTxt(place.getName());
-
                     // Access the parent activity
                     Activity parentActivity = getActivity();
                     View submitBtn = null;
                     if (parentActivity instanceof AddPropertyActivity) {
+                        // parent is add property activity, enable submit button
                         AddPropertyActivity addPropertyActivity = (AddPropertyActivity) parentActivity;
+                        addPropertyActivity.setSelectedAddress(selectedAddress);
+                        addPropertyActivity.setCoordinates(lat, lng);
                         submitBtn = addPropertyActivity.binding.submitBtn;
+                    } else {
+                        // parent is profile fragment, set location name to the dialog UI
+                        profileFragment.setLocationNameTxt(place.getName());
                     }
 
                     if (submitBtn != null) {
@@ -108,7 +110,7 @@ public class AutocompleteFragment extends Fragment {
 
             });
         } catch (Exception e) {
-            System.out.println("error: " + e.getMessage());
+            Log.e("AutocompleteFragmentError", "error: " + e.getMessage());
         }
         return root;
     }
@@ -129,10 +131,10 @@ public class AutocompleteFragment extends Fragment {
             String apiKey = metaData.getString("com.google.android.geo.API_KEY");
             return apiKey;
         } catch (PackageManager.NameNotFoundException e) {
-            System.out.println("error: " + e.getMessage());
+            Log.e("AutocompleteFragmentError", "error: " + e.getMessage());
             throw new PackageManager.NameNotFoundException("Unable to load meta-data: " + e.getMessage());
         } catch (NullPointerException e) {
-            System.out.println("error: " + e.getMessage());
+            Log.e("AutocompleteFragmentError", "error: " + e.getMessage());
         }
         return null;
     }
@@ -146,6 +148,7 @@ public class AutocompleteFragment extends Fragment {
     }
 
     public void setAddressText(String placeNameText) {
+        System.out.println("setAddressText: " + placeNameText);
         // set address text to search bar
         this.autocompleteFragment.setText(placeNameText);
         this.selectedAddress = placeNameText;

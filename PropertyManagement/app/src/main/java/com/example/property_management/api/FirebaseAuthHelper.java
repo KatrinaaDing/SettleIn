@@ -1,56 +1,59 @@
 package com.example.property_management.api;
 
 import static android.content.ContentValues.TAG;
-
-import android.os.Handler;
 import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.property_management.callbacks.AuthCallback;
 import com.example.property_management.ui.fragments.base.BasicSnackbar;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.FirebaseException;
 import com.google.firebase.FirebaseNetworkException;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.firestore.FirebaseFirestore;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.HashMap;
-import java.util.Map;
-
+/**
+ * Helper class for Firebase authentication
+ */
 public class FirebaseAuthHelper {
     private AppCompatActivity activity;
     private FirebaseAuth mAuth;
-// ...
-
 
     public FirebaseAuthHelper(AppCompatActivity activity) {
         this.activity = activity;
         init();
     }
 
+    /**
+     * Initialize Firebase Auth
+     */
     private void init() {
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
     }
 
+    /**
+     * Check if user is signed in
+     * @return true if user is signed in, false otherwise
+     */
     public boolean isUserSignedIn() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         return currentUser != null;
     }
 
+    /**
+     * Get current user
+     * @return FirebaseUser object
+     */
     public FirebaseUser getCurrentUser() {
         return mAuth.getCurrentUser();
     }
+
+
     public void createUser(String email, String username, String password, AuthCallback callback) {
         mAuth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(task -> {
@@ -82,13 +85,18 @@ public class FirebaseAuthHelper {
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                    System.out.println("Login fail");
                     showError(task);
                     callback.onFailure(task.getException());
                 }
             });
     }
 
+    /**
+     * Sign in user with email and password
+     * @param email user's email
+     * @param password user's password
+     * @param callback callback to handle success and failure
+     */
     public void signinWithEmail(String email, String password, AuthCallback callback) {
         mAuth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(task -> {
@@ -106,12 +114,17 @@ public class FirebaseAuthHelper {
             });
     }
 
-    // sign out user
+    /**
+     * Sign out user
+     */
     public void signout() {
         FirebaseAuth.getInstance().signOut();
     }
 
-    // show error snackbar based on error code
+    /**
+     * Show error message based on the error code
+     * @param task task that failed
+     */
     private void showError(Task<AuthResult> task) {
         Log.e("firebase-auth", task.getException().getMessage());
         // handle network error
@@ -126,6 +139,7 @@ public class FirebaseAuthHelper {
             FirebaseAuthException e = (FirebaseAuthException) task.getException();
             String errorCode = e.getErrorCode();
             String errorMessage;
+            // show error message based on the error code
             switch (errorCode) {
                 case "ERROR_INVALID_EMAIL":
                     errorMessage = "Invalid email format.";
@@ -154,9 +168,12 @@ public class FirebaseAuthHelper {
                     "error",
                     Snackbar.LENGTH_LONG);
         }
-
     }
 
+    /**
+     * Show success message
+     * @param msg message to be shown
+     */
     private void showSuccess(String msg) {
         new BasicSnackbar(activity.findViewById(android.R.id.content), msg, "success");
     }

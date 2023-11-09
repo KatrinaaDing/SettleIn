@@ -1,28 +1,26 @@
 package com.example.property_management.adapters;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
 import com.example.property_management.R;
-
 import java.util.ArrayList;
 
+/**
+ * Adapter for the carousel recycler view
+ */
 public class CarouselAdapter extends RecyclerView.Adapter<CarouselAdapter.ViewHolder> {
     Context context;
-    private ArrayList<String> imageUrls;
+    private ArrayList<String> imageUrls; // List of urls of images in the carousel
     private OnItemClickListener onItemClickListener;
 
     public CarouselAdapter(Context context, ArrayList<String> imageUrls) {
         this.context = context;
         this.imageUrls = imageUrls;
-
     }
 
     @NonNull
@@ -34,6 +32,7 @@ public class CarouselAdapter extends RecyclerView.Adapter<CarouselAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        // Load image into the image view and set on click listener
         Glide.with(context).load(imageUrls.get(position)).into(holder.imageView);
         holder.itemView.setOnClickListener(view -> onItemClickListener.onClick(holder.imageView, imageUrls.get(position)));
     }
@@ -55,6 +54,10 @@ public class CarouselAdapter extends RecyclerView.Adapter<CarouselAdapter.ViewHo
         this.onItemClickListener = onItemClickListener;
     }
 
+    /**
+     * Interface for the on click listener
+     * Preview image in full screen when clicked
+     */
     public interface OnItemClickListener {
         void onClick(ImageView imageView, String path);
     }

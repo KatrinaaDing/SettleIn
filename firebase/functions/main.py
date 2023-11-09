@@ -31,9 +31,11 @@ def hello_world(req: https_fn.Request) -> https_fn.Response:
     a new document in the messages collection."""
     return https_fn.Response(f"hello world")
 
-#Obtain webpage HTML content based on URL
-#Input: url (str)
-#Output: BeautifulSoup instance contains the html
+"""
+    Obtain webpage HTML content based on URL
+    Input: url (str)
+    Output: BeautifulSoup instance contains the html
+"""
 def getHtml(url):
     headers = {
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36'
@@ -47,9 +49,11 @@ def getHtml(url):
     soup=BeautifulSoup(res.text,'lxml')
     return soup
 
-#Scrape the property information on the domain website based on the URL.
-#Input: URL(str)
-#Output: URL (str), price (int), bed_num (int), parking_num (int), address (str),imgs_url (list of str)
+"""
+    Scrape the property information on the domain website based on the URL.
+    Input: URL(str)
+    Output: URL (str), price (int), bed_num (int), parking_num (int), address (str),imgs_url (list of str)
+"""
 def scrape_domain(url):
     try:
         html_soup = getHtml(url)
@@ -91,9 +95,11 @@ def scrape_domain(url):
 
     return url, price, bed_num, bath_num, parking_num, address, [imgs_url]
 
-#Scrape the property information on the raywhite website based on the URL.
-#Input: URL(str)
-#Output: URL (str), price (int), bed_num (int), parking_num (int), address (str),imgs_url (list of str)
+"""
+    Scrape the property information on the raywhite website based on the URL.
+    Input: URL(str)
+    Output: URL (str), price (int), bed_num (int), parking_num (int), address (str),imgs_url (list of str)
+"""
 def scrape_raywhite(url):
     try:
         html_soup = getHtml(url)
@@ -136,8 +142,10 @@ def create_error_response(error_code:int, message: str) -> https_fn.Response:
         headers={"Content-Type": "application/json"},
     )
 
-#Determine the website to scrape based on the URL format.
-#If the website does not come from domain or raywhite, temporarily return default value or raise error.
+"""
+    Determine the website to scrape based on the URL format.
+    If the website does not come from domain or raywhite, temporarily return default value or raise error.
+"""
 @https_fn.on_call()
 # def scrape_property_restful(req: https_fn.Request) -> https_fn.Response:
 def scrape_property_v2(req: https_fn.Request) -> Any:
@@ -193,49 +201,6 @@ def scrape_property_v2(req: https_fn.Request) -> Any:
     }
     return property
 
-# a restful api version of scrape_property_v2
-# @https_fn.on_request()
-# def scrape_property_restful(req: https_fn.Request) -> https_fn.Response:
-#     """Scrape a rental advertisement and return the data"""
-#     url = req.args.get("url")
-#     if url is None:
-#         return create_error_response(
-#             400,
-#             "The function must be called with an parameter, 'url', which must be string.",
-#         )
-        
-#     try: 
-#         if "domain" in url:
-#             href, price, bedroom_num, bathroom_num, parking_num, address, images = scrape_domain(url)
-#         elif "raywhite" in url:
-#             href, price, bedroom_num, bathroom_num, parking_num, address, images = scrape_raywhite(url)
-#         else:
-#             return create_error_response(
-#                 404,
-#                 "We only support URL from from Domain or Raywhite.",
-#             )
-#     except Exception as e:
-#         # return error when address not found
-#         return create_error_response(
-#             500,
-#             str(e),
-#         )
-#     # [END v2addHttpsError]
-
-#     # [START v2returnAddData]
-#     property = {
-#         "url": href,                             #str
-#         "price": price,                          #int
-#         "bedroom_num": bedroom_num,              #int
-#         "bathroom_num": bathroom_num,            #int
-#         "parking_num": parking_num,              #int
-#         "address": address,                      #str
-#         "images": images,                        #a list of str
-#     }
-#     return_data = json.dumps({ "property": property }) 
-#     return https_fn.Response(return_data, status=200, headers={"Content-Type": "application/json"})
-
-
 """
     get longtitude and latitude of the input address
     Input: address (str)
@@ -284,69 +249,12 @@ def get_lnglat_by_address(req: https_fn.Request) -> Any:
             code=https_fn.FunctionsErrorCode.INTERNAL,
             message=(r["google map server error, please try again later."]),
         )
-    
-# a restful api version of scrape_property_v2
-# @https_fn.on_request(secrets=["MAPS_API_KEY"])
-# def get_lnglat_by_address_restful(req: https_fn.Request) -> https_fn.Response:
-#     # parameters passed from the client.
-#     address = req.args.get("address")
-#     if address is None:
-#         return create_error_response(
-#             400,
-#             "The function must be called with an parameter, 'address', which must be string.",
-#         )
-    
-#     # get lng and lat of the input address from google gedocode api
-#     r = requests.get('https://maps.googleapis.com/maps/api/geocode/json?address=' + address + '&key=' + os.environ.get("MAPS_API_KEY"))
-#     r = r.json()
-#     # if the address is valid, return the coordinate
-#     if r["status"] == "OK":
-#         return r["results"][0]["geometry"]["location"]
-#     # if error, return the error message
-#     else:
-#         re = {
-#             "error": r["error_message"]
-#         }
-#         return re
-    
-    
-# # get all properties of a user from firestore
-# @https_fn.on_request()
-# def get_user_properties_rest(req:  https_fn.Request) -> https_fn.Response:
-#     user_id = req.args.get("userId")
-#     if user_id is None:
-#         return create_error_response(
-#             400,
-#             "The function must be called with an parameter, 'userId', which must be string.",
-#         )
-#     try:
-#         # get user document
-#         coll_user = firestore.client().collection(u'users').document(user_id)
-#         user = coll_user.get().to_dict()
-#         if user is None:
-#             return create_error_response(404, "User not found.")
-#         # for each propertyId in user document, get the property document
-#         if 'properties' not in user:
-#             return json.dumps({ "properties": [] })
-#         # for each propertyId in user document, get the property document
-#         properties = []
-#         for property_id in user['properties']:
-#             property = firestore.client().collection(u'properties').document(property_id).get().to_dict()
-#             property['propertyId'] = property_id
-#             property['price'] = user['properties'][property_id]['price']
-#             if ('inspected' in user['properties'][property_id]):
-#                 property['inspected'] = user['properties'][property_id]['inspected'] 
-#             else:
-#                 property['inspected'] = False
-#             properties.append(property)
-#         return_data = json.dumps({ "properties": properties })
-#         return https_fn.Response(return_data, status=200, headers={"Content-Type": "application/json"})
-#     except Exception as e:
-#         return create_error_response(
-#             500,
-#             str(e),
-#         )
 
+"""
+    get all properties of a user
+    Input: user_id (str)
+    Output: a list of property documents
+"""
 def get_user_properties_helper(user_id):
     if user_id is None:
         raise https_fn.HttpsError(
@@ -366,7 +274,6 @@ def get_user_properties_helper(user_id):
             )
         # for each propertyId in user document, get the property document
         if 'properties' not in user:
-            print("[get-all-properties]", " user ", user_id, " has no properties")
             return []
         properties = []
         for property_id in user['properties']:
@@ -379,7 +286,7 @@ def get_user_properties_helper(user_id):
             else:
                 property['inspected'] = False
             properties.append(property)
-        print("[get-all-properties]", " user ", user_id, " has properties")
+    
         return properties
     
     except Exception as e:
@@ -388,50 +295,21 @@ def get_user_properties_helper(user_id):
             message=(str(e)),
         )
 
-# get all properties of a user from firestore
+"""
+    get all properties of a user from firestore
+    Input: user_id (str)
+    Output: a list of property documents
+"""
 @https_fn.on_call()
 def get_user_properties(req:  https_fn.Request) -> Any:
     user_id = req.data["userId"]
-    print("[get-all-properties]", " getting all properties for user", user_id)
     return get_user_properties_helper(user_id)
-
-# # get a property from firestore combined with user's collected data from that property
-# @https_fn.on_request()
-# def get_property_by_id_rest(req:  https_fn.Request) -> https_fn.Response:
-#     # get property and user id
-#     property_id = req.args.get("propertyId")
-#     user_id = req.args.get("userId")
-#     if property_id is None or user_id is None:
-#         return create_error_response(
-#             400,
-#             "The function must be called with two parameters, 'propertyId' and 'userId, which must be string.",
-#         )
-#     # get property and user document
-#     property = firestore.client().collection(u'properties').document(property_id).get().to_dict()
-#     if property is None:
-#         return create_error_response(404, "Property not found.")
-#     user = firestore.client().collection(u'users').document(user_id).get().to_dict()
-#     if user is None:
-#         return create_error_response(404, "User not found.")
-#     try:
-#         user_property = user['properties'][property_id]
-#     except Exception as e:
-#         return create_error_response(404, "The property does not belong to this user.")
-    
-#     try:
-#         user_property.update(property)
-#         # get milliseconds of createdAt timestamp
-#         millis_epoch = user_property['createdAt'].timestamp() * 1000 
-#         user_property['createdAt'] = millis_epoch
-#         return_data = json.dumps({ "property": user_property })
-#         return https_fn.Response(return_data, status=200, headers={"Content-Type": "application/json"})
-#     except Exception as e:
-#         return create_error_response(
-#             500,
-#             str(e),
-#         )
         
-# get a property from firestore combined with user's collected data from that property
+"""
+    get a property from firestore combined with user's collected data from that property
+    Input: propertyId (str), userId (str)
+    Output: a property document (dict)
+"""
 @https_fn.on_call()
 def get_property_by_id(req:  https_fn.Request) -> Any:
     # get property and user id
@@ -466,7 +344,7 @@ def get_property_by_id(req:  https_fn.Request) -> Any:
             message=("The property does not belong to this user."),
         )
     # combine user's collected data and property document
-    # user's property data will override property document data
+    # property data will override user property document data
     try:
         user_property.update(property)
         # get milliseconds of createdAt timestamp
@@ -476,47 +354,20 @@ def get_property_by_id(req:  https_fn.Request) -> Any:
             user_property['createdAt'] = millis_epoch
         else:
             user_property['createdAt'] = None
+        print("get user_property: ", user_property)
         return user_property
     except Exception as e:
+        print("get user_property error:", e)
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.INTERNAL,
             message=(str(e)),
         )
-        
-# @https_fn.on_request()
-# def check_property_exist_rest(req:  https_fn.Request) -> https_fn.Response:
-#     user_id = req.args.get("userId")
-#     address = req.args.get("address")
-#     href = req.args.get("href")
-#     if user_id is None:
-#         return create_error_response(
-#             400,
-#             "The function must be called with a parameter, 'userId' , which must be string.",
-#         )
-#     if address is None and href is None:
-#         return create_error_response(
-#             400,
-#             "The function must be called with either 'address' or 'href' , which must be string.",
-#         )
-#     try:
-#         coll_user = firestore.client().collection(u'users').document(user_id)
-#         user = coll_user.get().to_dict()
-#         if user is None:
-#             return create_error_response(404, "User not found.")
-#         for property_id in user['properties']:
-#             # get property document
-#             property = firestore.client().collection(u'properties').document(property_id).get().to_dict()
-#             # check if property exist, return propertyId if exist
-#             if (address is not None and property['address'] == address) or (href is not None and property['href'] == href):
-#                 return_data = json.dumps({"exist": True, "propertyId": property_id})
-#                 return https_fn.Response(return_data, status=200, headers={"Content-Type": "application/json"})
-#         # property not exist, return false
-#         return_data = json.dumps({"exist": False})
-#         return https_fn.Response(return_data, status=200, headers={"Content-Type": "application/json"})
-#     except Exception as e:
-#         return create_error_response(500, str(e))
     
-# check if a property exist in a user's collection
+"""
+    check if a property exist in a user's collection
+    Input: userId (str), address (str), href (str)
+    Output: {"exist": True/False}
+"""
 @https_fn.on_call()
 def check_property_exist(req: https_fn.Request) -> Any:
     # get data from request
@@ -566,7 +417,11 @@ def check_property_exist(req: https_fn.Request) -> Any:
             message=(str(e)),
         )
 
-# get the closest facility address of a property winthin 5km
+"""
+    get the closest facility name and facility vicinity of a property winthin 5km
+    Input: facility (str), lat (double), lng (double)
+    Output: name (str), vicinity (str) or None, None if no interested facility within 5km from the property
+"""
 def get_nearby(facility, lat, lng):
     r = requests.get(NEARBY_URL + 'keyword=' + facility +
                     '&location=' + str(lat) + '%2C' + str(lng) +
@@ -590,18 +445,26 @@ def get_nearby(facility, lat, lng):
             message=(r["error_message"]),
         )
 
+"""
+    Keep only letters and numbers in a string
+    Input: key (str)
+    Output: alphanumeric_string (str)
+"""
 def keep_letter_number(key):
     # Use a regular expression to keep only letters and numbers
     alphanumeric_string = re.sub(r'[^a-zA-Z0-9]', '', key)
     return alphanumeric_string
 
+"""
+    get the abbreviation of given duration
+    replace ' hour' or ' hours' with 'h', ' min' or ' mins' with 'm'
+"""
 def get_duration_abbr(duration):
     if 'hour' in duration:
         duration = re.sub(r' hours?', 'h', duration)
     if 'min' in duration:
         duration = re.sub(r' mins?', 'm', duration)
     return duration
-
 
 """
     multiple properties, one interested location addresses
@@ -738,7 +601,10 @@ def update_distance1(origin, destinations, destination_names, interests, user_re
                 print("updat_data", update_data)
                 user_ref.update(update_data)
 
-# add interested facilities and locations to a new property
+"""
+    add interested facilities and locations to a new property
+    Input: user (dict), user_id (str), property_id (str)
+"""
 def add_interests_to_new_property(user, user_id, property_id):
     # get property document
     property_ref = firestore.client().collection(u'properties').document(property_id)
@@ -778,6 +644,7 @@ def add_interests_to_new_property(user, user_id, property_id):
     case 1: When user newly added a property, calculate distance from all interested facilities/locations to the property
     case 2: When user newly added a interested location, calculate distance from all properties to the location
     case 3: When user newly added a interested facility, calculate distance from all properties to the facility
+    Input: userId (str)
 """
 @on_document_written(document="users/{userId}", secrets=["MAPS_API_KEY"])
 def calculate_distance(event: Event[Change[DocumentSnapshot]]) -> Any:
@@ -846,6 +713,7 @@ def calculate_distance(event: Event[Change[DocumentSnapshot]]) -> Any:
             if len(properties) == 0:
                 return
             
+            # for each property, get the nearest interested facility name and address
             for property in properties:
                 propertyId = property["propertyId"]
                 property_address = property["address"]

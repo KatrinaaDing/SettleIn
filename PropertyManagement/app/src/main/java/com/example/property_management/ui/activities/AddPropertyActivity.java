@@ -42,8 +42,11 @@ public class AddPropertyActivity extends AppCompatActivity {
     private int bathroomNumber = 0;
     private int parkingNumber = 0;
     private int price = 0;
+    private String selectedAddress = "";
+    private double lat = Double.NaN;
+    private double lng = Double.NaN;
     private ArrayList<String> images;
-     AutocompleteFragment autocompleteFragment;
+    AutocompleteFragment autocompleteFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +60,7 @@ public class AddPropertyActivity extends AppCompatActivity {
         initSubmitButton();
         initUrlInputLayout();
         initScrapeUrlButton();
-        initArrowNumberPickers();
+        initPriceArrowNumberPickers();
     }
 
     /**
@@ -79,13 +82,25 @@ public class AddPropertyActivity extends AppCompatActivity {
     /**
      * Initialise property amenities arrow number pickers
      */
-    private void initArrowNumberPickers() {
+    private void initPriceArrowNumberPickers() {
         ArrowNumberPicker bedroomNumberPicker = findViewById(R.id.bedroomNumberPicker);
         ArrowNumberPicker bathroomNumberPicker = findViewById(R.id.bathroomNumberPicker);
         ArrowNumberPicker parkingNumberPicker = findViewById(R.id.parkingNumberPicker);
         bedroomNumberPicker.setOnValueChangeListener(newValue -> bedroomNumber = newValue);
         bathroomNumberPicker.setOnValueChangeListener(newValue -> bathroomNumber = newValue);
         parkingNumberPicker.setOnValueChangeListener(newValue -> parkingNumber = newValue);
+
+        TextInputLayout priceInputLayout = findViewById(R.id.priceInputLayout);
+        priceInputLayout.getEditText().addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2){}
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                price = Integer.parseInt(charSequence.toString());
+            }
+            @Override
+            public void afterTextChanged(Editable editable) {}
+        });
     }
     /**
      * Initialise submit property button
@@ -230,7 +245,8 @@ public class AddPropertyActivity extends AppCompatActivity {
         // check if property exists
         Map<String, String> payLoad = new HashMap<>();
         payLoad.put("href", url);
-        payLoad.put("address", autocompleteFragment.getSelectedAddress());
+        System.out.println("selected address111: " + selectedAddress);
+        payLoad.put("address", selectedAddress);
         FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
         firebaseFunctionsHelper.checkPropertyExists(payLoad)
             .addOnSuccessListener(propertId -> {
@@ -283,8 +299,7 @@ public class AddPropertyActivity extends AppCompatActivity {
             url = null;
         }
         NewProperty newProperty = new NewProperty(url, bedroomNumber, bathroomNumber, parkingNumber,
-                autocompleteFragment.getSelectedAddress(), autocompleteFragment.getLat(),
-                autocompleteFragment.getLng(), price, images);
+                selectedAddress, lat, lng, price, images);
         FirebasePropertyRepository db = new FirebasePropertyRepository();
         db.addProperty(newProperty, new AddPropertyCallback() {
             @Override
@@ -308,8 +323,10 @@ public class AddPropertyActivity extends AppCompatActivity {
     private void fetchCoordinates(Runnable onSuccess) {
         // check if autocompleteFragment is null
         if (autocompleteFragment == null) {
-            System.out.println("fetch coordinate, autocompleteFragment is null");
             new BasicSnackbar(findViewById(android.R.id.content), "Error: Cannot fetch property location. Try again later.", "error");
+            enableEditPrice(true);
+            enableEditAmenities(true);
+            enableSubmit();
             return;
         }
         FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
@@ -319,13 +336,16 @@ public class AddPropertyActivity extends AppCompatActivity {
         firebaseFunctionsHelper.getLngLatByAddress(autocompleteFragment.getSelectedAddress())
             .addOnSuccessListener(result -> {
                 // set lat and lng
-                double lat = result.get("lat");
-                double lng = result.get("lng");
-                Log.i("fetch-coordinates", "lat: " + lat + ", lng: " + lng);
+                double resultLat = result.get("lat");
+                double resultLng = result.get("lng");
+                Log.i("fetch-coordinates", "lat: " + resultLat + ", lng: " + resultLng);
 
                 // set lat and lng to autocompleteFragment
-                autocompleteFragment.setLat(lat);
-                autocompleteFragment.setLng(lng);
+                autocompleteFragment.setLat(resultLat);
+                autocompleteFragment.setLng(resultLng);
+                lat = resultLat;
+                lng = resultLng;
+
                 // run callback task (allow submit)
                 // only allow submit when coordinates are successfully fetched
                 onSuccess.run();
@@ -361,6 +381,9 @@ public class AddPropertyActivity extends AppCompatActivity {
                 } else {
                     urlInputLayout.setError("Error: " + e.getMessage());
                 }
+                enableSubmit();
+                enableEditPrice(true);
+                enableEditAmenities(true);
             });
 
     }
@@ -414,6 +437,7 @@ public class AddPropertyActivity extends AppCompatActivity {
         }
         // set address text to UI
         autocompleteFragment.setAddressText(property.getAddress());
+        selectedAddress = property.getAddress();
     }
 
     /**
@@ -455,5 +479,15 @@ public class AddPropertyActivity extends AppCompatActivity {
                 Log.e("add-property-failure", msg);
             }
         });
+    }
+
+    public void setSelectedAddress(String selectedAddress) {
+        this.selectedAddress = selectedAddress;
+        System.out.println("selected address: " + selectedAddress);
+    }
+
+    public void setCoordinates(double lat, double lng) {
+        this.lat = lat;
+        this.lng = lng;
     }
 }

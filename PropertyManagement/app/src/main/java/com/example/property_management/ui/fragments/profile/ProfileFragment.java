@@ -238,8 +238,8 @@ public class ProfileFragment extends Fragment implements EditProfileDialogFragme
 
             selectedAddress = autocompleteFragment.getSelectedAddress();
             selectedName = autocompleteFragment.getSelectedName();
-            System.out.println("SelectedAddress: " + selectedAddress);
-            System.out.println("SelectedName: " + selectedName);
+            Log.i("SelectedAddress",selectedAddress);
+            Log.i("SelectedName",selectedName);
 
             TextInputLayout locationEditTextLayout = (TextInputLayout) alertDialog.findViewById(R.id.locationEditTextLayout);
 

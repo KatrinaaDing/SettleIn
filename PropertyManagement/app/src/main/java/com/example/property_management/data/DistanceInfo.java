@@ -1,7 +1,10 @@
 package com.example.property_management.data;
 
-import java.util.HashMap;
+import java.io.Serializable;
 
+/**
+ * This class is used to store the distance information of a property from a given address.
+ */
 public class DistanceInfo {
     private String address;
     private String name;
@@ -27,17 +30,9 @@ public class DistanceInfo {
 
     public String getDistance() { return distance; }
 
-    public void setDistance(String distance) { this.distance = distance; }
-
     public String getDriving() { return driving; }
-
-    public void setDriving(String driving) { this.driving = driving; }
 
     public String getTransit() { return transit; }
 
-    public void setTransit(String transit) { this.transit = transit; }
-
     public String getWalking() { return walking; }
-
-    public void setWalking(String walking) { this.walking = walking; }
 }
