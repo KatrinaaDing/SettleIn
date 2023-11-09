@@ -380,7 +380,6 @@ public class AddPropertyActivity extends AppCompatActivity {
                 } else {
                     urlInputLayout.setError("Error: " + e.getMessage());
                 }
-                enableSubmit();
                 enableEditPrice(true);
                 enableEditAmenities(true);
             });
