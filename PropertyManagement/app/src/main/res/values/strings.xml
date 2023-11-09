@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PropertyManagement</string>
+    <string name="app_name">SettleIn</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_profile">User Profile</string>
