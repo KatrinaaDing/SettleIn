@@ -336,13 +336,16 @@ public class AddPropertyActivity extends AppCompatActivity {
         firebaseFunctionsHelper.getLngLatByAddress(autocompleteFragment.getSelectedAddress())
             .addOnSuccessListener(result -> {
                 // set lat and lng
-                double lat = result.get("lat");
-                double lng = result.get("lng");
-                Log.i("fetch-coordinates", "lat: " + lat + ", lng: " + lng);
+                double resultLat = result.get("lat");
+                double resultLng = result.get("lng");
+                Log.i("fetch-coordinates", "lat: " + resultLat + ", lng: " + resultLng);
 
                 // set lat and lng to autocompleteFragment
-                autocompleteFragment.setLat(lat);
-                autocompleteFragment.setLng(lng);
+                autocompleteFragment.setLat(resultLat);
+                autocompleteFragment.setLng(resultLng);
+                lat = resultLat;
+                lng = resultLng;
+
                 // run callback task (allow submit)
                 // only allow submit when coordinates are successfully fetched
                 onSuccess.run();

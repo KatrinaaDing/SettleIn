@@ -344,7 +344,7 @@ def get_property_by_id(req:  https_fn.Request) -> Any:
             message=("The property does not belong to this user."),
         )
     # combine user's collected data and property document
-    # user's property data will override property document data
+    # property data will override user property document data
     try:
         user_property.update(property)
         # get milliseconds of createdAt timestamp
@@ -354,8 +354,10 @@ def get_property_by_id(req:  https_fn.Request) -> Any:
             user_property['createdAt'] = millis_epoch
         else:
             user_property['createdAt'] = None
+        print("get user_property: ", user_property)
         return user_property
     except Exception as e:
+        print("get user_property error:", e)
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.INTERNAL,
             message=(str(e)),
