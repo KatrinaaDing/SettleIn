@@ -1,7 +1,6 @@
 package com.example.property_management.ui.activities;
 
 import android.Manifest;
-
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -19,8 +18,6 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -28,7 +25,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.property_management.adapters.PropertyConditionAdapter;
 import com.example.property_management.api.FirebaseAuthHelper;
 import com.example.property_management.api.FirebaseFunctionsHelper;
@@ -62,20 +58,20 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 import com.google.firebase.auth.FirebaseUser;
-
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This activity is used to display the property detail
+ */
 public class PropertyDetailActivity extends AppCompatActivity implements OnMapReadyCallback {
     private static final int MY_PERMISSIONS_REQUEST_CAMERA_AND_STORAGE = 2;
     private boolean hasCameraPermission = false;
     private boolean hasWriteExternalStoragePermission = false;
-
     private ActivityPropertyDetailBinding binding;
     // add calendar event flag
     private boolean firstTimeAddingCalendarEvent = false;
@@ -84,7 +80,6 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     private String propertyId;
     private Property property;
     private UserProperty userProperty;
-    private List<RoomData> roomDataList;
     DistanceAdapter distanceAdapter;
     RecyclerView distanceRecycler;
     // inspection date and time
@@ -96,9 +91,6 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
     String NO_DATE_HINT = "Date not set";
     String NO_TIME_HINT = "Time not set";
     String NO_DATE_TIME_HINT = "Not set";
-    private RecyclerView recyclerView;
-    private PropertyConditionAdapter adapter;
-    List<List<Integer>> imagesPerRoom = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,13 +127,6 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             newIntent.putExtra("roomNum", this.property.getNumBedrooms());
             newIntent.putExtra("notes", this.userProperty.getNotes());
             newIntent.putExtra("roomNames", this.userProperty.getRoomNames());
-
-            //Log.d("roomNames sent by detail page",this.userProperty.getRoomNames().toString());
-            //Log.d("property id sent by detail page", this.propertyId);
-            //Log.d("inspectedData sent by detail page", this.userProperty.getInspectedData().toString());
-            //Log.d("roomNum sent by detail page", String.valueOf(this.property.getNumBedrooms() + this.property.getNumBathrooms()));
-            //Log.d("notes sent by detail page", this.userProperty.getNotes());
-
             startActivity(newIntent);
         });
 
@@ -183,6 +168,9 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         }
     }
 
+    /**
+     * Pop up instruction when click on info button
+     */
     private void initInfoButton() {
         InfoButton infoButton = findViewById(R.id.distanceHintBtn);
         infoButton.setTitle("Distances from interested facilities");
@@ -195,6 +183,10 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
 
     }
 
+    /**
+     * Set distanceRecycler view in PropertyDetailActivity
+     * @param distanceInfoList
+     */
     private void setDistanceRecycler(ArrayList<DistanceInfo> distanceInfoList) {
         distanceRecycler = binding.distanceRecycler;
         // if no distance info, hide distance recycler
@@ -208,6 +200,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
             noInterestTxt.setVisibility(View.GONE);
         }
 
+        // set LayoutManager and Adapter
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
         distanceRecycler.setLayoutManager(layoutManager);
         distanceAdapter = new DistanceAdapter(this, distanceInfoList, property.getAddress());
@@ -235,6 +228,9 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         }
     }
 
+    /**
+     * Show dialog to select inspection date and time
+     */
     private void showCustomDialog() {
         View dialogView = getLayoutInflater().inflate(R.layout.custom_add_inspection_time_dialog, null);
 
@@ -361,6 +357,10 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         });
     }
 
+    /**
+     * Given propertyId, fetch property information from firebase and set to UI
+     * @param propertyId
+     */
     private void getPropertyById(String propertyId) {
         setLoading(true);
         FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
@@ -400,11 +400,17 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 });
     }
 
+    /**
+     * Set creation time of when the property is added
+     */
     private void setCreatedAtTime() {
         TextView createdAtText = findViewById(R.id.createdAtText);
         createdAtText.setText("Added at " + DateTimeFormatter.dateTimeFormatter(userProperty.getCreatedAt()));
     }
 
+    /**
+     * Tick isInspectedCheckbox if property is inspected, otherwise untick
+     */
     private void setIsInspected() {
         CheckBox isInspectedCheckbox = findViewById(R.id.isInspectedCheckbox);
         isInspectedCheckbox.setChecked(userProperty.getInspected());
@@ -467,7 +473,10 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 property.getNumParking());
     }
 
-    // set images to carousel
+    /**
+     * Set images to carousel
+     * @param property
+     */
     private void setCarousel(Property property) {
         ArrayList<String> images = property.getImages();
         RecyclerView recyclerView = findViewById(R.id.recycler);
@@ -497,7 +506,10 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         }
     }
 
-    // set link button href
+    /**
+     * Set link button href
+     * @param property
+     */
     private void setLinkButton(Property property) {
         Button linkButton = findViewById(R.id.linkButton);
         String href = property.getHref();
@@ -668,7 +680,7 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
                 detailContent.requestDisallowInterceptTouchEvent(false);
             });
 
-            // go to googlemap or web version on marker click
+            // go to google map or web version on marker click
             googleMap.setOnMarkerClickListener(marker -> {
                 // on click open google map
                 String address = property.getAddress();
@@ -679,6 +691,13 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         this.gMap = googleMap;
     }
 
+    /**
+     * Request calendar permission
+     * @param requestCode The request code passed in {@link #requestPermissions(
+     * android.app.Activity, String[], int)}
+     * @param permissions The requested permissions. Never null.
+     * @param grantResults The grant results for the corresponding permissions
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -721,6 +740,12 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         }
     }
 
+    /**
+     * Format date and time to display
+     * @param date
+     * @param time
+     * @return formatted date and time
+     */
     private String formatDateTime(String date, String time) {
         boolean noDate = date == null || date.equals("");
         boolean noTime = time == null || time.equals("");
@@ -728,30 +753,53 @@ public class PropertyDetailActivity extends AppCompatActivity implements OnMapRe
         return time + separator + date;
     }
 
+    /**
+     * Set loading state for PropertyDetailActivity
+     * @param isLoading true if loading, false if not
+     */
     private void setLoading(boolean isLoading) {
         binding.hintText.setText("Getting your property...");
         binding.detailContent.setVisibility(isLoading ? View.GONE : View.VISIBLE);
         binding.hintText.setVisibility(isLoading ? View.VISIBLE : View.GONE);
     }
 
+    /**
+     * Set error state for PropertyDetailActivity
+     * @param isError true if error, false if not
+     */
     private void setError(boolean isError) {
         binding.hintText.setText("Error getting your property. Please try again later.");
         binding.detailContent.setVisibility(isError ? View.GONE : View.VISIBLE);
         binding.hintText.setVisibility(isError ? View.VISIBLE : View.GONE);
     }
 
+    /**
+     * Set formatted inspection time
+     * @param hour
+     * @param minute
+     * @return formatted inspection time
+     */
     private String setInspectionTime(int hour, int minute) {
         // store date in format for easily parsing by LocalTime
         time = DateTimeFormatter.timeFormatter(hour, minute);
         return time;
     }
 
+    /**
+     * Set formatted inspection date
+     * @param newDate
+     * @return formatted inspection date
+     */
     private String setInspectionDate(Date newDate) {
         // display more sensible date format
         date = DateTimeFormatter.dateFormatter(newDate);
         return date;
     }
 
+    /**
+     * Set distance data to DistanceAdapter
+     * @param distances HashMap of distance data
+     */
     private void setDistances(HashMap<String, DistanceInfo> distances) {
         ArrayList<DistanceInfo> distanceInfoList = new ArrayList<>();
         for (DistanceInfo distanceInfo : distances.values()) {
