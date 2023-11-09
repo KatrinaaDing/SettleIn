@@ -42,8 +42,11 @@ public class AddPropertyActivity extends AppCompatActivity {
     private int bathroomNumber = 0;
     private int parkingNumber = 0;
     private int price = 0;
+    private String selectedAddress = "";
+    private double lat = Double.NaN;
+    private double lng = Double.NaN;
     private ArrayList<String> images;
-     AutocompleteFragment autocompleteFragment;
+    AutocompleteFragment autocompleteFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +60,7 @@ public class AddPropertyActivity extends AppCompatActivity {
         initSubmitButton();
         initUrlInputLayout();
         initScrapeUrlButton();
-        initArrowNumberPickers();
+        initPriceArrowNumberPickers();
     }
 
     /**
@@ -79,13 +82,25 @@ public class AddPropertyActivity extends AppCompatActivity {
     /**
      * Initialise property amenities arrow number pickers
      */
-    private void initArrowNumberPickers() {
+    private void initPriceArrowNumberPickers() {
         ArrowNumberPicker bedroomNumberPicker = findViewById(R.id.bedroomNumberPicker);
         ArrowNumberPicker bathroomNumberPicker = findViewById(R.id.bathroomNumberPicker);
         ArrowNumberPicker parkingNumberPicker = findViewById(R.id.parkingNumberPicker);
         bedroomNumberPicker.setOnValueChangeListener(newValue -> bedroomNumber = newValue);
         bathroomNumberPicker.setOnValueChangeListener(newValue -> bathroomNumber = newValue);
         parkingNumberPicker.setOnValueChangeListener(newValue -> parkingNumber = newValue);
+
+        TextInputLayout priceInputLayout = findViewById(R.id.priceInputLayout);
+        priceInputLayout.getEditText().addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2){}
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                price = Integer.parseInt(charSequence.toString());
+            }
+            @Override
+            public void afterTextChanged(Editable editable) {}
+        });
     }
     /**
      * Initialise submit property button
@@ -207,8 +222,6 @@ public class AddPropertyActivity extends AppCompatActivity {
                     // run on finish fetching coordinates
                     // enable submit button
                     enableSubmit();
-                    enableEditPrice(true);
-                    enableEditAmenities(true);
                 });
             });
 
@@ -232,7 +245,8 @@ public class AddPropertyActivity extends AppCompatActivity {
         // check if property exists
         Map<String, String> payLoad = new HashMap<>();
         payLoad.put("href", url);
-        payLoad.put("address", autocompleteFragment.getSelectedAddress());
+        System.out.println("selected address111: " + selectedAddress);
+        payLoad.put("address", selectedAddress);
         FirebaseFunctionsHelper firebaseFunctionsHelper = new FirebaseFunctionsHelper();
         firebaseFunctionsHelper.checkPropertyExists(payLoad)
             .addOnSuccessListener(propertId -> {
@@ -285,8 +299,7 @@ public class AddPropertyActivity extends AppCompatActivity {
             url = null;
         }
         NewProperty newProperty = new NewProperty(url, bedroomNumber, bathroomNumber, parkingNumber,
-                autocompleteFragment.getSelectedAddress(), autocompleteFragment.getLat(),
-                autocompleteFragment.getLng(), price, images);
+                selectedAddress, lat, lng, price, images);
         FirebasePropertyRepository db = new FirebasePropertyRepository();
         db.addProperty(newProperty, new AddPropertyCallback() {
             @Override
@@ -421,6 +434,7 @@ public class AddPropertyActivity extends AppCompatActivity {
         }
         // set address text to UI
         autocompleteFragment.setAddressText(property.getAddress());
+        selectedAddress = property.getAddress();
     }
 
     /**
@@ -462,5 +476,15 @@ public class AddPropertyActivity extends AppCompatActivity {
                 Log.e("add-property-failure", msg);
             }
         });
+    }
+
+    public void setSelectedAddress(String selectedAddress) {
+        this.selectedAddress = selectedAddress;
+        System.out.println("selected address: " + selectedAddress);
+    }
+
+    public void setCoordinates(double lat, double lng) {
+        this.lat = lat;
+        this.lng = lng;
     }
 }

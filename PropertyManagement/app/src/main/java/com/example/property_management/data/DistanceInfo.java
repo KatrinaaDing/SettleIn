@@ -1,5 +1,7 @@
 package com.example.property_management.data;
 
+import java.io.Serializable;
+
 /**
  * This class is used to store the distance information of a property from a given address.
  */
@@ -10,6 +12,8 @@ public class DistanceInfo {
     private String driving;
     private String transit;
     private String walking;
+
+    public DistanceInfo() {}
 
     public DistanceInfo(String address, String name,String distance, String driving, String transit, String walking) {
         this.address = address;

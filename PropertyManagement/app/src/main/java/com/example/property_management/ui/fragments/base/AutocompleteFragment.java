@@ -87,6 +87,8 @@ public class AutocompleteFragment extends Fragment {
                     if (parentActivity instanceof AddPropertyActivity) {
                         // parent is add property activity, enable submit button
                         AddPropertyActivity addPropertyActivity = (AddPropertyActivity) parentActivity;
+                        addPropertyActivity.setSelectedAddress(selectedAddress);
+                        addPropertyActivity.setCoordinates(lat, lng);
                         submitBtn = addPropertyActivity.binding.submitBtn;
                     } else {
                         // parent is profile fragment, set location name to the dialog UI
@@ -146,6 +148,7 @@ public class AutocompleteFragment extends Fragment {
     }
 
     public void setAddressText(String placeNameText) {
+        System.out.println("setAddressText: " + placeNameText);
         // set address text to search bar
         this.autocompleteFragment.setText(placeNameText);
         this.selectedAddress = placeNameText;

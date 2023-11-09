@@ -164,6 +164,8 @@ public class FirebaseFunctionsHelper {
 
                 // obtain results from the task
                 try{
+                    Log.d("get-property", task.getResult().toString());
+                    Log.d("whether get_property_by_id excuted",String.valueOf(task.getResult().getData() != null));
                     result = (Map<String, Object>) task.getResult().getData();
                 } catch (Exception e) {
                     int msgIdx = e.getMessage().indexOf("n:") + 2;
