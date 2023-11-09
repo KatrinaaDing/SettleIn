@@ -1,9 +1,7 @@
 package com.example.property_management.api;
 
 import android.util.Log;
-
 import androidx.annotation.NonNull;
-
 import com.example.property_management.data.DistanceInfo;
 import com.example.property_management.data.NewProperty;
 import com.example.property_management.data.Property;
@@ -11,25 +9,30 @@ import com.example.property_management.data.RoomData;
 import com.example.property_management.data.UserProperty;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
-import com.google.api.LogDescriptor;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.HttpsCallableResult;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Helper class for Firebase functions
+ */
 public class FirebaseFunctionsHelper {
 
     private FirebaseFunctions mFunctions;
 
     public FirebaseFunctionsHelper() {
         mFunctions = FirebaseFunctions.getInstance();
-//        mFunctions.useEmulator("10.0.2.2", 5001);
     }
 
+    /**
+     * Scrape property data from a given url, and create a new property object based on the data
+     * @param url the url of the property
+     * @return a task that returns a NewProperty object
+     */
     public Task<NewProperty> scrapeProperty(String url) {
         // Create the arguments to the callable function, which is just a single "url" field
         Map<String, String> data = new HashMap<>();
@@ -52,6 +55,7 @@ public class FirebaseFunctionsHelper {
                         String msg = e.getMessage().substring(msgIdx);
                         throw new Exception(msg);
                     }
+                    // return a NewProperty object
                     return new NewProperty(
                         (String) result.get("url"),
                         (int) result.get("bedroom_num"),
@@ -68,6 +72,11 @@ public class FirebaseFunctionsHelper {
             });
     }
 
+    /**
+     * Check if a property exist in a user's collection
+     * @param payLoad the payload to be sent to the firebase function
+     * @return a task that returns the property id if exist, null if not exist
+     */
     public Task<String> checkPropertyExists(Map<String, String> payLoad) {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         payLoad.put("userId", userId);
@@ -100,59 +109,8 @@ public class FirebaseFunctionsHelper {
     }
 
     /**
-     * get all properties of the current user
-     * @return a task that returns an arraylist of properties
-     */
-    public Task<ArrayList<Property>> getAllProperties() {
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        Map<String, String> payLoad = new HashMap<>();
-        payLoad.put("userId", userId);
-
-        return mFunctions
-            .getHttpsCallable("get_user_properties")
-            .call(payLoad)
-            .continueWith(new Continuation<HttpsCallableResult, ArrayList<Property>>() {
-                // This continuation runs on either success or failure, but if the task
-                // has failed then getResult() will throw an Exception which will be
-                // propagated down.
-                @Override
-                public ArrayList<Property> then(@NonNull Task<HttpsCallableResult> task) throws Exception {
-                    ArrayList<Map<String, Object>> result;
-                    try{
-                        result = (ArrayList<Map<String, Object>>) task.getResult().getData();
-                    } catch (Exception e) {
-                        int msgIdx = e.getMessage().indexOf("n:") + 2;
-                        String msg = e.getMessage().substring(msgIdx);
-                        throw new Exception(msg);
-                    }
-                    // iterate each object in the result and convert to Property object
-                    ArrayList<Property> properties = new ArrayList<>();
-                    Log.d("get-all-properties", "result: " + result);
-                    for (Map<String, Object> propertyObj : result) {
-                        Property property = new Property(
-                            (String) propertyObj.get("propertyId"),
-                            (String) propertyObj.get("href"),
-                            (String) propertyObj.get("address"),
-                            (Double) propertyObj.get("lat"),
-                            (Double) propertyObj.get("lng"),
-                            (int) propertyObj.get("numBedrooms"),
-                            (int) propertyObj.get("numBathrooms"),
-                            (int) propertyObj.get("numParking"),
-                            new HashMap<>(),
-                            (ArrayList<String>) propertyObj.get("images"),
-                            (int) propertyObj.get("price")
-                        );
-                        property.setInspected((boolean) propertyObj.get("inspected"));
-                        properties.add(property);
-                    }
-                    return properties;
-                }
-            });
-    }
-
-
-    /**
      * get longitude and latitude of an address
+     * @param address the address
      * @return a task that returns an a HashMap of longitude and latitude
      */
     public Task<Map<String, Double>> getLngLatByAddress(String address) {
@@ -186,77 +144,6 @@ public class FirebaseFunctionsHelper {
             });
     }
 
-
-    /**
-     * add a new interested facility
-     * get the distance info of the nearest facility from each property of the user
-     * @return "success" if success, error message if fail
-     */
-    public Task<String> addInterestedFacility(String userId, String facility) {
-        Map<String, String> data = new HashMap<>();
-        data.put("userId", userId);
-        data.put("facility", facility);
-        Log.i("add-interested-facility", "userId: " + userId + ", facility: " + facility);
-        return mFunctions
-            .getHttpsCallable("add_interested_facility")
-            .call(data)
-            .continueWith(new Continuation<HttpsCallableResult, String>() {
-                // This continuation runs on either success or failure, but if the task
-                // has failed then getResult() will throw an Exception which will be
-                // propagated down.
-                @Override
-                public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
-                    String result;
-                    try {
-                        result = (String) task.getResult().getData();
-                    } catch (Exception e) {
-                        int msgIdx = e.getMessage().indexOf("n:") + 2;
-                        String msg = e.getMessage().substring(msgIdx);
-                        throw new Exception(msg);
-                    }
-
-                    return result;
-                }
-            });
-    }
-
-
-    /**
-     * add a new interested location
-     * get the distance info of the interested location from each property of the user
-     * @return "success" if success, error message if fail
-     */
-    public Task<String> addInterestedLocation(String userId, String location) {
-        Map<String, String> data = new HashMap<>();
-        data.put("userId", userId);
-        data.put("location", location);
-        Log.i("add-interested-location", "userId: " + userId + ", location: " + location);
-        return mFunctions
-            .getHttpsCallable("add_interested_location")
-            .call(data)
-            .continueWith(new Continuation<HttpsCallableResult, String>() {
-                // This continuation runs on either success or failure, but if the task
-                // has failed then getResult() will throw an Exception which will be
-                // propagated down.
-                @Override
-                public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
-                    String result;
-                    try {
-                        result = (String) task.getResult().getData();
-                    } catch (Exception e) {
-                        int msgIdx = e.getMessage().indexOf("n:") + 2;
-                        String msg = e.getMessage().substring(msgIdx);
-                        throw new Exception(msg);
-                    }
-
-                    return result;
-                }
-
-
-            });
-    }
-
-
     /**
      * get a user's shortlisted property by property id
      * @param propertyId the property id
@@ -284,10 +171,6 @@ public class FirebaseFunctionsHelper {
                     throw new Exception(msg);
                 }
 
-                //Log.d("result set get by getPropertyById function",result.toString());
-                //Log.d("InspectedData get by getPropertyById function",result.keySet().toString());
-                //Log.d("roomNames get by getPropertyById function",((ArrayList<String>)result.get("roomNames")).toString());
-                //Log.d("roomNames class get by getPropertyById function",((ArrayList<String>)result.get("roomNames")).getClass().toString());
                 // get result and create Property object
                 Property propertyData = new Property(
                         (String) result.get("propertyId"),

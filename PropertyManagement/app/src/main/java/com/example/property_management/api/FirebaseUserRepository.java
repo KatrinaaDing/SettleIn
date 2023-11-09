@@ -1,7 +1,6 @@
 package com.example.property_management.api;
 
 import android.util.Log;
-
 import com.example.property_management.callbacks.AddUserCallback;
 import com.example.property_management.callbacks.DeletePropertyByIdCallback;
 import com.example.property_management.callbacks.DeleteUserByIdCallback;
@@ -229,7 +228,7 @@ public class FirebaseUserRepository {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         DocumentReference docRef = db.collection("users").document(currentUser.getUid());
         CollectionReference collecRef = db.collection("properties");
-        //        Log.d("test-get-user-properties", "getAllUserProperties: " + currentUser.getUid());
+
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(Task<DocumentSnapshot> task) {
@@ -322,6 +321,15 @@ public class FirebaseUserRepository {
 
     }
 
+    /**
+     * Delete a facility/location from the user
+     * @param propertyIds list of property ids of the user
+     * @param isFacility true if the interested item is a facility, false if it is a location
+     * @param interestedList list of interested facilities/locations after deletion
+     * @param locationNamesList list of location names after deletion, null if it is a facility
+     * @param interest_ interested facility/location to be deleted
+     * @param callback callback
+     */
     public void deleteInterestedFacilityLocation(ArrayList<String> propertyIds, Boolean isFacility, ArrayList<String> interestedList, ArrayList<String> locationNamesList, String interest_, DeleteInterestedFacilityCallback callback) {
         // retrieve current user id
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -394,6 +402,5 @@ public class FirebaseUserRepository {
                 }
             }
         });
-
     }
 }
