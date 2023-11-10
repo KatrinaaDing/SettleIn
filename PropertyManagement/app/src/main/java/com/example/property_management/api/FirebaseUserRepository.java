@@ -42,6 +42,14 @@ public class FirebaseUserRepository {
     public FirebaseUserRepository() {
         db = FirebaseFirestore.getInstance();
     }
+
+    /**
+     * Adds a new user to the database and handles the result.
+     *
+     * @param user The User object containing the user's information.
+     * @param callback The AddUserCallback that will be called after the operation is complete.
+     *                 It will provide either the userId upon success or an error message on failure.
+     */
     public void addUser(User user, AddUserCallback callback) {
         Map<String, Object> userPayload = new HashMap<>();
         db.collection("users")
@@ -78,6 +86,12 @@ public class FirebaseUserRepository {
                     }
                 });
     }
+
+    /**
+     * retrieves user information by a given document ID from the Firestore database.
+     * @param documentId The ID of the user document to fetch from the database.
+     * @param callback   The GetUserInfoByIdCallback that will handle the response or error.
+     */
     public void getUserInfoById(String documentId, GetUserInfoByIdCallback callback) {
         DocumentReference docRef = db.collection("users").document(documentId);
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -105,66 +119,6 @@ public class FirebaseUserRepository {
                 }
             }
         });
-    }
-
-    public void getAllUsers(GetAllUsersCallback callback) {
-        db.collection("users")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            ArrayList<User> users = new ArrayList<>();
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                User user = document.toObject(User.class);
-                                users.add(user);
-                            }
-                            callback.onSuccess(users);
-                        } else {
-                            Log.d("get-all-users-failure", "Error getting all users: ", task.getException());
-                            callback.onError("Error getting all users");
-                        }
-                    }
-                });
-    }
-
-    public void deleteUserById(String documentId, DeleteUserByIdCallback callback) {
-        db.collection("users").document(documentId)
-            .delete()
-            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void aVoid) {
-                    Log.d("delete-user-success", "DocumentSnapshot successfully deleted!");
-                    callback.onSuccess("Successfully delete the user");
-                }
-            })
-            .addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    if (e instanceof FirebaseFirestoreException) {
-                        FirebaseFirestoreException firestoreException = (FirebaseFirestoreException) e;
-                        FirebaseFirestoreException.Code errorCode = firestoreException.getCode();
-
-                        switch (errorCode) {
-                            case PERMISSION_DENIED:
-                                Log.w("delete-user-failure", "Error permission denied", e);
-                                callback.onError("Error permission denied");
-                                break;
-                            case NOT_FOUND:
-                                Log.w("delete-user-failure", "Error user not found", e);
-                                callback.onError("Error user not found");
-                                break;
-                            default:
-                                Log.w("delete-user-failure", "Error deleting user", e);
-                                callback.onError("Error deleting user");
-                                break;
-                        }
-                    } else {
-                        Log.w("delete-user-failure", "Non-Firebase Error deleting user", e);
-                        callback.onError("Non-Firebase Error deleting user");
-                    }
-                }
-            });
     }
 
     /**
@@ -322,7 +276,7 @@ public class FirebaseUserRepository {
     }
 
     /**
-     * Delete a facility/location from the user
+     * Delete a specific facility or location from a user's list of interests.
      * @param propertyIds list of property ids of the user
      * @param isFacility true if the interested item is a facility, false if it is a location
      * @param interestedList list of interested facilities/locations after deletion

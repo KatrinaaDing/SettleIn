@@ -84,7 +84,11 @@ public class Helpers {
         return Math.round((float) dp * density);
     }
 
-    // remove special characters
+    /**
+     * restricts input to alphanumeric characters (a-z, A-Z, 0-9).
+     * Any character not matching this criterion will be filtered out, thus not allowing
+     * the user to enter special characters into the text field.
+     */
     public static InputFilter specialCharFilter = new InputFilter() {
         @Override
         public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
