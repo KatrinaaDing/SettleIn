@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/addNewFacilityTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="58dp"
+        android:layout_weight="1"
+        android:text="Add a New Facility"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/addNewFacilityContent"
+        android:layout_width="314dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Add a facility that you want to know how far from a property. E.g. Coles, KFC, Restaurants..." />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/facilityEditTextLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter your interested facility"
+        android:paddingVertical="10dp">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/facilityEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:ems="10"
+            android:inputType="text"
+            />
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+</LinearLayout>

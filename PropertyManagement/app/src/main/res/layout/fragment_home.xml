@@ -7,47 +7,204 @@
     tools:context="com.example.property_management.ui.fragments.home.HomeFragment">
 
     <TextView
-        android:id="@+id/text_home"
+        android:id="@+id/loading_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginBottom="100dp"
+        android:text="Loading..."
         android:textAlignment="center"
-        android:textSize="20sp"
+        android:textColor="@color/grey"
+        android:textSize="25sp"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.core.widget.NestedScrollView
+    <LinearLayout
+        android:id="@+id/hint"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingBottom="100dp">
-
-        <!-- Scrollable content -->
-        <LinearLayout
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <ImageView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingHorizontal="20dp"
-            >
+            android:layout_height="200dp"
+            android:src="@drawable/baseline_add_home_work_24"
+            app:tint="@color/lightGrey" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="Press the + sign\n to add your first property!\n\n||\nV"
+            android:textAlignment="center"
+            android:textColor="@color/lightGrey"
+            android:textSize="25sp" />
+    </LinearLayout>
+
+    <!-- title -->
+    <TextView
+        android:id="@+id/home_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="20dp"
+        android:textAlignment="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="Your Shortlisted Properties"
+        android:textSize="30sp" />
+
+    <!-- filter and sort menu -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="20dp"
+        android:paddingHorizontal="10dp"
+        android:visibility="visible"
+        app:layout_constraintTop_toBottomOf="@id/home_title"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/listMapToggleButtons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dp"
+            android:paddingLeft="15dp"
+            app:singleSelection="true"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
 
             <Button
-                android:id="@+id/loginBtn"
+                android:id="@+id/listViewBtn"
+                style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="login" />
+                android:text="List"
+                app:icon="@drawable/baseline_view_list_24" />
 
             <Button
-                android:id="@+id/registerBtn"
+                android:id="@+id/mapViewBtn"
+                style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="register" />
-        </LinearLayout>
+                android:text="Map"
+                app:icon="@drawable/baseline_map_24" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
 
-    </androidx.core.widget.NestedScrollView>
+        <!-- sort menu -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/sort_menu_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/filter_menu"
+            app:layout_constraintEnd_toEndOf="parent">
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/sort_menu"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="150dp"
+                android:layout_height="25pt"
+                android:hint="Sort By"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+                <AutoCompleteTextView
+                    style="@style/Widget.Material3.AutoCompleteTextView.OutlinedBox.Dense"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:dropDownWidth="150dp"
+                    android:ellipsize="end"
+                    android:inputType="none"
+                    android:singleLine="true"
+                    app:simpleItems="@array/properties_sort_options" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <!-- sort menu ascending/descending button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/sort_order_button"
+                style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checkable="false"
+                android:insetRight="5dp"
+                android:insetTop="10dp"
+                android:insetBottom="10dp"
+                android:padding="10dp"
+                android:text="Asc"
+                app:cornerRadius="5dp"
+                app:iconGravity="textStart"
+                app:iconSize="20dp"
+                app:layout_constraintEnd_toStartOf="@+id/sort_menu"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <!-- filter menu -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/filter_menu"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="150dp"
+            android:layout_height="25pt"
+            android:hint="Filter"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <AutoCompleteTextView
+                style="@style/Widget.Material3.AutoCompleteTextView.OutlinedBox.Dense"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:inputType="none"
+                android:singleLine="true"
+                app:simpleItems="@array/properties_filter_options" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- properties list view -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/propertiesRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="600dp"
+        android:paddingHorizontal="10dp"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <!-- properties map view -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/propertiesMapView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        android:visibility="gone">
+        <fragment
+            android:id="@+id/propertiesMap"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="650dp"
+            android:layout_marginVertical="10dp"
+            android:layout_marginTop="4dp"
+            tools:layout_editor_absoluteX="0dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <com.example.property_management.ui.fragments.base.PropertyCard
+            android:id="@+id/selectedPropertyCard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:strokeWidth="4dp"
+            app:strokeColor="@color/white"
+            android:layout_marginHorizontal="20dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
