@@ -168,7 +168,6 @@ public class RegisterActivity extends AppCompatActivity {
             usernameLayout.setError("Username cannot be empty");
             return false;
         }
-        Log.d("check-usernmae", "validateUsername: " + username);
         return true;
     }
 

@@ -57,6 +57,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
+/**
+ * DialogFragment for editing the user profile.
+ * Allows a user to change their username and email. If the email is changed,
+ * the user is required to re-authenticate with their password. This fragment also provides
+ * the functionality to send a password reset email.
+ */
 public class EditProfileDialogFragment extends DialogFragment {
     private String username;
     private String email;
@@ -70,17 +76,29 @@ public class EditProfileDialogFragment extends DialogFragment {
     private TextView errorResetPassword;
     private View view;
 
-
+    /**
+     * Listener interface for profile updates.
+     * Implementations will receive updates when a user profile is successfully updated.
+     */
     public interface OnProfileUpdatedListener {
         void onProfileUpdated(String newUsername, String newEmail);
     }
 
     private OnProfileUpdatedListener listener;
 
+    /**
+     * Sets the listener that will be notified of profile updates.
+     */
     public void setOnProfileUpdatedListener(OnProfileUpdatedListener listener) {
         this.listener = listener;
     }
 
+    /**
+     * Notifies the listener of profile updates.
+     *
+     * @param newUsername the new username that has been set
+     * @param newEmail    the new email that has been set
+     */
     private void notifyProfileUpdated(String newUsername, String newEmail) {
         if (listener != null) {
             listener.onProfileUpdated(newUsername, newEmail);
@@ -221,7 +239,6 @@ public class EditProfileDialogFragment extends DialogFragment {
                                             positiveButton.setText("Save");
                                             positiveButton.setEnabled(true);
 
-                                            Log.d("update-username", "Username updated.");
                                             notifyProfileUpdated(userInputUsername, "");
 
                                             // If only the username was changed, display a message and dismiss the dialog
@@ -248,7 +265,6 @@ public class EditProfileDialogFragment extends DialogFragment {
                             user.reauthenticate(credential)
                                     .addOnCompleteListener(task -> {
                                         if (task.isSuccessful()) {
-                                            Log.d("user-auth", "User re-authenticated.");
                                             user.updateEmail(userInputEmail)
                                                     .addOnCompleteListener(emailTask -> {
                                                         if (emailTask.isSuccessful()) {
