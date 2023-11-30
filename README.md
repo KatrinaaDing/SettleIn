@@ -1,4 +1,4 @@
-# Project for COMP90018 -- SettleIn
+# SettleIn
 
 This app is designed to help renters organize, manage, and compare different rental properties to make an informed decision. 
 
