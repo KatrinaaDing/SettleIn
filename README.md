@@ -19,16 +19,20 @@ This app is designed to help renters organize, manage, and compare different ren
 1. To run the project, you will need:
 
    1. Google Map API key
-
-      Add this line in `PropertyManagement/local.properties`. Replace `<your_api_key>` with your actual Google Map API key
+    
+      Please use your own Google Map API key. You can create one from [here](https://developers.google.com/maps/documentation/javascript/get-api-key).
+      
+      Then, add this line in `PropertyManagement/local.properties`. Replace `<your_api_key>` with your actual Google Map API key.
 
       ```
       MAPS_API_KEY="<your_api_key>"
       ```
 
-   2. `google-service.json`
+   3. `google-service.json`
 
-      This file is for integrating Firebase services. Put this file in `PropertyManagement/app`.
+      This file is for integrating Firebase services. Due to security considerations, access to this file is restricted. To request this file, please send an email to katrina.ziqi.ding@gmail.com.
+
+      Then, you can put this file in `PropertyManagement/app`.
 
 ### Run the app
 
@@ -203,7 +207,7 @@ After placing the file and the api key correctly, you can run the app through st
 
 ```shell
 .
-├── PropertyManagement			# <==== MAPS_API_KEY goes into local.properties
+├── PropertyManagement		# <==== MAPS_API_KEY goes into local.properties
 │   ├── app						# <==== google-services.json goes here
 │   │   ├── build
 │   │   └── src
@@ -214,10 +218,10 @@ After placing the file and the api key correctly, you can run the app through st
 │   │       │   │       └── example
 │   │       │   │           └── property_management
 │   │       │   │               ├── adapters		# Adapters
-│   │       │   │               ├── api				# Repository and firebase helpers
-│   │       │   │               ├── callbacks		# Call back interfaces
+│   │       │   │               ├── api			# Repository and firebase helpers
+│   │       │   │               ├── callbacks	# Call back interfaces
 │   │       │   │               ├── data			# Data class
-│   │       │   │               ├── sensors			# Sensor class
+│   │       │   │               ├── sensors		# Sensor class
 │   │       │   │               ├── ui
 │   │       │   │               │   ├── activities	# Activity class
 │   │       │   │               │   └── fragments	# Fragment class
