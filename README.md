@@ -1,8 +1,10 @@
-# SettleIn
+# SettleIn -- an app designed to help renters organize, manage, and compare different rental properties to make an informed decision. 
 
-This app is designed to help renters organize, manage, and compare different rental properties to make an informed decision. 
+This rental property management app enables renters to add, sort, and filter properties, offering list and map views for easy comparison. It features detailed property information, inspection scheduling, and alerts for nearby inspections. The app assists in collecting inspection data, including photos, noise, and brightness levels. Its user-friendly interface and calendar integration streamline property management, making it a practical tool for renters to evaluate and compare potential rental properties efficiently.
 
-10min video demo: https://youtu.be/ermcBt6hqvg
+## Demo
+
+10min demo video: https://youtu.be/ermcBt6hqvg
 
 ## Authors
 
