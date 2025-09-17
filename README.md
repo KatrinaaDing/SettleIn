@@ -1,8 +1,12 @@
 # SettleIn 
 
-***An app designed to help renters organize, manage, and compare different rental properties to make an informed decision.***
+***Smarter, unbiased property and stay comparison — from rentals to Airbnbs and hotels.***
 
-This rental property management app enables renters to add, sort, and filter properties, offering list and map views for easy comparison. It features detailed property information, inspection scheduling, and alerts for nearby inspections. The app assists in collecting inspection data, including photos, noise, and brightness levels. Its user-friendly interface and calendar integration streamline property management, making it a practical tool for renters to evaluate and compare potential rental properties efficiently.
+SettleIn is an Android app that helps users compare and evaluate stays — from rentals to Airbnbs and hotels. It organizes candidate properties in list or map view, with filters, favorites, and side-by-side comparison.  
+
+Unlike typical listing apps, SettleIn uses **mobile sensors** to capture unbiased data such as noise levels, brightness, and window orientation. Users can also track facilities they care about (e.g., supermarkets, gyms), with automatic distance and travel time calculation.  
+
+With inspection scheduling, calendar integration, and offline access, SettleIn turns the chaotic search for a home or stay into a clear, data-driven decision process.  
 
 ## Demo
 
